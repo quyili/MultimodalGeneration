@@ -88,12 +88,12 @@ class GAN:
         G_loss += self.mse_loss(j_y_g, j_y)
         G_loss += self.mse_loss(self.y * self.mask, y_g * self.mask)
 
-        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob[:, :, :, 0])*0.5\
-                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob[:, :, :, 1])*0.5 \
-                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob[:, :, :, 2])*5\
-                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob[:, :, :, 3])*80 \
-                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob[:, :, :, 4])*80 \
-                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob[:, :, :, 5])*80
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l_input, l_g)
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_x[:, :, :, 0]) * 0.5 \
@@ -128,16 +128,16 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l_input, l_f_by_y)
 
-        G_loss += self.mse_loss(code_x[-1], code_y[-1])*0.5
-        G_loss += self.mse_loss(code_rm[-1], code_x_g[-1]) * 0.8
-        G_loss += self.mse_loss(code_rm[-1], code_y_g[-1]) * 0.8
+        G_loss += (self.mse_loss(code_x[0], code_y[0]) * 0.5 + self.mse_loss(code_x[1], code_y[1])) * 0.5
+        G_loss += (self.mse_loss(code_rm[0], code_x_g[0]) * 0.5 + self.mse_loss(code_rm[1], code_x_g[1])) * 0.8
+        G_loss += (self.mse_loss(code_rm[0], code_y_g[0]) * 0.5 + self.mse_loss(code_rm[1], code_y_g[1])) * 0.8
 
-        G_loss += self.mse_loss(l_g_by_x, l_g_by_y)*0.7
-        G_loss += self.mse_loss(code_x_g[-1], code_y_g[-1]) * 0.3
+        G_loss += self.mse_loss(l_g_by_x, l_g_by_y) * 0.7
+        G_loss += (self.mse_loss(code_x_g[0], code_y_g[0]) * 0.5 + self.mse_loss(code_x_g[1], code_y_g[1])) * 0.5
 
         evluation_list = [D_loss, G_loss]
 
-        return l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y,l_g_by_x, l_g_by_y, G_loss, D_loss, evluation_list
+        return l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, G_loss, D_loss, evluation_list
 
     def optimize(self, G_loss, D_loss, ):
         def make_optimizer(loss, variables, name='Adam'):

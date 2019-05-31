@@ -8,6 +8,7 @@ import numpy as np
 import SimpleITK
 import math
 
+
 def read_file(l_path, Label_train_files, index):
     train_range = len(Label_train_files)
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
@@ -39,17 +40,17 @@ def read_filename(path, shuffle=True):
 
 Label_train_files = read_filename("data/BRATS2015/trainLabel")
 train_L_arr_ = read_file("data/BRATS2015/trainLabel", Label_train_files, 0)
-L0 = np.asarray(train_L_arr_ == 0.,"float32").reshape([train_L_arr_.shape[0],train_L_arr_.shape[1],1])
-L1 = (train_L_arr_ * (train_L_arr_ == 1.)).reshape([train_L_arr_.shape[0],train_L_arr_.shape[1],1])
-L2 = (train_L_arr_ * (train_L_arr_ == 2.)).reshape([train_L_arr_.shape[0],train_L_arr_.shape[1],1])
-L3 = (train_L_arr_ * (train_L_arr_ == 3.)).reshape([train_L_arr_.shape[0],train_L_arr_.shape[1],1])
-L4 = (train_L_arr_ * (train_L_arr_ == 4.)).reshape([train_L_arr_.shape[0],train_L_arr_.shape[1],1])
-NL=np.concatenate([L0,L1,L2,L3,L4],axis=-1)
+L0 = np.asarray(train_L_arr_ == 0., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
+L1 = (train_L_arr_ * (train_L_arr_ == 1.)).reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
+L2 = (train_L_arr_ * (train_L_arr_ == 2.)).reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
+L3 = (train_L_arr_ * (train_L_arr_ == 3.)).reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
+L4 = (train_L_arr_ * (train_L_arr_ == 4.)).reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
+NL = np.concatenate([L0, L1, L2, L3, L4], axis=-1)
 print(NL.shape)
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_L_arr_)),"samples/L_arr.tiff")
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:,:,0]),"samples/L0.tiff")
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:,:,1]),"samples/L1.tiff")
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:,:,2]),"samples/L2.tiff")
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:,:,3]),"samples/L3.tiff")
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:,:,4]),"samples/L4.tiff")
-SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.sum(NL,axis=2)),"samples/NL_arr.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_L_arr_)), "samples/L_arr.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:, :, 0]), "samples/L0.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:, :, 1]), "samples/L1.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:, :, 2]), "samples/L2.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:, :, 3]), "samples/L3.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(NL[:, :, 4]), "samples/L4.tiff")
+SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.sum(NL, axis=2)), "samples/NL_arr.tiff")

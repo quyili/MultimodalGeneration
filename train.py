@@ -178,10 +178,11 @@ def train():
                                 FLAGS.image_size[2]).astype('float32')
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_l_input, train_rm_input, train_x_g, train_y_g,\
-                    train_l_g, train_l_f_by_x, train_l_f_by_y, train_l_g_by_x, train_l_g_by_y,\
+                    _, train_l_input, train_rm_input, train_x_g, train_y_g, \
+                    train_l_g, train_l_f_by_x, train_l_f_by_y, train_l_g_by_x, train_l_g_by_y, \
                     train_evluation_list = sess.run(
-                        [optimizers, l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, evluation_list],
+                        [optimizers, l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
+                         evluation_list],
                         feed_dict={
                             gan.x: np.asarray(train_true_x),
                             gan.y: np.asarray(train_true_y),

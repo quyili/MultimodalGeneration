@@ -4,7 +4,7 @@ import ops as ops
 
 
 class Discriminator:
-    def __init__(self, name,  ngf=64, is_training=True,norm='instance', slice_stride=2, keep_prob=1.0):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0):
         self.name = name
         self.is_training = is_training
         self.norm = norm
@@ -24,8 +24,18 @@ class Discriminator:
 
         with tf.variable_scope(self.name, reuse=self.reuse):
             input = tf.nn.dropout(input, keep_prob=self.keep_prob)
+            with tf.variable_scope("conv0", reuse=self.reuse):
+                conv0 = tf.layers.conv2d(inputs=input, filters=2 * self.ngf, kernel_size=4,
+                                         strides=self.slice_stride,
+                                         padding="SAME",
+                                         activation=None,
+                                         kernel_initializer=tf.random_normal_initializer(
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
+                                         bias_initializer=tf.constant_initializer(0.0), name='conv0')
+                norm0 = ops._norm(conv0, self.is_training, self.norm)
+                relu0 = ops.relu(norm0)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=input, filters=2 * self.ngf, kernel_size=4,
+                conv1 = tf.layers.conv2d(inputs=relu0, filters=4 * self.ngf, kernel_size=4,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
