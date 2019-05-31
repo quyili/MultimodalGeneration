@@ -50,16 +50,6 @@ class GAN:
         y_g = self.DC_Y(code_rm)
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
-        # X -> L
-        code_x = self.EC_X(self.x)
-        l_f_prob_by_x = self.DC_L(code_x)
-        l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
-                              shape=self.input_shape)
-        # Y -> L
-        code_y = self.EC_Y(self.y)
-        l_f_prob_by_y = self.DC_L(code_y)
-        l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
-                              shape=self.input_shape)
         # X_G -> L
         code_x_g = self.EC_X(x_g)
         l_g_prob_by_x = self.DC_L(code_x_g)
@@ -70,6 +60,19 @@ class GAN:
         l_g_prob_by_y = self.DC_L(code_y_g)
         l_g_by_y = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
+        # X -> L
+        code_x = self.EC_X(self.x)
+        l_f_prob_by_x = self.DC_L(code_x)
+        l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
+                              shape=self.input_shape)
+        # Y -> L
+        code_y = self.EC_Y(self.y)
+        l_f_prob_by_y = self.DC_L(code_y)
+        l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
+                              shape=self.input_shape)
+        # X -> X_R
+
+        # Y -> Y_R
 
         j_x = self.D_X(self.x)
         j_x_g = self.D_X(x_g)
