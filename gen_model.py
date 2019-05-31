@@ -44,22 +44,31 @@ class GAN:
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
-
+        # R -> X_G,Y_G,L
         code_rm = self.EC_R(rm_input)
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
-
-
+        # X -> L
         code_x = self.EC_X(self.x)
         l_f_prob_by_x = self.DC_L(code_x)
         l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
-
+        # Y -> L
         code_y = self.EC_Y(self.y)
         l_f_prob_by_y = self.DC_L(code_y)
         l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
+                              shape=self.input_shape)
+        # X_G -> L
+        code_x_g = self.EC_X(x_g)
+        l_g_prob_by_x = self.DC_L(code_x_g)
+        l_g_by_x = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
+                              shape=self.input_shape)
+        # Y_G -> L
+        code_y_g = self.EC_Y(y_g)
+        l_g_prob_by_y = self.DC_L(code_y_g)
+        l_g_by_y = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
 
         j_x = self.D_X(self.x)
@@ -87,6 +96,22 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob[:, :, :, 5])*80
         G_loss += self.mse_loss(l_input, l_g)
 
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_x[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob_by_x[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob_by_x[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob_by_x[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob_by_x[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob_by_x[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(l_input, l_g_by_x)
+
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_y[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob_by_y[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob_by_y[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob_by_y[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob_by_y[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob_by_y[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(l_input, l_g_by_y)
+
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
@@ -104,10 +129,15 @@ class GAN:
         G_loss += self.mse_loss(l_input, l_f_by_y)
 
         G_loss += self.mse_loss(code_x[-1], code_y[-1])*0.5
+        G_loss += self.mse_loss(code_rm[-1], code_x_g[-1]) * 0.8
+        G_loss += self.mse_loss(code_rm[-1], code_y_g[-1]) * 0.8
+
+        G_loss += self.mse_loss(l_g_by_x, l_g_by_y)*0.7
+        G_loss += self.mse_loss(code_x_g[-1], code_y_g[-1]) * 0.3
 
         evluation_list = [D_loss, G_loss]
 
-        return l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y, G_loss, D_loss, evluation_list
+        return l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y,l_g_by_x, l_g_by_y, G_loss, D_loss, evluation_list
 
     def optimize(self, G_loss, D_loss, ):
         def make_optimizer(loss, variables, name='Adam'):
