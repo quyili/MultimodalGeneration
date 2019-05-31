@@ -48,7 +48,7 @@ class Encoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
-            #pool1
+            # pool1
             with tf.variable_scope("conv3", reuse=self.reuse):
                 conv3 = tf.layers.conv2d(inputs=relu2, filters=4 * self.ngf, kernel_size=3,
                                          strides=self.slice_stride,

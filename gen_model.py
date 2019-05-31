@@ -71,25 +71,26 @@ class GAN:
         l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
         # X -> X_R
-
+        x_r = self.DC_X(code_x)
         # Y -> Y_R
+        y_r = self.DC_Y(code_y)
 
         j_x = self.D_X(self.x)
         j_x_g = self.D_X(x_g)
         j_y = self.D_Y(self.y)
         j_y_g = self.D_Y(y_g)
 
-        D_loss = self.mse_loss(j_x, 1.0)
-        D_loss += self.mse_loss(j_x_g, 0.0)
-        G_loss = self.mse_loss(j_x_g, 1.0)
-        G_loss += self.mse_loss(j_x_g, j_x)
-        G_loss += self.mse_loss(self.x * self.mask, x_g * self.mask)
+        D_loss = self.mse_loss(j_x, 1.0) * 5
+        D_loss += self.mse_loss(j_x_g, 0.0) * 5
+        G_loss = self.mse_loss(j_x_g, 1.0) * 5
+        G_loss += self.mse_loss(j_x_g, j_x) * 5
+        G_loss += self.mse_loss(0.0, x_g * self.label_expand[0]) * 0.5
 
-        D_loss += self.mse_loss(j_y, 1.0)
-        D_loss += self.mse_loss(j_y_g, 0.0)
-        G_loss += self.mse_loss(j_y_g, 1.0)
-        G_loss += self.mse_loss(j_y_g, j_y)
-        G_loss += self.mse_loss(self.y * self.mask, y_g * self.mask)
+        D_loss += self.mse_loss(j_y, 1.0) * 5
+        D_loss += self.mse_loss(j_y_g, 0.0) * 5
+        G_loss += self.mse_loss(j_y_g, 1.0) * 5
+        G_loss += self.mse_loss(j_y_g, j_y) * 5
+        G_loss += self.mse_loss(0.0, y_g * self.label_expand[0]) * 0.5
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) * 0.5 \
@@ -138,9 +139,12 @@ class GAN:
         G_loss += self.mse_loss(l_g_by_x, l_g_by_y) * 0.7
         G_loss += (self.mse_loss(code_x_g[0], code_y_g[0]) * 0.5 + self.mse_loss(code_x_g[1], code_y_g[1])) * 0.5
 
+        G_loss += self.mse_loss(self.x, x_r)
+        G_loss += self.mse_loss(self.y, y_r)
+
         evluation_list = [D_loss, G_loss]
 
-        return l_input, rm_input, x_g, y_g, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, G_loss, D_loss, evluation_list
+        return l_input, rm_input, x_g, y_g, x_r, y_r, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, G_loss, D_loss, evluation_list
 
     def optimize(self, G_loss, D_loss, ):
         def make_optimizer(loss, variables, name='Adam'):

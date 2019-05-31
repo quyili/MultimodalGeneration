@@ -29,12 +29,12 @@ class Decoder:
             input2 = tf.nn.dropout(input2, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
                 conv1 = tf.layers.conv2d(inputs=input2, filters=6 * self.ngf, kernel_size=3, strides=1,
-                                          padding="SAME",
-                                          activation=None,
-                                          kernel_initializer=tf.random_normal_initializer(
-                                              mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001,
-                                              dtype=tf.float32),
-                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
+                                         padding="SAME",
+                                         activation=None,
+                                         kernel_initializer=tf.random_normal_initializer(
+                                             mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001,
+                                             dtype=tf.float32),
+                                         bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
 
@@ -140,11 +140,11 @@ class Decoder:
 
             with tf.variable_scope("conv2", reuse=self.reuse):
                 conv2 = tf.layers.conv2d(inputs=add2_relu2, filters=self.ngf, kernel_size=3, strides=1,
-                                          padding="SAME",
-                                          activation=None,
-                                          kernel_initializer=tf.random_normal_initializer(
-                                              mean=1.0 / (9.0 * 2*self.ngf), stddev=0.000001, dtype=tf.float32),
-                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
+                                         padding="SAME",
+                                         activation=None,
+                                         kernel_initializer=tf.random_normal_initializer(
+                                             mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                         bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
             with tf.variable_scope("lastconv", reuse=self.reuse):
