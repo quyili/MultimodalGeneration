@@ -181,7 +181,7 @@ def train():
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
                     _, train_l_input, \
-                    train_x_g, train_y_g,train_x_g_t, train_y_g_t, train_x_r, train_y_r,train_x_t, train_y_t, \
+                    train_x_g, train_y_g, train_x_g_t, train_y_g_t, train_x_r, train_y_r, train_x_t, train_y_t, \
                     train_l_g, train_l_f_by_x, train_l_f_by_y, train_l_g_by_x, train_l_g_by_y, \
                     train_evluation_list = sess.run(
                         [optimizers, l_input,

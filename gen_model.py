@@ -1,6 +1,7 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 from discriminator import Discriminator
+from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
 from decoder import Decoder
 
@@ -29,6 +30,7 @@ class GAN:
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=6)
         self.D_X = Discriminator('D_X', ngf=ngf)
         self.D_Y = Discriminator('D_Y', ngf=ngf)
+        self.FD = FeatureDiscriminator('FD', ngf=ngf)
         self.x = tf.placeholder(tf.float32, shape=self.input_shape)
         self.y = tf.placeholder(tf.float32, shape=self.input_shape)
         self.rm = tf.placeholder(tf.float32, shape=self.input_shape)
@@ -90,6 +92,10 @@ class GAN:
         j_y = self.D_Y(self.y)
         j_y_g = self.D_Y(y_g)
 
+        j_code_rm = self.FD(code_rm)
+        j_code_x = self.FD(code_x)
+        j_code_y = self.FD(code_y)
+
         D_loss = self.mse_loss(j_x, 1.0) * 5
         D_loss += self.mse_loss(j_x_g, 0.0) * 5
         G_loss = self.mse_loss(j_x_g, 1.0) * 5
@@ -101,6 +107,11 @@ class GAN:
         G_loss += self.mse_loss(j_y_g, 1.0) * 5
         G_loss += self.mse_loss(j_y_g, j_y) * 10
         G_loss += self.mse_loss(0.0, y_g * self.label_expand[0]) * 0.5
+
+        D_loss += self.mse_loss(j_code_rm, 0.0) * 2
+        D_loss += self.mse_loss(j_code_x, 1.0)
+        D_loss += self.mse_loss(j_code_y, 1.0)
+        G_loss += self.mse_loss(j_code_rm, 1.0) * 2
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) * 0.5 \
@@ -132,7 +143,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_f_by_x)*5
+        G_loss += self.mse_loss(l_input, l_f_by_x) * 5
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 0.5 \
@@ -140,7 +151,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_f_by_y)*5
+        G_loss += self.mse_loss(l_input, l_f_by_y) * 5
 
         G_loss += (self.mse_loss(code_x[0], code_y[0]) * 0.5 + self.mse_loss(code_x[1], code_y[1])) * 0.5
         G_loss += (self.mse_loss(code_rm[0], code_x_g[0]) * 0.5 + self.mse_loss(code_rm[1], code_x_g[1])) * 0.8
@@ -149,17 +160,17 @@ class GAN:
         G_loss += self.mse_loss(l_g_by_x, l_g_by_y) * 0.7
         G_loss += (self.mse_loss(code_x_g[0], code_y_g[0]) * 0.5 + self.mse_loss(code_x_g[1], code_y_g[1])) * 0.5
 
-        G_loss += self.mse_loss(y_g, y_g_t)*2
-        G_loss += self.mse_loss(x_g, x_g_t)*2
+        G_loss += self.mse_loss(y_g, y_g_t) * 2
+        G_loss += self.mse_loss(x_g, x_g_t) * 2
         G_loss += self.mse_loss(self.x, x_r)
         G_loss += self.mse_loss(self.y, y_r)
-        G_loss += self.mse_loss(self.x, x_t)*2
-        G_loss += self.mse_loss(self.y, y_t)*2
+        G_loss += self.mse_loss(self.x, x_t) * 2
+        G_loss += self.mse_loss(self.y, y_t) * 2
 
         evluation_list = [D_loss, G_loss]
 
         return l_input, rm_input, \
-               x_g, y_g,x_g_t, y_g_t,x_r, y_r, x_t, y_t,\
+               x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
                l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
                G_loss, D_loss, evluation_list
 
@@ -181,7 +192,11 @@ class GAN:
                                      + self.DC_L.variables
                                      ,
                                      name='Adam_G')
-        D_optimizer = make_optimizer(D_loss, self.D_X.variables + self.D_Y.variables, name='Adam_D')
+        D_optimizer = make_optimizer(D_loss,
+                                     self.D_X.variables
+                                     + self.D_Y.variables
+                                     + self.FD.variables
+                                     , name='Adam_D')
 
         with tf.control_dependencies(
                 [G_optimizer,

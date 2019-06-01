@@ -4,15 +4,13 @@ import ops as ops
 
 
 class Decoder:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance',
-                 skip_type="concat", slice_stride=2, keep_prob=1.0, output_channl=1):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
         self.reuse = False
         self.ngf = ngf
         self.norm = norm
         self.is_training = is_training
         self.slice_stride = slice_stride
-        self.skip_type = skip_type
         self.keep_prob = keep_prob
         self.output_channl = output_channl
 
