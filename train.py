@@ -20,6 +20,10 @@ tf.flags.DEFINE_string('X', '../data/BRATS2015/trainT1', 'X files for training')
 tf.flags.DEFINE_string('Y', '../data/BRATS2015/trainT2', 'Y files for training')
 tf.flags.DEFINE_string('L', '../data/BRATS2015/trainLabel', 'Y files for training')
 tf.flags.DEFINE_string('M', '../data/BRATS2015/trainMask', 'Y files for training')
+tf.flags.DEFINE_string('X_test', '../data/BRATS2015/testT1', 'X files for training')
+tf.flags.DEFINE_string('Y_test', '../data/BRATS2015/testT2', 'Y files for training')
+tf.flags.DEFINE_string('L_test', '../data/BRATS2015/testLabel', 'Y files for training')
+tf.flags.DEFINE_string('M_test', '../data/BRATS2015/testMask', 'Y files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -114,12 +118,26 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
 
-            l_input, rm_input, \
-            x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
-            l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
-            G_loss, D_loss, evluation_list = gan.model()
+            image_list, code_list, j_list, loss_list= gan.model()
+            optimizers = gan.optimize(loss_list)
 
-            optimizers = gan.optimize(G_loss, D_loss)
+            gan.image_summary(image_list)
+            gan.histogram_summary(j_list)
+
+            evaluation_list = gan.evaluation(image_list)
+            evaluation_code_list = gan.evaluation_code(code_list)
+
+            loss_list_summary = tf.placeholder(tf.float32)
+            evaluation_list_summary = tf.placeholder(tf.float32)
+            evaluation_code_list_summary = tf.placeholder(tf.float32)
+
+            gan.loss_summary(loss_list_summary)
+            gan.evaluation_summary(evaluation_list_summary)
+            gan.evaluation_code_summary(evaluation_code_list_summary)
+
+            summary_op = tf.summary.merge_all()
+            train_writer = tf.summary.FileWriter(checkpoints_dir + "/train", graph)
+            val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
             saver = tf.train.Saver()
 
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -150,14 +168,18 @@ def train():
 
             try:
                 Label_train_files = read_filename(FLAGS.L)
+                Label_test_files = read_filename(FLAGS.L_test)
                 index = 0
                 epoch = 0
+                train_loss_list = []
+                train_evaluation_list = []
+                train_evaluation_code_list = []
                 while not coord.should_stop() and epoch <= FLAGS.epoch:
                     train_true_x = []
                     train_true_y = []
                     train_true_l = []
                     train_true_m = []
-                    for i in range(FLAGS.batch_size):
+                    for b in range(FLAGS.batch_size):
                         train_L_arr_ = read_file(FLAGS.L, Label_train_files, index)
                         train_M_arr_ = read_file(FLAGS.M, Label_train_files, index)
                         train_X_arr_ = read_file(FLAGS.X, Label_train_files, index)
@@ -180,14 +202,8 @@ def train():
                                 FLAGS.image_size[2]).astype('float32')
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_l_input, \
-                    train_x_g, train_y_g, train_x_g_t, train_y_g_t, train_x_r, train_y_r, train_x_t, train_y_t, \
-                    train_l_g, train_l_f_by_x, train_l_f_by_y, train_l_g_by_x, train_l_g_by_y, \
-                    train_evluation_list = sess.run(
-                        [optimizers, l_input,
-                         x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
-                         l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
-                         evluation_list],
+                    _, train_losses, train_evaluations, train_evaluation_codes = sess.run(
+                        [optimizers, loss_list, evaluation_list, evaluation_code_list],
                         feed_dict={
                             gan.x: np.asarray(train_true_x),
                             gan.y: np.asarray(train_true_y),
@@ -195,47 +211,118 @@ def train():
                             gan.label_expand: np.asarray(train_true_l),
                             gan.mask: np.asarray(train_true_m).astype('float32')
                         })
-                    logging.info("train_evluation_list:" + str(train_evluation_list))
-                    logging.info("-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+                    train_loss_list.append(train_losses)
+                    train_evaluation_list.append(train_evaluations)
+                    train_evaluation_code_list.append(train_evaluation_codes)
+                    logging.info(
+                        "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+                    
+                    if step % int(FLAGS.epoch_steps/2) == 0:
+                        logging.info('-----------Train summary start-------------')
+                        train__summary = sess.run(
+                            summary_op,
+                            feed_dict={loss_list_summary: mean_list(train_loss_list),
+                                       evaluation_list_summary: mean_list(train_evaluation_list),
+                                       evaluation_code_list_summary: mean_list(train_evaluation_code_list)})
+                        train_writer.add_summary(train__summary, step)
+                        train_writer.flush()
+                        logging.info('-----------Train summary end-------------')
 
-                    if step % 7500 == 0:
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_l_input)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/true_label_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_l_g)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_label_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_l_f_by_x)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_label_by_x_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_l_f_by_y)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_label_by_y_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_l_g_by_x)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_label_by_x_g_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_l_g_by_y)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_label_by_y_g_" + str(step) + ".tiff")
+                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+                        logging.info("Model saved in file: %s" % save_path)
 
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_x)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/true_x_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_y)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/true_y_" + str(step) + ".tiff")
+                        logging.info(
+                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
+                        val_index=0
+                        for j in range(int(len(Label_test_files)/FLAGS.batch_size)):
+                            val_true_x = []
+                            val_true_y = []
+                            val_true_l = []
+                            val_true_m = []
+                            for b in range(FLAGS.batch_size):
+                                val_L_arr_ = read_file(FLAGS.L, Label_test_files, val_index)
+                                val_M_arr_ = read_file(FLAGS.M, Label_test_files, val_index)
+                                val_X_arr_ = read_file(FLAGS.X, Label_test_files, val_index)
+                                val_Y_arr_ = read_file(FLAGS.Y, Label_test_files, val_index)
+                                L_arr = expand(val_M_arr_, val_L_arr_)
+                                X_arr = np.asarray(val_X_arr_).reshape(
+                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
+                                Y_arr = np.asarray(val_Y_arr_).reshape(
+                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
+                                M_arr = np.asarray(val_M_arr_).reshape(
+                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
+                                val_true_x.append(X_arr)
+                                val_true_y.append(Y_arr)
+                                val_true_m.append(M_arr)
+                                val_true_l.append(L_arr)
+                                val_index +=1
+                        
+                            val_loss_list = []
+                            val_evaluation_list = []
+                            val_evaluation_code_list = []
+                            val_image_list, val_losses, val_evaluations, val_evaluation_codes = sess.run(
+                                [image_list, loss_list, evaluation_list, evaluation_code_list],
+                                feed_dict={
+                                    gan.x: np.asarray(val_true_x),
+                                    gan.y: np.asarray(val_true_y),
+                                    gan.rm: rm,
+                                    gan.label_expand: np.asarray(val_true_l),
+                                    gan.mask: np.asarray(val_true_m).astype('float32')
+                                })
+                            val_loss_list.append(val_losses)
+                            val_evaluation_list.append(val_evaluations)
+                            val_evaluation_code_list.append(val_evaluation_codes)
 
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_g)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_x_g_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_g)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_y_g_" + str(step) + ".tiff")
+                            val__summary = sess.run(
+                                summary_op,
+                                feed_dict={loss_list_summary: mean_list(val_loss_list),
+                                           evaluation_list_summary: mean_list(val_evaluation_list),
+                                           evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
+                            val_writer.add_summary(val__summary, step)
+                            val_writer.flush()
 
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_g_t)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_x_g_t_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_g_t)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_y_g_t_" + str(step) + ".tiff")
+                            if j==0:
+                                val_true_x,val_true_y, val_x_g, val_y_g, val_x_g_t, val_y_g_t, val_x_r, val_y_r, val_x_t, val_y_t, \
+                                val_l_input, val_l_g, val_l_f_by_x, val_l_f_by_y, val_l_g_by_x, val_l_g_by_y = val_image_list
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_input)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/true_label_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_g)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_label_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_f_by_x)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_label_by_x_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_f_by_y)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_label_by_y_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_g_by_x)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_label_by_x_g_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_g_by_y)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_label_by_y_g_" + str(step) + ".tiff")
 
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_r)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_x_r_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_r)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_y_r_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_x)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/true_x_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_y)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/true_y_" + str(step) + ".tiff")
 
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_t)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_x_t_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_t)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_y_t_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_x_g)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_x_g_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_y_g)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_y_g_" + str(step) + ".tiff")
+
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_x_g_t)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_x_g_t_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_y_g_t)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_y_g_t_" + str(step) + ".tiff")
+
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_x_r)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_x_r_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_y_r)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_y_r_" + str(step) + ".tiff")
+
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_x_t)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_x_t_" + str(step) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_y_t)[0, :, :, 0]),
+                                                     checkpoints_dir + "/samples/fake_y_t_" + str(step) + ".tiff")
+                        logging.info(
+                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                     step += 1
             except KeyboardInterrupt:
                 logging.info('Interrupted')
