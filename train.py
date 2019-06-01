@@ -114,7 +114,9 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
 
-            l_input, rm_input, x_g, y_g, x_r, y_r, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
+            l_input, rm_input, \
+            x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
+            l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
             G_loss, D_loss, evluation_list = gan.model()
 
             optimizers = gan.optimize(G_loss, D_loss)
@@ -178,10 +180,13 @@ def train():
                                 FLAGS.image_size[2]).astype('float32')
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_l_input, train_rm_input, train_x_g, train_y_g, train_x_r, train_y_r, \
+                    _, train_l_input, \
+                    train_x_g, train_y_g,train_x_g_t, train_y_g_t, train_x_r, train_y_r,train_x_t, train_y_t, \
                     train_l_g, train_l_f_by_x, train_l_f_by_y, train_l_g_by_x, train_l_g_by_y, \
                     train_evluation_list = sess.run(
-                        [optimizers, l_input, rm_input, x_g, y_g, x_r, y_r, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
+                        [optimizers, l_input,
+                         x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
+                         l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
                          evluation_list],
                         feed_dict={
                             gan.x: np.asarray(train_true_x),
@@ -209,16 +214,28 @@ def train():
 
                         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_x)[0, :, :, 0]),
                                              checkpoints_dir + "/samples/true_x_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_g)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_x_" + str(step) + ".tiff")
-                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_r)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_x_r_" + str(step) + ".tiff")
                         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_y)[0, :, :, 0]),
                                              checkpoints_dir + "/samples/true_y_" + str(step) + ".tiff")
+
+                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_g)[0, :, :, 0]),
+                                             checkpoints_dir + "/samples/fake_x_g_" + str(step) + ".tiff")
                         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_g)[0, :, :, 0]),
-                                             checkpoints_dir + "/samples/fake_y_" + str(step) + ".tiff")
+                                             checkpoints_dir + "/samples/fake_y_g_" + str(step) + ".tiff")
+
+                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_g_t)[0, :, :, 0]),
+                                             checkpoints_dir + "/samples/fake_x_g_t_" + str(step) + ".tiff")
+                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_g_t)[0, :, :, 0]),
+                                             checkpoints_dir + "/samples/fake_y_g_t_" + str(step) + ".tiff")
+
+                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_r)[0, :, :, 0]),
+                                             checkpoints_dir + "/samples/fake_x_r_" + str(step) + ".tiff")
                         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_r)[0, :, :, 0]),
                                              checkpoints_dir + "/samples/fake_y_r_" + str(step) + ".tiff")
+
+                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_x_t)[0, :, :, 0]),
+                                             checkpoints_dir + "/samples/fake_x_t_" + str(step) + ".tiff")
+                        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_y_t)[0, :, :, 0]),
+                                             checkpoints_dir + "/samples/fake_y_t_" + str(step) + ".tiff")
                     step += 1
             except KeyboardInterrupt:
                 logging.info('Interrupted')
