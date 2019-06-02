@@ -38,17 +38,29 @@ class GAN:
         self.label_expand = tf.placeholder(tf.float32, shape=[batch_size, image_size[0], image_size[1], 6])
 
     def model(self):
-        l_input = tf.reshape(tf.cast(tf.argmax(self.label_expand, axis=-1), dtype=tf.float32) * 0.2,
+        l = tf.reshape(tf.cast(tf.argmax(self.label_expand, axis=-1), dtype=tf.float32) * 0.2,
                              shape=self.input_shape)
-        rm_input = tf.concat([
+        rm_expand = tf.concat([
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 1], shape=self.input_shape),
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 2], shape=self.input_shape),
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
             tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
+        x_expand = tf.concat([
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 2], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
+        y_expand = tf.concat([
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 2], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
 
         # R -> X_G,Y_G,L
-        code_rm = self.EC_R(rm_input)
+        code_rm = self.EC_R(rm_expand)
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)
         l_g_prob = self.DC_L(code_rm)
@@ -69,9 +81,11 @@ class GAN:
         x_g_t = self.DC_X(code_y_g)
 
         # X -> X_R
+        code_rm_x = self.EC_R(x_expand)
         code_x = self.EC_X(self.x)
         x_r = self.DC_X(code_x)
         # Y -> Y_R
+        code_rm_y = self.EC_R(y_expand)
         code_y = self.EC_Y(self.y)
         y_r = self.DC_Y(code_y)
         # X -> Y_T
@@ -119,7 +133,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_g)
+        G_loss += self.mse_loss(l, l_g)
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_x[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob_by_x[:, :, :, 1]) * 0.5 \
@@ -127,7 +141,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob_by_x[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob_by_x[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob_by_x[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_g_by_x)
+        G_loss += self.mse_loss(l, l_g_by_x)
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_y[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob_by_y[:, :, :, 1]) * 0.5 \
@@ -135,7 +149,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob_by_y[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob_by_y[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob_by_y[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_g_by_y)
+        G_loss += self.mse_loss(l, l_g_by_y)
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 0.5 \
@@ -143,7 +157,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_f_by_x) * 5
+        G_loss += self.mse_loss(l, l_f_by_x) * 5
 
         G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) * 0.5 \
                   + self.mse_loss(self.label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 0.5 \
@@ -151,7 +165,7 @@ class GAN:
                   + self.mse_loss(self.label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 80 \
                   + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l_input, l_f_by_y) * 5
+        G_loss += self.mse_loss(l, l_f_by_y) * 5
 
         G_loss += (self.mse_loss(code_x[0], code_y[0]) * 0.5 + self.mse_loss(code_x[1], code_y[1])) * 0.5
         G_loss += (self.mse_loss(code_rm[0], code_x_g[0]) * 0.5 + self.mse_loss(code_rm[1], code_x_g[1])) * 0.8
@@ -159,6 +173,9 @@ class GAN:
 
         G_loss += self.mse_loss(l_g_by_x, l_g_by_y) * 0.7
         G_loss += (self.mse_loss(code_x_g[0], code_y_g[0]) * 0.5 + self.mse_loss(code_x_g[1], code_y_g[1])) * 0.5
+
+        G_loss += (self.mse_loss(code_x[0], code_rm_x[0]) * 0.5 + self.mse_loss(code_x[1], code_rm_x[1])) * 5
+        G_loss += (self.mse_loss(code_y[0], code_rm_y[0]) * 0.5 + self.mse_loss(code_y[1], code_rm_y[1])) * 5
 
         G_loss += self.mse_loss(y_g, y_g_t) * 2
         G_loss += self.mse_loss(x_g, x_g_t) * 2
@@ -168,7 +185,7 @@ class GAN:
         G_loss += self.mse_loss(self.y, y_t) * 2
 
         image_list=[self.x,self.y,x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
-                    l_input, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y]
+                    l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y]
 
         code_list=[code_x, code_y, code_rm, code_x_g, code_y_g]
 
