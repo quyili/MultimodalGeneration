@@ -21,7 +21,7 @@ class GAN:
           ngf: number of gen filters in first conv layer
         """
         self.learning_rate = learning_rate
-        self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
+        self.input_shape = [batch_size, image_size[0], image_size[1], image_size[2]]
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
@@ -31,28 +31,33 @@ class GAN:
         self.D_X = Discriminator('D_X', ngf=ngf)
         self.D_Y = Discriminator('D_Y', ngf=ngf)
         self.FD = FeatureDiscriminator('FD', ngf=ngf)
+        self.x = tf.placeholder(tf.float32, shape=self.input_shape)
+        self.y = tf.placeholder(tf.float32, shape=self.input_shape)
+        self.rm = tf.placeholder(tf.float32, shape=self.input_shape)
+        self.mask = tf.placeholder(tf.float32, shape=self.input_shape)
+        self.label_expand = tf.placeholder(tf.float32, shape=[batch_size, image_size[0], image_size[1], 6])
 
-    def model(self, x, y, rm, label_expand):
-        l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
+    def model(self):
+        l = tf.reshape(tf.cast(tf.argmax(self.label_expand, axis=-1), dtype=tf.float32) * 0.2,
                        shape=self.input_shape)
         rm_expand = tf.concat([
-            tf.reshape(rm[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
-            tf.reshape(rm[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
-            tf.reshape(rm[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
-            tf.reshape(rm[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
-            tf.reshape(rm[:, :, :, 0] * label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
+            tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 2], shape=self.input_shape),
+            tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
+            tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
+            tf.reshape(self.rm[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
         x_expand = tf.concat([
-            tf.reshape(x[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
-            tf.reshape(x[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
-            tf.reshape(x[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
-            tf.reshape(x[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
-            tf.reshape(x[:, :, :, 0] * label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 2], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
+            tf.reshape(self.x[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
         y_expand = tf.concat([
-            tf.reshape(y[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
-            tf.reshape(y[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
-            tf.reshape(y[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
-            tf.reshape(y[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
-            tf.reshape(y[:, :, :, 0] * label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 2], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 3], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 4], shape=self.input_shape),
+            tf.reshape(self.y[:, :, :, 0] * self.label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
 
         # R -> X_G,Y_G,L
         code_rm = self.EC_R(rm_expand)
@@ -77,11 +82,11 @@ class GAN:
 
         # X -> X_R
         code_rm_x = self.EC_R(x_expand)
-        code_x = self.EC_X(x)
+        code_x = self.EC_X(self.x)
         x_r = self.DC_X(code_x)
         # Y -> Y_R
         code_rm_y = self.EC_R(y_expand)
-        code_y = self.EC_Y(y)
+        code_y = self.EC_Y(self.y)
         y_r = self.DC_Y(code_y)
         # X -> Y_T
         y_t = self.DC_Y(code_x)
@@ -96,9 +101,9 @@ class GAN:
         l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
 
-        j_x = self.D_X(x)
+        j_x = self.D_X(self.x)
         j_x_g = self.D_X(x_g)
-        j_y = self.D_Y(y)
+        j_y = self.D_Y(self.y)
         j_y_g = self.D_Y(y_g)
 
         j_code_rm = self.FD(code_rm)
@@ -109,57 +114,57 @@ class GAN:
         D_loss += self.mse_loss(j_x_g, 0.0) * 5
         G_loss = self.mse_loss(j_x_g, 1.0) * 5
         G_loss += self.mse_loss(j_x_g, j_x) * 10
-        G_loss += self.mse_loss(0.0, x_g * label_expand[0]) * 0.5
+        G_loss += self.mse_loss(0.0, x_g * self.label_expand[0]) * 0.5
 
         D_loss += self.mse_loss(j_y, 1.0) * 5
         D_loss += self.mse_loss(j_y_g, 0.0) * 5
         G_loss += self.mse_loss(j_y_g, 1.0) * 5
         G_loss += self.mse_loss(j_y_g, j_y) * 10
-        G_loss += self.mse_loss(0.0, y_g * label_expand[0]) * 0.5
+        G_loss += self.mse_loss(0.0, y_g * self.label_expand[0]) * 0.5
 
-        D_loss += self.mse_loss(j_code_rm, 0.0) * 10
-        D_loss += self.mse_loss(j_code_x, 1.0) * 5
-        D_loss += self.mse_loss(j_code_y, 1.0) * 5
-        G_loss += self.mse_loss(j_code_rm, 1.0) * 10
+        D_loss += self.mse_loss(j_code_rm, 0.0) * 2
+        D_loss += self.mse_loss(j_code_x, 1.0)
+        D_loss += self.mse_loss(j_code_y, 1.0)
+        G_loss += self.mse_loss(j_code_rm, 1.0) * 2
 
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_g_prob[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_g_prob[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l, l_g)
 
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob_by_x[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob_by_x[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob_by_x[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_g_prob_by_x[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob_by_x[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_g_prob_by_x[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_x[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob_by_x[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob_by_x[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob_by_x[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob_by_x[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob_by_x[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l, l_g_by_x)
 
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob_by_y[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob_by_y[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob_by_y[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_g_prob_by_y[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob_by_y[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_g_prob_by_y[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_g_prob_by_y[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_g_prob_by_y[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_g_prob_by_y[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_g_prob_by_y[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_g_prob_by_y[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_g_prob_by_y[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l, l_g_by_y)
 
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l, l_f_by_x) * 5
 
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 80
+        G_loss += self.mse_loss(self.label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 0.5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 5 \
+                  + self.mse_loss(self.label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 80 \
+                  + self.mse_loss(self.label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 80
         G_loss += self.mse_loss(l, l_f_by_y) * 5
 
         G_loss += (self.mse_loss(code_x[0], code_y[0]) * 0.5 + self.mse_loss(code_x[1], code_y[1])) * 0.5
@@ -174,12 +179,12 @@ class GAN:
 
         G_loss += self.mse_loss(y_g, y_g_t) * 2
         G_loss += self.mse_loss(x_g, x_g_t) * 2
-        G_loss += self.mse_loss(x, x_r)
-        G_loss += self.mse_loss(y, y_r)
-        G_loss += self.mse_loss(x, x_t) * 2
-        G_loss += self.mse_loss(y, y_t) * 2
+        G_loss += self.mse_loss(self.x, x_r)
+        G_loss += self.mse_loss(self.y, y_r)
+        G_loss += self.mse_loss(self.x, x_t) * 2
+        G_loss += self.mse_loss(self.y, y_t) * 2
 
-        image_list = [x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
+        image_list = [self.x, self.y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
                       l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y]
 
         code_list = [code_x[0], code_y[0], code_rm[0], code_x_g[0], code_y_g[0]]
@@ -190,29 +195,35 @@ class GAN:
 
         return image_list, code_list, j_list, loss_list
 
-    def get_variables(self):
-        return [self.EC_R.variables
-                + self.EC_X.variables
-                + self.EC_Y.variables
-                + self.DC_X.variables
-                + self.DC_Y.variables
-                + self.DC_L.variables,
-
-                self.D_X.variables
-                + self.D_Y.variables
-                + self.FD.variables]
-
-    def optimize(self):
-        def make_optimizer(name='Adam'):
+    def optimize(self, loss_list):
+        def make_optimizer(loss, variables, name='Adam'):
             learning_step = (
                 tf.train.AdamOptimizer(self.learning_rate, beta1=0.5, name=name)
+                    .minimize(loss, global_step=global_step, var_list=variables)
             )
             return learning_step
 
-        G_optimizer = make_optimizer(name='Adam_G')
-        D_optimizer = make_optimizer(name='Adam_D')
+        global_step = tf.Variable(0, trainable=False)
+        G_loss, D_loss = loss_list[0], loss_list[1]
+        G_optimizer = make_optimizer(G_loss,
+                                     self.EC_R.variables
+                                     + self.EC_X.variables
+                                     + self.EC_Y.variables
+                                     + self.DC_X.variables
+                                     + self.DC_Y.variables
+                                     + self.DC_L.variables
+                                     ,
+                                     name='Adam_G')
+        D_optimizer = make_optimizer(D_loss,
+                                     self.D_X.variables
+                                     + self.D_Y.variables
+                                     + self.FD.variables
+                                     , name='Adam_D')
 
-        return G_optimizer, D_optimizer
+        with tf.control_dependencies(
+                [G_optimizer,
+                 D_optimizer]):
+            return tf.no_op(name='optimizers')
 
     def histogram_summary(self, j_list):
         j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm = \
@@ -242,15 +253,15 @@ class GAN:
         return list
 
     def evaluation_code_summary(self, evluation_list):
-        tf.summary.scalar('evaluation_code/PSNR/code_x__VS__code_y', evluation_list[0])
-        tf.summary.scalar('evaluation_code/PSNR/code_rm__VS__code_x_g', evluation_list[1])
-        tf.summary.scalar('evaluation_code/PSNR/code_rm__VS__code_y_g', evluation_list[2])
-        tf.summary.scalar('evaluation_code/PSNR/code_x_g__VS__code_y_g', evluation_list[3])
+        tf.summary.scalar('code/PSNR/code_x__VS__code_y', evluation_list[0])
+        tf.summary.scalar('code/PSNR/code_rm__VS__code_x_g', evluation_list[1])
+        tf.summary.scalar('code/PSNR/code_rm__VS__code_y_g', evluation_list[2])
+        tf.summary.scalar('code/PSNR/code_x_g__VS__code_y_g', evluation_list[3])
 
-        tf.summary.scalar('evaluation_code/SSIM/code_x__VS__code_y', evluation_list[4])
-        tf.summary.scalar('evaluation_code/SSIM/code_rm__VS__code_x_g', evluation_list[5])
-        tf.summary.scalar('evaluation_code/SSIM/code_rm__VS__code_y_g', evluation_list[6])
-        tf.summary.scalar('evaluation_code/SSIM/code_x_g__VS__code_y_g', evluation_list[7])
+        tf.summary.scalar('code/SSIM/code_x__VS__code_y', evluation_list[4])
+        tf.summary.scalar('code/SSIM/code_rm__VS__code_x_g', evluation_list[5])
+        tf.summary.scalar('code/SSIM/code_rm__VS__code_y_g', evluation_list[6])
+        tf.summary.scalar('code/SSIM/code_x_g__VS__code_y_g', evluation_list[7])
 
     def evaluation(self, image_list):
         x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
