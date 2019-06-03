@@ -446,7 +446,7 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if step==FLAGS.epoch_steps*FLAGS.epoch:
+                            if step>FLAGS.epoch_steps*(FLAGS.epoch-1) and step<=FLAGS.epoch_steps*FLAGS.epoch:
                                 save_images(val_image_list_0, checkpoints_dir, val_index-4)
                                 save_images(val_image_list_1, checkpoints_dir, val_index-3)
                                 save_images(val_image_list_2, checkpoints_dir, val_index-2)
