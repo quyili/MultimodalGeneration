@@ -22,20 +22,31 @@ class FeatureDiscriminator:
                   filled with 0.9 if real, 0.0 if fake
         """
 
+        input1, input2 = input
         with tf.variable_scope(self.name, reuse=self.reuse):
-            input = tf.nn.dropout(input, keep_prob=self.keep_prob)
-            with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=input, filters=2 * self.ngf, kernel_size=5,
-                                         strides=self.slice_stride,
-                                         padding="SAME",
-                                         activation=None,
-                                         kernel_initializer=tf.random_normal_initializer(
-                                             mean=0.0, stddev=0.02, dtype=tf.float32),
-                                         bias_initializer=tf.constant_initializer(0.0), name='conv1')
-                norm1 = ops._norm(conv1, self.is_training, self.norm)
-                relu1 = ops.relu(norm1)
+            input1 = tf.nn.dropout(input1, keep_prob=self.keep_prob)
+            input2 = tf.nn.dropout(input2, keep_prob=self.keep_prob)
+            with tf.variable_scope("conv1_1", reuse=self.reuse):
+                conv1_1 = tf.layers.conv2d(inputs=input1, filters=2 * self.ngf, kernel_size=5,
+                                           strides=self.slice_stride,
+                                           padding="SAME",
+                                           activation=None,
+                                           kernel_initializer=tf.random_normal_initializer(
+                                               mean=0.0, stddev=0.02, dtype=tf.float32),
+                                           bias_initializer=tf.constant_initializer(0.0), name='conv1_1')
+                norm1_1 = ops._norm(conv1_1, self.is_training, self.norm)
+            with tf.variable_scope("conv1_2", reuse=self.reuse):
+                conv1_2 = tf.layers.conv2d(inputs=input2, filters=2 * self.ngf, kernel_size=5, strides=1,
+                                           padding="SAME",
+                                           activation=None,
+                                           kernel_initializer=tf.random_normal_initializer(
+                                               mean=0.0, stddev=0.02, dtype=tf.float32),
+                                           bias_initializer=tf.constant_initializer(0.0), name='conv1_2')
+                norm1_2 = ops._norm(conv1_2, self.is_training, self.norm)
+            with tf.variable_scope("add1", reuse=self.reuse):
+                add1 = ops.relu(tf.add(norm1_1, norm1_2))
             with tf.variable_scope("conv2", reuse=self.reuse):
-                conv2 = tf.layers.conv2d(inputs=relu1, filters=2 * self.ngf, kernel_size=3, strides=1,
+                conv2 = tf.layers.conv2d(inputs=add1, filters=2 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(

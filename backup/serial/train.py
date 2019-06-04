@@ -118,7 +118,7 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
 
-            image_list, code_list, j_list, loss_list= gan.model()
+            image_list, code_list, j_list, loss_list = gan.model()
             optimizers = gan.optimize(loss_list)
 
             gan.image_summary(image_list)
@@ -215,8 +215,8 @@ def train():
                     train_evaluation_code_list.append(train_evaluation_codes)
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
-                    
-                    if step % int(FLAGS.epoch_steps/2-1) == 0:
+
+                    if step % int(FLAGS.epoch_steps / 2 - 1) == 0:
                         logging.info('-----------Train summary start-------------')
                         train__summary = sess.run(
                             summary_op,
@@ -241,9 +241,9 @@ def train():
                         val_loss_list = []
                         val_evaluation_list = []
                         val_evaluation_code_list = []
-                        val_index=0
+                        val_index = 0
                         Label_test_files = read_filename(FLAGS.L_test)
-                        for j in range(int(len(Label_test_files)/FLAGS.batch_size)):
+                        for j in range(int(len(Label_test_files) / FLAGS.batch_size)):
                             val_true_x = []
                             val_true_y = []
                             val_true_l = []
@@ -264,7 +264,7 @@ def train():
                                 val_true_y.append(Y_arr)
                                 val_true_m.append(M_arr)
                                 val_true_l.append(L_arr)
-                                val_index +=1
+                                val_index += 1
 
                             val_losses, val_evaluations, val_evaluation_codes = sess.run(
                                 [loss_list, evaluation_list, evaluation_code_list],
@@ -279,8 +279,8 @@ def train():
                             val_evaluation_list.append(val_evaluations)
                             val_evaluation_code_list.append(val_evaluation_codes)
 
-                        val__summary,val_image_list = sess.run(
-                            [summary_op,image_list],
+                        val__summary, val_image_list = sess.run(
+                            [summary_op, image_list],
                             feed_dict={
                                 gan.x: np.asarray(val_true_x),
                                 gan.y: np.asarray(val_true_y),
@@ -288,8 +288,8 @@ def train():
                                 gan.label_expand: np.asarray(val_true_l),
                                 gan.mask: np.asarray(val_true_m).astype('float32'),
                                 loss_list_summary: mean_list(val_loss_list),
-                                       evaluation_list_summary: mean_list(val_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
+                                evaluation_list_summary: mean_list(val_evaluation_list),
+                                evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
                         val_writer.add_summary(val__summary, step)
                         val_writer.flush()
 

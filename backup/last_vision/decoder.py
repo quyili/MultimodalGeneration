@@ -21,10 +21,12 @@ class Decoder:
         Returns:
           output: same size as input
         """
+        input1, input2 = input
         with tf.variable_scope(self.name, reuse=self.reuse):
-            input = tf.nn.dropout(input, keep_prob=self.keep_prob)
+            input1 = tf.nn.dropout(input1, keep_prob=self.keep_prob)
+            input2 = tf.nn.dropout(input2, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=input, filters=6 * self.ngf, kernel_size=3, strides=1,
+                conv1 = tf.layers.conv2d(inputs=input2, filters=6 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
@@ -70,21 +72,23 @@ class Decoder:
                                               name='add1_conv1')
                 add1_norm1 = ops._norm(add1_conv1, self.is_training, self.norm)
                 add1_relu1 = ops.relu(add1_norm1)
-            with tf.variable_scope("add1_conv2", reuse=self.reuse):
-                add1_conv2 = tf.layers.conv2d(inputs=add1_relu1, filters=4 * self.ngf, kernel_size=3,
-                                              strides=1,
-                                              padding="SAME",
-                                              activation=None,
-                                              kernel_initializer=tf.random_normal_initializer(
-                                                  mean=1.0 / (9.0 * 4 * self.ngf), stddev=0.000001,
-                                                  dtype=tf.float32),
-                                              bias_initializer=tf.constant_initializer(0.0),
-                                              name='add1_conv2')
-                add1_norm2 = ops._norm(add1_conv2, self.is_training, self.norm)
-                add1_relu2 = ops.relu(add1_norm2)
+            with tf.variable_scope("concat1", reuse=self.reuse):
+                shape1 = input1.get_shape().as_list()
+                concat1 = tf.reshape(tf.concat([add1_relu1, input1], axis=-1),
+                                     [shape1[0], shape1[1], shape1[2], 2 * shape1[3]])
+                concat1_conv = tf.layers.conv2d(inputs=concat1, filters=4 * self.ngf, kernel_size=3, strides=1,
+                                                padding="SAME",
+                                                activation=None,
+                                                kernel_initializer=tf.random_normal_initializer(
+                                                    mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001,
+                                                    dtype=tf.float32),
+                                                bias_initializer=tf.constant_initializer(0.0),
+                                                name='concat1_conv')
+                concat1_norm2 = ops._norm(concat1_conv, self.is_training, self.norm)
+                concat1_relu2 = ops.relu(concat1_norm2)
 
             with tf.variable_scope("deconv2_r", reuse=self.reuse):
-                resize2 = ops.uk_resize(add1_relu2, reuse=self.reuse, name='resize1')
+                resize2 = ops.uk_resize(concat1_relu2, reuse=self.reuse, name='resize1')
                 deconv2_r = tf.layers.conv2d(inputs=resize2, filters=2 * self.ngf, kernel_size=3, strides=1,
                                              padding="SAME",
                                              activation=None,
@@ -95,7 +99,7 @@ class Decoder:
                                              name='deconv2_r')
                 deconv2_norm1_r = ops._norm(deconv2_r, self.is_training, self.norm)
             with tf.variable_scope("deconv2_t", reuse=self.reuse):
-                deconv2_t = tf.layers.conv2d_transpose(inputs=add1_relu2, filters=2 * self.ngf,
+                deconv2_t = tf.layers.conv2d_transpose(inputs=concat1_relu2, filters=2 * self.ngf,
                                                        kernel_size=3,
                                                        strides=self.slice_stride,
                                                        padding="SAME",
