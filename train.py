@@ -29,7 +29,7 @@ tf.flags.DEFINE_string('load_model', None,
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 10, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 40, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
@@ -84,7 +84,8 @@ def expand(train_M_arr_, train_L_arr_):
 
 def save_images(image_list, checkpoints_dir, file_index):
     val_true_x, val_true_y, val_x_g, val_y_g, val_x_g_t, val_y_g_t, val_x_r, val_y_r, val_x_t, val_y_t, \
-    val_l_input, val_l_g, val_l_f_by_x, val_l_f_by_y, val_l_g_by_x, val_l_g_by_y = image_list
+    val_l_input, val_l_g, val_l_f_by_x, val_l_f_by_y, val_l_g_by_x, val_l_g_by_y, \
+    val_f_x, val_f_y, val_f_r, val_f_x_r, val_f_y_r = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_input)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_label_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_g)[0, :, :, 0]),
@@ -122,6 +123,17 @@ def save_images(image_list, checkpoints_dir, file_index):
                          checkpoints_dir + "/samples/fake_x_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_y_t)[0, :, :, 0]),
                          checkpoints_dir + "/samples/fake_y_t_" + str(file_index) + ".tiff")
+
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_x)[0, :, :, 0]),
+                         checkpoints_dir + "/samples/true_f_x_" + str(file_index) + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_y)[0, :, :, 0]),
+                         checkpoints_dir + "/samples/true_f_x_" + str(file_index) + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_r)[0, :, :, 0]),
+                         checkpoints_dir + "/samples/fake_f_r_" + str(file_index) + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_x_r)[0, :, :, 0]),
+                         checkpoints_dir + "/samples/fake_f_x_r_" + str(file_index) + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_y_r)[0, :, :, 0]),
+                         checkpoints_dir + "/samples/fake_f_y_r_" + str(file_index) + ".tiff")
 
 
 def read_filename(path, shuffle=True):
@@ -359,7 +371,8 @@ def train():
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
-                    if step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == FLAGS.epoch_steps * FLAGS.epoch:
+                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
+                            FLAGS.epoch_steps * FLAGS.epoch / 4):
                         logging.info('-----------Train summary start-------------')
                         train_summary_op = sess.run(
                             summary_op,
@@ -448,11 +461,10 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if step > FLAGS.epoch_steps * (FLAGS.epoch - 1) and step <= FLAGS.epoch_steps * FLAGS.epoch:
-                                save_images(val_image_list_0, checkpoints_dir, val_index - 4)
-                                save_images(val_image_list_1, checkpoints_dir, val_index - 3)
-                                save_images(val_image_list_2, checkpoints_dir, val_index - 2)
-                                save_images(val_image_list_3, checkpoints_dir, val_index - 1)
+                            save_images(val_image_list_0, checkpoints_dir, val_index - 4)
+                            save_images(val_image_list_1, checkpoints_dir, val_index - 3)
+                            save_images(val_image_list_2, checkpoints_dir, val_index - 2)
+                            save_images(val_image_list_3, checkpoints_dir, val_index - 1)
 
                         val_summary_op = sess.run(
                             summary_op,

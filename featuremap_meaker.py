@@ -1,30 +1,24 @@
 # -*- coding: utf-8 -*-
-import cv2
+import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
+import SimpleITK
 
-# 读取图像
-img = cv2.imread('lena.png')
-lenna_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+graph = tf.Graph()
+with graph.as_default():
+    x = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
+    y = tf.image.sobel_edges(x)
 
-# 灰度化处理图像
-grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-# Sobel算子
-x = cv2.Sobel(grayImage, cv2.CV_16S, 1, 0)  # 对x求一阶导
-y = cv2.Sobel(grayImage, cv2.CV_16S, 0, 1)  # 对y求一阶导
-absX = cv2.convertScaleAbs(x)
-absY = cv2.convertScaleAbs(y)
-Sobel = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
-
-# 用来正常显示中文标签
-plt.rcParams['font.sans-serif'] = ['SimHei']
-
-# 显示图形
-titles = [u'原始图像', u'Sobel算子']
-images = [lenna_img, Sobel]
-for i in xrange(2):
-    plt.subplot(1, 2, i + 1), plt.imshow(images[i], 'gray')
-    plt.title(titles[i])
-    plt.xticks([]), plt.yticks([])
-plt.show()
+with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/0_90.tiff")).astype('float32')
+    input_x = np.asarray(input_x).reshape([184, 144, 1])
+    out = sess.run(y,
+                   feed_dict={x: np.asarray([input_x])})
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_x[:, :, 0]), "input_x.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out)[0, :, :, 0, 0]), "ouput_0.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out)[0, :, :, 0, 1]), "ouput_1.tiff")
+    SimpleITK.WriteImage(
+        SimpleITK.GetImageFromArray(np.asarray(out)[0, :, :, 0, 0] * 0.5 + np.asarray(out)[0, :, :, 0, 1] * 0.5),
+        "ouput_mean.tiff")
+    SimpleITK.WriteImage(
+        SimpleITK.GetImageFromArray(np.asarray(out)[0, :, :, 0, 0] + np.asarray(out)[0, :, :, 0, 1]),
+        "ouput_sum.tiff")

@@ -81,7 +81,8 @@ def expand(train_M_arr_, train_L_arr_):
     L_arr = np.concatenate([L0, L1, L2, L3, L4, L5], axis=-1)
     return L_arr
 
-def save_images(image_list,checkpoints_dir,file_index):
+
+def save_images(image_list, checkpoints_dir, file_index):
     val_true_x, val_true_y, val_x_g, val_y_g, val_x_g_t, val_y_g_t, val_x_r, val_y_r, val_x_t, val_y_t, \
     val_l_input, val_l_g, val_l_f_by_x, val_l_f_by_y, val_l_g_by_x, val_l_g_by_y = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_input)[0, :, :, 0]),
@@ -121,6 +122,7 @@ def save_images(image_list,checkpoints_dir,file_index):
                          checkpoints_dir + "/samples/fake_x_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_y_t)[0, :, :, 0]),
                          checkpoints_dir + "/samples/fake_y_t_" + str(file_index) + ".tiff")
+
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -357,7 +359,7 @@ def train():
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
-                    if step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step==FLAGS.epoch_steps*FLAGS.epoch:
+                    if step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == FLAGS.epoch_steps * FLAGS.epoch:
                         logging.info('-----------Train summary start-------------')
                         train_summary_op = sess.run(
                             summary_op,
@@ -406,12 +408,12 @@ def train():
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
                             val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
                             val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
-                            val_image_summary_op,val_image_list_0,val_image_list_1,val_image_list_2,val_image_list_3 = sess.run(
+                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
                                 [loss_list_0, evaluation_list_0, evaluation_code_list_0,
                                  loss_list_1, evaluation_list_1, evaluation_code_list_1,
                                  loss_list_2, evaluation_list_2, evaluation_code_list_2,
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op,image_list_0,image_list_1,image_list_2,image_list_3],
+                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
                                 feed_dict={
                                     rm_0: rm[0:1, :, :, :],
                                     x_0: np.asarray(val_true_x)[0:1, :, :, :],
@@ -446,11 +448,11 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if step==FLAGS.epoch_steps*FLAGS.epoch:
-                                save_images(val_image_list_0, checkpoints_dir, val_index-4)
-                                save_images(val_image_list_1, checkpoints_dir, val_index-3)
-                                save_images(val_image_list_2, checkpoints_dir, val_index-2)
-                                save_images(val_image_list_3, checkpoints_dir, val_index-1)
+                            if step == FLAGS.epoch_steps * FLAGS.epoch:
+                                save_images(val_image_list_0, checkpoints_dir, val_index - 4)
+                                save_images(val_image_list_1, checkpoints_dir, val_index - 3)
+                                save_images(val_image_list_2, checkpoints_dir, val_index - 2)
+                                save_images(val_image_list_3, checkpoints_dir, val_index - 1)
 
                         val_summary_op = sess.run(
                             summary_op,
