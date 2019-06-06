@@ -32,6 +32,7 @@ class GAN:
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=6)
         self.D_X = Discriminator('D_X', ngf=ngf)
         self.D_Y = Discriminator('D_Y', ngf=ngf)
+        self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
@@ -69,6 +70,8 @@ class GAN:
         code_f_rm = tf.random_normal(shape, mean=0.5, stddev=0.5, dtype=tf.float32, seed=None, name=None)
         j_code_f_rm = self.FD_F(code_f_rm)
         f_rm = self.DC_F(code_f_rm)
+        j_f = self.D_F(f)
+        j_f_rm = self.D_F(f_rm)
 
         f_r_expand = tf.concat([
             tf.reshape(f_r[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
@@ -151,9 +154,12 @@ class GAN:
 
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 30
         D_loss += self.mse_loss(j_code_f, 0.0) * 30
+        D_loss += self.mse_loss(j_f, 1.0) * 30
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 30
 
         G_loss = self.mse_loss(j_code_f, 1.0) * 30
-        G_loss += self.mse_loss(f, f_r) * 25
+        G_loss += self.mse_loss(j_f_rm, 1.0) * 30
+        G_loss += self.mse_loss(f, f_r) * 50
         G_loss += self.mse_loss(f_r, f_xy_r) * 25
         G_loss += self.mse_loss(f_x, f_x_r) * 25
         G_loss += self.mse_loss(f_y, f_y_r) * 25
@@ -257,6 +263,7 @@ class GAN:
 
                 self.D_X.variables
                 + self.D_Y.variables
+                + self.D_F.variables
                 + self.FD_R.variables
                 + self.FD_F.variables
                 ]
