@@ -161,6 +161,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm, 1.0) * 30
         G_loss += self.mse_loss(f, f_r) * 50
         G_loss += self.mse_loss(f_r, f_xy_r) * 25
+        G_loss += self.mse_loss(f, f_xy_r) * 25
         G_loss += self.mse_loss(f_x, f_x_r) * 25
         G_loss += self.mse_loss(f_y, f_y_r) * 25
         G_loss += self.mse_loss(f_rm, f_xy_g_r) * 10
