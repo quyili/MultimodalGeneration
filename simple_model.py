@@ -54,7 +54,7 @@ class GAN:
                               shape=self.input_shape)
 
         # R -> X_G,Y_G,L
-        code_rm = tf.random_normal(code_x.get_shape().as_list(), mean=0.5, stddev=0.5, dtype=tf.float32, seed=None,
+        code_rm = tf.truncated_normal(code_x.get_shape().as_list(), mean=0.5, stddev=0.25, dtype=tf.float32, seed=None,
                                    name=None)
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)

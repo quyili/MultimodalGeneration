@@ -195,11 +195,10 @@ def train():
                     with tf.name_scope("GPU_0"):
                         x_0 = tf.placeholder(tf.float32, shape=input_shape)
                         y_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        rm_0 = tf.placeholder(tf.float32, shape=input_shape)
                         label_expand_0 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(x_0, y_0, rm_0, label_expand_0)
+                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(x_0, y_0, label_expand_0)
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
@@ -211,11 +210,10 @@ def train():
                     with tf.name_scope("GPU_1"):
                         x_1 = tf.placeholder(tf.float32, shape=input_shape)
                         y_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        rm_1 = tf.placeholder(tf.float32, shape=input_shape)
                         label_expand_1 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(x_1, y_1, rm_1, label_expand_1)
+                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(x_1, y_1, label_expand_1)
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
@@ -227,11 +225,10 @@ def train():
                     with tf.name_scope("GPU_2"):
                         x_2 = tf.placeholder(tf.float32, shape=input_shape)
                         y_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        rm_2 = tf.placeholder(tf.float32, shape=input_shape)
                         label_expand_2 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(x_2, y_2, rm_2, label_expand_2)
+                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(x_2, y_2, label_expand_2)
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
@@ -243,11 +240,10 @@ def train():
                     with tf.name_scope("GPU_3"):
                         x_3 = tf.placeholder(tf.float32, shape=input_shape)
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        rm_3 = tf.placeholder(tf.float32, shape=input_shape)
                         label_expand_3 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(x_3, y_3, rm_3, label_expand_3)
+                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(x_3, y_3, label_expand_3)
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()
@@ -338,29 +334,23 @@ def train():
                         epoch = int(index / len(Label_train_files))
                         index = index + 1
 
-                    rm = random(FLAGS.batch_size, FLAGS.image_size[0], FLAGS.image_size[1],
-                                FLAGS.image_size[2]).astype('float32')
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
                     _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
                         [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
                         feed_dict={
-                            rm_0: rm[0:1, :, :, :],
                             x_0: np.asarray(train_true_x)[0:1, :, :, :],
                             y_0: np.asarray(train_true_y)[0:1, :, :, :],
                             label_expand_0: np.asarray(train_true_l)[0:1, :, :, :],
 
-                            rm_1: rm[1:2, :, :, :],
                             x_1: np.asarray(train_true_x)[1:2, :, :, :],
                             y_1: np.asarray(train_true_y)[1:2, :, :, :],
                             label_expand_1: np.asarray(train_true_l)[1:2, :, :, :],
 
-                            rm_2: rm[2:3, :, :, :],
                             x_2: np.asarray(train_true_x)[2:3, :, :, :],
                             y_2: np.asarray(train_true_y)[2:3, :, :, :],
                             label_expand_2: np.asarray(train_true_l)[2:3, :, :, :],
 
-                            rm_3: rm[3:4, :, :, :],
                             x_3: np.asarray(train_true_x)[3:4, :, :, :],
                             y_3: np.asarray(train_true_y)[3:4, :, :, :],
                             label_expand_3: np.asarray(train_true_l)[3:4, :, :, :],
@@ -428,22 +418,18 @@ def train():
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
                                  image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
                                 feed_dict={
-                                    rm_0: rm[0:1, :, :, :],
                                     x_0: np.asarray(val_true_x)[0:1, :, :, :],
                                     y_0: np.asarray(val_true_y)[0:1, :, :, :],
                                     label_expand_0: np.asarray(val_true_l)[0:1, :, :, :],
 
-                                    rm_1: rm[1:2, :, :, :],
                                     x_1: np.asarray(val_true_x)[1:2, :, :, :],
                                     y_1: np.asarray(val_true_y)[1:2, :, :, :],
                                     label_expand_1: np.asarray(val_true_l)[1:2, :, :, :],
 
-                                    rm_2: rm[2:3, :, :, :],
                                     x_2: np.asarray(val_true_x)[2:3, :, :, :],
                                     y_2: np.asarray(val_true_y)[2:3, :, :, :],
                                     label_expand_2: np.asarray(val_true_l)[2:3, :, :, :],
 
-                                    rm_3: rm[3:4, :, :, :],
                                     x_3: np.asarray(val_true_x)[3:4, :, :, :],
                                     y_3: np.asarray(val_true_y)[3:4, :, :, :],
                                     label_expand_3: np.asarray(val_true_l)[3:4, :, :, :],
