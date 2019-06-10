@@ -133,7 +133,11 @@ class GAN:
 
         # D,FD
         j_f = self.D_F(f)
+        j_f_1 = self.D_F(f_x * 0.25 + f_y * 0.75)
+        j_f_2 = self.D_F(f_x * 0.75 + f_y * 0.25)
         j_f_rm = self.D_F(f_rm)
+        j_f_rm_1 = self.D_F(self.DC_F(tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32, seed=None, name=None)))
+        j_f_rm_2 = self.D_F(self.DC_F(tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32, seed=None, name=None)))
 
         j_code_f = self.FD_F(code_f)
         j_code_f_rm = self.FD_F(code_f_rm)
@@ -153,9 +157,15 @@ class GAN:
         G_loss = self.mse_loss(j_code_f, 1.0) * 30
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 30
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 30
-        G_loss += self.mse_loss(j_f_rm, 1.0) * 30
+        D_loss += self.mse_loss(j_f, 1.0) * 80
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 80
+        G_loss += self.mse_loss(j_f_rm, 1.0) * 80
+        D_loss += self.mse_loss(j_f_1, 1.0) * 80
+        D_loss += self.mse_loss(j_f_rm_1, 0.0) * 80
+        G_loss += self.mse_loss(j_f_rm_1, 1.0) * 80
+        D_loss += self.mse_loss(j_f_2, 1.0) * 80
+        D_loss += self.mse_loss(j_f_rm_2, 0.0) * 80
+        G_loss += self.mse_loss(j_f_rm_2, 1.0) * 80
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         G_loss += self.mse_loss(f, f_r) * 100
@@ -225,22 +235,22 @@ class GAN:
         G_loss += self.mse_loss(l_g_by_x, l_g_by_y) * 0.7
 
         # X模态图分割训练的有监督损失
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l, l_f_by_x) * 15
+        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 50 \
+                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 150 \
+                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 150 \
+                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 150
+        G_loss += self.mse_loss(l, l_f_by_x) * 50
 
         # Y模态图分割训练的有监督损失
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 0.5 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 80 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 80
-        G_loss += self.mse_loss(l, l_f_by_y) * 15
+        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 50 \
+                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 150 \
+                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 150 \
+                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 150
+        G_loss += self.mse_loss(l, l_f_by_y) * 50
 
         # X模态与Y模态图编码的有监督语义一致性损失
         G_loss += self.mse_loss(code_x, code_y) * 10
