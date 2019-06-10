@@ -35,6 +35,7 @@ class GAN:
         self.D_Y = Discriminator('D_Y', ngf=ngf)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
+        self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
     def model(self, x, y, label_expand):
         # L
@@ -144,12 +145,8 @@ class GAN:
         j_f_rm_2 = self.D_F(
             self.DC_F(tf.truncated_normal(shape, dtype=tf.float32)))
 
-        # j_code_f = self.FD_F(code_f)
-        # j_code_f_rm = self.FD_F(code_f_rm)
-        # # 使得结构特征图编码服从正态分布的对抗性损失
-        # D_loss = self.mse_loss(j_code_f_rm, 1.0) * 30
-        # D_loss += self.mse_loss(j_code_f, 0.0) * 30
-        # G_loss = self.mse_loss(j_code_f, 1.0) * 30
+        j_code_f = self.FD_F(code_f)
+        j_code_f_rm = self.FD_F(code_f_rm)
 
         j_x = self.D_X(x)
         j_x_g = self.D_X(x_g)
@@ -162,8 +159,13 @@ class GAN:
 
         G_loss = -50 * tf.reduce_sum(1 + code_f_logvar - tf.pow(code_f_mean, 2) - tf.exp(code_f_logvar))
 
+        # 使得结构特征图编码服从正态分布的对抗性损失
+        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 15
+        D_loss += self.mse_loss(j_code_f, 0.0) * 15
+        G_loss += self.mse_loss(j_code_f, 1.0) * 15
+
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss = self.mse_loss(j_f, 1.0) * 80
+        D_loss += self.mse_loss(j_f, 1.0) * 80
         D_loss += self.mse_loss(j_f_rm, 0.0) * 80
         G_loss += self.mse_loss(j_f_rm, 1.0) * 80
         D_loss += self.mse_loss(j_f_1, 1.0) * 80
@@ -174,7 +176,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm_2, 1.0) * 80
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 100
+        G_loss += self.mse_loss(f, f_r) * 150
         G_loss += self.mse_loss(f_r, f_xy_r) * 25
         G_loss += self.mse_loss(f, f_xy_r) * 25
 
@@ -289,9 +291,7 @@ class GAN:
 
         code_list = [code_x, code_y, code_rm, code_x_g, code_y_g]
 
-        j_list = [j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm
-                  # j_code_f, j_code_f_rm
-                  ]
+        j_list = [j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm, j_code_f, j_code_f_rm]
 
         loss_list = [G_loss, D_loss]
 
@@ -311,7 +311,7 @@ class GAN:
                 + self.D_Y.variables
                 + self.D_F.variables
                 + self.FD_R.variables
-                # + self.FD_F.variables
+                + self.FD_F.variables
                 ]
 
     def optimize(self):
@@ -327,18 +327,18 @@ class GAN:
         return G_optimizer, D_optimizer
 
     def histogram_summary(self, j_list):
-        j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm = \
-            j_list[0], j_list[1], j_list[2], j_list[3], j_list[4], j_list[5], j_list[6]
+        j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm, j_code_f, j_code_f_rm = \
+            j_list[0], j_list[1], j_list[2], j_list[3], j_list[4], j_list[5], j_list[6], j_list[7], j_list[8]
         tf.summary.histogram('discriminator/TRUE/j_x', j_x)
         tf.summary.histogram('discriminator/TRUE/j_y', j_y)
         tf.summary.histogram('discriminator/TRUE/j_code_x', j_code_x)
         tf.summary.histogram('discriminator/TRUE/j_code_y', j_code_y)
-        # tf.summary.histogram('discriminator/TRUE/j_code_f_rm', j_code_f_rm)
+        tf.summary.histogram('discriminator/TRUE/j_code_f_rm', j_code_f_rm)
 
         tf.summary.histogram('discriminator/FALSE/j_x_g', j_x_g)
         tf.summary.histogram('discriminator/FALSE/j_y_g', j_y_g)
         tf.summary.histogram('discriminator/FALSE/j_code_rm', j_code_rm)
-        # tf.summary.histogram('discriminator/FALSE/j_code_f', j_code_f)
+        tf.summary.histogram('discriminator/FALSE/j_code_f', j_code_f)
 
     def loss_summary(self, loss_list):
         G_loss, D_loss = loss_list[0], loss_list[1]
