@@ -47,7 +47,7 @@ class GAN:
         f_y = self.norm(tf.reduce_mean(tf.image.sobel_edges(y), axis=-1))
         f = f_x * 0.5 + f_y * 0.5
 
-        # F -> F_R
+        # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
@@ -157,6 +157,7 @@ class GAN:
         j_code_x = self.FD_R(code_x)
         j_code_y = self.FD_R(code_y)
 
+        # VAE loss
         G_loss = -50 * tf.reduce_sum(1 + code_f_logvar - tf.pow(code_f_mean, 2) - tf.exp(code_f_logvar))
 
         # 使得结构特征图编码服从正态分布的对抗性损失
