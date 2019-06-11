@@ -45,7 +45,7 @@ class GAN:
         # X,Y -> F
         f_x = self.norm(tf.reduce_mean(tf.image.sobel_edges(x), axis=-1))
         f_y = self.norm(tf.reduce_mean(tf.image.sobel_edges(y), axis=-1))
-        f = f_x * 0.5 + f_y * 0.5
+        f = tf.reduce_max(tf.concat([f_x,f_y],axis=-1),axis=-1,keep_dims=True)
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
@@ -74,7 +74,7 @@ class GAN:
         # X_GR,Y_GR -> F_X_R,F_Y_R -> F_XY_R
         f_x_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(x_gr), axis=-1))
         f_y_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(y_gr), axis=-1))
-        f_xy_r = f_x_r * 0.5 + f_y_r * 0.5
+        f_xy_r = tf.reduce_max(tf.concat([f_x_r, f_y_r], axis=-1), axis=-1,keep_dims=True)
 
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, dtype=tf.float32)
@@ -99,7 +99,7 @@ class GAN:
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
         f_x_g_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(x_g), axis=-1))
         f_y_g_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(y_g), axis=-1))
-        f_xy_g_r = f_x_g_r * 0.5 + f_y_g_r * 0.5
+        f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1,keep_dims=True)
 
         # X_G -> L_X_G
         code_x_g = self.EC_X(x_g)
