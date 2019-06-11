@@ -13,15 +13,31 @@ def norm( input):
 graph = tf.Graph()
 with graph.as_default():
     x = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
-    y = norm(tf.reduce_mean(tf.image.sobel_edges(x), axis=-1))
+    y = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
+    x1 = norm(tf.reduce_mean(tf.image.sobel_edges(x), axis=-1))
+    x2 = norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
+
+    y1 = norm(tf.reduce_mean(tf.image.sobel_edges(y), axis=-1))
+    y2 = norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
+
+    xy1 = norm(tf.reduce_mean(tf.concat([x1,y1],axis=-1), axis=-1,keep_dims=True))
+    xy2 =norm(tf.reduce_max(tf.concat([x2,y2],axis=-1), axis=-1,keep_dims=True))
+
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/0_90.tiff")).astype('float32')
+    input_y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT2/0_90.tiff")).astype('float32')
     input_x = np.asarray(input_x).reshape([184, 144, 1])
-    out = sess.run(y,
-                   feed_dict={x: np.asarray([input_x])})
-    print(np.asarray(out).shape)
+    input_y = np.asarray(input_y).reshape([184, 144, 1])
+    x1_,x2_,y1_,y2_,xy1_,xy2_ = sess.run([x1,x2,y1,y2,xy1,xy2],
+                   feed_dict={x: np.asarray([input_x]),
+                              y: np.asarray([input_y])})
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out)[0, :, :, :]), "ouput_mean.mha")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out)[0, :, :, 0]), "ouput_mean.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x1_)[0, :, :, 0]), "x1_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x2_)[0, :, :, 0]), "x2_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y1_)[0, :, :, 0]), "y1_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y2_)[0, :, :, 0]), "y2_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(xy1_)[0, :, :, 0]), "xy1_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(xy2_)[0, :, :, 0]), "xy2_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_x[:, :, 0]), "input_x.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_y[:, :, 0]), "input_y.tiff")
