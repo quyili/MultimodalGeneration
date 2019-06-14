@@ -141,9 +141,9 @@ class GAN:
         j_f_2 = self.D_F(f_x * 0.75 + f_y * 0.25)
         j_f_rm = self.D_F(f_rm)
         j_f_rm_1 = self.D_F(
-            self.DC_F(tf.truncated_normal(shape, dtype=tf.float32)))
+            self.DC_F(tf.random_normal(shape, dtype=tf.float32)))
         j_f_rm_2 = self.D_F(
-            self.DC_F(tf.truncated_normal(shape, dtype=tf.float32)))
+            self.DC_F(tf.random_normal(shape, dtype=tf.float32)))
 
         j_code_f = self.FD_F(code_f)
         j_code_f_rm = self.FD_F(code_f_rm)
@@ -177,7 +177,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm_2, 1.0) * 80
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 150
+        G_loss += self.mse_loss(f, f_r) * 50
         G_loss += self.mse_loss(f_r, f_xy_r) * 25
         G_loss += self.mse_loss(f, f_xy_r) * 25
 
