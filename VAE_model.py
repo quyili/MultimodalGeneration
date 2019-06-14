@@ -43,8 +43,8 @@ class GAN:
                        shape=self.input_shape)
 
         # X,Y -> F
-        f_x = self.norm(tf.reduce_mean(tf.image.sobel_edges(x), axis=-1))
-        f_y = self.norm(tf.reduce_mean(tf.image.sobel_edges(y), axis=-1))
+        f_x = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
+        f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x,f_y],axis=-1),axis=-1,keep_dims=True)
 
         # F -> F_R VAE
@@ -72,8 +72,8 @@ class GAN:
         y_gr = self.DC_Y(code_rm_xy)
 
         # X_GR,Y_GR -> F_X_R,F_Y_R -> F_XY_R
-        f_x_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(x_gr), axis=-1))
-        f_y_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(y_gr), axis=-1))
+        f_x_r = self.norm(tf.reduce_max(tf.image.sobel_edges(x_gr), axis=-1))
+        f_y_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_gr), axis=-1))
         f_xy_r = tf.reduce_max(tf.concat([f_x_r, f_y_r], axis=-1), axis=-1,keep_dims=True)
 
         # CODE_F_RM
@@ -97,8 +97,8 @@ class GAN:
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
 
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
-        f_x_g_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(x_g), axis=-1))
-        f_y_g_r = self.norm(tf.reduce_mean(tf.image.sobel_edges(y_g), axis=-1))
+        f_x_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(x_g), axis=-1))
+        f_y_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_g), axis=-1))
         f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1,keep_dims=True)
 
         # X_G -> L_X_G
@@ -177,7 +177,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm_2, 1.0) * 80
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 150
+        G_loss += self.mse_loss(f, f_r) * 100
         G_loss += self.mse_loss(f_r, f_xy_r) * 25
         G_loss += self.mse_loss(f, f_xy_r) * 25
 
