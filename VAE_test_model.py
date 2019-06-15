@@ -65,6 +65,7 @@ class GAN:
         j_f = self.D_F(f)
         j_f_1 = self.D_F(f_x * 0.25 + f_y * 0.75)
         j_f_2 = self.D_F(f_x * 0.75 + f_y * 0.25)
+        j_f_r = self.D_F(f_r) #add f_r ->D_F
         j_f_rm = self.D_F(f_rm)
         j_f_rm_1 = self.D_F(
             self.DC_F(tf.random_normal(shape, dtype=tf.float32)))
@@ -85,6 +86,9 @@ class GAN:
         G_loss += self.mse_loss(j_code_f, 1.0) * 15
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
+        D_loss += self.mse_loss(j_f, 1.0) * 80    #add f_r G_loss and  D_loss
+        D_loss += self.mse_loss(j_f_r, 0.0) * 80
+        G_loss += self.mse_loss(j_f_r, 1.0) * 80
         D_loss += self.mse_loss(j_f, 1.0) * 80
         D_loss += self.mse_loss(j_f_rm, 0.0) * 80
         G_loss += self.mse_loss(j_f_rm, 1.0) * 80
@@ -96,7 +100,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm_2, 1.0) * 80
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 50
+        G_loss += self.mse_loss(f, f_r) * 100 #50
 
 
         image_list = [x, y, l, f, f_r, f_rm,]
