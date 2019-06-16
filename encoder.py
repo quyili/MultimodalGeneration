@@ -13,7 +13,7 @@ class Encoder:
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
 
-    def __call__(self, input):
+    def __call__(self, EC_input):
         """
         Args:
           input: batch_size x width x height x 3
@@ -22,9 +22,9 @@ class Encoder:
         """
 
         with tf.variable_scope(self.name):
-            input = tf.nn.dropout(input, keep_prob=self.keep_prob)
+            EC_input = tf.nn.dropout(EC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0", reuse=self.reuse):
-                conv0 = tf.layers.conv2d(inputs=input, filters=self.ngf, kernel_size=3, strides=1,
+                conv0 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
