@@ -37,7 +37,7 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape) * tf.cast(f > 0.07, dtype=tf.float32)
+        f = tf.ones(self.input_shape,name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
 
         # F -> F_R VAE
         code_f = self.EC_F(f)
@@ -75,6 +75,10 @@ class GAN:
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         G_loss += self.mse_loss(f, f_r) * 5
 
+        f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
+                               shape=f_r_prob.get_shape().as_list())
+        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 5
+
         image_list = [x, y, l, f, f_r, f_rm]
 
         code_list = [code_f, code_f_r, code_f_rm, code_f_rm_r]
@@ -89,8 +93,8 @@ class GAN:
         return [self.EC_F.variables
                 + self.DC_F.variables,
 
-                self.D_F.variables
-                + self.FD_F.variables
+                self.D_F.variables+
+                self.FD_F.variables
                 ]
 
     def optimize(self):
