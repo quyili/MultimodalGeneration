@@ -23,13 +23,16 @@ with graph.as_default():
     xy1 = norm(tf.reduce_mean(tf.concat([x1,y1],axis=-1), axis=-1,keep_dims=True))
     xy2 =norm(tf.reduce_max(tf.concat([x2,y2],axis=-1), axis=-1,keep_dims=True))
 
+    out = xy2-tf.reduce_mean(xy2, axis=[1, 2, 3])
+    out =  tf.ones(out.get_shape().as_list())*tf.cast( out>0.07,dtype="float32")
+
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/0_90.tiff")).astype('float32')
     input_y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT2/0_90.tiff")).astype('float32')
     input_x = np.asarray(input_x).reshape([184, 144, 1])
     input_y = np.asarray(input_y).reshape([184, 144, 1])
-    x1_,x2_,y1_,y2_,xy1_,xy2_ = sess.run([x1,x2,y1,y2,xy1,xy2],
+    x1_,x2_,y1_,y2_,xy1_,xy2_,out_ = sess.run([x1,x2,y1,y2,xy1,xy2,out],
                    feed_dict={x: np.asarray([input_x]),
                               y: np.asarray([input_y])})
 
@@ -41,3 +44,4 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(xy2_)[0, :, :, 0]), "xy2_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_x[:, :, 0]), "input_x.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_y[:, :, 0]), "input_y.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_)[0, :, :, 0]), "out.tiff")

@@ -82,6 +82,13 @@ def expand(train_M_arr_, train_L_arr_):
     return L_arr
 
 
+def save_codes(code_f_rm, code_f, checkpoints_dir, file_index):
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(code_f)[0, :, :, :]),
+                         checkpoints_dir + "/samples/true_code_f_" + str(file_index) + ".mha")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(code_f_rm)[0, :, :, :]),
+                         checkpoints_dir + "/samples/true_code_f_rm_" + str(file_index) + ".mha")
+
+
 def save_images(image_list, checkpoints_dir, file_index):
     val_true_x, val_true_y, val_l, val_f, val_f_r, val_f_rm = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l)[0, :, :, 0]),
@@ -97,6 +104,7 @@ def save_images(image_list, checkpoints_dir, file_index):
                          checkpoints_dir + "/samples/true_f_r_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_rm)[0, :, :, 0]),
                          checkpoints_dir + "/samples/fake_f_rm_" + str(file_index) + ".tiff")
+
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -160,7 +168,8 @@ def train():
                         label_expand_0 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(x_0, y_0, label_expand_0)
+                        image_list_0, code_list_0, j_list_0, loss_list_0, code_f_rm_0, code_f_0 = gan.model(x_0, y_0,
+                                                                                                            label_expand_0)
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
@@ -175,7 +184,8 @@ def train():
                         label_expand_1 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(x_1, y_1, label_expand_1)
+                        image_list_1, code_list_1, j_list_1, loss_list_1, code_f_rm_1, code_f_1 = gan.model(x_1, y_1,
+                                                                                                            label_expand_1)
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
@@ -190,7 +200,8 @@ def train():
                         label_expand_2 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(x_2, y_2, label_expand_2)
+                        image_list_2, code_list_2, j_list_2, loss_list_2, code_f_rm_2, code_f_2 = gan.model(x_2, y_2,
+                                                                                                            label_expand_2)
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
@@ -205,7 +216,8 @@ def train():
                         label_expand_3 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(x_3, y_3, label_expand_3)
+                        image_list_3, code_list_3, j_list_3, loss_list_3, code_f_rm_3, code_f_3 = gan.model(x_3, y_3,
+                                                                                                            label_expand_3)
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()
@@ -373,12 +385,15 @@ def train():
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
                             val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
                             val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
-                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
+                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3, \
+                            val_code_f_rm_0, val_code_f_0, val_code_f_rm_1, val_code_f_1, val_code_f_rm_2, val_code_f_2, val_code_f_rm_3, val_code_f_3 = sess.run(
                                 [loss_list_0, evaluation_list_0, evaluation_code_list_0,
                                  loss_list_1, evaluation_list_1, evaluation_code_list_1,
                                  loss_list_2, evaluation_list_2, evaluation_code_list_2,
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
+                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3,
+                                 code_f_rm_0, code_f_0, code_f_rm_1, code_f_1, code_f_rm_2, code_f_2, code_f_rm_3,
+                                 code_f_3],
                                 feed_dict={
                                     x_0: np.asarray(val_true_x)[0:1, :, :, :],
                                     y_0: np.asarray(val_true_y)[0:1, :, :, :],
@@ -409,7 +424,9 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if j == 0: save_images(val_image_list_3, checkpoints_dir, val_index - 1)
+                            if j == 0:
+                                save_images(val_image_list_3, checkpoints_dir, val_index - 1)
+                                save_codes(val_code_f_rm_3, val_code_f_3, checkpoints_dir, val_index - 1)
 
                         val_summary_op = sess.run(
                             summary_op,
