@@ -2,8 +2,8 @@
 import tensorflow as tf
 from discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
-from encoder import Encoder
-from decoder import Decoder
+from GAN_test_encoder import GEncoder
+from GAN_test_decoder import GDecoder
 
 
 class GAN:
@@ -22,8 +22,8 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.EC_F = Encoder('EC_F', ngf=ngf)
-        self.DC_F = Decoder('DC_F', ngf=ngf, output_channl=2)
+        self.EC_F = GEncoder('EC_F', ngf=ngf)
+        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
         self.FD_F_S = FeatureDiscriminator('FD_F_S', ngf=ngf)
@@ -65,13 +65,13 @@ class GAN:
         j_code_f_s = self.FD_F_S(tf.transpose(code_f, perm=[3, 1, 2, 0]))
 
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 80
-        D_loss += self.mse_loss(j_code_f, 0.0) * 80
-        G_loss = self.mse_loss(j_code_f, 1.0) * 80
+        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 50
+        D_loss += self.mse_loss(j_code_f, 0.0) * 50
+        G_loss = self.mse_loss(j_code_f, 1.0) * 50
 
-        D_loss += self.mse_loss(j_code_f_rm_s, 1.0) * 80
-        D_loss += self.mse_loss(j_code_f_s, 0.0) * 80
-        G_loss += self.mse_loss(j_code_f_s, 1.0) * 80
+        D_loss += self.mse_loss(j_code_f_rm_s, 1.0) * 50
+        D_loss += self.mse_loss(j_code_f_s, 0.0) * 50
+        G_loss += self.mse_loss(j_code_f_s, 1.0) * 50
 
         G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
         G_loss += self.mse_loss(code_f, code_f_r)
@@ -122,14 +122,16 @@ class GAN:
         code_f, code_f_r, code_f_rm, code_f_rm_r = \
             code_list[0], code_list[1], code_list[2], code_list[3]
         list = [self.PSNR(code_f, code_f_r), self.PSNR(code_f_rm, code_f_rm_r),
-                self.SSIM(code_f, code_f_r), self.SSIM(code_f_rm, code_f_rm_r)]
+
+                # self.SSIM(code_f, code_f_r), self.SSIM(code_f_rm, code_f_rm_r)
+                ]
         return list
 
     def evaluation_code_summary(self, evluation_list):
         tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_r', evluation_list[0])
         tf.summary.scalar('evaluation_code/PSNR/code_f_rm__VS__code_f_rm_r', evluation_list[1])
-        tf.summary.scalar('evaluation_code/SSIM/code_f__VS__code_f_r', evluation_list[2])
-        tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
+        # tf.summary.scalar('evaluation_code/SSIM/code_f__VS__code_f_r', evluation_list[2])
+        # tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
 
     def evaluation(self, image_list):
         x, y, l, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]
