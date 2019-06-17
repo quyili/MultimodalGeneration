@@ -143,13 +143,13 @@ class Decoder:
                 relu2 = ops.relu(norm2)
             with tf.variable_scope("lastconv", reuse=self.reuse):
                 lastconv = tf.layers.conv2d(inputs=relu2, filters=self.output_channl, kernel_size=3, strides=1,
-                                          padding="SAME",
-                                          activation=None,
-                                          kernel_initializer=tf.random_normal_initializer(
-                                              mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
-                                          bias_initializer=tf.constant_initializer(0.0), name='lastconv')
+                                            padding="SAME",
+                                            activation=None,
+                                            kernel_initializer=tf.random_normal_initializer(
+                                                mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                            bias_initializer=tf.constant_initializer(0.0), name='lastconv')
                 lastnorm = ops._norm(lastconv, self.is_training, self.norm)
-                output =tf.nn.sigmoid(lastnorm)
+                output = tf.nn.sigmoid(lastnorm)
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)

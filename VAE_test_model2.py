@@ -27,7 +27,7 @@ class GAN:
         self.DC_F = Decoder('DC_F', ngf=ngf, output_channl=2)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
-        self._observation_std = 0.01 #hyper parameter
+        self._observation_std = 0.01  # hyper parameter
         self.eps = 1e-5
 
     def model(self, x, y, label_expand):
@@ -40,7 +40,7 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape,name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
+        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
@@ -69,12 +69,12 @@ class GAN:
         j_code_f = self.FD_F(code_f)
 
         # VAE loss
-        #G_loss = -50 * tf.reduce_sum(1 + code_f_logvar - tf.square(code_f_mean) - tf.exp(code_f_logvar))
-        #KL loss
-        G_loss = 100 * 0.5 * tf.reduce_sum( tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
-        #gaussian_log_likelihood
-        #G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - self.obs_mean)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
-        #bernoulli_log_likelihood
+        # G_loss = -50 * tf.reduce_sum(1 + code_f_logvar - tf.square(code_f_mean) - tf.exp(code_f_logvar))
+        # KL loss
+        G_loss = 100 * 0.5 * tf.reduce_sum(tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
+        # gaussian_log_likelihood
+        # G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - self.obs_mean)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
+        # bernoulli_log_likelihood
         G_loss += 100 * -tf.reduce_sum(f * tf.log(f_r + self.eps) + (1. - f) * tf.log((1. - f_r) + self.eps))
 
         # 使得结构特征图编码服从正态分布的对抗性损失
@@ -111,7 +111,7 @@ class GAN:
         return [self.EC_F.variables
                 + self.DC_F.variables,
 
-                self.D_F.variables+
+                self.D_F.variables +
                 self.FD_F.variables
                 ]
 

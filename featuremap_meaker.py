@@ -4,7 +4,7 @@ import numpy as np
 import SimpleITK
 
 
-def norm( input):
+def norm(input):
     output = (input - tf.reduce_min(input, axis=[1, 2, 3])
               ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
     return output
@@ -20,21 +20,20 @@ with graph.as_default():
     y1 = norm(tf.reduce_mean(tf.image.sobel_edges(y), axis=-1))
     y2 = norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
 
-    xy1 = norm(tf.reduce_mean(tf.concat([x1,y1],axis=-1), axis=-1,keep_dims=True))
-    xy2 =norm(tf.reduce_max(tf.concat([x2,y2],axis=-1), axis=-1,keep_dims=True))
+    xy1 = norm(tf.reduce_mean(tf.concat([x1, y1], axis=-1), axis=-1, keep_dims=True))
+    xy2 = norm(tf.reduce_max(tf.concat([x2, y2], axis=-1), axis=-1, keep_dims=True))
 
-    out = xy2-tf.reduce_mean(xy2, axis=[1, 2, 3])
-    out =  tf.ones(out.get_shape().as_list())*tf.cast( out>0.07,dtype="float32")
-
+    out = xy2 - tf.reduce_mean(xy2, axis=[1, 2, 3])
+    out = tf.ones(out.get_shape().as_list()) * tf.cast(out > 0.07, dtype="float32")
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/0_90.tiff")).astype('float32')
     input_y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT2/0_90.tiff")).astype('float32')
     input_x = np.asarray(input_x).reshape([184, 144, 1])
     input_y = np.asarray(input_y).reshape([184, 144, 1])
-    x1_,x2_,y1_,y2_,xy1_,xy2_,out_ = sess.run([x1,x2,y1,y2,xy1,xy2,out],
-                   feed_dict={x: np.asarray([input_x]),
-                              y: np.asarray([input_y])})
+    x1_, x2_, y1_, y2_, xy1_, xy2_, out_ = sess.run([x1, x2, y1, y2, xy1, xy2, out],
+                                                    feed_dict={x: np.asarray([input_x]),
+                                                               y: np.asarray([input_y])})
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x1_)[0, :, :, 0]), "x1_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x2_)[0, :, :, 0]), "x2_.tiff")

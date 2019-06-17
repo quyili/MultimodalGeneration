@@ -44,8 +44,8 @@ class GAN:
         # X,Y -> F
         f_x = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
-        print(tf.concat([f_x,f_y],axis=-1).get_shape().as_list())
-        f = tf.reduce_max(tf.concat([f_x,f_y],axis=-1),axis=-1,keep_dims=True)
+        print(tf.concat([f_x, f_y], axis=-1).get_shape().as_list())
+        f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keep_dims=True)
         print(f.get_shape().as_list())
 
         # F -> F_R
@@ -71,7 +71,7 @@ class GAN:
         # X_GR,Y_GR -> F_X_R,F_Y_R -> F_XY_R
         f_x_r = self.norm(tf.reduce_max(tf.image.sobel_edges(x_gr), axis=-1))
         f_y_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_gr), axis=-1))
-        f_xy_r = tf.reduce_max(tf.concat([f_x_r, f_y_r], axis=-1), axis=-1,keep_dims=True)
+        f_xy_r = tf.reduce_max(tf.concat([f_x_r, f_y_r], axis=-1), axis=-1, keep_dims=True)
 
         # CODE_F_RM
         shape = code_f.get_shape().as_list()
@@ -97,7 +97,7 @@ class GAN:
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
         f_x_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(x_g), axis=-1))
         f_y_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_g), axis=-1))
-        f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1,keep_dims=True)
+        f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1, keep_dims=True)
 
         # X_G -> L_X_G
         code_x_g = self.EC_X(x_g)
@@ -138,8 +138,10 @@ class GAN:
         j_f_1 = self.D_F(f_x * 0.25 + f_y * 0.75)
         j_f_2 = self.D_F(f_x * 0.75 + f_y * 0.25)
         j_f_rm = self.D_F(f_rm)
-        j_f_rm_1 = self.D_F(self.DC_F(tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32, seed=None, name=None)))
-        j_f_rm_2 = self.D_F(self.DC_F(tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32, seed=None, name=None)))
+        j_f_rm_1 = self.D_F(
+            self.DC_F(tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32, seed=None, name=None)))
+        j_f_rm_2 = self.D_F(
+            self.DC_F(tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32, seed=None, name=None)))
 
         j_code_f = self.FD_F(code_f)
         j_code_f_rm = self.FD_F(code_f_rm)
@@ -470,7 +472,7 @@ class GAN:
         ssim = tf.reduce_mean(tf.image.ssim(output, target, max_val=1.0))
         return ssim
 
-    def norm(self,input):
-        output = (input-tf.reduce_min(input,axis=[1,2,3])
-                  ) / (tf.reduce_max(input,axis=[1,2,3])- tf.reduce_min(input,axis=[1,2,3]))
+    def norm(self, input):
+        output = (input - tf.reduce_min(input, axis=[1, 2, 3])
+                  ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output

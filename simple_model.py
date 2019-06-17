@@ -55,7 +55,7 @@ class GAN:
 
         # R -> X_G,Y_G,L
         code_rm = tf.truncated_normal(code_x.get_shape().as_list(), mean=0.5, stddev=0.25, dtype=tf.float32, seed=None,
-                                   name=None)
+                                      name=None)
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)
         l_g_prob = self.DC_L(code_rm)
