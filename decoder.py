@@ -14,7 +14,7 @@ class Decoder:
         self.keep_prob = keep_prob
         self.output_channl = output_channl
 
-    def __call__(self, input):
+    def __call__(self, DC_input):
         """
         Args:
           input: batch_size x width x height x N
@@ -22,9 +22,9 @@ class Decoder:
           output: same size as input
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
-            input = tf.nn.dropout(input, keep_prob=self.keep_prob)
+            DC_input = tf.nn.dropout(DC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=input, filters=6 * self.ngf, kernel_size=3, strides=1,
+                conv1 = tf.layers.conv2d(inputs=DC_input, filters=6 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(

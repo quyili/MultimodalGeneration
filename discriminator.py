@@ -13,7 +13,7 @@ class Discriminator:
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
 
-    def __call__(self, input):
+    def __call__(self, D_input):
         """
         Args:
           input: batch_size x image_size x image_size x 3
@@ -23,9 +23,9 @@ class Discriminator:
         """
 
         with tf.variable_scope(self.name, reuse=self.reuse):
-            input = tf.nn.dropout(input, keep_prob=self.keep_prob)
+            D_input = tf.nn.dropout(D_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0", reuse=self.reuse):
-                conv0 = tf.layers.conv2d(inputs=input, filters=2 * self.ngf, kernel_size=5,
+                conv0 = tf.layers.conv2d(inputs=D_input, filters=2 * self.ngf, kernel_size=5,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
