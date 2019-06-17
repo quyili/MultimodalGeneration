@@ -28,6 +28,7 @@ class GAN:
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
         self._observation_std = 0.01 #hyper parameter
+        self.eps = 1e-5
 
     def model(self, x, y, label_expand):
         # L
@@ -69,8 +70,12 @@ class GAN:
 
         # VAE loss
         #G_loss = -50 * tf.reduce_sum(1 + code_f_logvar - tf.square(code_f_mean) - tf.exp(code_f_logvar))
+        #KL loss
         G_loss = 100 * 0.5 * tf.reduce_sum( tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
-        G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - self.obs_mean)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
+        #gaussian_log_likelihood
+        #G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - self.obs_mean)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
+        #bernoulli_log_likelihood
+        G_loss += 100 * -tf.reduce_sum(f * tf.log(f_r + self.eps) + (1. - f) * tf.log((1. - f_r) + self.eps))
 
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 10

@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from VAE_test_model import GAN
+from VAE_test_model2 import GAN
 from datetime import datetime
 import os
 import logging
