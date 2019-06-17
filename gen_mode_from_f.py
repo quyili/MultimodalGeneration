@@ -44,15 +44,8 @@ class GAN:
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
         f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
 
-        f_expand = tf.concat([
-            tf.reshape(f[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
-            tf.reshape(f[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
-            tf.reshape(f[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
-            tf.reshape(f[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
-            tf.reshape(f[:, :, :, 0] * label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
-
         # F_RM -> X_G,Y_G,L_G
-        code_rm = self.EC_R(f_expand)
+        code_rm = self.EC_R(tf.concat([f, label_expand], axis=-1))
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)
         l_g_prob = self.DC_L(code_rm)
@@ -211,7 +204,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list, f_expand
+        return image_list, code_list, j_list, loss_list
 
     def get_variables(self):
         return [self.EC_R.variables
