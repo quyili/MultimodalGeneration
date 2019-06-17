@@ -26,6 +26,7 @@ class GAN:
         self.DC_F = Decoder('DC_F', ngf=ngf, output_channl=2)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
+        self.FD_F_S = FeatureDiscriminator('FD_F_S', ngf=ngf)
 
     def model(self, x, y, label_expand):
         # L
@@ -37,7 +38,7 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape,name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
+        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
 
         # F -> F_R VAE
         code_f = self.EC_F(f)
@@ -59,13 +60,21 @@ class GAN:
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
+        j_code_f_rm_s = self.FD_F_S(
+            tf.truncated_normal([shape[3], shape[1], shape[2], shape[0]], mean=0.5, stddev=0.25, dtype=tf.float32))
+        j_code_f_s = self.FD_F_S(tf.transpose(code_f, perm=[3, 1, 2, 0]))
+
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 80
         D_loss += self.mse_loss(j_code_f, 0.0) * 80
         G_loss = self.mse_loss(j_code_f, 1.0) * 80
 
-        G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 5
-        G_loss += self.mse_loss(code_f, code_f_r) * 5
+        D_loss += self.mse_loss(j_code_f_rm_s, 1.0) * 80
+        D_loss += self.mse_loss(j_code_f_s, 0.0) * 80
+        G_loss += self.mse_loss(j_code_f_s, 1.0) * 80
+
+        G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
+        G_loss += self.mse_loss(code_f, code_f_r)
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 5
@@ -73,11 +82,11 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm, 1.0) * 50
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 5
+        G_loss += self.mse_loss(f, f_r)
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 5
+        G_loss += self.mse_loss(f_one_hot, f_r_prob)
 
         image_list = [x, y, l, f, f_r, f_rm]
 
@@ -93,7 +102,7 @@ class GAN:
         return [self.EC_F.variables
                 + self.DC_F.variables,
 
-                self.D_F.variables+
+                self.D_F.variables +
                 self.FD_F.variables
                 ]
 
