@@ -41,14 +41,18 @@ class GAN:
         f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
 
         # F -> F_R VAE
-        code_f = self.EC_F(f)
+        code_f_mean, code_f_logvar = self.EC_F(f)
+        shape = code_f_logvar.get_shape().as_list()
+        code_f_std = tf.exp(0.5 * code_f_logvar)
+        code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1.,dtype=tf.float32)
+        code_f = code_f_mean + tf.multiply(code_f_std, code_f_epsilon)
+
         f_r_prob = self.DC_F(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_r = self.EC_F(f_r)
 
         # CODE_F_RM
-        shape = code_f.get_shape().as_list()
-        code_f_rm = tf.truncated_normal(shape, mean=0.5, stddev=0.25, dtype=tf.float32)
+        code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
         f_rm_prob = self.DC_F(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_rm_r = self.EC_F(f_rm)
@@ -57,21 +61,18 @@ class GAN:
         j_f = self.D_F(f)
         j_f_rm = self.D_F(f_rm)
 
+        code_f, code_f_r, code_f_rm, code_f_rm_r = \
+            tf.reshape(code_f, shape=[-1, 64, 64, 1]), \
+            tf.reshape(code_f_r, shape=[-1, 64, 64, 1]), \
+            tf.reshape(code_f_rm, shape=[-1, 64, 64, 1]), \
+            tf.reshape(code_f_rm_r, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
-
-        j_code_f_rm_s = self.FD_F_S(
-            tf.truncated_normal([shape[3], shape[1], shape[2], shape[0]], mean=0.5, stddev=0.25, dtype=tf.float32))
-        j_code_f_s = self.FD_F_S(tf.transpose(code_f, perm=[3, 1, 2, 0]))
 
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 50
         D_loss += self.mse_loss(j_code_f, 0.0) * 50
         G_loss = self.mse_loss(j_code_f, 1.0) * 50
-
-        D_loss += self.mse_loss(j_code_f_rm_s, 1.0) * 50
-        D_loss += self.mse_loss(j_code_f_s, 0.0) * 50
-        G_loss += self.mse_loss(j_code_f_s, 1.0) * 50
 
         G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
         G_loss += self.mse_loss(code_f, code_f_r)
@@ -82,7 +83,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm, 1.0) * 50
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r)
+        G_loss += self.mse_loss(f, f_r)*50
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
@@ -96,7 +97,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list, code_f_rm, code_f
+        return image_list, code_list, j_list, loss_list, code_f_rm,code_f
 
     def get_variables(self):
         return [self.EC_F.variables
@@ -123,15 +124,15 @@ class GAN:
             code_list[0], code_list[1], code_list[2], code_list[3]
         list = [self.PSNR(code_f, code_f_r), self.PSNR(code_f_rm, code_f_rm_r),
 
-                # self.SSIM(code_f, code_f_r), self.SSIM(code_f_rm, code_f_rm_r)
+                self.SSIM(code_f, code_f_r), self.SSIM(code_f_rm, code_f_rm_r)
                 ]
         return list
 
     def evaluation_code_summary(self, evluation_list):
         tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_r', evluation_list[0])
         tf.summary.scalar('evaluation_code/PSNR/code_f_rm__VS__code_f_rm_r', evluation_list[1])
-        # tf.summary.scalar('evaluation_code/SSIM/code_f__VS__code_f_r', evluation_list[2])
-        # tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
+        tf.summary.scalar('evaluation_code/SSIM/code_f__VS__code_f_r', evluation_list[2])
+        tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
 
     def evaluation(self, image_list):
         x, y, l, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]

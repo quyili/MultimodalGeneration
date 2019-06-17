@@ -427,6 +427,12 @@ def train():
                             if j == 0:
                                 save_images(val_image_list_3, checkpoints_dir, val_index - 1)
                                 save_codes(val_code_f_rm_3, val_code_f_3, checkpoints_dir, val_index - 1)
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_code_f_3)[0,:,:,0]),
+                                                     checkpoints_dir + "/samples/true_code_f_" + str(
+                                                         val_index - 1) + ".tiff")
+                                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_code_f_rm_3)[0,:,:,0]),
+                                                     checkpoints_dir + "/samples/true_code_f_rm_" + str(
+                                                         val_index - 1) + ".tiff")
 
                         val_summary_op = sess.run(
                             summary_op,

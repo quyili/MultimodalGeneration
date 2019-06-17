@@ -135,9 +135,14 @@ class GEncoder:
                                               mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                           bias_initializer=tf.constant_initializer(0.0), name='conv10')
                 norm10 = ops._norm(conv10, self.is_training, self.norm)
-                output = tf.nn.sigmoid(norm10)
+                relu10 = tf.nn.relu(norm10)
+                conv_output=tf.layers.flatten(relu10)
             # 5 6
+            with tf.variable_scope("dense1", reuse=self.reuse):
+                mean = tf.layers.dense(conv_output,units=4096,name="dense1")
+            with tf.variable_scope("dense2", reuse=self.reuse):
+                log_var = tf.layers.dense(conv_output,units=4096,name="dense2")
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
-        return output
+        return mean, log_var

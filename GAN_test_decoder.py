@@ -22,10 +22,15 @@ class GDecoder:
           output: same size as input
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
-            DC_input = tf.nn.dropout(DC_input, keep_prob=self.keep_prob)
+            with tf.variable_scope("dense0", reuse=self.reuse):
+                dense0 =tf.layers.dense(DC_input, units=DC_input.get_shape().as_list()[0]*6*5*self.ngf,name="dense0")
+            with tf.variable_scope("dense1", reuse=self.reuse):
+                dense1 = tf.layers.dense(dense0, units=DC_input.get_shape().as_list()[0] * 6 * 5 * 12 *self.ngf,
+                                     name="dense0")
+                dense1 = tf.reshape(dense1,shape=[DC_input.get_shape().as_list()[0],6,5,12 * self.ngf])
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
-                conv0_1 = tf.layers.conv2d(inputs=DC_input, filters=12 * self.ngf, kernel_size=3, strides=1,
+                conv0_1 = tf.layers.conv2d(inputs=dense1, filters=12 * self.ngf, kernel_size=3, strides=1,
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
