@@ -104,20 +104,6 @@ class VEncoder:
                 output_1 = tf.layers.dense(conv_output, units=4096, name="dense1")
             with tf.variable_scope("dense2", reuse=self.reuse):
                 output_2 = tf.layers.dense(conv_output, units=4096, name="dense2")
-            # with tf.variable_scope("conv8_1", reuse=self.reuse):
-            #     output_1 = tf.layers.conv2d(inputs=relu7, filters=6 * self.ngf, kernel_size=3, strides=1,
-            #                              padding="SAME",
-            #                              activation=None,
-            #                              kernel_initializer=tf.random_normal_initializer(
-            #                                  mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001, dtype=tf.float32),
-            #                              bias_initializer=tf.constant_initializer(0.0), name='conv8_1')
-            # with tf.variable_scope("conv8_2", reuse=self.reuse):
-            #     output_2 = tf.layers.conv2d(inputs=relu7, filters=6 * self.ngf, kernel_size=3, strides=1,
-            #                              padding="SAME",
-            #                              activation=None,
-            #                              kernel_initializer=tf.random_normal_initializer(
-            #                                  mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001, dtype=tf.float32),
-            #                              bias_initializer=tf.constant_initializer(0.0), name='conv8_2')
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
