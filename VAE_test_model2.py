@@ -2,9 +2,8 @@
 import tensorflow as tf
 from discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
-from encoder import Encoder
-from VAE_encoder import VEncoder
-from decoder import Decoder
+from VAE_test_encoder import VEncoder
+from VAE_decoder import VDecoder
 
 
 class GAN:
@@ -24,9 +23,10 @@ class GAN:
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.EC_F = VEncoder('EC_F', ngf=ngf)
-        self.DC_F = Decoder('DC_F', ngf=ngf, output_channl=2)
+        self.DC_F = VDecoder('DC_F', ngf=ngf, output_channl=2)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
+        # self.FD_F_S = FeatureDiscriminator('FD_F_S', ngf=ngf)
         self._observation_std = 0.01 #hyper parameter
         self.eps = 1e-5
 
@@ -52,7 +52,6 @@ class GAN:
         f_r_prob = self.DC_F(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_r = self.EC_F(f_r)
-        self.obs_mean = f_r
 
         # CODE_F_RM
         shape = code_f.get_shape().as_list()
@@ -65,37 +64,42 @@ class GAN:
         j_f = self.D_F(f)
         j_f_rm = self.D_F(f_rm)
 
+        code_f, code_f_r, code_f_rm, code_f_rm_r = \
+            tf.reshape(code_f, shape=[-1, 96, 96, 1]), \
+            tf.reshape(code_f_r, shape=[-1, 96, 96, 1]), \
+            tf.reshape(code_f_rm, shape=[-1,96, 96, 1]), \
+            tf.reshape(code_f_rm_r, shape=[-1, 96, 96, 1])
+
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
-        # VAE loss
-        #G_loss = -50 * tf.reduce_sum(1 + code_f_logvar - tf.square(code_f_mean) - tf.exp(code_f_logvar))
-        #KL loss
-        G_loss = 100 * 0.5 * tf.reduce_sum( tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
+        kl_loss =  0.5 * tf.reduce_sum( tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
         #gaussian_log_likelihood
-        #G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - self.obs_mean)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
+        #G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - f_r)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
         #bernoulli_log_likelihood
-        G_loss += 100 * -tf.reduce_sum(f * tf.log(f_r + self.eps) + (1. - f) * tf.log((1. - f_r) + self.eps))
+        #G_loss += 100 * -tf.reduce_sum(f * tf.log(f_r + self.eps) + (1. - f) * tf.log((1. - f_r) + self.eps))
+        log_loss =   tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=f, logits=f_r))
+        G_loss = (kl_loss + log_loss) *50
 
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 10
-        D_loss += self.mse_loss(j_code_f, 0.0) * 10
-        G_loss += self.mse_loss(j_code_f, 1.0) * 10
+        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 50
+        D_loss += self.mse_loss(j_code_f, 0.0) * 50
+        #G_loss += self.mse_loss(j_code_f, 1.0) * 80
 
-        G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 5
-        G_loss += self.mse_loss(code_f, code_f_r) * 5
+        G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
+        G_loss += self.mse_loss(code_f, code_f_r)
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 5
         D_loss += self.mse_loss(j_f_rm, 0.0) * 5
-        G_loss += self.mse_loss(j_f_rm, 1.0) * 30
+        G_loss += self.mse_loss(j_f_rm, 1.0) * 50
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 5
+        G_loss += self.mse_loss(f, f_r)
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 5
+        G_loss += self.mse_loss(f_one_hot, f_r_prob)
 
         image_list = [x, y, l, f, f_r, f_rm]
 
