@@ -32,7 +32,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv0')
                 norm0 = ops._norm(conv0, self.is_training, self.norm)
                 relu0 = ops.relu(norm0)
-                print(relu0.shape)
             # pool1
             with tf.variable_scope("conv1", reuse=self.reuse):
                 conv1 = tf.layers.conv2d(inputs=relu0, filters=2 * self.ngf, kernel_size=3,
@@ -44,7 +43,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
-                print(relu1.shape)
             # w/2,h/2
             with tf.variable_scope("conv2", reuse=self.reuse):
                 conv2 = tf.layers.conv2d(inputs=relu1, filters=2 * self.ngf, kernel_size=3, strides=1, padding="SAME",
@@ -54,7 +52,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
-                print(relu2.shape)
             # pool2
             with tf.variable_scope("conv3", reuse=self.reuse):
                 conv3 = tf.layers.conv2d(inputs=relu2, filters=4 * self.ngf, kernel_size=3,
@@ -66,7 +63,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv3')
                 norm3 = ops._norm(conv3, self.is_training, self.norm)
                 relu3 = ops.relu(norm3)
-                print(relu3.shape)
             # w/4,h/4
             with tf.variable_scope("conv4", reuse=self.reuse):
                 conv4 = tf.layers.conv2d(inputs=relu3, filters=4 * self.ngf, kernel_size=3, strides=1,
@@ -77,7 +73,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv4')
                 norm4 = ops._norm(conv4, self.is_training, self.norm)
                 relu4 = ops.relu(norm4)
-                print(relu4.shape)
             with tf.variable_scope("conv5", reuse=self.reuse):
                 conv5 = tf.layers.conv2d(inputs=relu4, filters=4 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
@@ -87,7 +82,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv5')
                 norm5 = ops._norm(conv5, self.is_training, self.norm)
                 relu5 = tf.nn.relu(norm5)
-                print(relu5.shape)
             # pool3
             with tf.variable_scope("conv6", reuse=self.reuse):
                 conv6 = tf.layers.conv2d(inputs=relu5, filters=6 * self.ngf, kernel_size=3,
@@ -99,7 +93,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv6')
                 norm6 = ops._norm(conv6, self.is_training, self.norm)
                 relu6 = ops.relu(norm6)
-                print(relu6.shape)
             # w/8,h/8 18 23
             with tf.variable_scope("conv7", reuse=self.reuse):
                 conv7 = tf.layers.conv2d(inputs=relu6, filters=6 * self.ngf, kernel_size=3, strides=1,
@@ -110,7 +103,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv7')
                 norm7 = ops._norm(conv7, self.is_training, self.norm)
                 relu7 = ops.relu(norm7)
-                print(relu7.shape)
             # pool4
             with tf.variable_scope("conv8", reuse=self.reuse):
                 conv8 = tf.layers.conv2d(inputs=relu7, filters=8 * self.ngf, kernel_size=3,
@@ -122,7 +114,6 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv8')
                 norm8 = ops._norm(conv8, self.is_training, self.norm)
                 relu8 = tf.nn.relu(norm8)
-                print(relu8.shape)
             # 9 12
             with tf.variable_scope("conv9", reuse=self.reuse):
                 conv9 = tf.layers.conv2d(inputs=relu8, filters=8 * self.ngf, kernel_size=3,
@@ -134,10 +125,9 @@ class VEncoder:
                                          bias_initializer=tf.constant_initializer(0.0), name='conv9')
                 norm9 = ops._norm(conv9, self.is_training, self.norm)
                 relu9 = tf.nn.relu(norm9)
-                print(relu9.shape)
             # pool5
             with tf.variable_scope("conv10", reuse=self.reuse):
-                conv10 = tf.layers.conv2d(inputs=relu9, filters=12 * self.ngf, kernel_size=3,
+                conv10 = tf.layers.conv2d(inputs=relu9, filters=8 * self.ngf, kernel_size=3,
                                           strides=self.slice_stride,
                                           padding="SAME",
                                           activation=None,
@@ -146,16 +136,12 @@ class VEncoder:
                                           bias_initializer=tf.constant_initializer(0.0), name='conv10')
                 norm10 = ops._norm(conv10, self.is_training, self.norm)
                 relu10 = tf.nn.relu(norm10)
-                print(relu10.shape)
                 conv_output=tf.layers.flatten(relu10)
-                print(conv_output.shape)
             # 5 6
             with tf.variable_scope("dense1", reuse=self.reuse):
                 mean = tf.layers.dense(conv_output,units=9216,name="dense1")
-                print(mean.shape)
             with tf.variable_scope("dense2", reuse=self.reuse):
                 log_var = tf.layers.dense(conv_output,units=9216,name="dense2")
-                print(log_var.shape)
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)

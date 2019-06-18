@@ -52,7 +52,6 @@ class GAN:
         f_r_prob = self.DC_F(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_r = self.EC_F(f_r)
-        self.obs_mean = f_r
 
         # CODE_F_RM
         shape = code_f.get_shape().as_list()
