@@ -75,8 +75,8 @@ class GAN:
         G_loss = self.mse_loss(j_code_f, 1.0) * 50
 
         #TODO
-        G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 50
-        G_loss += self.mse_loss(tf.reduce_mean(code_f_logvar), 1.0) * 50
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0)
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_logvar), 0.0)
 
         G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
         G_loss += self.mse_loss(code_f, code_f_r)
@@ -87,7 +87,7 @@ class GAN:
         G_loss += self.mse_loss(j_f_rm, 1.0) * 50
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r)*50
+        G_loss += self.mse_loss(f, f_r)*150
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())

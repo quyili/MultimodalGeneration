@@ -46,7 +46,8 @@ class GAN:
 
         f_rm=f/2.0+0.5
         f_rm_expand = tf.concat([
-            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 0], shape=self.input_shape)
+            +tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
             tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
             tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
             tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
