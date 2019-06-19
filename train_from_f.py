@@ -447,7 +447,7 @@ def train():
                                                      checkpoints_dir + "/samples/val_f_rm_3_" + str(val_index - 1) + ".tiff")
                                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_rm_expand_3)[0, :, :, :]),
                                                      checkpoints_dir + "/samples/val_f_rm_expand_3_" + str(
-                                                         val_index - 1) + ".tiff")
+                                                         val_index - 1) + ".mha")
 
                         val_summary_op = sess.run(
                             summary_op,
