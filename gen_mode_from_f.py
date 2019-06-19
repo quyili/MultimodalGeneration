@@ -42,10 +42,18 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
+        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.06, dtype=tf.float32)
+
+        f_rm=f/2.0+0.5
+        f_rm_expand = tf.concat([
+            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
+            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
+            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
+            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
+            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
 
         # F_RM -> X_G,Y_G,L_G
-        code_rm = self.EC_R(tf.concat([f, label_expand], axis=-1))
+        code_rm = self.EC_R(f_rm_expand)
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)
         l_g_prob = self.DC_L(code_rm)
@@ -103,14 +111,14 @@ class GAN:
         j_code_y = self.FD_R(code_y)
 
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss = self.mse_loss(j_x, 1.0) * 5
-        D_loss += self.mse_loss(j_x_g, 0.0) * 5
-        G_loss = self.mse_loss(j_x_g, 1.0) * 5
+        D_loss = self.mse_loss(j_x, 1.0) * 25
+        D_loss += self.mse_loss(j_x_g, 0.0) * 25
+        G_loss = self.mse_loss(j_x_g, 1.0) * 25
 
         # 使得通过随机结构特征图生成的Y模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_y, 1.0) * 5
-        D_loss += self.mse_loss(j_y_g, 0.0) * 5
-        G_loss += self.mse_loss(j_y_g, 1.0) * 5
+        D_loss += self.mse_loss(j_y, 1.0) * 25
+        D_loss += self.mse_loss(j_y_g, 0.0) * 25
+        G_loss += self.mse_loss(j_y_g, 1.0) * 25
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_g * label_expand[0]) * 0.5
@@ -124,7 +132,7 @@ class GAN:
         G_loss += self.mse_loss(j_code_rm, 1.0) * 10
 
         # 输入的结构特征图的重建自监督损失
-        G_loss += self.mse_loss(f, f_xy_g_r) * 10
+        G_loss += self.mse_loss(f, f_xy_g_r) * 20
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.5 \
@@ -204,7 +212,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list
+        return image_list, code_list, j_list, loss_list,f_rm,f_rm_expand
 
     def get_variables(self):
         return [self.EC_R.variables

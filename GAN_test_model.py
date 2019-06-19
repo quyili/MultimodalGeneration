@@ -74,6 +74,10 @@ class GAN:
         D_loss += self.mse_loss(j_code_f, 0.0) * 50
         G_loss = self.mse_loss(j_code_f, 1.0) * 50
 
+        #TODO
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 50
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_logvar), 1.0) * 50
+
         G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
         G_loss += self.mse_loss(code_f, code_f_r)
 
