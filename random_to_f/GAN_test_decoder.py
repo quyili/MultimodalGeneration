@@ -222,25 +222,44 @@ class GDecoder:
                 add2_norm2 = ops._norm(add2_conv, self.is_training, self.norm)
                 add2_relu2 = ops.relu(add2_norm2)
 
-            with tf.variable_scope("conv2", reuse=self.reuse):
-                conv2 = tf.layers.conv2d(inputs=add2_relu2, filters=self.ngf, kernel_size=3, strides=1,
+            with tf.variable_scope("conv2_1", reuse=self.reuse):
+                conv2_1 = tf.layers.conv2d(inputs=add2_relu2, filters=self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
                                              mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
-                                         bias_initializer=tf.constant_initializer(0.0), name='conv2')
-                norm2 = ops._norm(conv2, self.is_training, self.norm)
-                relu2 = ops.relu(norm2)
-            with tf.variable_scope("lastconv", reuse=self.reuse):
-                lastconv = tf.layers.conv2d(inputs=relu2, filters=self.output_channl, kernel_size=3, strides=1,
+                                         bias_initializer=tf.constant_initializer(0.0), name='conv2_1')
+                norm2_1 = ops._norm(conv2_1, self.is_training, self.norm)
+                relu2_1 = ops.relu(norm2_1)
+            with tf.variable_scope("lastconv_1", reuse=self.reuse):
+                lastconv_1 = tf.layers.conv2d(inputs=relu2_1, filters=self.output_channl, kernel_size=3, strides=1,
                                             padding="SAME",
                                             activation=None,
                                             kernel_initializer=tf.random_normal_initializer(
                                                 mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
-                                            bias_initializer=tf.constant_initializer(0.0), name='lastconv')
-                lastnorm = ops._norm(lastconv, self.is_training, self.norm)
-                output = tf.nn.sigmoid(lastnorm)
+                                            bias_initializer=tf.constant_initializer(0.0), name='lastconv_1')
+                lastnorm_1 = ops._norm(lastconv_1, self.is_training, self.norm)
+                output_1 = tf.nn.sigmoid(lastnorm_1)
+
+            with tf.variable_scope("conv2_2", reuse=self.reuse):
+                conv2_2 = tf.layers.conv2d(inputs=add2_relu2, filters=self.ngf, kernel_size=3, strides=1,
+                                         padding="SAME",
+                                         activation=None,
+                                         kernel_initializer=tf.random_normal_initializer(
+                                             mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                         bias_initializer=tf.constant_initializer(0.0), name='conv2_2')
+                norm2_2 = ops._norm(conv2_2, self.is_training, self.norm)
+                relu2_2 = ops.relu(norm2_2)
+            with tf.variable_scope("lastconv", reuse=self.reuse):
+                lastconv_2 = tf.layers.conv2d(inputs=relu2_2, filters=self.output_channl, kernel_size=3, strides=1,
+                                            padding="SAME",
+                                            activation=None,
+                                            kernel_initializer=tf.random_normal_initializer(
+                                                mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                            bias_initializer=tf.constant_initializer(0.0), name='lastconv_2')
+                lastnorm_2 = ops._norm(lastconv_2, self.is_training, self.norm)
+                output_2 = tf.nn.sigmoid(lastnorm_2)
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
-        return output
+        return output_1,output_2
