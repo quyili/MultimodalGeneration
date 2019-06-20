@@ -168,7 +168,8 @@ def train():
                         label_expand_0 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_0, code_list_0, j_list_0, loss_list_0, code_f_rm_0, code_f_0 = gan.model(x_0, y_0,label_expand_0)
+                        image_list_0, code_list_0, j_list_0, loss_list_0, code_f_rm_0, code_f_0 = gan.model(x_0, y_0,
+                                                                                                            label_expand_0)
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
@@ -183,7 +184,8 @@ def train():
                         label_expand_1 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_1, code_list_1, j_list_1, loss_list_1, code_f_rm_1, code_f_1 = gan.model(x_1, y_1,label_expand_1)
+                        image_list_1, code_list_1, j_list_1, loss_list_1, code_f_rm_1, code_f_1 = gan.model(x_1, y_1,
+                                                                                                            label_expand_1)
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
@@ -198,7 +200,8 @@ def train():
                         label_expand_2 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_2, code_list_2, j_list_2, loss_list_2, code_f_rm_2, code_f_2 = gan.model(x_2, y_2,label_expand_2)
+                        image_list_2, code_list_2, j_list_2, loss_list_2, code_f_rm_2, code_f_2 = gan.model(x_2, y_2,
+                                                                                                            label_expand_2)
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
@@ -213,7 +216,8 @@ def train():
                         label_expand_3 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_3, code_list_3, j_list_3, loss_list_3, code_f_rm_3, code_f_3 = gan.model(x_3, y_3,label_expand_3)
+                        image_list_3, code_list_3, j_list_3, loss_list_3, code_f_rm_3, code_f_3 = gan.model(x_3, y_3,
+                                                                                                            label_expand_3)
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()

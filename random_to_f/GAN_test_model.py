@@ -71,10 +71,10 @@ class GAN:
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 0.1
         D_loss += self.mse_loss(j_code_f, 0.0) * 0.1
-        G_loss = self.mse_loss(j_code_f, 1.0) * 0.1
+        # G_loss = self.mse_loss(j_code_f, 1.0) * 0.1
 
-        G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
-        G_loss += self.mse_loss(tf.reduce_mean(code_f_logvar), 0.0) * 0.1
+        G_loss = self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
         G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 0.5
         G_loss += self.mse_loss(code_f, code_f_r) * 0.5

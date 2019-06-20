@@ -27,7 +27,7 @@ class GAN:
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
         # self.FD_F_S = FeatureDiscriminator('FD_F_S', ngf=ngf)
-        self._observation_std = 0.01 #hyper parameter
+        self._observation_std = 0.01  # hyper parameter
         self.eps = 1e-5
 
     def model(self, x, y, label_expand):
@@ -40,7 +40,7 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape,name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
+        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
@@ -67,24 +67,24 @@ class GAN:
         code_f, code_f_r, code_f_rm, code_f_rm_r = \
             tf.reshape(code_f, shape=[-1, 96, 96, 1]), \
             tf.reshape(code_f_r, shape=[-1, 96, 96, 1]), \
-            tf.reshape(code_f_rm, shape=[-1,96, 96, 1]), \
+            tf.reshape(code_f_rm, shape=[-1, 96, 96, 1]), \
             tf.reshape(code_f_rm_r, shape=[-1, 96, 96, 1])
 
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
-        kl_loss =  0.5 * tf.reduce_sum( tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
-        #gaussian_log_likelihood
-        #G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - f_r)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
-        #bernoulli_log_likelihood
-        #G_loss += 100 * -tf.reduce_sum(f * tf.log(f_r + self.eps) + (1. - f) * tf.log((1. - f_r) + self.eps))
-        log_loss =   tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=f, logits=f_r))
-        G_loss = (kl_loss + log_loss) *50
+        kl_loss = 0.5 * tf.reduce_sum(tf.square(code_f_mean) + tf.exp(code_f_logvar) - 1. - code_f_logvar)
+        # gaussian_log_likelihood
+        # G_loss += 100 * 0.5 * tf.reduce_sum(tf.square(f - f_r)) / (2 * tf.square(self._observation_std)) + tf.log(self._observation_std)
+        # bernoulli_log_likelihood
+        # G_loss += 100 * -tf.reduce_sum(f * tf.log(f_r + self.eps) + (1. - f) * tf.log((1. - f_r) + self.eps))
+        log_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=f, logits=f_r))
+        G_loss = (kl_loss + log_loss) * 50
 
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 50
         D_loss += self.mse_loss(j_code_f, 0.0) * 50
-        #G_loss += self.mse_loss(j_code_f, 1.0) * 80
+        # G_loss += self.mse_loss(j_code_f, 1.0) * 80
 
         G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
         G_loss += self.mse_loss(code_f, code_f_r)

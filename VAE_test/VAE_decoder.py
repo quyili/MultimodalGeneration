@@ -241,7 +241,6 @@ class VDecoder:
                 lastnorm = ops._norm(lastconv, self.is_training, self.norm)
                 output = tf.nn.sigmoid(lastnorm)
 
-
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
         return output

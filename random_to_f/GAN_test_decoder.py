@@ -23,11 +23,12 @@ class GDecoder:
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
             with tf.variable_scope("dense0", reuse=self.reuse):
-                dense0 =tf.layers.dense(DC_input, units=DC_input.get_shape().as_list()[0]*6*5*self.ngf,name="dense0")
+                dense0 = tf.layers.dense(DC_input, units=DC_input.get_shape().as_list()[0] * 6 * 5 * self.ngf,
+                                         name="dense0")
             with tf.variable_scope("dense1", reuse=self.reuse):
-                dense1 = tf.layers.dense(dense0, units=DC_input.get_shape().as_list()[0] * 6 * 5 * 12 *self.ngf,
-                                     name="dense0")
-                dense1 = tf.reshape(dense1,shape=[DC_input.get_shape().as_list()[0],6,5,12 * self.ngf])
+                dense1 = tf.layers.dense(dense0, units=DC_input.get_shape().as_list()[0] * 6 * 5 * 12 * self.ngf,
+                                         name="dense0")
+                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 6, 5, 12 * self.ngf])
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
                 conv0_1 = tf.layers.conv2d(inputs=dense1, filters=12 * self.ngf, kernel_size=3, strides=1,

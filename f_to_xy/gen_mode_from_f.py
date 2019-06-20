@@ -36,22 +36,22 @@ class GAN:
         # L
         l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
                        shape=self.input_shape)
+        ones = tf.ones(self.input_shape, name="ones")
 
         # X,Y -> F
         f_x = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.05, dtype=tf.float32)
+        f = ones * tf.cast(f > 0.05, dtype=tf.float32)
 
-        f_rm = f / 2.0 + 0.5
         f_rm_expand = tf.concat([
-            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 0], shape=self.input_shape)
-            + tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 1], shape=self.input_shape),
-            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 2], shape=self.input_shape),
-            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 3], shape=self.input_shape),
-            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 4], shape=self.input_shape),
-            tf.reshape(f_rm[:, :, :, 0] * label_expand[:, :, :, 5], shape=self.input_shape)], axis=-1)
+            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 0], shape=self.input_shape)
+            + tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.5,
+            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.5,
+            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.5,
+            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.5,
+            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.5], axis=-1)
 
         # F_RM -> X_G,Y_G,L_G
         code_rm = self.EC_R(f_rm_expand)
@@ -63,9 +63,9 @@ class GAN:
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
         f_x_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(x_g), axis=-1))
         f_y_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_g), axis=-1))
-        f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1, keep_dims=True)
+        f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1, keepdims=True)
         f_xy_g_r = f_xy_g_r - tf.reduce_mean(f_xy_g_r, axis=[1, 2, 3])
-        f_xy_g_r = tf.ones(self.input_shape, name="ones") * tf.cast(f_xy_g_r > 0.05, dtype=tf.float32)
+        f_xy_g_r = ones * tf.cast(f_xy_g_r > 0.05, dtype=tf.float32)
 
         # X_G -> L_X_G
         code_x_g = self.EC_X(x_g)
@@ -213,7 +213,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list, f_rm, f_rm_expand
+        return image_list, code_list, j_list, loss_list, ones * 0.5, f_rm_expand
 
     def get_variables(self):
         return [self.EC_R.variables

@@ -24,7 +24,7 @@ class Encoder:
         with tf.variable_scope(self.name):
             EC_input = tf.nn.dropout(EC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=EC_input, filters= self.ngf, kernel_size=3, strides=1, padding="SAME",
+                conv1 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=3, strides=1, padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
                                              mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),

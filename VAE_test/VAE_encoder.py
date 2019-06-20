@@ -107,4 +107,4 @@ class VEncoder:
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
-        return [output_1,output_2]
+        return [output_1, output_2]
