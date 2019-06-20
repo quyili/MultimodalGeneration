@@ -23,17 +23,8 @@ class Encoder:
 
         with tf.variable_scope(self.name):
             EC_input = tf.nn.dropout(EC_input, keep_prob=self.keep_prob)
-            with tf.variable_scope("conv0", reuse=self.reuse):
-                conv0 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=3, strides=1,
-                                         padding="SAME",
-                                         activation=None,
-                                         kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / 9.0, stddev=0.000001, dtype=tf.float32),
-                                         bias_initializer=tf.constant_initializer(0.0), name='conv0')
-                norm0 = ops._norm(conv0, self.is_training, self.norm)
-                relu0 = ops.relu(norm0)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=relu0, filters=2 * self.ngf, kernel_size=3, strides=1, padding="SAME",
+                conv1 = tf.layers.conv2d(inputs=EC_input, filters= self.ngf, kernel_size=3, strides=1, padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
                                              mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
@@ -80,7 +71,7 @@ class Encoder:
                 relu5 = tf.nn.relu(norm5)
             # pool2
             with tf.variable_scope("conv6", reuse=self.reuse):
-                conv6 = tf.layers.conv2d(inputs=relu5, filters=6 * self.ngf, kernel_size=3,
+                conv6 = tf.layers.conv2d(inputs=relu5, filters=8 * self.ngf, kernel_size=3,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
@@ -91,20 +82,20 @@ class Encoder:
                 relu6 = ops.relu(norm6)
             # w/4,h/4
             with tf.variable_scope("conv7", reuse=self.reuse):
-                conv7 = tf.layers.conv2d(inputs=relu6, filters=6 * self.ngf, kernel_size=3, strides=1,
+                conv7 = tf.layers.conv2d(inputs=relu6, filters=8 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv7')
                 norm7 = ops._norm(conv7, self.is_training, self.norm)
                 relu7 = ops.relu(norm7)
             with tf.variable_scope("conv8", reuse=self.reuse):
-                conv8 = tf.layers.conv2d(inputs=relu7, filters=6 * self.ngf, kernel_size=3, strides=1,
+                conv8 = tf.layers.conv2d(inputs=relu7, filters=8 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv8')
                 norm8 = ops._norm(conv8, self.is_training, self.norm)
                 output = tf.nn.sigmoid(norm8)

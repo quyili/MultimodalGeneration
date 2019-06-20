@@ -24,11 +24,11 @@ class Decoder:
         with tf.variable_scope(self.name, reuse=self.reuse):
             DC_input = tf.nn.dropout(DC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=DC_input, filters=6 * self.ngf, kernel_size=3, strides=1,
+                conv1 = tf.layers.conv2d(inputs=DC_input, filters=8 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001,
+                                             mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001,
                                              dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
@@ -40,7 +40,7 @@ class Decoder:
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001,
+                                                 mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001,
                                                  dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv1_r')
@@ -51,7 +51,7 @@ class Decoder:
                                                        padding="SAME",
                                                        activation=None,
                                                        kernel_initializer=tf.random_normal_initializer(
-                                                           mean=1.0 / (9.0 * 6 * self.ngf), stddev=0.000001,
+                                                           mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001,
                                                            dtype=tf.float32),
                                                        bias_initializer=tf.constant_initializer(0.0),
                                                        name='deconv1_t')
