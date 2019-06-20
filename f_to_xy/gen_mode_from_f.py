@@ -122,8 +122,14 @@ class GAN:
         G_loss += self.mse_loss(j_y_g, 1.0) * 25
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_g * label_expand[0]) * 0.5
+        G_loss += self.mse_loss(0.0, x_g * label_expand[0]) * 1.5
         G_loss += self.mse_loss(0.0, y_g * label_expand[0]) * 0.5
+        G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
+        G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 0.5
+        G_loss += self.mse_loss(0.0, x_r * label_expand[0])
+        G_loss += self.mse_loss(0.0, y_r * label_expand[0])
+        G_loss += self.mse_loss(0.0, x_t * label_expand[0])
+        G_loss += self.mse_loss(0.0, y_t * label_expand[0])
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图
