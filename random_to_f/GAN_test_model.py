@@ -26,7 +26,6 @@ class GAN:
         self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
-        self.FD_F_S = FeatureDiscriminator('FD_F_S', ngf=ngf)
 
     def model(self, x, y, label_expand):
         # L
@@ -38,13 +37,13 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.07, dtype=tf.float32)
+        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.05, dtype=tf.float32)
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
-        code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1.,dtype=tf.float32)
+        code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
         code_f = code_f_mean + tf.multiply(code_f_std, code_f_epsilon)
 
         f_r_prob = self.DC_F(code_f)
@@ -70,24 +69,29 @@ class GAN:
         j_code_f = self.FD_F(code_f)
 
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 50
-        D_loss += self.mse_loss(j_code_f, 0.0) * 50
-        G_loss = self.mse_loss(j_code_f, 1.0) * 50
+        D_loss = self.mse_loss(j_code_f_rm, 1.0) * 0.1
+        D_loss += self.mse_loss(j_code_f, 0.0) * 0.1
+        # G_loss = self.mse_loss(j_code_f, 1.0) * 0.1
 
-        G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
-        G_loss += self.mse_loss(code_f, code_f_r)
+        # G_loss = self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
+        # G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
+
+        # G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 0.5
+        # G_loss += self.mse_loss(code_f, code_f_r) * 0.5
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 5
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 5
-        G_loss += self.mse_loss(j_f_rm, 1.0) * 50
+        D_loss += self.mse_loss(j_f, 1.0)
+        D_loss += self.mse_loss(j_f_rm, 0.0)
+        G_loss = self.mse_loss(j_f_rm, 1.0) * 10
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r)*50
+        G_loss += self.mse_loss(f, f_r) * 55
+
+        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) -tf.reduce_mean(f_rm))* 0.1
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        G_loss += self.mse_loss(f_one_hot, f_r_prob)
+        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 55
 
         image_list = [x, y, l, f, f_r, f_rm]
 
@@ -97,7 +101,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list, code_f_rm,code_f
+        return image_list, code_list, j_list, loss_list, code_f_rm, code_f
 
     def get_variables(self):
         return [self.EC_F.variables

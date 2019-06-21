@@ -3,7 +3,7 @@ import tensorflow as tf
 import ops as ops
 
 
-class GDecoder:
+class VDecoder:
     def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
         self.reuse = False
@@ -23,18 +23,19 @@ class GDecoder:
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
             with tf.variable_scope("dense0", reuse=self.reuse):
-                dense0 =tf.layers.dense(DC_input, units=DC_input.get_shape().as_list()[0]*6*5*self.ngf,name="dense0")
+                dense0 = tf.layers.dense(DC_input, units=DC_input.get_shape().as_list()[0] * 6 * 5 * self.ngf,
+                                         name="dense0")
             with tf.variable_scope("dense1", reuse=self.reuse):
-                dense1 = tf.layers.dense(dense0, units=DC_input.get_shape().as_list()[0] * 6 * 5 * 12 *self.ngf,
-                                     name="dense0")
-                dense1 = tf.reshape(dense1,shape=[DC_input.get_shape().as_list()[0],6,5,12 * self.ngf])
+                dense1 = tf.layers.dense(dense0, units=DC_input.get_shape().as_list()[0] * 6 * 5 * 12 * self.ngf,
+                                         name="dense1")
+                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 6, 5, 12 * self.ngf])
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
-                conv0_1 = tf.layers.conv2d(inputs=dense1, filters=12 * self.ngf, kernel_size=3, strides=1,
+                conv0_1 = tf.layers.conv2d(inputs=dense1, filters=8 * self.ngf, kernel_size=3, strides=1,
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                               mean=1.0 / (9.0 * 12 * self.ngf), stddev=0.000001,
+                                               mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001,
                                                dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_1')
                 norm0_1 = ops._norm(conv0_1, self.is_training, self.norm)
