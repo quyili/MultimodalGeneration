@@ -31,7 +31,6 @@ class GAN:
         # L
         l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
                        shape=self.input_shape)
-        m = 1.0 - label_expand[:, :, :, 0:1]
 
         # X,Y -> F
         f_x = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
@@ -47,16 +46,14 @@ class GAN:
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
         code_f = code_f_mean + tf.multiply(code_f_std, code_f_epsilon)
 
-        f_r_prob, m_r_prob = self.DC_F(code_f)
+        f_r_prob = self.DC_F(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        m_r = tf.reshape(tf.cast(tf.argmax(m_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_r = self.EC_F(f_r)
 
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
-        f_rm_prob, m_rm_prob = self.DC_F(code_f_rm)
+        f_rm_prob = self.DC_F(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        m_rm = tf.reshape(tf.cast(tf.argmax(m_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_rm_r = self.EC_F(f_rm)
 
         # D,FD
@@ -74,10 +71,9 @@ class GAN:
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss = self.mse_loss(j_code_f_rm, 1.0) * 0.1
         D_loss += self.mse_loss(j_code_f, 0.0) * 0.1
-        G_loss = self.mse_loss(j_code_f, 1.0) * 0.01
 
-        G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.01
-        G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.01
+        G_loss = self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
         G_loss = self.mse_loss(code_f_rm, code_f_rm_r) * 0.5
         G_loss += self.mse_loss(code_f, code_f_r) * 0.5
@@ -89,18 +85,14 @@ class GAN:
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         G_loss += self.mse_loss(f, f_r) * 55
-        G_loss += self.mse_loss(m, m_r) * 10
 
-        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 0.05
+        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) -tf.reduce_mean(f_rm))* 0.3
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
-        m_one_hot = tf.reshape(tf.one_hot(tf.cast(m, dtype=tf.int32), depth=2, axis=-1),
-                               shape=m_r_prob.get_shape().as_list())
-        G_loss += self.mse_loss(m_one_hot, m_r_prob) * 10
+        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 55
 
-        image_list = [x, y, l, f, f_r, f_rm, m, m_r, m_rm]
+        image_list = [x, y, l, f, f_r, f_rm]
 
         code_list = [code_f, code_f_r, code_f_rm, code_f_rm_r]
 
@@ -168,17 +160,13 @@ class GAN:
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_list):
-        x, y, l, f, f_r, f_rm, m, m_r, m_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], \
-                                              image_list[5], image_list[6], image_list[7], image_list[8]
+        x, y, l, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]
         tf.summary.image('image/x', x)
         tf.summary.image('image/y', y)
         tf.summary.image('image/l_input', l)
         tf.summary.image('image/f', f)
         tf.summary.image('image/f_rm', f_rm)
         tf.summary.image('image/f_r', f_r)
-        tf.summary.image('image/m', m)
-        tf.summary.image('image/m_rm', m_rm)
-        tf.summary.image('image/m_r', m_r)
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
