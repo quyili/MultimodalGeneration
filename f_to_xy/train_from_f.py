@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from gen_mode_from_f import GAN
+from unsupervision_mode import GAN
 from datetime import datetime
 import os
 import logging
