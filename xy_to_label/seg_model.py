@@ -86,12 +86,12 @@ class GAN:
     def evaluation(self, image_list):
         x, y, l_input, l_f_by_x, l_f_by_y = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4]
-        list = [self.mse_loss(l_input, l_f_by_x), self.mse_loss(l_input, l_f_by_y)]
+        list = [self.iou(l_input, l_f_by_x), self.iou(l_input, l_f_by_y)]
         return list
 
     def evaluation_summary(self, evluation_list):
-        tf.summary.scalar('evaluation/MSE/l_input__VS__l_f_by_x', evluation_list[0])
-        tf.summary.scalar('evaluation/MSE/l_input__VS__l_f_by_y', evluation_list[1])
+        tf.summary.scalar('evaluation/IOU/l_input__VS__l_f_by_x', evluation_list[0])
+        tf.summary.scalar('evaluation/IOU/l_input__VS__l_f_by_y', evluation_list[1])
 
 
     def image_summary(self, image_list):
@@ -103,6 +103,11 @@ class GAN:
         tf.summary.image('image/l_input', l_input)
         tf.summary.image('image/l_f_by_x', l_f_by_x)
         tf.summary.image('image/l_f_by_y', l_f_by_y)
+
+    def iou(self, label, predict):
+        iou_op = tf.metrics.mean_iou(label,predict,6)
+        mean_iou = iou_op[0]
+        return mean_iou
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
