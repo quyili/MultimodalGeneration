@@ -22,7 +22,8 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
-        self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=6)
+        self.DC_X_L = Decoder('DC_X_L', ngf=ngf, output_channl=6)
+        self.DC_Y_L = Decoder('DC_Y_L', ngf=ngf, output_channl=6)
 
     def model(self, x, y, label_expand):
         # L
@@ -31,12 +32,12 @@ class GAN:
 
         # X -> L_X
         code_x = self.EC_X(x)
-        l_f_prob_by_x = self.DC_L(code_x)
+        l_f_prob_by_x = self.DC_X_L(code_x)
         l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
         # Y -> L_Y
         code_y = self.EC_Y(y)
-        l_f_prob_by_y = self.DC_L(code_y)
+        l_f_prob_by_y = self.DC_Y_L(code_y)
         l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
 
@@ -64,7 +65,7 @@ class GAN:
         return image_list, G_loss
 
     def get_variables(self):
-        variables= self.EC_X.variables+ self.EC_Y.variables+ self.DC_L.variables
+        variables= self.EC_X.variables+ self.EC_Y.variables+ self.DC_X_L.variables + self.DC_Y_L.variables
         return variables
 
     def optimize(self):
