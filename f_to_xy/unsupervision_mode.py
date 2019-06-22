@@ -47,15 +47,15 @@ class GAN:
         f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
         f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = ones * tf.cast(f > 0.05, dtype=tf.float32)
+        f = ones * tf.cast(f > 0.1, dtype=tf.float32)
 
         f_rm_expand = tf.concat([
-            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 0], shape=self.input_shape)
-            + tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.5,
-            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.5,
-            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.5,
-            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.5,
-            tf.reshape(ones[:, :, :, 0] * 0.5 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.5], axis=-1)
+            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
+            + tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
+            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
+            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
+            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
+            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8], axis=-1)
 
         # F_RM -> X_G,Y_G,L_G
         code_rm = self.EC_R(f_rm_expand)
@@ -69,7 +69,7 @@ class GAN:
         f_y_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_g), axis=-1))
         f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1, keepdims=True)
         f_xy_g_r = f_xy_g_r - tf.reduce_mean(f_xy_g_r, axis=[1, 2, 3])
-        f_xy_g_r = ones * tf.cast(f_xy_g_r > 0.05, dtype=tf.float32)
+        f_xy_g_r = ones * tf.cast(f_xy_g_r > 0.1, dtype=tf.float32)
 
         # X_G -> L_X_G
         code_x_g = self.EC_X(x_g)
