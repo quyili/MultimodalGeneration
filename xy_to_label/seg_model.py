@@ -86,16 +86,12 @@ class GAN:
     def evaluation(self, image_list):
         x, y, l_input, l_f_by_x, l_f_by_y = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4]
-        list = [self.PSNR(l_input, l_f_by_x), self.PSNR(l_input, l_f_by_y),
-                self.SSIM(l_input, l_f_by_x), self.SSIM(l_input, l_f_by_y)]
+        list = [self.mse_loss(l_input, l_f_by_x), self.mse_loss(l_input, l_f_by_y)]
         return list
 
     def evaluation_summary(self, evluation_list):
-        tf.summary.scalar('evaluation/PSNR/l_input__VS__l_f_by_x', evluation_list[0])
-        tf.summary.scalar('evaluation/PSNR/l_input__VS__l_f_by_y', evluation_list[1])
-
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_f_by_x', evluation_list[2])
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_f_by_y', evluation_list[3])
+        tf.summary.scalar('evaluation/MSE/l_input__VS__l_f_by_x', evluation_list[0])
+        tf.summary.scalar('evaluation/MSE/l_input__VS__l_f_by_y', evluation_list[1])
 
 
     def image_summary(self, image_list):
@@ -114,19 +110,19 @@ class GAN:
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
-    def ssim_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
-        loss = (1.0 - self.SSIM(x, y)) * 20
-        return loss
-
-    def PSNR(self, output, target):
-        psnr = tf.reduce_mean(tf.image.psnr(output, target, max_val=1.0, name="psnr"))
-        return psnr
-
-    def SSIM(self, output, target):
-        ssim = tf.reduce_mean(tf.image.ssim(output, target, max_val=1.0))
-        return ssim
+    # def ssim_loss(self, x, y):
+    #     """ supervised loss (L2 norm)
+    #     """
+    #     loss = (1.0 - self.SSIM(x, y)) * 20
+    #     return loss
+    #
+    # def PSNR(self, output, target):
+    #     psnr = tf.reduce_mean(tf.image.psnr(output, target, max_val=1.0, name="psnr"))
+    #     return psnr
+    #
+    # def SSIM(self, output, target):
+    #     ssim = tf.reduce_mean(tf.image.ssim(output, target, max_val=1.0))
+    #     return ssim
 
     def norm(self, input):
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])

@@ -147,10 +147,8 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
             input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-            G_optimizer, D_optimizer = gan.optimize()
-
+            G_optimizer= gan.optimize()
             G_grad_list = []
-            D_grad_list = []
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
                     with tf.name_scope("GPU_0"):
@@ -159,14 +157,11 @@ def train():
                         label_expand_0 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(x_0, y_0, label_expand_0)
+                        image_list_0,  loss_list_0 = gan.model(x_0, y_0, label_expand_0)
                         evaluation_list_0 = gan.evaluation(image_list_0)
-                        evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
-                        G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
-                        D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
+                        G_grad_0 = G_optimizer.compute_gradients(loss_list_0, var_list=variables_list_0)
                         G_grad_list.append(G_grad_0)
-                        D_grad_list.append(D_grad_0)
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
                         x_1 = tf.placeholder(tf.float32, shape=input_shape)
@@ -174,14 +169,11 @@ def train():
                         label_expand_1 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(x_1, y_1, label_expand_1)
+                        image_list_1,loss_list_1 = gan.model(x_1, y_1, label_expand_1)
                         evaluation_list_1 = gan.evaluation(image_list_1)
-                        evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
-                        G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
-                        D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
+                        G_grad_1 = G_optimizer.compute_gradients(loss_list_1, var_list=variables_list_1)
                         G_grad_list.append(G_grad_1)
-                        D_grad_list.append(D_grad_1)
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
                         x_2 = tf.placeholder(tf.float32, shape=input_shape)
@@ -189,14 +181,11 @@ def train():
                         label_expand_2 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(x_2, y_2, label_expand_2)
+                        image_list_2,loss_list_2 = gan.model(x_2, y_2, label_expand_2)
                         evaluation_list_2 = gan.evaluation(image_list_2)
-                        evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
-                        G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
-                        D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
+                        G_grad_2 = G_optimizer.compute_gradients(loss_list_2, var_list=variables_list_2)
                         G_grad_list.append(G_grad_2)
-                        D_grad_list.append(D_grad_2)
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
                         x_3 = tf.placeholder(tf.float32, shape=input_shape)
@@ -204,33 +193,25 @@ def train():
                         label_expand_3 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(x_3, y_3, label_expand_3)
+                        image_list_3, loss_list_3 = gan.model(x_3, y_3, label_expand_3)
                         evaluation_list_3 = gan.evaluation(image_list_3)
-                        evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()
-                        G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
-                        D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
+                        G_grad_3 = G_optimizer.compute_gradients(loss_list_3, var_list=variables_list_3)
                         G_grad_list.append(G_grad_3)
-                        D_grad_list.append(D_grad_3)
 
             G_ave_grad = average_gradients(G_grad_list)
-            D_ave_grad = average_gradients(D_grad_list)
             G_optimizer_op = G_optimizer.apply_gradients(G_ave_grad)
-            D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
-            optimizers = [G_optimizer_op, D_optimizer_op]
+            optimizers = [G_optimizer_op]
 
             gan.image_summary(image_list_0)
-            gan.histogram_summary(j_list_0)
             image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image'),
                                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'discriminator')])
 
             loss_list_summary = tf.placeholder(tf.float32)
             evaluation_list_summary = tf.placeholder(tf.float32)
-            evaluation_code_list_summary = tf.placeholder(tf.float32)
 
             gan.loss_summary(loss_list_summary)
             gan.evaluation_summary(evaluation_list_summary)
-            gan.evaluation_code_summary(evaluation_code_list_summary)
 
             summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
@@ -270,7 +251,6 @@ def train():
                 epoch = 0
                 train_loss_list = []
                 train_evaluation_list = []
-                train_evaluation_code_list = []
                 while not coord.should_stop() and epoch <= FLAGS.epoch:
                     train_true_x = []
                     train_true_y = []
@@ -297,8 +277,8 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
-                        [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
+                    _, train_image_summary_op, train_losses, train_evaluations = sess.run(
+                        [optimizers, image_summary_op, loss_list_0, evaluation_list_0],
                         feed_dict={
                             x_0: np.asarray(train_true_x)[0:1, :, :, :],
                             y_0: np.asarray(train_true_y)[0:1, :, :, :],
@@ -318,7 +298,6 @@ def train():
                         })
                     train_loss_list.append(train_losses)
                     train_evaluation_list.append(train_evaluations)
-                    train_evaluation_code_list.append(train_evaluation_codes)
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
@@ -327,9 +306,8 @@ def train():
                         logging.info('-----------Train summary start-------------')
                         train_summary_op = sess.run(
                             summary_op,
-                            feed_dict={loss_list_summary: mean_list(train_loss_list),
-                                       evaluation_list_summary: mean_list(train_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(train_evaluation_code_list)})
+                            feed_dict={loss_list_summary: mean(train_loss_list),
+                                       evaluation_list_summary: mean_list(train_evaluation_list)})
                         train_writer.add_summary(train_image_summary_op, step)
                         train_writer.add_summary(train_summary_op, step)
                         train_writer.flush()
@@ -342,7 +320,6 @@ def train():
                             "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
                         val_loss_list = []
                         val_evaluation_list = []
-                        val_evaluation_code_list = []
                         val_index = 0
                         Label_test_files = read_filename(FLAGS.L_test)
                         for j in range(int(math.ceil(len(Label_test_files) / FLAGS.batch_size))):
@@ -368,15 +345,15 @@ def train():
                                 val_true_l.append(L_arr)
                                 val_index += 1
 
-                            val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
-                            val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
-                            val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
-                            val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
+                            val_losses_0, val_evaluations_0,\
+                            val_losses_1, val_evaluations_1, \
+                            val_losses_2, val_evaluations_2, \
+                            val_losses_3, val_evaluations_3, \
                             val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
-                                [loss_list_0, evaluation_list_0, evaluation_code_list_0,
-                                 loss_list_1, evaluation_list_1, evaluation_code_list_1,
-                                 loss_list_2, evaluation_list_2, evaluation_code_list_2,
-                                 loss_list_3, evaluation_list_3, evaluation_code_list_3,
+                                [loss_list_0, evaluation_list_0,
+                                 loss_list_1, evaluation_list_1,
+                                 loss_list_2, evaluation_list_2,
+                                 loss_list_3, evaluation_list_3,
                                  image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
                                 feed_dict={
                                     x_0: np.asarray(val_true_x)[0:1, :, :, :],
@@ -403,18 +380,14 @@ def train():
                             val_evaluation_list.append(val_evaluations_1)
                             val_evaluation_list.append(val_evaluations_2)
                             val_evaluation_list.append(val_evaluations_3)
-                            val_evaluation_code_list.append(val_evaluation_codes_0)
-                            val_evaluation_code_list.append(val_evaluation_codes_1)
-                            val_evaluation_code_list.append(val_evaluation_codes_2)
-                            val_evaluation_code_list.append(val_evaluation_codes_3)
+
 
                             if j == 0: save_images(val_image_list_3, checkpoints_dir, val_index - 1)
 
                         val_summary_op = sess.run(
                             summary_op,
-                            feed_dict={loss_list_summary: mean_list(val_loss_list),
-                                       evaluation_list_summary: mean_list(val_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
+                            feed_dict={loss_list_summary: mean(val_loss_list),
+                                       evaluation_list_summary: mean_list(val_evaluation_list)})
                         val_writer.add_summary(val_image_summary_op, step)
                         val_writer.add_summary(val_summary_op, step)
                         val_writer.flush()
