@@ -44,7 +44,7 @@ class MDecoder:
                 relu0_2 = ops.relu(norm0_2)
             with tf.variable_scope("concat0", reuse=self.reuse):
                 shape=DC_input.get_shape().as_list()
-                concat0=tf.reshape(tf.concat([relu0_1,relu0_2],axis=-1),shape=[shape[0],shape[1],shape[2],2*shape[3]])
+                concat0=tf.reshape(tf.concat([relu0_1,relu0_2],axis=-1),shape=[shape[0],shape[1],shape[2],4 * self.ngf])
             with tf.variable_scope("conv1", reuse=self.reuse):
                 conv1 = tf.layers.conv2d(inputs=concat0, filters=2 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
