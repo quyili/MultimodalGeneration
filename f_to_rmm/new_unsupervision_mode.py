@@ -29,7 +29,6 @@ class GAN:
         self.code_list = []
         self.judge_list = []
 
-
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=6)
 
@@ -49,28 +48,16 @@ class GAN:
 
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
 
-    def get_f(self,x):
+    def get_f(self, x):
         f = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
         f = self.ones * tf.cast(f > 0.1, dtype=tf.float32)
         return f
 
-    def gen(self,f,l,EC_X,EC_Y, DC_X, DC_Y,G_loss=0.0):
-        label_expand=tf.reshape(tf.one_hot(tf.cast(l,dtype=tf.int32),axis=-1,depth=6),
-                                shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],6])
-        f_rm_expand = tf.concat([
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
-            + tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8], axis=-1)
+    def gen(self, f, l, EC_X, EC_Y, DC_X, DC_Y,label_expand, code_rm,l_g_prob, G_loss=0.0):
 
-        # F_RM -> X_G,Y_G,L_G
-        code_rm = self.EC_R(f_rm_expand)
         x_g = DC_X(self.SDC(code_rm))
         y_g = DC_Y(self.SDC(code_rm))
-        l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
 
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
@@ -91,7 +78,6 @@ class GAN:
         y_g_t = DC_Y(self.SDC(code_x_g))
         # Y_G -> X_G_T
         x_g_t = DC_X(self.SDC(code_y_g))
-
 
         # 输入的结构特征图的重建自监督损失
         G_loss += self.mse_loss(f, f_x_g_r) * 5
@@ -139,16 +125,16 @@ class GAN:
         G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 1.0
 
-        self.image_list.extend([x_g, y_g,x_g_t, y_g_t,l_g,l_g_by_x, l_g_by_y, f_x_g_r,f_y_g_r])
-        self.code_list=[code_rm, code_x_g, code_y_g]
+        self.image_list.extend([x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r])
+        self.code_list = [code_rm, code_x_g, code_y_g]
 
         return G_loss
 
-    def translate(self,x,y,l_x,l_y, EC_X,EC_Y, DC_X, DC_Y,G_loss=0.0):
-        label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x,dtype=tf.int32),axis=-1,depth=6),
-                                    shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],6])
-        label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y,dtype=tf.int32),axis=-1,depth=6),
-                                    shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],6])
+    def translate(self, x, y, l_x, l_y, EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0):
+        label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=6),
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
+        label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=6),
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         # X -> X_R
         code_x = EC_X(x)
         x_r = DC_X(self.SDC(code_x))
@@ -211,18 +197,18 @@ class GAN:
         G_loss += self.mse_loss(0.0, x_t * label_expand_y[0]) * 0.5
         G_loss += self.mse_loss(0.0, y_t * label_expand_x[0]) * 0.5
 
-        self.image_list.extend([x_r, y_r, x_t, y_t,  x_c_r, y_c_r,l_f_by_x, l_f_by_y])
-        self.code_list.extend([code_x,code_y])
+        self.image_list.extend([x_r, y_r, x_t, y_t, x_c_r, y_c_r, l_f_by_x, l_f_by_y])
+        self.code_list.extend([code_x, code_y])
 
-        return  G_loss
+        return G_loss
 
-    def judge(self, x,y, cx, cy ,G_loss=0.0, D_loss=0.0):
-        x_g, y_g=self.image_list[0],self.image_list[1]
-        code_rm,code_x, code_y=self.code_list[0],self.code_list[3],self.code_list[4]
-        j_x,j_x_c = self.D(x)
-        j_x_g,j_x_g_c = self.D(x_g)
-        j_y,j_y_c = self.D(y)
-        j_y_g ,j_y_g_c= self.D(y_g)
+    def judge(self, x, y, cx, cy, G_loss=0.0, D_loss=0.0):
+        x_g, y_g = self.image_list[0], self.image_list[1]
+        code_rm, code_x, code_y = self.code_list[0], self.code_list[3], self.code_list[4]
+        j_x, j_x_c = self.D(x)
+        j_x_g, j_x_g_c = self.D(x_g)
+        j_y, j_y_c = self.D(y)
+        j_y_g, j_y_g_c = self.D(y_g)
 
         j_code_rm = self.FD_R(code_rm)
         j_code_x = self.FD_R(code_x)
@@ -238,7 +224,7 @@ class GAN:
         D_loss += self.mse_loss(j_y_g, 0.0) * 25
         G_loss += self.mse_loss(j_y_g, 1.0) * 25
 
-        #TODO 交叉熵损失函数
+        # TODO 交叉熵损失函数
         D_loss += self.mse_loss(j_x_c, cx) * 25
         D_loss += self.mse_loss(j_y_c, cy) * 25
 
@@ -251,14 +237,14 @@ class GAN:
 
         self.judge_list = [j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm]
 
-        return G_loss,D_loss
+        return G_loss, D_loss
 
-    def model(self,f,l,m1,m2,c1, c2, EC_1, EC_2, DC_1, DC_2):
+    def model(self, f, l, m1, m2, c1, c2, EC_1, EC_2, DC_1, DC_2,label_expand, code_rm,l_g_prob):
         # 保存输入信息
         self.image_list = [m1, m2, f, l]
 
         # 生成训练过程
-        G_loss = self.gen(f, l, EC_1, EC_2, DC_1, DC_2, G_loss=0.0)
+        G_loss = self.gen(f, l, EC_1, EC_2, DC_1, DC_2,label_expand, code_rm,l_g_prob, G_loss=0.0)
 
         # 辅助训练过程
         G_loss = self.translate(m1, m2, l, l, EC_1, EC_2, DC_1, DC_2, G_loss=G_loss)
@@ -269,7 +255,7 @@ class GAN:
         loss_list = [G_loss, D_loss]
         return loss_list
 
-    def run(self, x, y, z, w,l,rand_f,rand_train):
+    def run(self, x, y, z, w, l, rand_f, rand_train):
         # 选择f来源模态
         m = tf.case({tf.equal(rand_f, 0): lambda: x,
                      tf.equal(rand_f, 1): lambda: y,
@@ -277,32 +263,66 @@ class GAN:
                      tf.equal(rand_f, 3): lambda: w}, exclusive=True)
         f = self.get_f(m)  # M -> F
 
+        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=6),
+                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
+        f_rm_expand = tf.concat([
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
+            + tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8],
+            axis=-1)
+
+        # F_RM -> X_G,Y_G,L_G
+        code_rm = self.EC_R(f_rm_expand)
+        l_g_prob = self.DC_L(code_rm)
+        self.G_variables = self.EC_R.variables + self.DC_L.variables
+
         def xy_model():
-            loss_list=self.model(f,l,x,y,0,1,self.EC_X,self.EC_Y,self.DC_X,self.DC_Y)
-            return loss_list
+            loss_list = self.model(f, l, x, y, 0, 1, self.EC_X, self.EC_Y, self.DC_X, self.DC_Y, label_expand, code_rm,
+                                   l_g_prob)
+            G_variables = self.EC_X.variables + self.EC_Y.variables + self.DC_X.variables + self.DC_Y.variables
+            return loss_list, G_variables
+
         def xz_model():
-            loss_list=self.model(f,l,x,z,0,2,self.EC_X,self.EC_Z,self.DC_X,self.DC_Z)
-            return loss_list
+            loss_list = self.model(f, l, x, z, 0, 2, self.EC_X, self.EC_Z, self.DC_X, self.DC_Z, label_expand, code_rm,
+                                   l_g_prob)
+            G_variables = self.EC_X.variables + self.EC_Z.variables + self.DC_X.variables + self.DC_Z.variables
+            return loss_list, G_variables
+
         def xw_model():
-            loss_list=self.model(f,l,x,w,0,3,self.EC_X,self.EC_W,self.DC_X,self.DC_W)
-            return loss_list
+            loss_list = self.model(f, l, x, w, 0, 3, self.EC_X, self.EC_W, self.DC_X, self.DC_W, label_expand, code_rm,
+                                   l_g_prob)
+            G_variables = self.EC_X.variables + self.EC_W.variables + self.DC_X.variables + self.DC_W.variables
+            return loss_list, G_variables
+
         def yz_model():
-            loss_list=self.model(f,l,y,z,1,2,self.EC_Y,self.EC_Z,self.DC_Y,self.DC_Z)
-            return loss_list
+            loss_list = self.model(f, l, y, z, 1, 2, self.EC_Y, self.EC_Z, self.DC_Y, self.DC_Z, label_expand, code_rm,
+                                   l_g_prob)
+            G_variables = self.EC_Y.variables + self.EC_Z.variables + self.DC_Y.variables + self.DC_Z.variables
+            return loss_list, G_variables
+
         def yw_model():
-            loss_list=self.model(f,l,y,w,1,3,self.EC_Y,self.EC_W,self.DC_Y,self.DC_W)
-            return loss_list
+            loss_list = self.model(f, l, y, w, 1, 3, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W, label_expand, code_rm,
+                                   l_g_prob)
+            G_variables = self.EC_Y.variables + self.EC_W.variables + self.DC_Y.variables + self.DC_W.variables
+            return loss_list, G_variables
+
         def zw_model():
-            loss_list=self.model(f,l,z,w,2,3,self.EC_Z,self.EC_W,self.DC_Z,self.DC_W)
-            return loss_list
+            loss_list = self.model(f, l, z, w, 2, 3, self.EC_Z, self.EC_W, self.DC_Z, self.DC_W, label_expand, code_rm,
+                                   l_g_prob)
+            G_variables = self.EC_Z.variables + self.EC_W.variables + self.DC_Z.variables + self.DC_W.variables
+            return loss_list, G_variables
 
         # 选择训练模态
-        loss_list= tf.case({tf.equal(rand_train, 0): xy_model,
-                             tf.equal(rand_train, 1): xz_model,
-                             tf.equal(rand_train, 2): xw_model,
-                             tf.equal(rand_train, 3): yz_model,
-                             tf.equal(rand_train, 4): yw_model,
-                             tf.equal(rand_train, 5): zw_model,},exclusive=True)
+        loss_list, G_variables = tf.case({tf.equal(rand_train, 0): xy_model,
+                                          tf.equal(rand_train, 1): xz_model,
+                                          tf.equal(rand_train, 2): xw_model,
+                                          tf.equal(rand_train, 3): yz_model,
+                                          tf.equal(rand_train, 4): yw_model,
+                                          tf.equal(rand_train, 5): zw_model, }, exclusive=True)
+        self.G_variables += G_variables
 
         # image_list=[x,y,f,l,
         # x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r,
@@ -316,18 +336,9 @@ class GAN:
         return loss_list
 
     def get_variables(self):
-        return [self.EC_R.variables
-                + self.DC_L.variables
-                + self.EC_X.variables
-                + self.DC_X.variables
-                + self.EC_Y.variables
-                + self.DC_Y.variables
-                + self.EC_Z.variables
-                + self.DC_Z.variables
-                + self.EC_W.variables
-                + self.DC_W.variables
+        return [self.G_variables
                 + self.SDC.variables
-                ,
+            ,
                 self.D.variables
                 + self.FD_R.variables
                 ]
@@ -345,7 +356,7 @@ class GAN:
         return G_optimizer, D_optimizer
 
     def histogram_summary(self, j_list):
-        j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm= \
+        j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm = \
             j_list[0], j_list[1], j_list[2], j_list[3], j_list[4], j_list[5], j_list[6]
         tf.summary.histogram('discriminator/TRUE/j_x', j_x)
         tf.summary.histogram('discriminator/TRUE/j_y', j_y)
@@ -362,7 +373,7 @@ class GAN:
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def evaluation_code(self, code_list):
-        code_rm, code_x_g, code_y_g,\
+        code_rm, code_x_g, code_y_g, \
         code_x, code_y = \
             code_list[0], code_list[1], code_list[2], code_list[3], code_list[4]
         list = [self.PSNR(code_x, code_y),
@@ -384,13 +395,13 @@ class GAN:
         tf.summary.scalar('evaluation_code/SSIM/code_x_g__VS__code_y_g', evluation_list[7])
 
     def evaluation(self, image_list):
-        x, y, f, l,\
-        x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r,\
-        x_r, y_r, x_t, y_t, x_c_r, y_c_r, l_f_by_x, l_f_by_y= \
+        x, y, f, l, \
+        x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r, \
+        x_r, y_r, x_t, y_t, x_c_r, y_c_r, l_f_by_x, l_f_by_y = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
             image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17], \
-            image_list[18],image_list[19],image_list[20]
+            image_list[18], image_list[19], image_list[20]
 
         list = [self.PSNR(x, x_t), self.PSNR(x, x_r),
                 self.PSNR(y, y_t), self.PSNR(y, y_r),
