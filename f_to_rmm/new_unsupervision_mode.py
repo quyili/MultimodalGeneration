@@ -269,8 +269,6 @@ class GAN:
         loss_list = [G_loss, D_loss]
         return loss_list
 
-
-
     def run(self, x, y, z, w,l,rand_f,rand_train):
         # 选择f来源模态
         m = tf.case({tf.equal(rand_f, 0): lambda: x,
@@ -319,12 +317,17 @@ class GAN:
 
     def get_variables(self):
         return [self.EC_R.variables
+                + self.DC_L.variables
                 + self.EC_X.variables
-                + self.EC_Y.variables
                 + self.DC_X.variables
+                + self.EC_Y.variables
                 + self.DC_Y.variables
-                + self.DC_L.variables,
-
+                + self.EC_Z.variables
+                + self.DC_Z.variables
+                + self.EC_W.variables
+                + self.DC_W.variables
+                + self.SDC.variables
+                ,
                 self.D.variables
                 + self.FD_R.variables
                 ]
