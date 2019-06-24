@@ -50,7 +50,20 @@ class GAN:
         f = self.ones * tf.cast(f > 0.1, dtype=tf.float32)
         return f
 
-    def gen(self, f, l, EC_X, EC_Y, DC_X, DC_Y,label_expand,code_rm,l_g_prob, G_loss=0.0):
+    def gen(self, f, l, EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0):
+        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=6),
+                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
+        f_rm_expand = tf.concat([
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
+            + tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8],
+            axis=-1)
+        # F_RM -> X_G,Y_G,L_G
+        code_rm = self.EC_R(f_rm_expand)
+        l_g_prob = self.DC_L(code_rm)
 
         x_g = DC_X(code_rm)
         y_g = DC_Y(code_rm)
@@ -235,12 +248,12 @@ class GAN:
 
         return G_loss, D_loss
 
-    def model(self, f, l, m1, m2, c1, c2, EC_1, EC_2, DC_1, DC_2,label_expand,code_rm,l_g_prob):
+    def model(self, f, l, m1, m2, c1, c2, EC_1, EC_2, DC_1, DC_2):
         # 保存输入信息
         self.image_list = [m1, m2, f, l]
 
         # 生成训练过程
-        G_loss = self.gen(f, l, EC_1, EC_2, DC_1, DC_2,label_expand,code_rm,l_g_prob, G_loss=0.0)
+        G_loss = self.gen(f, l, EC_1, EC_2, DC_1, DC_2, G_loss=0.0)
 
         # 辅助训练过程
         G_loss = self.translate(m1, m2, l, l, EC_1, EC_2, DC_1, DC_2, G_loss=G_loss)
@@ -259,50 +272,34 @@ class GAN:
                      tf.equal(rand_f, 3): lambda: w}, exclusive=True)
         f = self.get_f(m)  # M -> F
 
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=6),
-                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
-        f_rm_expand = tf.concat([
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
-            + tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8],
-            axis=-1)
-
-        # F_RM -> X_G,Y_G,L_G
-        code_rm = self.EC_R(f_rm_expand)
-        l_g_prob = self.DC_L(code_rm)
-        self.G_variables = self.EC_R.variables + self.DC_L.variables
-
         def xy_model():
-            loss_list = self.model(f, l, x, y, 0, 1, self.EC_X, self.EC_Y, self.DC_X, self.DC_Y,label_expand,code_rm,l_g_prob)
-            self.G_variables += self.EC_X.variables + self.EC_Y.variables + self.DC_X.variables + self.DC_Y.variables
+            loss_list = self.model(f, l, x, y, 0, 1, self.EC_X, self.EC_Y, self.DC_X, self.DC_Y)
+            self.G_variables = self.EC_X.variables + self.EC_Y.variables + self.DC_X.variables + self.DC_Y.variables
             return loss_list
 
         def xz_model():
-            loss_list = self.model(f, l, x, z, 0, 2, self.EC_X, self.EC_Z, self.DC_X, self.DC_Z,label_expand,code_rm,l_g_prob)
-            self.G_variables += self.EC_X.variables + self.EC_Z.variables + self.DC_X.variables + self.DC_Z.variables
+            loss_list = self.model(f, l, x, z, 0, 2, self.EC_X, self.EC_Z, self.DC_X, self.DC_Z)
+            self.G_variables = self.EC_X.variables + self.EC_Z.variables + self.DC_X.variables + self.DC_Z.variables
             return loss_list
 
         def xw_model():
-            loss_list = self.model(f, l, x, w, 0, 3, self.EC_X, self.EC_W, self.DC_X, self.DC_W,label_expand,code_rm,l_g_prob)
-            self.G_variables += self.EC_X.variables + self.EC_W.variables + self.DC_X.variables + self.DC_W.variables
+            loss_list = self.model(f, l, x, w, 0, 3, self.EC_X, self.EC_W, self.DC_X, self.DC_W)
+            self.G_variables = self.EC_X.variables + self.EC_W.variables + self.DC_X.variables + self.DC_W.variables
             return loss_list
 
         def yz_model():
-            loss_list = self.model(f, l, y, z, 1, 2, self.EC_Y, self.EC_Z, self.DC_Y, self.DC_Z,label_expand,code_rm,l_g_prob)
-            self.G_variables += self.EC_Y.variables + self.EC_Z.variables + self.DC_Y.variables + self.DC_Z.variables
+            loss_list = self.model(f, l, y, z, 1, 2, self.EC_Y, self.EC_Z, self.DC_Y, self.DC_Z)
+            self.G_variables = self.EC_Y.variables + self.EC_Z.variables + self.DC_Y.variables + self.DC_Z.variables
             return loss_list
 
         def yw_model():
-            loss_list = self.model(f, l, y, w, 1, 3, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W,label_expand,code_rm,l_g_prob)
-            self.G_variables += self.EC_Y.variables + self.EC_W.variables + self.DC_Y.variables + self.DC_W.variables
+            loss_list = self.model(f, l, y, w, 1, 3, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W)
+            self.G_variables = self.EC_Y.variables + self.EC_W.variables + self.DC_Y.variables + self.DC_W.variables
             return loss_list
 
         def zw_model():
-            loss_list = self.model(f, l, z, w, 2, 3, self.EC_Z, self.EC_W, self.DC_Z, self.DC_W,label_expand,code_rm,l_g_prob)
-            self.G_variables += self.EC_Z.variables + self.EC_W.variables + self.DC_Z.variables + self.DC_W.variables
+            loss_list = self.model(f, l, z, w, 2, 3, self.EC_Z, self.EC_W, self.DC_Z, self.DC_W)
+            self.G_variables = self.EC_Z.variables + self.EC_W.variables + self.DC_Z.variables + self.DC_W.variables
             return loss_list
 
         # 选择训练模态
@@ -326,6 +323,8 @@ class GAN:
 
     def get_variables(self):
         return [self.G_variables
+                + self.EC_R.variables
+                + self.DC_L.variables
             ,
                 self.D.variables
                 + self.FD_R.variables
