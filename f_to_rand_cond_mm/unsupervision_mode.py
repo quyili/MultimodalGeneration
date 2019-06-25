@@ -297,24 +297,21 @@ class GAN:
             loss_list = self.model(f, l, x, w, 0, 3, self.EC_X, self.EC_W, self.DC_X, self.DC_W)
             self.G_variables = self.EC_X.variables + self.EC_W.variables + self.DC_X.variables + self.DC_W.variables
             return loss_list
-        #
-        # # def yw_model():
-        # #     loss_list = self.model(f, l, y, w, 1, 3, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W)
-        # #     self.G_variables = self.EC_Y.variables + self.EC_W.variables + self.DC_Y.variables + self.DC_W.variables
-        # #     return loss_list
-        # # def xz_model():
-        # #     loss_list = self.model(f, l, x, z, 0, 2, self.EC_X, self.EC_Z, self.DC_X, self.DC_Z)
-        # #     self.G_variables = self.EC_X.variables + self.EC_Z.variables + self.DC_X.variables + self.DC_Z.variables
-        # #     return loss_list
+
+        # def yw_model():
+        #     loss_list = self.model(f, l, y, w, 1, 3, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W)
+        #     self.G_variables = self.EC_Y.variables + self.EC_W.variables + self.DC_Y.variables + self.DC_W.variables
+        #     return loss_list
+        # def xz_model():
+        #     loss_list = self.model(f, l, x, z, 0, 2, self.EC_X, self.EC_Z, self.DC_X, self.DC_Z)
+        #     self.G_variables = self.EC_X.variables + self.EC_Z.variables + self.DC_X.variables + self.DC_Z.variables
+        #     return loss_list
 
         # 选择训练模态
         loss_list = tf.case({tf.equal(rand_train, 0): xy_model,
                              tf.equal(rand_train, 1): xw_model,
                              tf.equal(rand_train, 2): yz_model,
-                             tf.equal(rand_train, 3): zw_model,
-                             # tf.equal(rand_train, 4): yw_model,
-                             # tf.equal(rand_train, 5): xz_model
-                             }, exclusive=True)
+                             tf.equal(rand_train, 3): zw_model }, exclusive=True)
 
         return loss_list
 

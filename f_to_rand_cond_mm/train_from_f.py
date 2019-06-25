@@ -350,7 +350,7 @@ def train():
                         index = index + 1
 
                     rande_f = np.random.randint(4)
-                    rande_train=np.random.randint(4)
+                    rande_train=np.random.randint(6)
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
@@ -451,7 +451,7 @@ def train():
                                 val_index += 1
 
                             val_rande_f = np.random.randint(4)
-                            val_rande_train = np.random.randint(4)
+                            val_rande_train = np.random.randint(6)
 
                             val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
