@@ -253,7 +253,7 @@ class GAN:
 
         code_list.extend([code_x, code_y])
 
-        judge_list.extend([j_x, j_x, j_code_x, j_code_y])
+        judge_list.extend([j_x, j_y, j_code_x, j_code_y])
 
         return  G_loss, D_X_loss,D_Y_loss,D_F_loss,image_list,code_list,judge_list
 
@@ -322,7 +322,7 @@ class GAN:
         return G_optimizer, D_optimizer
 
     def histogram_summary(self, j_list):
-        j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm = \
+        j_x_g, j_y_g, j_code_rm,j_x, j_y, j_code_x, j_code_y = \
             j_list[0], j_list[1], j_list[2], j_list[3], j_list[4], j_list[5], j_list[6]
         tf.summary.histogram('discriminator/TRUE/j_x', j_x)
         tf.summary.histogram('discriminator/TRUE/j_y', j_y)
@@ -361,13 +361,12 @@ class GAN:
         tf.summary.scalar('evaluation_code/SSIM/code_x_g__VS__code_y_g', evluation_list[7])
 
     def evaluation(self, image_list):
-        x, y, f, l, \
-        x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r, \
-        x_r, y_r, x_t, y_t, x_c_r, y_c_r, l_f_by_x, l_f_by_y = \
+        l, f, x_g, y_g, x_g_t, y_g_t,l_g, l_g_by_x, l_g_by_y,f_x_g_r, f_y_g_r,\
+        x,y,x_r, y_r, x_t, y_t,l_f_by_x, l_f_by_y = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
             image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17], \
-            image_list[18], image_list[19], image_list[20]
+            image_list[18]
 
         list = [self.PSNR(x, x_t), self.PSNR(x, x_r),
                 self.PSNR(y, y_t), self.PSNR(y, y_r),
@@ -417,13 +416,12 @@ class GAN:
         tf.summary.scalar('evaluation/SSIM/f__VS__f_xy_g_r', evluation_list[25])
 
     def image_summary(self, image_list):
-        x, y, f, l, \
-        x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r, \
-        x_r, y_r, x_t, y_t, x_c_r, y_c_r, l_f_by_x, l_f_by_y = \
+        l, f, x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r, \
+        x, y, x_r, y_r, x_t, y_t, l_f_by_x, l_f_by_y = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
             image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17], \
-            image_list[18], image_list[19], image_list[20]
+            image_list[18]
         tf.summary.image('image/x_g', x_g)
         tf.summary.image('image/x_g_t', x_g_t)
         tf.summary.image('image/x', x)
