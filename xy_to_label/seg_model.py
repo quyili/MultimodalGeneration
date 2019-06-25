@@ -106,6 +106,7 @@ class GAN:
     def iou(self, label, predict):
         iou_op = tf.metrics.mean_iou(label,predict,6)
         mean_iou = iou_op[0]
+        print(mean_iou)
         return mean_iou
 
     def mse_loss(self, x, y):
