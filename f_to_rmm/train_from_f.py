@@ -349,8 +349,8 @@ def train():
                         epoch = int(index / len(Label_train_files))
                         index = index + 1
 
-                    # rande_f = np.random.randint(4)
-                    # rande_train: np.random.randint(6)
+                    rande_f = np.random.randint(4)
+                    rande_train=np.random.randint(6)
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
@@ -361,32 +361,32 @@ def train():
                             y_0: np.asarray(train_true_y)[0:1, :, :, :],
                             z_0: np.asarray(train_true_z)[0:1, :, :, :],
                             w_0: np.asarray(train_true_w)[0:1, :, :, :],
-                            rande_f_0:np.random.randint(4),
-                            rande_train_0: np.random.randint(6),
+                            rande_f_0:rande_f,
+                            rande_train_0: rande_train,
                             label_expand_0: np.asarray(train_true_l)[0:1, :, :, :],
 
                             x_1: np.asarray(train_true_x)[1:2, :, :, :],
                             y_1: np.asarray(train_true_y)[1:2, :, :, :],
                             z_1: np.asarray(train_true_z)[1:2, :, :, :],
                             w_1: np.asarray(train_true_w)[1:2, :, :, :],
-                            rande_f_1: np.random.randint(4),
-                            rande_train_1: np.random.randint(6),
+                            rande_f_1: rande_f,
+                            rande_train_1: rande_train,
                             label_expand_1: np.asarray(train_true_l)[1:2, :, :, :],
 
                             x_2: np.asarray(train_true_x)[2:3, :, :, :],
                             y_2: np.asarray(train_true_y)[2:3, :, :, :],
                             z_2: np.asarray(train_true_z)[2:3, :, :, :],
                             w_2: np.asarray(train_true_w)[2:3, :, :, :],
-                            rande_f_2: np.random.randint(4),
-                            rande_train_2: np.random.randint(6),
+                            rande_f_2: rande_f,
+                            rande_train_2: rande_train,
                             label_expand_2: np.asarray(train_true_l)[2:3, :, :, :],
 
                             x_3: np.asarray(train_true_x)[3:4, :, :, :],
                             y_3: np.asarray(train_true_y)[3:4, :, :, :],
                             z_3: np.asarray(train_true_z)[3:4, :, :, :],
                             w_3: np.asarray(train_true_w)[3:4, :, :, :],
-                            rande_f_3: np.random.randint(4),
-                            rande_train_3: np.random.randint(6),
+                            rande_f_3: rande_f,
+                            rande_train_3: rande_train,
                             label_expand_3: np.asarray(train_true_l)[3:4, :, :, :],
                         })
                     train_loss_list.append(train_losses)
@@ -448,6 +448,9 @@ def train():
                                 val_true_l.append(L_arr)
                                 val_index += 1
 
+                            val_rande_f = np.random.randint(4)
+                            val_rande_train = np.random.randint(6)
+
                             val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
                             val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
@@ -463,32 +466,32 @@ def train():
                                     y_0: np.asarray(val_true_y)[0:1, :, :, :],
                                     z_0: np.asarray(val_true_z)[0:1, :, :, :],
                                     w_0: np.asarray(val_true_w)[0:1, :, :, :],
-                                    rande_f_0: np.random.randint(4),
-                                    rande_train_0: np.random.randint(6),
+                                    rande_f_0: val_rande_f,
+                                    rande_train_0: val_rande_train,
                                     label_expand_0: np.asarray(val_true_l)[0:1, :, :, :],
 
                                     x_1: np.asarray(val_true_x)[1:2, :, :, :],
                                     y_1: np.asarray(val_true_y)[1:2, :, :, :],
                                     z_1: np.asarray(val_true_z)[1:2, :, :, :],
                                     w_1: np.asarray(val_true_w)[1:2, :, :, :],
-                                    rande_f_1: np.random.randint(4),
-                                    rande_train_1: np.random.randint(6),
+                                    rande_f_1: val_rande_f,
+                                    rande_train_1: val_rande_train,
                                     label_expand_1: np.asarray(val_true_l)[1:2, :, :, :],
 
                                     x_2: np.asarray(val_true_x)[2:3, :, :, :],
                                     y_2: np.asarray(val_true_y)[2:3, :, :, :],
                                     z_2: np.asarray(val_true_z)[2:3, :, :, :],
                                     w_2: np.asarray(val_true_w)[2:3, :, :, :],
-                                    rande_f_2: np.random.randint(4),
-                                    rande_train_2: np.random.randint(6),
+                                    rande_f_2: val_rande_f,
+                                    rande_train_2: val_rande_train,
                                     label_expand_2: np.asarray(val_true_l)[2:3, :, :, :],
 
                                     x_3: np.asarray(val_true_x)[3:4, :, :, :],
                                     y_3: np.asarray(val_true_y)[3:4, :, :, :],
                                     z_3: np.asarray(val_true_z)[3:4, :, :, :],
                                     w_3: np.asarray(val_true_w)[3:4, :, :, :],
-                                    rande_f_3: np.random.randint(4),
-                                    rande_train_3: np.random.randint(6),
+                                    rande_f_3: val_rande_f,
+                                    rande_train_3: val_rande_train,
                                     label_expand_3: np.asarray(val_true_l)[3:4, :, :, :],
                                 })
                             val_loss_list.append(val_losses_0)
