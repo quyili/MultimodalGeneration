@@ -85,8 +85,8 @@ def expand(train_M_arr_, train_L_arr_):
 
 
 def save_images(image_list, checkpoints_dir, file_index):
-    true_x, true_y, true_f, true_l,\
-    gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y,gen_f_x_g_r, gen_f_y_g_r,\
+    true_x, true_y, true_f, true_l, \
+    gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y, gen_f_x_g_r, gen_f_y_g_r, \
     trans_x_r, trans_y_r, trans_x_t, trans_y_t, trans_x_c_r, trans_y_c_r, trans_l_f_by_x, trans_l_f_by_y = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_x)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_x_" + str(file_index) + ".tiff")
@@ -191,13 +191,13 @@ def train():
                     with tf.name_scope("GPU_0"):
                         x_0 = tf.placeholder(tf.float32, shape=input_shape)
                         y_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_0 = tf.placeholder(tf.float32,shape=input_shape)
+                        label_expand_0 = tf.placeholder(tf.float32, shape=input_shape)
                         z_0 = tf.placeholder(tf.float32, shape=input_shape)
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_0 = tf.placeholder(tf.int32)
                         rande_train_0 = tf.placeholder(tf.int32)
-                        loss_list_0 = gan.run(x_0, y_0, z_0, w_0,label_expand_0,rande_f_0,rande_train_0)
-                        image_list_0, code_list_0, j_list_0=gan.image_list, gan.code_list, gan.judge_list
+                        loss_list_0 = gan.run(x_0, y_0, z_0, w_0, label_expand_0, rande_f_0, rande_train_0)
+                        image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_0 = gan.evaluation(gan.image_list)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
@@ -227,7 +227,7 @@ def train():
                     with tf.name_scope("GPU_2"):
                         x_2 = tf.placeholder(tf.float32, shape=input_shape)
                         y_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_2 = tf.placeholder(tf.float32,shape=input_shape)
+                        label_expand_2 = tf.placeholder(tf.float32, shape=input_shape)
                         z_2 = tf.placeholder(tf.float32, shape=input_shape)
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_2 = tf.placeholder(tf.int32)
@@ -245,7 +245,7 @@ def train():
                     with tf.name_scope("GPU_3"):
                         x_3 = tf.placeholder(tf.float32, shape=input_shape)
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_3 = tf.placeholder(tf.float32,shape=input_shape)
+                        label_expand_3 = tf.placeholder(tf.float32, shape=input_shape)
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_3 = tf.placeholder(tf.int32)
@@ -331,7 +331,7 @@ def train():
                         train_Z_arr_ = read_file(FLAGS.Z, Label_train_files, index)
                         train_W_arr_ = read_file(FLAGS.W, Label_train_files, index)
                         L_arr = np.asarray(train_L_arr_).reshape(
-                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))*5
+                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2])) * 5
                         X_arr = np.asarray(train_X_arr_).reshape(
                             (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
                         Y_arr = np.asarray(train_Y_arr_).reshape(
@@ -350,7 +350,7 @@ def train():
                         index = index + 1
 
                     rande_f = np.random.randint(4)
-                    rande_train=np.random.randint(4)
+                    rande_train = np.random.randint(4)
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
@@ -363,7 +363,7 @@ def train():
                             y_0: np.asarray(train_true_y)[0:1, :, :, :],
                             z_0: np.asarray(train_true_z)[0:1, :, :, :],
                             w_0: np.asarray(train_true_w)[0:1, :, :, :],
-                            rande_f_0:rande_f,
+                            rande_f_0: rande_f,
                             rande_train_0: rande_train,
                             label_expand_0: np.asarray(train_true_l)[0:1, :, :, :],
 
@@ -462,7 +462,7 @@ def train():
                                  loss_list_1, evaluation_list_1, evaluation_code_list_1,
                                  loss_list_2, evaluation_list_2, evaluation_code_list_2,
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3,],
+                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3, ],
                                 feed_dict={
                                     x_0: np.asarray(val_true_x)[0:1, :, :, :],
                                     y_0: np.asarray(val_true_y)[0:1, :, :, :],

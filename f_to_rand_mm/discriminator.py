@@ -66,20 +66,20 @@ class Discriminator:
                 relu3 = ops.relu(norm3)
             with tf.variable_scope("conv4_1", reuse=self.reuse):
                 conv4_1 = tf.layers.conv2d(inputs=relu3, filters=4 * self.ngf, kernel_size=3, strides=1,
-                                         padding="SAME",
-                                         activation=None,
-                                         kernel_initializer=tf.random_normal_initializer(
-                                             mean=0.0, stddev=0.02, dtype=tf.float32),
-                                         bias_initializer=tf.constant_initializer(0.0), name='conv4_1')
+                                           padding="SAME",
+                                           activation=None,
+                                           kernel_initializer=tf.random_normal_initializer(
+                                               mean=0.0, stddev=0.02, dtype=tf.float32),
+                                           bias_initializer=tf.constant_initializer(0.0), name='conv4_1')
                 norm4_1 = ops._norm(conv4_1, self.is_training, self.norm)
                 relu4_1 = ops.relu(norm4_1)
             with tf.variable_scope("conv5_1", reuse=self.reuse):
                 output_1 = tf.layers.conv2d(inputs=relu4_1, filters=1, kernel_size=3, strides=1,
-                                          padding="SAME",
-                                          activation=None,
-                                          kernel_initializer=tf.random_normal_initializer(
-                                              mean=0.0, stddev=0.02, dtype=tf.float32),
-                                          bias_initializer=tf.constant_initializer(0.0), name='conv5_1')
+                                            padding="SAME",
+                                            activation=None,
+                                            kernel_initializer=tf.random_normal_initializer(
+                                                mean=0.0, stddev=0.02, dtype=tf.float32),
+                                            bias_initializer=tf.constant_initializer(0.0), name='conv5_1')
 
             with tf.variable_scope("conv4_2", reuse=self.reuse):
                 conv4_2 = tf.layers.conv2d(inputs=relu3, filters=4 * self.ngf, kernel_size=3, strides=1,
@@ -101,4 +101,4 @@ class Discriminator:
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
 
-        return output_1,output_2
+        return output_1, output_2

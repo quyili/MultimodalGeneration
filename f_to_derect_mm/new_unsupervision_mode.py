@@ -50,9 +50,10 @@ class GAN:
     def get_f(self, x):
         f = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = self.ones* tf.cast(f > 0.1, dtype=tf.float32)
+        f = self.ones * tf.cast(f > 0.1, dtype=tf.float32)
         return f
-    def gen(self,f,l,cx,cy,EC_X, EC_Y, DC_X, DC_Y):
+
+    def gen(self, f, l, cx, cy, EC_X, EC_Y, DC_X, DC_Y):
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=6),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         f_rm_expand = tf.concat([
@@ -61,7 +62,8 @@ class GAN:
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8], axis=-1)
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8],
+            axis=-1)
 
         # F_RM -> X_G,Y_G,L_G
         code_rm = self.EC_R(f_rm_expand)
@@ -157,17 +159,18 @@ class GAN:
         G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 1.0
 
-        image_list = [l,f, x_g, y_g, x_g_t, y_g_t,
-                           l_g, l_g_by_x, l_g_by_y,
-                           f_x_g_r, f_y_g_r]
+        image_list = [l, f, x_g, y_g, x_g_t, y_g_t,
+                      l_g, l_g_by_x, l_g_by_y,
+                      f_x_g_r, f_y_g_r]
 
         code_list = [code_rm, code_x_g, code_y_g]
 
         judge_list = [j_x_g, j_y_g, j_code_rm]
 
-        return G_loss, D_X_loss,D_Y_loss,D_F_loss,image_list,code_list,judge_list
+        return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
-    def translate(self,x,y,cx,cy,l_x,l_y,EC_X, EC_Y, DC_X, DC_Y,G_loss=0.0,D_X_loss=0.0,D_Y_loss=0.0,D_F_loss=0.0,image_list=[],code_list=[],judge_list=[]):
+    def translate(self, x, y, cx, cy, l_x, l_y, EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
+                  D_F_loss=0.0, image_list=[], code_list=[], judge_list=[]):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=6),
                                     shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=6),
@@ -248,21 +251,27 @@ class GAN:
         G_loss += self.mse_loss(0.0, x_t * label_expand_y[0]) * 0.5
         G_loss += self.mse_loss(0.0, y_t * label_expand_x[0]) * 0.5
 
-        image_list.extend([x,y,x_r, y_r, x_t, y_t,
-                                l_f_by_x, l_f_by_y])
+        image_list.extend([x, y, x_r, y_r, x_t, y_t,
+                           l_f_by_x, l_f_by_y])
 
         code_list.extend([code_x, code_y])
 
         judge_list.extend([j_x, j_y, j_code_x, j_code_y])
 
-        return  G_loss, D_X_loss,D_Y_loss,D_F_loss,image_list,code_list,judge_list
+        return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
-    def model(self,x, y,cx,cy,l,f,EC_X, EC_Y, DC_X, DC_Y):
-        G_loss,D_X_loss,D_Y_loss,D_F_loss,image_list,code_list,judge_list = self.gen(f, l,cx,cy, EC_X, EC_Y, DC_X, DC_Y)
-        G_loss,D_X_loss,D_Y_loss,D_F_loss,image_list,code_list,judge_list= self.translate(x, y,cx,cy, l,l, EC_X, EC_Y, DC_X, DC_Y, G_loss, D_X_loss,D_Y_loss, D_F_loss,image_list,code_list,judge_list)
-        return G_loss, D_X_loss+D_Y_loss+D_F_loss,image_list,code_list,judge_list
+    def model(self, x, y, cx, cy, l, f, EC_X, EC_Y, DC_X, DC_Y):
+        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.gen(f, l, cx, cy, EC_X, EC_Y,
+                                                                                           DC_X, DC_Y)
+        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,
+                                                                                                 EC_X, EC_Y, DC_X, DC_Y,
+                                                                                                 G_loss, D_X_loss,
+                                                                                                 D_Y_loss, D_F_loss,
+                                                                                                 image_list, code_list,
+                                                                                                 judge_list)
+        return G_loss, D_X_loss + D_Y_loss + D_F_loss, image_list, code_list, judge_list
 
-    def run(self, x, y, z, w, l, rand_f,r):
+    def run(self, x, y, z, w, l, rand_f, r):
         # X,Y -> F
         # 选择f来源模态
         m = tf.case({tf.equal(rand_f, 0): lambda: x,
@@ -271,41 +280,47 @@ class GAN:
                      tf.equal(rand_f, 3): lambda: w}, exclusive=True)
         f = self.get_f(m)  # M -> F
 
-        G_loss_XY, D_loss_XY,image_list_XY,code_list_XY,judge_list_XY = self.model( x, y, 0., 1.,l, f, self.EC_X, self.EC_Y, self.DC_X, self.DC_Y)
+        G_loss_XY, D_loss_XY, image_list_XY, code_list_XY, judge_list_XY = self.model(x, y, 0., 1., l, f, self.EC_X,
+                                                                                      self.EC_Y, self.DC_X, self.DC_Y)
 
-        G_loss_XZ, D_loss_XZ,image_list_XZ,code_list_XZ,judge_list_XZ = self.model( x, z, 0., 2.,l, f, self.EC_X, self.EC_Z, self.DC_X, self.DC_Z)
+        G_loss_XZ, D_loss_XZ, image_list_XZ, code_list_XZ, judge_list_XZ = self.model(x, z, 0., 2., l, f, self.EC_X,
+                                                                                      self.EC_Z, self.DC_X, self.DC_Z)
 
-        G_loss_XW, D_loss_XW,image_list_XW,code_list_XW,judge_list_XW = self.model( x, w, 0., 3.,l, f, self.EC_X, self.EC_W, self.DC_X, self.DC_W)
+        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f, self.EC_X,
+                                                                                      self.EC_W, self.DC_X, self.DC_W)
 
-        G_loss_YZ, D_loss_YZ,image_list_YZ,code_list_YZ,judge_list_YZ = self.model( y, z, 1., 2.,l, f, self.EC_Y, self.EC_Z, self.DC_Y, self.DC_Z)
+        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, self.EC_Y,
+                                                                                      self.EC_Z, self.DC_Y, self.DC_Z)
 
-        G_loss_YW, D_loss_YW,image_list_YW,code_list_YW,judge_list_YW = self.model( y, w, 1., 3.,l, f, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W)
+        G_loss_YW, D_loss_YW, image_list_YW, code_list_YW, judge_list_YW = self.model(y, w, 1., 3., l, f, self.EC_Y,
+                                                                                      self.EC_W, self.DC_Y, self.DC_W)
 
-        G_loss_ZW, D_loss_ZW,image_list_ZW,code_list_ZW,judge_list_ZW = self.model(z, w, 2., 3., l, f,self.EC_Z, self.EC_W, self.DC_Z, self.DC_W)
+        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f, self.EC_Z,
+                                                                                      self.EC_W, self.DC_Z, self.DC_W)
 
-        self.image_list = [image_list_XY,image_list_XZ,image_list_XW,image_list_YZ,image_list_YW,image_list_ZW]
-        self.code_list = [code_list_XY,code_list_XZ,code_list_XW,code_list_YZ,code_list_YW,code_list_ZW]
-        self.judge_list = [judge_list_XY,judge_list_XZ,judge_list_XW,judge_list_YZ,judge_list_YW,judge_list_ZW]
+        self.image_list = [image_list_XY, image_list_XZ, image_list_XW, image_list_YZ, image_list_YW, image_list_ZW]
+        self.code_list = [code_list_XY, code_list_XZ, code_list_XW, code_list_YZ, code_list_YW, code_list_ZW]
+        self.judge_list = [judge_list_XY, judge_list_XZ, judge_list_XW, judge_list_YZ, judge_list_YW, judge_list_ZW]
 
-        loss_list = [G_loss_XY+G_loss_XZ+G_loss_XW+G_loss_YZ+G_loss_YW+G_loss_ZW,
-                     D_loss_XY+D_loss_XZ+D_loss_XW+D_loss_YZ+D_loss_YW+D_loss_ZW]
+        loss_list = [G_loss_XY + G_loss_XZ + G_loss_XW + G_loss_YZ + G_loss_YW + G_loss_ZW,
+                     D_loss_XY + D_loss_XZ + D_loss_XW + D_loss_YZ + D_loss_YW + D_loss_ZW]
 
-        return  loss_list
+        return loss_list
 
     def get_variables(self):
         return [self.EC_R.variables
                 + self.DC_L.variables
                 + self.EC_X.variables
                 + self.DC_X.variables
-                +self.EC_Y.variables
+                + self.EC_Y.variables
                 + self.DC_Y.variables
-                +self.EC_Z.variables
+                + self.EC_Z.variables
                 + self.DC_Z.variables
-                +self.EC_W.variables
+                + self.EC_W.variables
                 + self.DC_W.variables
                 + self.SDC.variables
             ,
-                self.D_M.variables+
+                self.D_M.variables +
                 self.FD_R.variables
                 ]
 
@@ -322,11 +337,11 @@ class GAN:
         return G_optimizer, D_optimizer
 
     def histogram_summary(self, j_list):
-        judge_list_XY, judge_list_XZ, judge_list_XW, judge_list_YZ, judge_list_YW, judge_list_ZW =\
+        judge_list_XY, judge_list_XZ, judge_list_XW, judge_list_YZ, judge_list_YW, judge_list_ZW = \
             j_list[0], j_list[1], j_list[2], j_list[3], j_list[4], j_list[5]
 
         xy_j_x_g, xy_j_y_g, xy_j_code_rm, xy_j_code_x, xy_j_code_y = \
-            judge_list_XY[0],judge_list_XY[1],judge_list_XY[2],judge_list_XY[5],judge_list_XY[6]
+            judge_list_XY[0], judge_list_XY[1], judge_list_XY[2], judge_list_XY[5], judge_list_XY[6]
         xz_j_x_g, xz_j_y_g, xz_j_code_rm, xz_j_code_x, xz_j_code_y = \
             judge_list_XZ[0], judge_list_XZ[1], judge_list_XZ[2], judge_list_XZ[5], judge_list_XZ[6]
         xw_j_x_g, xw_j_y_g, xw_j_code_rm, xw_j_code_x, xw_j_code_y = \
@@ -374,36 +389,47 @@ class GAN:
         tf.summary.histogram('discriminator/FALSE/ZW/j_y_g', zw_j_y_g)
         tf.summary.histogram('discriminator/FALSE/ZW/j_code_rm', zw_j_code_rm)
 
-
     def loss_summary(self, loss_list):
         G_loss, D_loss = loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def evaluation_code(self, code_list):
-        code_list_XY, code_list_XZ, code_list_XW, code_list_YZ, code_list_YW, code_list_ZW =\
+        code_list_XY, code_list_XZ, code_list_XW, code_list_YZ, code_list_YW, code_list_ZW = \
             code_list[0], code_list[1], code_list[2], code_list[3], code_list[4], code_list[5]
 
-        xy_code_rm, xy_code_x_g, xy_code_y_g = code_list_XY[0],code_list_XY[1],code_list_XY[3]
+        xy_code_rm, xy_code_x_g, xy_code_y_g = code_list_XY[0], code_list_XY[1], code_list_XY[3]
         xz_code_rm, xz_code_x_g, xz_code_y_g = code_list_XZ[0], code_list_XZ[1], code_list_XZ[3]
         xw_code_rm, xw_code_x_g, xw_code_y_g = code_list_XW[0], code_list_XW[1], code_list_XW[3]
         yz_code_rm, yz_code_x_g, yz_code_y_g = code_list_YZ[0], code_list_YZ[1], code_list_YZ[3]
         yw_code_rm, yw_code_x_g, yw_code_y_g = code_list_YW[0], code_list_YW[1], code_list_YW[3]
         zw_code_rm, zw_code_x_g, zw_code_y_g = code_list_ZW[0], code_list_ZW[1], code_list_ZW[3]
 
-        list = [self.PSNR(xy_code_rm, xy_code_x_g), self.PSNR(xy_code_rm, xy_code_y_g), self.PSNR(xy_code_x_g, xy_code_y_g),
-                self.PSNR(xz_code_rm, xz_code_x_g), self.PSNR(xz_code_rm, xz_code_y_g), self.PSNR(xz_code_x_g, xz_code_y_g),
-                self.PSNR(xw_code_rm, xw_code_x_g), self.PSNR(xw_code_rm, xw_code_y_g), self.PSNR(xw_code_x_g, xw_code_y_g),
-                self.PSNR(yz_code_rm, yz_code_x_g), self.PSNR(yz_code_rm, yz_code_y_g), self.PSNR(yz_code_x_g, yz_code_y_g),
-                self.PSNR(yw_code_rm, yw_code_x_g), self.PSNR(yw_code_rm, yw_code_y_g), self.PSNR(yw_code_x_g, yw_code_y_g),
-                self.PSNR(zw_code_rm, zw_code_x_g), self.PSNR(zw_code_rm, zw_code_y_g), self.PSNR(zw_code_x_g, zw_code_y_g),
+        list = [self.PSNR(xy_code_rm, xy_code_x_g), self.PSNR(xy_code_rm, xy_code_y_g),
+                self.PSNR(xy_code_x_g, xy_code_y_g),
+                self.PSNR(xz_code_rm, xz_code_x_g), self.PSNR(xz_code_rm, xz_code_y_g),
+                self.PSNR(xz_code_x_g, xz_code_y_g),
+                self.PSNR(xw_code_rm, xw_code_x_g), self.PSNR(xw_code_rm, xw_code_y_g),
+                self.PSNR(xw_code_x_g, xw_code_y_g),
+                self.PSNR(yz_code_rm, yz_code_x_g), self.PSNR(yz_code_rm, yz_code_y_g),
+                self.PSNR(yz_code_x_g, yz_code_y_g),
+                self.PSNR(yw_code_rm, yw_code_x_g), self.PSNR(yw_code_rm, yw_code_y_g),
+                self.PSNR(yw_code_x_g, yw_code_y_g),
+                self.PSNR(zw_code_rm, zw_code_x_g), self.PSNR(zw_code_rm, zw_code_y_g),
+                self.PSNR(zw_code_x_g, zw_code_y_g),
 
-                self.SSIM(xy_code_rm, xy_code_x_g), self.SSIM(xy_code_rm, xy_code_y_g), self.SSIM(xy_code_x_g, xy_code_y_g),
-                self.SSIM(xz_code_rm, xz_code_x_g), self.SSIM(xz_code_rm, xz_code_y_g), self.SSIM(xz_code_x_g, xz_code_y_g),
-                self.SSIM(xw_code_rm, xw_code_x_g), self.SSIM(xw_code_rm, xw_code_y_g), self.SSIM(xw_code_x_g, xw_code_y_g),
-                self.SSIM(yz_code_rm, yz_code_x_g), self.SSIM(yz_code_rm, yz_code_y_g), self.SSIM(yz_code_x_g, yz_code_y_g),
-                self.SSIM(yw_code_rm, yw_code_x_g), self.SSIM(yw_code_rm, yw_code_y_g), self.SSIM(yw_code_x_g, yw_code_y_g),
-                self.SSIM(zw_code_rm, zw_code_x_g), self.SSIM(zw_code_rm, zw_code_y_g), self.SSIM(zw_code_x_g, zw_code_y_g)]
+                self.SSIM(xy_code_rm, xy_code_x_g), self.SSIM(xy_code_rm, xy_code_y_g),
+                self.SSIM(xy_code_x_g, xy_code_y_g),
+                self.SSIM(xz_code_rm, xz_code_x_g), self.SSIM(xz_code_rm, xz_code_y_g),
+                self.SSIM(xz_code_x_g, xz_code_y_g),
+                self.SSIM(xw_code_rm, xw_code_x_g), self.SSIM(xw_code_rm, xw_code_y_g),
+                self.SSIM(xw_code_x_g, xw_code_y_g),
+                self.SSIM(yz_code_rm, yz_code_x_g), self.SSIM(yz_code_rm, yz_code_y_g),
+                self.SSIM(yz_code_x_g, yz_code_y_g),
+                self.SSIM(yw_code_rm, yw_code_x_g), self.SSIM(yw_code_rm, yw_code_y_g),
+                self.SSIM(yw_code_x_g, yw_code_y_g),
+                self.SSIM(zw_code_rm, zw_code_x_g), self.SSIM(zw_code_rm, zw_code_y_g),
+                self.SSIM(zw_code_x_g, zw_code_y_g)]
         return list
 
     def evaluation_code_summary(self, evluation_list):
@@ -445,24 +471,29 @@ class GAN:
         tf.summary.scalar('evaluation_code/SSIM/ZW/code_rm__VS__code_y_g', evluation_list[34])
         tf.summary.scalar('evaluation_code/SSIM/ZW/code_x_g__VS__code_y_g', evluation_list[35])
 
-
     def evaluation(self, image_list):
         image_list_XY, image_list_XZ, image_list_XW, image_list_YZ, image_list_YW, image_list_ZW = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]
 
         xy_l, xy_l_g, xy_x, xy_y, xy_x_r, xy_y_r = \
-            image_list_XY[0],image_list_XY[6],image_list_XY[11],image_list_XY[12],image_list_XY[13],image_list_XY[14]
+            image_list_XY[0], image_list_XY[6], image_list_XY[11], image_list_XY[12], image_list_XY[13], image_list_XY[
+                14]
         xz_l, xz_l_g, xz_x, xz_y, xz_x_r, xz_y_r = \
-            image_list_XZ[0], image_list_XZ[6], image_list_XZ[11], image_list_XZ[12], image_list_XZ[13], image_list_XZ[14]
+            image_list_XZ[0], image_list_XZ[6], image_list_XZ[11], image_list_XZ[12], image_list_XZ[13], image_list_XZ[
+                14]
         xw_l, xw_l_g, xw_x, xw_y, xw_x_r, xw_y_r = \
-            image_list_XW[0], image_list_XW[6], image_list_XW[11], image_list_XW[12], image_list_XW[13], image_list_XW[14]
+            image_list_XW[0], image_list_XW[6], image_list_XW[11], image_list_XW[12], image_list_XW[13], image_list_XW[
+                14]
         yz_l, yz_l_g, yz_x, yz_y, yz_x_r, yz_y_r = \
-            image_list_YZ[0], image_list_YZ[6], image_list_YZ[11], image_list_YZ[12], image_list_YZ[13], image_list_YZ[14]
+            image_list_YZ[0], image_list_YZ[6], image_list_YZ[11], image_list_YZ[12], image_list_YZ[13], image_list_YZ[
+                14]
         yw_l, yw_l_g, yw_x, yw_y, yw_x_r, yw_y_r = \
-            image_list_YW[0], image_list_YW[6], image_list_YW[11], image_list_YW[12], image_list_YW[13], image_list_YW[14]
+            image_list_YW[0], image_list_YW[6], image_list_YW[11], image_list_YW[12], image_list_YW[13], image_list_YW[
+                14]
         zw_l, zw_l_g, zw_x, zw_y, zw_x_r, zw_y_r = \
-            image_list_ZW[0], image_list_ZW[6], image_list_ZW[11], image_list_ZW[12], image_list_ZW[13], image_list_ZW[14]
-        list = [ self.PSNR(xy_x, xy_x_r), self.PSNR(xy_y, xy_y_r),
+            image_list_ZW[0], image_list_ZW[6], image_list_ZW[11], image_list_ZW[12], image_list_ZW[13], image_list_ZW[
+                14]
+        list = [self.PSNR(xy_x, xy_x_r), self.PSNR(xy_y, xy_y_r),
                 self.PSNR(xy_l, xy_l_g),
 
                 self.PSNR(xz_x, xz_x_r), self.PSNR(xz_y, xz_y_r),
@@ -489,7 +520,7 @@ class GAN:
                 self.SSIM(xw_x, xw_x_r), self.SSIM(xw_y, xw_y_r),
                 self.SSIM(xw_l, xw_l_g),
 
-                self.SSIM(yz_x, yz_x_r),self.SSIM(yz_y, yz_y_r),
+                self.SSIM(yz_x, yz_x_r), self.SSIM(yz_y, yz_y_r),
                 self.SSIM(yz_l, yz_l_g),
 
                 self.SSIM(yw_x, yw_x_r), self.SSIM(yw_y, yw_y_r),
@@ -539,14 +570,14 @@ class GAN:
         tf.summary.scalar('evaluation/SSIM/ZW/y__VS__y_r', evluation_list[34])
         tf.summary.scalar('evaluation/SSIM/ZW/l_input__VS__l_g', evluation_list[35])
 
-
     def image_summary(self, image_list):
         image_list_XY, image_list_XZ, image_list_XW, image_list_YZ, image_list_YW, image_list_ZW = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]
 
-        xy_l, xy_f,xy_x_g, xy_y_g, xy_l_g, xy_l_g_by_x, xy_l_g_by_y, xy_f_x_g_r, xy_f_y_g_r,x, y, xy_x_r, xy_y_r = \
-            image_list_XY[0], image_list_XY[1], image_list_XY[2],image_list_XY[3],image_list_XY[6],image_list_XY[7], \
-            image_list_XY[8], image_list_XY[9], image_list_XY[10], image_list_XY[11], image_list_XY[12], image_list_XY[13], image_list_XY[14]
+        xy_l, xy_f, xy_x_g, xy_y_g, xy_l_g, xy_l_g_by_x, xy_l_g_by_y, xy_f_x_g_r, xy_f_y_g_r, x, y, xy_x_r, xy_y_r = \
+            image_list_XY[0], image_list_XY[1], image_list_XY[2], image_list_XY[3], image_list_XY[6], image_list_XY[7], \
+            image_list_XY[8], image_list_XY[9], image_list_XY[10], image_list_XY[11], image_list_XY[12], image_list_XY[
+                13], image_list_XY[14]
 
         xz_l, xz_f, xz_x_g, xz_y_g, xz_l_g, xz_l_g_by_x, xz_l_g_by_y, xz_f_x_g_r, xz_f_y_g_r, xz_x_r, xz_y_r = \
             image_list_XZ[0], image_list_XZ[1], image_list_XZ[2], image_list_XZ[3], image_list_XZ[6], image_list_XZ[7], \
@@ -563,7 +594,8 @@ class GAN:
 
         zw_l, zw_f, zw_x_g, zw_y_g, zw_l_g, zw_l_g_by_x, zw_l_g_by_y, zw_f_x_g_r, zw_f_y_g_r, z, w, zw_x_r, zw_y_r = \
             image_list_ZW[0], image_list_ZW[1], image_list_ZW[2], image_list_ZW[3], image_list_ZW[6], image_list_ZW[7], \
-            image_list_ZW[8], image_list_ZW[9], image_list_ZW[10], image_list_ZW[11], image_list_ZW[12], image_list_ZW[13], image_list_ZW[14]
+            image_list_ZW[8], image_list_ZW[9], image_list_ZW[10], image_list_ZW[11], image_list_ZW[12], image_list_ZW[
+                13], image_list_ZW[14]
 
         tf.summary.image('image/x', x)
         tf.summary.image('image/y', y)
@@ -666,4 +698,3 @@ class GAN:
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])
                   ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output
-

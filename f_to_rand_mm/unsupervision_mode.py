@@ -297,6 +297,7 @@ class GAN:
             loss_list = self.model(f, l, x, w, 0, 3, self.EC_X, self.EC_W, self.DC_X, self.DC_W)
             self.G_variables = self.EC_X.variables + self.EC_W.variables + self.DC_X.variables + self.DC_W.variables
             return loss_list
+
         #
         # # def yw_model():
         # #     loss_list = self.model(f, l, y, w, 1, 3, self.EC_Y, self.EC_W, self.DC_Y, self.DC_W)

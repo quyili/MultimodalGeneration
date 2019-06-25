@@ -24,12 +24,12 @@ class MDecoder:
             DC_input = tf.nn.dropout(DC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0_1", reuse=self.reuse):
                 conv0_1 = tf.layers.conv2d(inputs=DC_input, filters=2 * self.ngf, kernel_size=3, strides=1,
-                                         padding="SAME",
-                                         activation=None,
-                                         kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001,
-                                             dtype=tf.float32),
-                                         bias_initializer=tf.constant_initializer(0.0), name='conv0_1')
+                                           padding="SAME",
+                                           activation=None,
+                                           kernel_initializer=tf.random_normal_initializer(
+                                               mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001,
+                                               dtype=tf.float32),
+                                           bias_initializer=tf.constant_initializer(0.0), name='conv0_1')
                 norm0_1 = ops._norm(conv0_1, self.is_training, self.norm)
                 relu0_1 = ops.relu(norm0_1)
             with tf.variable_scope("conv0_2", reuse=self.reuse):
@@ -43,8 +43,9 @@ class MDecoder:
                 norm0_2 = ops._norm(conv0_2, self.is_training, self.norm)
                 relu0_2 = ops.relu(norm0_2)
             with tf.variable_scope("concat0", reuse=self.reuse):
-                shape=DC_input.get_shape().as_list()
-                concat0=tf.reshape(tf.concat([relu0_1,relu0_2],axis=-1),shape=[shape[0],shape[1],shape[2],4 * self.ngf])
+                shape = DC_input.get_shape().as_list()
+                concat0 = tf.reshape(tf.concat([relu0_1, relu0_2], axis=-1),
+                                     shape=[shape[0], shape[1], shape[2], 4 * self.ngf])
             with tf.variable_scope("conv1", reuse=self.reuse):
                 conv1 = tf.layers.conv2d(inputs=concat0, filters=2 * self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
