@@ -40,7 +40,7 @@ class GAN:
         self.DC_Z = Decoder('DC_Z', ngf=ngf)
         self.DC_W = Decoder('DC_W', ngf=ngf)
 
-        self.D = Discriminator('D', ngf=ngf)
+        self.D_M = Discriminator('D_M', ngf=ngf)
 
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
 
@@ -214,10 +214,10 @@ class GAN:
     def judge(self, x, y, cx, cy, G_loss=0.0, D_loss=0.0):
         x_g, y_g = self.image_list[0], self.image_list[1]
         code_rm, code_x, code_y = self.code_list[0], self.code_list[3], self.code_list[4]
-        j_x, j_x_c = self.D(x)
-        j_x_g, j_x_g_c = self.D(x_g)
-        j_y, j_y_c = self.D(y)
-        j_y_g, j_y_g_c = self.D(y_g)
+        j_x, j_x_c = self.D_M(x)
+        j_x_g, j_x_g_c = self.D_M(x_g)
+        j_y, j_y_c = self.D_M(y)
+        j_y_g, j_y_g_c = self.D_M(y_g)
 
         j_code_rm = self.FD_R(code_rm)
         j_code_x = self.FD_R(code_x)
@@ -308,7 +308,7 @@ class GAN:
                              tf.equal(rand_train, 2): xw_model,
                              tf.equal(rand_train, 3): yz_model,
                              tf.equal(rand_train, 4): yw_model,
-                             tf.equal(rand_train, 5): zw_model, }, exclusive=True)
+                             tf.equal(rand_train, 5): zw_model }, exclusive=True)
 
         # image_list=[x,y,f,l,
         # x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r,
@@ -326,7 +326,7 @@ class GAN:
                 + self.EC_R.variables
                 + self.DC_L.variables
             ,
-                self.D.variables
+                self.D_M.variables
                 + self.FD_R.variables
                 ]
 
