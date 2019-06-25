@@ -3,6 +3,8 @@ import tensorflow as tf
 from discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
+from shared_decoder import SDecoder
+from m_decoder import MDecoder
 from decoder import Decoder
 
 
@@ -35,10 +37,12 @@ class GAN:
         self.EC_Z = Encoder('EC_Z', ngf=ngf)
         self.EC_W = Encoder('EC_W', ngf=ngf)
 
-        self.DC_X = Decoder('DC_X', ngf=ngf)
-        self.DC_Y = Decoder('DC_Y', ngf=ngf)
-        self.DC_Z = Decoder('DC_Z', ngf=ngf)
-        self.DC_W = Decoder('DC_W', ngf=ngf)
+        self.SDC = SDecoder('SHARED_DC', ngf=ngf)
+
+        self.DC_X = MDecoder('MDC_X', ngf=ngf)
+        self.DC_Y = MDecoder('MDC_Y', ngf=ngf)
+        self.DC_Z = MDecoder('MDC_Z', ngf=ngf)
+        self.DC_W = MDecoder('MDC_W', ngf=ngf)
 
         self.D_M = Discriminator('D_M', ngf=ngf)
 
@@ -65,8 +69,8 @@ class GAN:
         code_rm = self.EC_R(f_rm_expand)
         l_g_prob = self.DC_L(code_rm)
 
-        x_g = DC_X(code_rm)
-        y_g = DC_Y(code_rm)
+        x_g = DC_X(self.SDC(code_rm))
+        y_g = DC_Y(self.SDC(code_rm))
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
 
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
@@ -84,9 +88,9 @@ class GAN:
         l_g_by_y = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
         # X_G -> Y_G_T
-        y_g_t = DC_Y(code_x_g)
+        y_g_t = DC_Y(self.SDC(code_x_g))
         # Y_G -> X_G_T
-        x_g_t = DC_X(code_y_g)
+        x_g_t = DC_X(self.SDC(code_y_g))
 
         # 输入的结构特征图的重建自监督损失
         G_loss += self.mse_loss(f, f_x_g_r) * 5
@@ -146,14 +150,14 @@ class GAN:
                                     shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         # X -> X_R
         code_x = EC_X(x)
-        x_r = DC_X(code_x)
+        x_r = DC_X(self.SDC(code_x))
         # Y -> Y_R
         code_y = EC_Y(y)
-        y_r = DC_Y(code_y)
+        y_r = DC_Y(self.SDC(code_y))
         # X -> Y_T
-        y_t = DC_Y(code_x)
+        y_t = DC_Y(self.SDC(code_x))
         # Y -> X_T
-        x_t = DC_X(code_y)
+        x_t = DC_X(self.SDC(code_y))
         # X -> L_X
         l_f_prob_by_x = self.DC_L(code_x)
         l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
@@ -164,11 +168,11 @@ class GAN:
                               shape=self.input_shape)
         # Y_T -> X_C_R
         code_y_t = EC_Y(y_t)
-        x_c_r = DC_X(code_y_t)
+        x_c_r = DC_X(self.SDC(code_y_t))
 
         # X_T -> Y_C_R
         code_x_t = EC_X(x_t)
-        y_c_r = DC_Y(code_x_t)
+        y_c_r = DC_Y(self.SDC(code_x_t))
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
         G_loss += self.mse_loss(x, x_r) * 5
@@ -318,6 +322,7 @@ class GAN:
         return [self.G_variables
                 + self.EC_R.variables
                 + self.DC_L.variables
+                + self.SDC.variables
             ,
                 self.D_M.variables
                 + self.FD_R.variables
