@@ -236,6 +236,8 @@ class GAN:
         # TODO 交叉熵损失函数
         D_loss += self.mse_loss(j_x_c, cx) * 25
         D_loss += self.mse_loss(j_y_c, cy) * 25
+        D_loss += self.mse_loss(j_x_g_c, cx) * 25
+        D_loss += self.mse_loss(j_y_g_c, cy) * 25
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图
@@ -309,15 +311,6 @@ class GAN:
                              tf.equal(rand_train, 3): yz_model,
                              tf.equal(rand_train, 4): yw_model,
                              tf.equal(rand_train, 5): zw_model }, exclusive=True)
-
-        # image_list=[x,y,f,l,
-        # x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r,
-        #  x_r, y_r, x_t, y_t, x_c_r, y_c_r, l_f_by_x, l_f_by_y]
-        #
-        # code_list =[code_rm, code_x_g, code_y_g,
-        #  code_x, code_y]
-        #
-        # judge_list = [j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm]
 
         return loss_list
 

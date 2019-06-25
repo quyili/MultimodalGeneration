@@ -354,6 +354,8 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
+                    logging.info(
+                        "-----------rande_f: " + str(rande_f) + ", rande_train: " + str(rande_train) + "-------------")
                     _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
                         [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
                         feed_dict={
