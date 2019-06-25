@@ -333,13 +333,8 @@ def train():
                         epoch = int(index / len(Label_train_files))
                         index = index + 1
 
-                    rande_f = np.random.randint(4)
-                    rande_train = np.random.randint(4)
-
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    logging.info(
-                        "-----------rande_f: " + str(rande_f) + ", rande_train: " + str(rande_train) + "-------------")
                     _, train_image_summary_op, \
                     train_losses_0, train_evaluations_0, train_evaluation_codes_0, \
                     train_losses_1, train_evaluations_1, train_evaluation_codes_1, \
