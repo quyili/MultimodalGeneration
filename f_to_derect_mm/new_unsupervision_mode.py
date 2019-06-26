@@ -53,7 +53,7 @@ class GAN:
         f = self.ones * tf.cast(f > 0.1, dtype=tf.float32)
         return f
 
-    def gen(self, f, l, cx, cy, EC_X, EC_Y, DC_X, DC_Y):
+    def gen_encode(self,f, l,x, y, z, w,):
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=6),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         f_rm_expand = tf.concat([
@@ -67,8 +67,23 @@ class GAN:
 
         # F_RM -> X_G,Y_G,L_G
         code_rm = self.EC_R(f_rm_expand)
-        x_g = DC_X(self.SDC(code_rm))
-        y_g = DC_Y(self.SDC(code_rm))
+
+        code_x = self.EC_X(x)
+        code_y = self.EC_Y(y)
+        code_z = self.EC_Z(z)
+        code_w = self.EC_W(w)
+
+        mid_code_x = self.SDC(code_x)
+        mid_code_y = self.SDC(code_y)
+        mid_code_z = self.SDC(code_z)
+        mid_code_w = self.SDC(code_w)
+
+        return label_expand,code_rm,code_x,code_y,code_z,code_w,mid_code_x,mid_code_y,mid_code_z,mid_code_w
+
+    def gen(self, f, l, cx, cy,label_expand,code_rm, EC_X, EC_Y, DC_X, DC_Y):
+        mid_code_rm=self.SDC(code_rm)
+        x_g = DC_X(mid_code_rm)
+        y_g = DC_Y(mid_code_rm)
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
 
@@ -169,22 +184,21 @@ class GAN:
 
         return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
-    def translate(self, x, y, cx, cy, l_x, l_y, EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
+
+    def translate(self, x, y, cx, cy, l_x, l_y, code_x,code_y,EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
                   D_F_loss=0.0, image_list=[], code_list=[], judge_list=[]):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=6),
                                     shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=6),
                                     shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         # X -> X_R
-        code_x = EC_X(x)
-        x_r = DC_X(self.SDC(code_x))
+        x_r = DC_X(mid_code_x)
         # Y -> Y_R
-        code_y = EC_Y(y)
-        y_r = DC_Y(self.SDC(code_y))
+        y_r = DC_Y(mid_code_y)
         # X -> Y_T
-        y_t = DC_Y(self.SDC(code_x))
+        y_t = DC_Y(mid_code_x)
         # Y -> X_T
-        x_t = DC_X(self.SDC(code_y))
+        x_t = DC_X(mid_code_y)
         # X -> L_X
         l_f_prob_by_x = self.DC_L(code_x)
         l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
@@ -260,10 +274,10 @@ class GAN:
 
         return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
-    def model(self, x, y, cx, cy, l, f, EC_X, EC_Y, DC_X, DC_Y):
-        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.gen(f, l, cx, cy, EC_X, EC_Y,
+    def model(self, x, y, cx, cy, l, f, label_expand,code_rm,code_x,code_y,mid_code_x,mid_code_y,EC_X, EC_Y, DC_X, DC_Y):
+        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.gen(f, l, cx, cy, label_expand,code_rm,EC_X, EC_Y,
                                                                                            DC_X, DC_Y)
-        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,
+        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,code_x,code_y,
                                                                                                  EC_X, EC_Y, DC_X, DC_Y,
                                                                                                  G_loss, D_X_loss,
                                                                                                  D_Y_loss, D_F_loss,
@@ -271,39 +285,33 @@ class GAN:
                                                                                                  judge_list)
         return G_loss, D_X_loss + D_Y_loss + D_F_loss, image_list, code_list, judge_list
 
-    def run(self, x, y, z, w, l, rand_f, r):
+    def run(self, x, y, z, w, l):
         # X,Y -> F
         # 选择f来源模态
+        rand_f = tf.random_uniform([], 0, 4, dtype=tf.int32)
         m = tf.case({tf.equal(rand_f, 0): lambda: x,
                      tf.equal(rand_f, 1): lambda: y,
                      tf.equal(rand_f, 2): lambda: z,
                      tf.equal(rand_f, 3): lambda: w}, exclusive=True)
         f = self.get_f(m)  # M -> F
 
-        G_loss_XY, D_loss_XY, image_list_XY, code_list_XY, judge_list_XY = self.model(x, y, 0., 1., l, f, self.EC_X,
+        label_expand,code_rm,code_x,code_y,code_z,code_w,mid_code_x,mid_code_y,mid_code_z,mid_code_w=self.gen_encode( f, l,x, y, z, w)
+
+        G_loss_XY, D_loss_XY, image_list_XY, code_list_XY, judge_list_XY = self.model(x, y, 0., 1., l, f, label_expand,code_rm,code_x,code_y,mid_code_x,mid_code_y,self.EC_X,
                                                                                       self.EC_Y, self.DC_X, self.DC_Y)
-
-        G_loss_XZ, D_loss_XZ, image_list_XZ, code_list_XZ, judge_list_XZ = self.model(x, z, 0., 2., l, f, self.EC_X,
-                                                                                      self.EC_Z, self.DC_X, self.DC_Z)
-
-        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f, self.EC_X,
+        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, label_expand,code_rm,code_y,code_z,self.EC_Y,
+                                                                                      self.EC_Z, self.DC_Y, self.DC_Z)
+        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f, label_expand,code_rm,code_z,code_w,self.EC_Z,
+                                                                                      self.EC_W, self.DC_Z, self.DC_W)
+        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f, label_expand,code_rm,code_w,code_x,self.EC_X,
                                                                                       self.EC_W, self.DC_X, self.DC_W)
 
-        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, self.EC_Y,
-                                                                                      self.EC_Z, self.DC_Y, self.DC_Z)
+        self.image_list = [image_list_XY, image_list_XW, image_list_YZ, image_list_ZW]
+        self.code_list = [code_list_XY, code_list_XW, code_list_YZ, code_list_ZW]
+        self.judge_list = [judge_list_XY, judge_list_XW, judge_list_YZ, judge_list_ZW]
 
-        G_loss_YW, D_loss_YW, image_list_YW, code_list_YW, judge_list_YW = self.model(y, w, 1., 3., l, f, self.EC_Y,
-                                                                                      self.EC_W, self.DC_Y, self.DC_W)
-
-        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f, self.EC_Z,
-                                                                                      self.EC_W, self.DC_Z, self.DC_W)
-
-        self.image_list = [image_list_XY, image_list_XZ, image_list_XW, image_list_YZ, image_list_YW, image_list_ZW]
-        self.code_list = [code_list_XY, code_list_XZ, code_list_XW, code_list_YZ, code_list_YW, code_list_ZW]
-        self.judge_list = [judge_list_XY, judge_list_XZ, judge_list_XW, judge_list_YZ, judge_list_YW, judge_list_ZW]
-
-        loss_list = [G_loss_XY + G_loss_XZ + G_loss_XW + G_loss_YZ + G_loss_YW + G_loss_ZW,
-                     D_loss_XY + D_loss_XZ + D_loss_XW + D_loss_YZ + D_loss_YW + D_loss_ZW]
+        loss_list = [G_loss_XY  + G_loss_XW + G_loss_YZ  + G_loss_ZW,
+                     D_loss_XY  + D_loss_XW + D_loss_YZ  + D_loss_ZW]
 
         return loss_list
 
