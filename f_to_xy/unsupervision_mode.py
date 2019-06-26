@@ -22,6 +22,7 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
+        self.ones = tf.ones(self.input_shape, name="ones")
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
