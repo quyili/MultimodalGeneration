@@ -37,10 +37,10 @@ class GAN:
         # L
         l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
                        shape=self.input_shape)
-        label_expand_x=label_expand
-        label_expand_y=label_expand
-        l_x=l
-        l_y=l
+        label_expand_x = label_expand
+        label_expand_y = label_expand
+        l_x = l
+        l_y = l
         ones = tf.ones(self.input_shape, name="ones")
 
         # X,Y -> F
@@ -174,8 +174,6 @@ class GAN:
         G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 1.0
 
-
-
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
         G_loss += self.mse_loss(x, x_r) * 5
         G_loss += self.mse_loss(y, y_r) * 5
@@ -207,10 +205,10 @@ class GAN:
         G_loss += self.mse_loss(code_y, code_x_t) * 5
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_r * label_expand_x[0])* 0.5
-        G_loss += self.mse_loss(0.0, y_r * label_expand_y[0])* 0.5
-        G_loss += self.mse_loss(0.0, x_t * label_expand_y[0])* 0.5
-        G_loss += self.mse_loss(0.0, y_t * label_expand_x[0])* 0.5
+        G_loss += self.mse_loss(0.0, x_r * label_expand_x[0]) * 0.5
+        G_loss += self.mse_loss(0.0, y_r * label_expand_y[0]) * 0.5
+        G_loss += self.mse_loss(0.0, x_t * label_expand_y[0]) * 0.5
+        G_loss += self.mse_loss(0.0, y_t * label_expand_x[0]) * 0.5
 
         image_list = [x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
                       l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
@@ -218,14 +216,14 @@ class GAN:
 
         code_list = [code_x, code_y, code_rm, code_x_g, code_y_g]
 
-        j_list = [j_x, j_x_g, j_y, j_y_g,]
+        j_list = [j_x, j_x_g, j_y, j_y_g, ]
 
         loss_list = [G_loss, D_loss]
 
         return image_list, code_list, j_list, loss_list, ones * 0.5, f_rm_expand
 
     def get_variables(self):
-        return [ self.EC_Y.variables
+        return [self.EC_Y.variables
                 + self.DC_Y.variables,
 
                 self.D_Y.variables
@@ -251,7 +249,6 @@ class GAN:
 
         tf.summary.histogram('discriminator/FALSE/j_x_g', j_x_g)
         tf.summary.histogram('discriminator/FALSE/j_y_g', j_y_g)
-
 
     def loss_summary(self, loss_list):
         G_loss, D_loss = loss_list[0], loss_list[1]
