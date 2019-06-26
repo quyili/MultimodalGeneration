@@ -41,19 +41,18 @@ class GAN:
         l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
 
-
         # X模态图分割训练的有监督损失
-        G_loss = self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0])  \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 15 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 15 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 15
+        G_loss = self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) \
+                 + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) \
+                 + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
+                 + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 15 \
+                 + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 15 \
+                 + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 15
         G_loss += self.mse_loss(l, l_f_by_x) * 10
 
         # Y模态图分割训练的有监督损失
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0])  \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1])  \
+        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) \
                   + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 15 \
@@ -65,7 +64,7 @@ class GAN:
         return image_list, G_loss
 
     def get_variables(self):
-        variables= self.EC_X.variables+ self.EC_Y.variables+ self.DC_X_L.variables + self.DC_Y_L.variables
+        variables = self.EC_X.variables + self.EC_Y.variables + self.DC_X_L.variables + self.DC_Y_L.variables
         return variables
 
     def optimize(self):
@@ -80,7 +79,7 @@ class GAN:
         return G_optimizer
 
     def loss_summary(self, loss):
-        G_loss= loss
+        G_loss = loss
         tf.summary.scalar('loss', G_loss)
 
     def evaluation(self, image_list):
@@ -93,9 +92,8 @@ class GAN:
         tf.summary.scalar('evaluation/IOU/l_input__VS__l_f_by_x', evluation_list[0])
         tf.summary.scalar('evaluation/IOU/l_input__VS__l_f_by_y', evluation_list[1])
 
-
     def image_summary(self, image_list):
-        x, y,l_input, l_f_by_x, l_f_by_y= \
+        x, y, l_input, l_f_by_x, l_f_by_y = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4]
 
         tf.summary.image('image/x', x)
@@ -105,7 +103,7 @@ class GAN:
         tf.summary.image('image/l_f_by_y', l_f_by_y)
 
     def iou(self, label, predict):
-        iou_op = tf.metrics.mean_iou(label,predict,6)
+        iou_op = tf.metrics.mean_iou(label, predict, 6)
         mean_iou = iou_op[0]
         return mean_iou
 

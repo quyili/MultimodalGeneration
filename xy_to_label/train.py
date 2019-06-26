@@ -83,7 +83,7 @@ def expand(train_M_arr_, train_L_arr_):
 
 
 def save_images(image_list, checkpoints_dir, file_index):
-    val_true_x, val_true_y,val_l_input, val_l_f_by_x, val_l_f_by_y  = image_list
+    val_true_x, val_true_y, val_l_input, val_l_f_by_x, val_l_f_by_y = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_input)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_label_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l_f_by_x)[0, :, :, 0]),
@@ -147,7 +147,7 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
             input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-            G_optimizer= gan.optimize()
+            G_optimizer = gan.optimize()
             G_grad_list = []
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
@@ -157,7 +157,7 @@ def train():
                         label_expand_0 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_0,  loss_list_0 = gan.model(x_0, y_0, label_expand_0)
+                        image_list_0, loss_list_0 = gan.model(x_0, y_0, label_expand_0)
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0, var_list=variables_list_0)
@@ -169,7 +169,7 @@ def train():
                         label_expand_1 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_1,loss_list_1 = gan.model(x_1, y_1, label_expand_1)
+                        image_list_1, loss_list_1 = gan.model(x_1, y_1, label_expand_1)
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1, var_list=variables_list_1)
@@ -181,7 +181,7 @@ def train():
                         label_expand_2 = tf.placeholder(tf.float32,
                                                         shape=[int(FLAGS.batch_size / 4), FLAGS.image_size[0],
                                                                FLAGS.image_size[1], 6])
-                        image_list_2,loss_list_2 = gan.model(x_2, y_2, label_expand_2)
+                        image_list_2, loss_list_2 = gan.model(x_2, y_2, label_expand_2)
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         variables_list_2 = gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(loss_list_2, var_list=variables_list_2)
@@ -346,7 +346,7 @@ def train():
                                     val_true_l.append(L_arr)
                                     val_index += 1
 
-                                val_losses_0, val_evaluations_0,\
+                                val_losses_0, val_evaluations_0, \
                                 val_losses_1, val_evaluations_1, \
                                 val_losses_2, val_evaluations_2, \
                                 val_losses_3, val_evaluations_3, \
@@ -381,7 +381,6 @@ def train():
                                 val_evaluation_list.append(val_evaluations_1)
                                 val_evaluation_list.append(val_evaluations_2)
                                 val_evaluation_list.append(val_evaluations_3)
-
 
                                 if j == 0: save_images(val_image_list_3, checkpoints_dir, val_index - 1)
 

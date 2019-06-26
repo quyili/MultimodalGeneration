@@ -299,11 +299,11 @@ class GAN:
 
         G_loss_XY, D_loss_XY, image_list_XY, code_list_XY, judge_list_XY = self.model(x, y, 0., 1., l, f, label_expand,code_rm,code_x,code_y,mid_code_x,mid_code_y,self.EC_X,
                                                                                       self.EC_Y, self.DC_X, self.DC_Y)
-        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, label_expand,code_rm,code_y,code_z,self.EC_Y,
+        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, label_expand,code_rm,code_y,code_z,mid_code_y,mid_code_z,self.EC_Y,
                                                                                       self.EC_Z, self.DC_Y, self.DC_Z)
-        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f, label_expand,code_rm,code_z,code_w,self.EC_Z,
+        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f, label_expand,code_rm,code_z,code_w,mid_code_z,mid_code_w,self.EC_Z,
                                                                                       self.EC_W, self.DC_Z, self.DC_W)
-        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f, label_expand,code_rm,code_w,code_x,self.EC_X,
+        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f, label_expand,code_rm,code_w,code_x,mid_code_w,mid_code_x,self.EC_X,
                                                                                       self.EC_W, self.DC_X, self.DC_W)
 
         self.image_list = [image_list_XY, image_list_XW, image_list_YZ, image_list_ZW]
