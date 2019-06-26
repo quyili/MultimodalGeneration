@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from unsupervision_mode import GAN
+from new_unsupervision_mode import GAN
 from datetime import datetime
 import os
 import logging
@@ -85,9 +85,10 @@ def expand(train_M_arr_, train_L_arr_):
 
 
 def save_images(image_list, checkpoints_dir, file_index):
-    true_x, true_y, true_f, true_l, \
-    gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y, gen_f_x_g_r, gen_f_y_g_r, \
-    trans_x_r, trans_y_r, trans_x_t, trans_y_t, trans_x_c_r, trans_y_c_r, trans_l_f_by_x, trans_l_f_by_y = image_list
+    true_l, true_f,\
+    gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y, gen_f_x_g_r, gen_f_y_g_r, true_x, true_y,\
+    trans_x_r, trans_y_r, trans_x_t, trans_y_t, trans_l_f_by_x, trans_l_f_by_y = image_list
+
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_x)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_x_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_y)[0, :, :, 0]),
@@ -122,10 +123,6 @@ def save_images(image_list, checkpoints_dir, file_index):
                          checkpoints_dir + "/samples/trans_x_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_y_t)[0, :, :, 0]),
                          checkpoints_dir + "/samples/trans_y_t_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_x_c_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/trans_x_c_r_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_y_c_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/trans_y_c_r_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_l_f_by_x)[0, :, :, 0]),
                          checkpoints_dir + "/samples/trans_l_f_by_x_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_l_f_by_y)[0, :, :, 0]),
@@ -196,7 +193,7 @@ def train():
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_0 = tf.placeholder(tf.int32)
                         rande_train_0 = tf.placeholder(tf.int32)
-                        loss_list_0 = gan.run(x_0, y_0, z_0, w_0, label_expand_0, rande_f_0, rande_train_0)
+                        loss_list_0 = gan.run(x_0, y_0, z_0, w_0, label_expand_0)
                         image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_0 = gan.evaluation(gan.image_list)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
@@ -214,7 +211,7 @@ def train():
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_1 = tf.placeholder(tf.int32)
                         rande_train_1 = tf.placeholder(tf.int32)
-                        loss_list_1 = gan.run(x_1, y_1, z_1, w_1, label_expand_1, rande_f_1, rande_train_1)
+                        loss_list_1 = gan.run(x_1, y_1, z_1, w_1, label_expand_1)
                         image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
@@ -232,7 +229,7 @@ def train():
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_2 = tf.placeholder(tf.int32)
                         rande_train_2 = tf.placeholder(tf.int32)
-                        loss_list_2 = gan.run(x_2, y_2, z_2, w_2, label_expand_2, rande_f_2, rande_train_2)
+                        loss_list_2 = gan.run(x_2, y_2, z_2, w_2, label_expand_2)
                         image_list_2, code_list_2, j_list_2 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
@@ -250,7 +247,7 @@ def train():
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         rande_f_3 = tf.placeholder(tf.int32)
                         rande_train_3 = tf.placeholder(tf.int32)
-                        loss_list_3 = gan.run(x_3, y_3, z_3, w_3, label_expand_3, rande_f_3, rande_train_3)
+                        loss_list_3 = gan.run(x_3, y_3, z_3, w_3, label_expand_3)
                         image_list_3, code_list_3, j_list_3 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)

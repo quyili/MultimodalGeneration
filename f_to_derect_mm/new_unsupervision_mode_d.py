@@ -3,8 +3,6 @@ import tensorflow as tf
 from discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
-from shared_decoder import SDecoder
-from m_decoder import MDecoder
 from decoder import Decoder
 
 
@@ -37,12 +35,10 @@ class GAN:
         self.EC_Z = Encoder('EC_Z', ngf=ngf)
         self.EC_W = Encoder('EC_W', ngf=ngf)
 
-        self.SDC = SDecoder('SDC', ngf=ngf)
-
-        self.DC_X = MDecoder('DC_X', ngf=ngf)
-        self.DC_Y = MDecoder('DC_Y', ngf=ngf)
-        self.DC_Z = MDecoder('DC_Z', ngf=ngf)
-        self.DC_W = MDecoder('DC_W', ngf=ngf)
+        self.DC_X = Decoder('DC_X', ngf=ngf)
+        self.DC_Y = Decoder('DC_Y', ngf=ngf)
+        self.DC_Z = Decoder('DC_Z', ngf=ngf)
+        self.DC_W = Decoder('DC_W', ngf=ngf)
 
         self.D_M = Discriminator('D_M', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
@@ -67,7 +63,6 @@ class GAN:
 
         # F_RM -> X_G,Y_G,L_G
         code_rm = self.EC_R(f_rm_expand)
-        mid_code_rm = self.SDC(code_rm)
 
         code_x = self.EC_X(x)
         code_y = self.EC_Y(y)
@@ -75,17 +70,11 @@ class GAN:
         code_w = self.EC_W(w)
         self.code_m_list =[code_rm,code_x,code_y,code_z,code_w]
 
-        x_g = self.DC_X(mid_code_rm)
-        y_g = self.DC_Y(mid_code_rm)
-        z_g = self.DC_Z(mid_code_rm)
-        w_g = self.DC_W(mid_code_rm)
+        x_g = self.DC_X(code_rm)
+        y_g = self.DC_Y(code_rm)
+        z_g = self.DC_Z(code_rm)
+        w_g = self.DC_W(code_rm)
         self.m_g_list =[x_g,y_g,z_g,w_g]
-
-        mid_code_x = self.SDC(code_x)
-        mid_code_y = self.SDC(code_y)
-        mid_code_z = self.SDC(code_z)
-        mid_code_w = self.SDC(code_w)
-        self.mid_code_list = [mid_code_x,mid_code_y,mid_code_z,mid_code_w]
 
         l_f_prob_by_x = self.DC_L(code_x)
         l_f_prob_by_y = self.DC_L(code_y)
@@ -142,9 +131,9 @@ class GAN:
         l_g_by_y = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
                               shape=self.input_shape)
         # X_G -> Y_G_T
-        y_g_t = DC_Y(self.SDC(code_x_g))
+        y_g_t = DC_Y(code_x_g)
         # Y_G -> X_G_T
-        x_g_t = DC_X(self.SDC(code_y_g))
+        x_g_t = DC_X(code_y_g)
 
 
 
@@ -223,7 +212,7 @@ class GAN:
         return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
 
-    def translate(self, x, y, cx, cy, l_x, l_y, code_x,code_y,mid_code_x,mid_code_y,l_f_prob_by_x,l_f_prob_by_y,j_x,j_x_c,j_y,j_y_c,j_code_x,j_code_y,EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
+    def translate(self, x, y, cx, cy, l_x, l_y, code_x,code_y,l_f_prob_by_x,l_f_prob_by_y,j_x,j_x_c,j_y,j_y_c,j_code_x,j_code_y,EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
                   D_F_loss=0.0, image_list=[], code_list=[], judge_list=[]):
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=6),
@@ -231,13 +220,13 @@ class GAN:
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=6),
                                     shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
         # X -> X_R
-        x_r = DC_X(mid_code_x)
+        x_r = DC_X(code_x)
         # Y -> Y_R
-        y_r = DC_Y(mid_code_y)
+        y_r = DC_Y(code_y)
         # X -> Y_T
-        y_t = DC_Y(mid_code_x)
+        y_t = DC_Y(code_x)
         # Y -> X_T
-        x_t = DC_X(mid_code_y)
+        x_t = DC_X(code_y)
         # X -> L_X
 
         l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
@@ -248,11 +237,11 @@ class GAN:
                               shape=self.input_shape)
         # Y_T -> X_C_R
         code_y_t = EC_Y(y_t)
-        x_c_r = DC_X(self.SDC(code_y_t))
+        x_c_r = DC_X(code_y_t)
 
         # X_T -> Y_C_R
         code_x_t = EC_X(x_t)
-        y_c_r = DC_Y(self.SDC(code_x_t))
+        y_c_r = DC_Y(code_x_t)
 
 
 
@@ -310,10 +299,10 @@ class GAN:
 
         return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
-    def model(self, x, y, cx, cy, l, f,code_x,code_y,mid_code_x,mid_code_y,x_g,y_g,code_x_g,code_y_g,l_f_prob_by_x,l_f_prob_by_y,l_g_prob_by_x,l_g_prob_by_y,j_x,j_x_c,j_y,j_y_c,j_x_g,j_x_g_c,j_y_g,j_y_g_c,j_code_x,j_code_y,EC_X, EC_Y, DC_X, DC_Y):
+    def model(self, x, y, cx, cy, l, f,code_x,code_y,x_g,y_g,code_x_g,code_y_g,l_f_prob_by_x,l_f_prob_by_y,l_g_prob_by_x,l_g_prob_by_y,j_x,j_x_c,j_y,j_y_c,j_x_g,j_x_g_c,j_y_g,j_y_g_c,j_code_x,j_code_y,EC_X, EC_Y, DC_X, DC_Y):
         G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.gen(f, l, cx, cy,x_g,y_g,code_x_g,code_y_g,l_g_prob_by_x,l_g_prob_by_y,j_x_g,j_x_g_c,j_y_g,j_y_g_c,
                                                                                            DC_X, DC_Y)
-        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,code_x,code_y,mid_code_x,mid_code_y,l_f_prob_by_x,l_f_prob_by_y,j_x,j_x_c,j_y,j_y_c,j_code_x,j_code_y,
+        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,code_x,code_y,l_f_prob_by_x,l_f_prob_by_y,j_x,j_x_c,j_y,j_y_c,j_code_x,j_code_y,
                                                                                                  EC_X, EC_Y, DC_X, DC_Y,
                                                                                                  G_loss, D_X_loss,
                                                                                                  D_Y_loss, D_F_loss,
@@ -333,28 +322,28 @@ class GAN:
 
         self.gen_encode( f, l,x, y, z, w)
 
-        G_loss_XY, D_loss_XY, image_list_XY, code_list_XY, judge_list_XY = self.model(x, y, 0., 1., l, f, self.code_m_list[1],self.code_m_list[2],self.mid_code_list[0],self.mid_code_list[1],
+        G_loss_XY, D_loss_XY, image_list_XY, code_list_XY, judge_list_XY = self.model(x, y, 0., 1., l, f, self.code_m_list[1],self.code_m_list[2],
                                                                                       self.m_g_list[0],self.m_g_list[1],self.code_m_g_list[0],self.code_m_g_list[1],
                                                                                       self.l_f_prob_list[0],self.l_f_prob_list[1],self.l_g_prob_list[1],self.l_g_prob_list[2],
                                                                                       self.j_m_list[0],self.j_m_list[1],self.j_m_list[2],self.j_m_list[3],
                                                                                       self.j_m_g_list[0],self.j_m_g_list[1],self.j_m_g_list[2],self.j_m_g_list[3],
                                                                                       self.j_m_code_list[0],self.j_m_code_list[1],
                                                                                       self.EC_X,self.EC_Y, self.DC_X, self.DC_Y)
-        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, self.code_m_list[2],self.code_m_list[3],self.mid_code_list[1],self.mid_code_list[2],
+        G_loss_YZ, D_loss_YZ, image_list_YZ, code_list_YZ, judge_list_YZ = self.model(y, z, 1., 2., l, f, self.code_m_list[2],self.code_m_list[3],
                                                                                       self.m_g_list[1],self.m_g_list[2],self.code_m_g_list[1],self.code_m_g_list[2],
                                                                                       self.l_f_prob_list[1],self.l_f_prob_list[2],self.l_g_prob_list[2],self.l_g_prob_list[3],
                                                                                       self.j_m_list[2],self.j_m_list[3],self.j_m_list[4],self.j_m_list[5],
                                                                                       self.j_m_g_list[2],self.j_m_g_list[3],self.j_m_g_list[4],self.j_m_g_list[5],
                                                                                       self.j_m_code_list[1],self.j_m_code_list[2],
                                                                                       self.EC_Y,self.EC_Z, self.DC_Y, self.DC_Z)
-        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f ,self.code_m_list[3],self.code_m_list[4],self.mid_code_list[2],self.mid_code_list[3],
+        G_loss_ZW, D_loss_ZW, image_list_ZW, code_list_ZW, judge_list_ZW = self.model(z, w, 2., 3., l, f ,self.code_m_list[3],self.code_m_list[4],
                                                                                       self.m_g_list[2],self.m_g_list[3],self.code_m_g_list[2],self.code_m_g_list[3],
                                                                                       self.l_f_prob_list[2],self.l_f_prob_list[3],self.l_g_prob_list[3],self.l_g_prob_list[4],
                                                                                       self.j_m_list[4],self.j_m_list[5],self.j_m_list[6],self.j_m_list[7],
                                                                                       self.j_m_g_list[4],self.j_m_g_list[5],self.j_m_g_list[6],self.j_m_g_list[7],
                                                                                       self.j_m_code_list[2],self.j_m_code_list[3],
                                                                                       self.EC_Z,self.EC_W, self.DC_Z, self.DC_W)
-        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f,self.code_m_list[1],self.code_m_list[4],self.mid_code_list[0],self.mid_code_list[3],
+        G_loss_XW, D_loss_XW, image_list_XW, code_list_XW, judge_list_XW = self.model(x, w, 0., 3., l, f,self.code_m_list[1],self.code_m_list[4],
                                                                                       self.m_g_list[0],self.m_g_list[3],self.code_m_g_list[0],self.code_m_g_list[3],
                                                                                       self.l_f_prob_list[0],self.l_f_prob_list[3],self.l_g_prob_list[1],self.l_g_prob_list[4],
                                                                                       self.j_m_list[0],self.j_m_list[1],self.j_m_list[6],self.j_m_list[7],
@@ -382,7 +371,6 @@ class GAN:
                 + self.DC_Z.variables
                 + self.EC_W.variables
                 + self.DC_W.variables
-                + self.SDC.variables
             ,
                 self.D_M.variables +
                 self.FD_R.variables
