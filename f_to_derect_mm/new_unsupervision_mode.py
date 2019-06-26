@@ -185,7 +185,7 @@ class GAN:
         return G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list
 
 
-    def translate(self, x, y, cx, cy, l_x, l_y, code_x,code_y,EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
+    def translate(self, x, y, cx, cy, l_x, l_y, code_x,code_y,mid_code_x,mid_code_y,EC_X, EC_Y, DC_X, DC_Y, G_loss=0.0, D_X_loss=0.0, D_Y_loss=0.0,
                   D_F_loss=0.0, image_list=[], code_list=[], judge_list=[]):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=6),
                                     shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 6])
@@ -277,7 +277,7 @@ class GAN:
     def model(self, x, y, cx, cy, l, f, label_expand,code_rm,code_x,code_y,mid_code_x,mid_code_y,EC_X, EC_Y, DC_X, DC_Y):
         G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.gen(f, l, cx, cy, label_expand,code_rm,EC_X, EC_Y,
                                                                                            DC_X, DC_Y)
-        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,code_x,code_y,
+        G_loss, D_X_loss, D_Y_loss, D_F_loss, image_list, code_list, judge_list = self.translate(x, y, cx, cy, l, l,code_x,code_y,mid_code_x,mid_code_y,
                                                                                                  EC_X, EC_Y, DC_X, DC_Y,
                                                                                                  G_loss, D_X_loss,
                                                                                                  D_Y_loss, D_F_loss,
