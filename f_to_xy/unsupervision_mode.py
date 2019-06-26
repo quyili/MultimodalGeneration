@@ -22,6 +22,7 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
+        self.ones = tf.ones(self.input_shape, name="ones")
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
@@ -31,6 +32,19 @@ class GAN:
         self.D_X = Discriminator('D_X', ngf=ngf)
         self.D_Y = Discriminator('D_Y', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
+
+    def get_f(self, x):
+        f = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
+        f = f - tf.reduce_mean(f, axis=[1, 2, 3])
+        f = self.ones * tf.cast(f > 0.075, dtype=tf.float32)
+        return f
+
+    def select_f(self, x, y ):
+        rand_f = tf.random_uniform([], 0, 2, dtype=tf.int32)
+        m = tf.case({tf.equal(rand_f, 0): lambda: x,
+                     tf.equal(rand_f, 1): lambda: y}, exclusive=True)
+        f = self.get_f(m)  # M -> F
+        return f
 
     def model(self, x, y, label_expand):
         # L
@@ -43,11 +57,7 @@ class GAN:
         ones = tf.ones(self.input_shape, name="ones")
 
         # X,Y -> F
-        f_x = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
-        f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
-        f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = ones * tf.cast(f > 0.1, dtype=tf.float32)
+        f = self.select_f(x, y)
 
         f_rm_expand = tf.concat([
             tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
@@ -65,11 +75,8 @@ class GAN:
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
 
         # X_G,Y_G -> F_X_G,F_Y_G -> F_G_R
-        f_x_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(x_g), axis=-1))
-        f_y_g_r = self.norm(tf.reduce_max(tf.image.sobel_edges(y_g), axis=-1))
-        f_xy_g_r = tf.reduce_max(tf.concat([f_x_g_r, f_y_g_r], axis=-1), axis=-1, keepdims=True)
-        f_xy_g_r = f_xy_g_r - tf.reduce_mean(f_xy_g_r, axis=[1, 2, 3])
-        f_xy_g_r = ones * tf.cast(f_xy_g_r > 0.1, dtype=tf.float32)
+        f_x_g_r = self.get_f(x_g)
+        f_y_g_r = self.get_f(y_g)
 
         # X_G -> L_X_G
         code_x_g = self.EC_X(x_g)
@@ -115,22 +122,30 @@ class GAN:
         # D,FD
         j_x = self.D_X(x)
         j_x_g = self.D_X(x_g)
+        j_x_t = self.D_X(x_t)
+
         j_y = self.D_Y(y)
         j_y_g = self.D_Y(y_g)
+        j_y_t = self.D_Y(y_t)
+
 
         j_code_rm = self.FD_R(code_rm)
         j_code_x = self.FD_R(code_x)
         j_code_y = self.FD_R(code_y)
 
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss = self.mse_loss(j_x, 1.0) * 25
-        D_loss += self.mse_loss(j_x_g, 0.0) * 25
+        D_loss = self.mse_loss(j_x, 1.0) * 30
+        D_loss += self.mse_loss(j_x_g, 0.0) * 20
+        D_loss += self.mse_loss(j_x_t, 0.0) * 20
         G_loss = self.mse_loss(j_x_g, 1.0) * 25
+        G_loss += self.mse_loss(j_x_t, 1.0) * 25
 
         # 使得通过随机结构特征图生成的Y模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_y, 1.0) * 25
-        D_loss += self.mse_loss(j_y_g, 0.0) * 25
+        D_loss += self.mse_loss(j_y, 1.0) * 30
+        D_loss += self.mse_loss(j_y_g, 0.0) * 20
+        D_loss += self.mse_loss(j_y_t, 0.0) * 20
         G_loss += self.mse_loss(j_y_g, 1.0) * 25
+        G_loss += self.mse_loss(j_y_t, 1.0) * 25
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图
@@ -140,7 +155,8 @@ class GAN:
         G_loss += self.mse_loss(j_code_rm, 1.0) * 2
 
         # 输入的结构特征图的重建自监督损失
-        G_loss += self.mse_loss(f, f_xy_g_r) * 20
+        G_loss += self.mse_loss(f, f_x_g_r) * 20
+        G_loss += self.mse_loss(f, f_y_g_r) * 20
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.1 \
@@ -183,6 +199,8 @@ class GAN:
         G_loss += self.mse_loss(0.0, y_g * label_expand[0]) * 1.0
         G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 1.0
+        G_loss += self.mse_loss(0.0, x_t * label_expand_y[0]) * 2
+        G_loss += self.mse_loss(0.0, y_t * label_expand_x[0]) * 2
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
         G_loss += self.mse_loss(x, x_r) * 5
@@ -222,7 +240,7 @@ class GAN:
 
         image_list = [x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
                       l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
-                      f, f_xy_g_r]
+                      f, f_x_g_r,f_y_g_r]
 
         code_list = [code_x, code_y, code_rm, code_x_g, code_y_g]
 
@@ -298,17 +316,17 @@ class GAN:
     def evaluation(self, image_list):
         x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
         l_input, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
-        f, f_xy_g_r = \
+        f, f_x_g_r,f_y_g_r = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
-            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17]
+            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17],image_list[18]
         list = [self.PSNR(x, x_t), self.PSNR(x, x_r),
                 self.PSNR(y, y_t), self.PSNR(y, y_r),
                 self.PSNR(x_g, x_g_t),
                 self.PSNR(y_g, y_g_t),
                 self.PSNR(l_input, l_f_by_x), self.PSNR(l_input, l_f_by_y),
                 self.PSNR(l_input, l_g), self.PSNR(l_input, l_g_by_x), self.PSNR(l_input, l_g_by_y),
-                self.PSNR(f, f_xy_g_r),
+                self.PSNR(f, f_x_g_r),self.PSNR(f, f_y_g_r),
 
                 self.SSIM(x, x_t), self.SSIM(x, x_r),
                 self.SSIM(y, y_t), self.SSIM(y, y_r),
@@ -316,7 +334,7 @@ class GAN:
                 self.SSIM(y_g, y_g_t),
                 self.SSIM(l_input, l_f_by_x), self.SSIM(l_input, l_f_by_y),
                 self.SSIM(l_input, l_g), self.SSIM(l_input, l_g_by_x), self.SSIM(l_input, l_g_by_y),
-                self.SSIM(f, f_xy_g_r),
+                self.SSIM(f, f_x_g_r), self.SSIM(f, f_y_g_r),
                 ]
         return list
 
@@ -332,28 +350,30 @@ class GAN:
         tf.summary.scalar('evaluation/PSNR/l_input__VS__l_g', evluation_list[8])
         tf.summary.scalar('evaluation/PSNR/l_input__VS__l_g_by_x', evluation_list[9])
         tf.summary.scalar('evaluation/PSNR/l_input__VS__l_g_by_y', evluation_list[10])
-        tf.summary.scalar('evaluation/PSNR/f__VS__f_xy_g_r', evluation_list[11])
+        tf.summary.scalar('evaluation/PSNR/f__VS__f_x_g_r', evluation_list[11])
+        tf.summary.scalar('evaluation/PSNR/f__VS__f_y_g_r', evluation_list[12])
 
-        tf.summary.scalar('evaluation/SSIM/x__VS__x_t', evluation_list[12])
-        tf.summary.scalar('evaluation/SSIM/x__VS__x_r', evluation_list[13])
-        tf.summary.scalar('evaluation/SSIM/y__VS__y_t', evluation_list[14])
-        tf.summary.scalar('evaluation/SSIM/y__VS__y_r', evluation_list[15])
-        tf.summary.scalar('evaluation/SSIM/x_g__VS__x_g_t', evluation_list[16])
-        tf.summary.scalar('evaluation/SSIM/y_g__VS__y_g_t', evluation_list[17])
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_f_by_x', evluation_list[18])
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_f_by_y', evluation_list[19])
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_g', evluation_list[20])
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_g_by_x', evluation_list[21])
-        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_g_by_y', evluation_list[22])
-        tf.summary.scalar('evaluation/SSIM/f__VS__f_xy_g_r', evluation_list[23])
+        tf.summary.scalar('evaluation/SSIM/x__VS__x_t', evluation_list[13])
+        tf.summary.scalar('evaluation/SSIM/x__VS__x_r', evluation_list[14])
+        tf.summary.scalar('evaluation/SSIM/y__VS__y_t', evluation_list[15])
+        tf.summary.scalar('evaluation/SSIM/y__VS__y_r', evluation_list[16])
+        tf.summary.scalar('evaluation/SSIM/x_g__VS__x_g_t', evluation_list[17])
+        tf.summary.scalar('evaluation/SSIM/y_g__VS__y_g_t', evluation_list[18])
+        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_f_by_x', evluation_list[19])
+        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_f_by_y', evluation_list[20])
+        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_g', evluation_list[21])
+        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_g_by_x', evluation_list[22])
+        tf.summary.scalar('evaluation/SSIM/l_input__VS__l_g_by_y', evluation_list[23])
+        tf.summary.scalar('evaluation/SSIM/f__VS__f_x_g_r', evluation_list[24])
+        tf.summary.scalar('evaluation/SSIM/f__VS__f_y_g_r', evluation_list[25])
 
     def image_summary(self, image_list):
         x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
         l_input, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
-        f, f_xy_g_r = \
+        f, f_x_g_r,f_y_g_r = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
-            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17]
+            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17],image_list[18]
         tf.summary.image('image/x_g', x_g)
         tf.summary.image('image/x_g_t', x_g_t)
         tf.summary.image('image/x', x)
@@ -374,7 +394,8 @@ class GAN:
         tf.summary.image('image/l_g_by_y', l_g_by_y)
 
         tf.summary.image('image/f', f)
-        tf.summary.image('image/f_xy_g_r', f_xy_g_r)
+        tf.summary.image('image/f_x_g_r', f_x_g_r)
+        tf.summary.image('image/f_y_g_r', f_y_g_r)
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
