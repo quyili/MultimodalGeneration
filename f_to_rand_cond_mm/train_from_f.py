@@ -453,6 +453,7 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
                             if j == 0:
+                                print(np.asarray(val_image_list_0).shape)
                                 save_images(val_image_list_0, checkpoints_dir, val_index - 1, m="T1_T2")
                                 save_images(val_image_list_1, checkpoints_dir, val_index - 1, m="T2_T1c")
                                 save_images(val_image_list_2, checkpoints_dir, val_index - 1, m="T1c_Flair")
