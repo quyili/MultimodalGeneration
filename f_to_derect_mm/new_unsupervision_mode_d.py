@@ -46,7 +46,7 @@ class GAN:
     def get_f(self, x):
         f = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = self.ones * tf.cast(f > 0.1, dtype=tf.float32)
+        f = self.ones * tf.cast(f > 0.075, dtype=tf.float32)
         return f
 
     def gen_encode(self,f, l,x, y, z, w,):
