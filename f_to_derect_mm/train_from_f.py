@@ -167,7 +167,10 @@ def train():
             else:
                 checkpoints_dir = "checkpoints/{}".format(current_time)
             try:
-                os.makedirs(checkpoints_dir + "/samples")
+                os.makedirs(checkpoints_dir + "/samples/X")
+                os.makedirs(checkpoints_dir + "/samples/Y")
+                os.makedirs(checkpoints_dir + "/samples/f")
+                os.makedirs(checkpoints_dir + "/samples/l")
             except os.error:
                 pass
 
