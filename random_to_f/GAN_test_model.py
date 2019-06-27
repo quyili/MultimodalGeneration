@@ -27,17 +27,34 @@ class GAN:
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
+    def get_f(self, x):
+        f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
+        f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
+        f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
+        f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
+
+        f1 = tf.ones(f1.get_shape().as_list()) * tf.cast(f1 > 0.07, dtype="float32")
+        f2 = tf.ones(f2.get_shape().as_list()) * tf.cast(f2 > 0.07, dtype="float32")
+
+        f = f1 + f2
+        f = tf.ones(f.get_shape().as_list()) * tf.cast(f > 0.0, dtype="float32")
+        return f
+
     def model(self, x, y, label_expand):
         # L
         l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
                        shape=self.input_shape)
 
         # X,Y -> F
-        f_x = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f_y = self.norm(tf.reduce_max(tf.image.sobel_edges(y), axis=-1))
-        f = tf.reduce_max(tf.concat([f_x, f_y], axis=-1), axis=-1, keepdims=True)
-        f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = tf.ones(self.input_shape, name="ones") * tf.cast(f > 0.045, dtype=tf.float32)
+        # 选择f来源模态
+        rand_f = tf.random_uniform([], 0, 4, dtype=tf.int32)
+        m = tf.case({tf.equal(rand_f, 0): lambda: x,
+                     tf.equal(rand_f, 1): lambda: y,
+                     tf.equal(rand_f, 2): lambda: z,
+                     tf.equal(rand_f, 3): lambda: w}, exclusive=True)
+
+        f = self.get_f(m)  # M -> F
+
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
