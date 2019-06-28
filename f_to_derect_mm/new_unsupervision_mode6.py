@@ -48,9 +48,16 @@ class GAN:
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
 
     def get_f(self, x):
-        f = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = self.ones * tf.cast(f > 0.1, dtype=tf.float32)
+        f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
+        f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
+        f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
+        f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
+
+        f1 = tf.ones(f1.get_shape().as_list()) * tf.cast(f1 > 0.12, dtype="float32")
+        f2 = tf.ones(f2.get_shape().as_list()) * tf.cast(f2 > 0.12, dtype="float32")
+
+        f = f1 + f2
+        f = tf.ones(f.get_shape().as_list()) * tf.cast(f > 0.0, dtype="float32")
         return f
 
     def gen_encode(self,f, l,x, y, z, w,):
