@@ -62,6 +62,15 @@ class GAN:
         return mask
 
     def model(self, l, l_x, l_y, l_z, l_w, x, y, z, w):
+        self.image_list["l"] = l
+        self.image_list["l_x"] = l_x
+        self.image_list["l_y"] = l_y
+        self.image_list["l_z"] = l_z
+        self.image_list["l_w"] = l_w
+        self.image_list["x"] = x
+        self.image_list["y"] = y
+        self.image_list["z"] = z
+        self.image_list["w"] = w
         cx = 0.0;
         cy = 1.0;
         cz = 2.0;
