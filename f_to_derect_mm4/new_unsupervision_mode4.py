@@ -67,27 +67,212 @@ class GAN:
         cy = 1.0
         cz = 2.0
         cw = 3.0
-        self.image_list["mask"] = self.get_mask(m)
-        self.image_list["f"] = self.get_f(m)  # M->F
-        self.prob_list["label_expand"] = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
+        mask = self.get_mask(m)
+        f = self.get_f(m)  # M->F
+        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
                                                     shape=[self.input_shape[0], self.input_shape[1],
                                                            self.input_shape[2], 5])
-        self.prob_list["f_rm_expand"] = tf.concat([
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * self.prob_list["label_expand"][:, :, :, 0],
-                       shape=self.input_shape) + self.image_list["f"] * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * self.prob_list["label_expand"][:, :, :, 1],
-                       shape=self.input_shape) + self.image_list["f"] * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * self.prob_list["label_expand"][:, :, :, 2],
-                       shape=self.input_shape) + self.image_list["f"] * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * self.prob_list["label_expand"][:, :, :, 3],
-                       shape=self.input_shape) + self.image_list["f"] * 0.8,
-            tf.reshape(self.ones[:, :, :, 0] * 0.2 * self.prob_list["label_expand"][:, :, :, 4],
-                       shape=self.input_shape) + self.image_list["f"] * 0.8],
+        f_rm_expand = tf.concat([
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0],
+                       shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1],
+                       shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2],
+                       shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3],
+                       shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4],
+                       shape=self.input_shape) + f * 0.8],
             axis=-1)
 
         # TODO input f
-        # self.image_list["f"] = f
+        # f = f
         l = l * 0.25
+        l = l
+        l_x = l_x
+        l_y = l_y
+        l_z = l_z
+        l_w = l_w
+        x = x
+        y = y
+        z = z
+        w = w
+
+        code_rm = self.EC_R(f_rm_expand)
+
+        l_g_prob = self.DC_L(code_rm)
+        l_g = tf.reshape(
+            tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
+        x_g = self.DC_X(code_rm)
+        y_g = self.DC_Y(code_rm)
+        z_g = self.DC_Z(code_rm)
+        w_g = self.DC_W(code_rm)
+
+        code_x_g = self.EC_X(x_g)
+        code_y_g = self.EC_Y(y_g)
+        code_z_g = self.EC_Z(z_g)
+        code_w_g = self.EC_W(w_g)
+
+        l_g_prob_by_x = self.DC_L(code_x_g)
+        l_g_prob_by_y = self.DC_L(code_y_g)
+        l_g_prob_by_z = self.DC_L(code_z_g)
+        l_g_prob_by_w = self.DC_L(code_w_g)
+        l_g_by_x = tf.reshape(
+            tf.cast(tf.argmax(l_g_prob_by_x, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_g_by_y = tf.reshape(
+            tf.cast(tf.argmax(l_g_prob_by_y, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_g_by_z = tf.reshape(
+            tf.cast(tf.argmax(l_g_prob_by_z, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_g_by_w = tf.reshape(
+            tf.cast(tf.argmax(l_g_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+
+        f_x_g_r = self.get_f(x_g)
+        f_y_g_r = self.get_f(y_g)
+        f_z_g_r = self.get_f(z_g)
+        f_w_g_r = self.get_f(w_g)
+
+        y_g_t_by_x = self.DC_Y(code_x_g)
+        # z_g_t_by_x = self.DC_Z(code_x_g)
+        w_g_t_by_x = self.DC_W(code_x_g)
+
+        x_g_t_by_y = self.DC_X(code_y_g)
+        z_g_t_by_y = self.DC_Z(code_y_g)
+        # w_g_t_by_y = self.DC_W(code_y_g)
+
+        # x_g_t_by_z = self.DC_X(code_z_g)
+        y_g_t_by_z = self.DC_Y(code_z_g)
+        w_g_t_by_z = self.DC_W(code_z_g)
+
+        x_g_t_by_w = self.DC_X(code_w_g)
+        # y_g_t_by_w = self.DC_Y(code_w_g)
+        z_g_t_by_w = self.DC_Z(code_w_g)
+
+        label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+        label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+        label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+        label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+
+        mask_x = self.get_mask(x)
+        mask_y = self.get_mask(y)
+        mask_z = self.get_mask(z)
+        mask_w = self.get_mask(w)
+
+        code_x = self.EC_X(x)
+        code_y = self.EC_Y(y)
+        code_z = self.EC_Z(z)
+        code_w = self.EC_W(w)
+
+        l_f_prob_by_x = self.DC_L(code_x)
+        l_f_prob_by_y = self.DC_L(code_y)
+        l_f_prob_by_z = self.DC_L(code_z)
+        l_f_prob_by_w = self.DC_L(code_w)
+        l_f_by_x = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_f_by_y = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_f_by_z = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_z, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_f_by_w = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+
+        x_r = self.DC_X(code_x)
+        y_r = self.DC_Y(code_y)
+        z_r = self.DC_Z(code_z)
+        w_r = self.DC_W(code_w)
+
+        y_t_by_x = self.DC_Y(code_x)
+        code_y_t_by_x = self.EC_Y(y_t_by_x)
+        x_r_c_by_y = self.DC_X(code_y_t_by_x)
+        # z_t_by_x = self.DC_Z(code_x)
+        # code_z_t_by_x = self.EC_Z(z_t_by_x)
+        # x_r_c_by_z = self.DC_X(code_z_t_by_x)
+        w_t_by_x = self.DC_W(code_x)
+        code_w_t_by_x = self.EC_W(w_t_by_x)
+        x_r_c_by_w = self.DC_X(code_w_t_by_x)
+
+        x_t_by_y = self.DC_X(code_y)
+        code_x_t_by_y = self.EC_X(x_t_by_y)
+        y_r_c_by_x = self.DC_Y(code_x_t_by_y)
+        z_t_by_y = self.DC_Z(code_y)
+        code_z_t_by_y = self.EC_Z(x_t_by_y)
+        y_r_c_by_z = self.DC_Y(code_z_t_by_y)
+        # w_t_by_y = self.DC_W(code_y)
+        # code_w_t_by_y = self.EC_W(x_t_by_y)
+        # y_r_c_by_w = self.DC_Y(code_w_t_by_y)
+
+        # x_t_by_z = self.DC_X(code_z)
+        # code_x_t_by_z = self.EC_X(x_t_by_z)
+        # z_r_c_by_x = self.DC_Z(code_x_t_by_z)
+        y_t_by_z = self.DC_Y(code_z)
+        code_y_t_by_z = self.EC_Y(y_t_by_z)
+        z_r_c_by_y = self.DC_Z(code_y_t_by_z)
+        w_t_by_z = self.DC_W(code_z)
+        code_w_t_by_z = self.EC_W(w_t_by_z)
+        z_r_c_by_w = self.DC_Z(code_w_t_by_z)
+
+        x_t_by_w = self.DC_X(code_w)
+        code_x_t_by_w = self.EC_X(x_t_by_w)
+        w_r_c_by_x = self.DC_W(code_x_t_by_w)
+        # y_t_by_w = self.DC_Y(code_w)
+        # code_y_t_by_w = self.EC_Y(y_t_by_w)
+        # w_r_c_by_y = self.DC_W(code_y_t_by_w)
+        z_t_by_w = self.DC_Z(code_w)
+        code_z_t_by_w = self.EC_Z(z_t_by_w)
+        w_r_c_by_z = self.DC_W(code_z_t_by_w)
+
+        j_x_g, j_x_g_c = self.D_M(x_g)
+        j_y_g, j_y_g_c = self.D_M(y_g)
+        j_z_g, j_z_g_c = self.D_M(z_g)
+        j_w_g, j_w_g_c = self.D_M(w_g)
+
+        j_x, j_x_c = self.D_M(x)
+        j_y, j_y_c = self.D_M(y)
+        j_z, j_z_c = self.D_M(z)
+        j_w, j_w_c = self.D_M(w)
+
+        j_x_t_by_y, j_x_t_c_by_y = self.D_M(x_t_by_y)
+        # j_x_t_by_z, j_x_t_c_by_z = self.D_M(x_t_by_z)
+        j_x_t_by_w, j_x_t_c_by_w = self.D_M(x_t_by_w)
+
+        j_y_t_by_x, j_y_t_c_by_x = self.D_M(y_t_by_x)
+        j_y_t_by_z, j_y_t_c_by_z = self.D_M(y_t_by_z)
+        # j_y_t_by_w, j_y_t_c_by_w = self.D_M(y_t_by_w)
+
+        # j_z_t_by_x, j_z_t_c_by_x = self.D_M(z_t_by_x)
+        j_z_t_by_y, j_z_t_c_by_y = self.D_M(z_t_by_y)
+        j_z_t_by_w, j_z_t_c_by_w = self.D_M(z_t_by_w)
+
+        j_w_t_by_x, j_w_t_c_by_x = self.D_M(w_t_by_x)
+        # j_w_t_by_y, j_w_t_c_by_y = self.D_M(w_t_by_y)
+        j_w_t_by_z, j_w_t_c_by_z = self.D_M(w_t_by_z)
+
+        j_code_x = self.FD_R(code_x)
+        j_code_y = self.FD_R(code_y)
+        j_code_z = self.FD_R(code_z)
+        j_code_w = self.FD_R(code_w)
+        j_code_rm = self.FD_R(code_rm)
+
+
+        self.image_list["mask"] =mask
+        self.image_list["f"] =f
+        self.prob_list["label_expand"] =label_expand
+        self.prob_list["f_rm_expand"] =f_rm_expand
         self.image_list["l"] = l
         self.image_list["l_x"] = l_x
         self.image_list["l_y"] = l_y
@@ -98,480 +283,456 @@ class GAN:
         self.image_list["z"] = z
         self.image_list["w"] = w
 
-        self.code_list["code_rm"] = self.EC_R(self.prob_list["f_rm_expand"])
+        self.code_list["code_rm"] =code_rm
 
-        self.prob_list["l_g_prob"] = self.DC_L(self.code_list["code_rm"])
-        self.image_list["l_g"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_g_prob"], axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        self.image_list["x_g"] = self.DC_X(self.code_list["code_rm"])
-        self.image_list["y_g"] = self.DC_Y(self.code_list["code_rm"])
-        self.image_list["z_g"] = self.DC_Z(self.code_list["code_rm"])
-        self.image_list["w_g"] = self.DC_W(self.code_list["code_rm"])
+        self.prob_list["l_g_prob"] =l_g_prob
+        self.image_list["l_g"] =l_g
+        self.image_list["x_g"] =x_g
+        self.image_list["y_g"] =y_g
+        self.image_list["z_g"] =z_g
+        self.image_list["w_g"] =w_g
 
-        self.code_list["code_x_g"] = self.EC_X(self.image_list["x_g"])
-        self.code_list["code_y_g"] = self.EC_Y(self.image_list["y_g"])
-        self.code_list["code_z_g"] = self.EC_Z(self.image_list["z_g"])
-        self.code_list["code_w_g"] = self.EC_W(self.image_list["w_g"])
+        self.code_list["code_x_g"] =code_x_g
+        self.code_list["code_y_g"] =code_y_g
+        self.code_list["code_z_g"] =code_z_g
+        self.code_list["code_w_g"] =code_w_g
 
-        self.prob_list["l_g_prob_by_x"] = self.DC_L(self.code_list["code_x_g"])
-        self.prob_list["l_g_prob_by_y"] = self.DC_L(self.code_list["code_y_g"])
-        self.prob_list["l_g_prob_by_z"] = self.DC_L(self.code_list["code_z_g"])
-        self.prob_list["l_g_prob_by_w"] = self.DC_L(self.code_list["code_w_g"])
-        self.image_list["l_g_by_x"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_g_prob_by_x"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        self.image_list["l_g_by_y"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_g_prob_by_y"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        self.image_list["l_g_by_z"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_g_prob_by_z"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        self.image_list["l_g_by_w"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_g_prob_by_w"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
+        self.prob_list["l_g_prob_by_x"] =l_g_prob_by_x
+        self.prob_list["l_g_prob_by_y"] =l_g_prob_by_y
+        self.prob_list["l_g_prob_by_z"] =l_g_prob_by_z
+        self.prob_list["l_g_prob_by_w"] =l_g_prob_by_w
+        self.image_list["l_g_by_x"] =l_g_by_x
+        self.image_list["l_g_by_y"] =l_g_by_y
+        self.image_list["l_g_by_z"] =l_g_by_z
+        self.image_list["l_g_by_w"] =l_g_by_w
 
-        self.image_list["f_x_g_r"] = self.get_f(self.image_list["x_g"])
-        self.image_list["f_y_g_r"] = self.get_f(self.image_list["y_g"])
-        self.image_list["f_z_g_r"] = self.get_f(self.image_list["z_g"])
-        self.image_list["f_w_g_r"] = self.get_f(self.image_list["w_g"])
+        self.image_list["f_x_g_r"] =f_x_g_r
+        self.image_list["f_y_g_r"] =f_y_g_r
+        self.image_list["f_z_g_r"] =f_z_g_r
+        self.image_list["f_w_g_r"] =f_w_g_r
 
-        self.image_list["y_g_t_by_x"] = self.DC_Y(self.code_list["code_x_g"])
-        # self.image_list["z_g_t_by_x"] = self.DC_Z(self.code_list["code_x_g"])
-        self.image_list["w_g_t_by_x"] = self.DC_W(self.code_list["code_x_g"])
+        self.image_list["y_g_t_by_x"] =y_g_t_by_x
+        # self.image_list["z_g_t_by_x"] =z_g_t_by_x
+        self.image_list["w_g_t_by_x"] =w_g_t_by_x
 
-        self.image_list["x_g_t_by_y"] = self.DC_X(self.code_list["code_y_g"])
-        self.image_list["z_g_t_by_y"] = self.DC_Z(self.code_list["code_y_g"])
-        # self.image_list["w_g_t_by_y"] = self.DC_W(self.code_list["code_y_g"])
+        self.image_list["x_g_t_by_y"] =x_g_t_by_y
+        self.image_list["z_g_t_by_y"] =z_g_t_by_y
+        # self.image_list["w_g_t_by_y"] =w_g_t_by_y
 
-        # self.image_list["x_g_t_by_z"] = self.DC_X(self.code_list["code_z_g"])
-        self.image_list["y_g_t_by_z"] = self.DC_Y(self.code_list["code_z_g"])
-        self.image_list["w_g_t_by_z"] = self.DC_W(self.code_list["code_z_g"])
+        # self.image_list["x_g_t_by_z"] =x_g_t_by_z
+        self.image_list["y_g_t_by_z"] =y_g_t_by_z
+        self.image_list["w_g_t_by_z"] =w_g_t_by_z
 
-        self.image_list["x_g_t_by_w"] = self.DC_X(self.code_list["code_w_g"])
-        # self.image_list["y_g_t_by_w"] = self.DC_Y(self.code_list["code_w_g"])
-        self.image_list["z_g_t_by_w"] = self.DC_Z(self.code_list["code_w_g"])
+        self.image_list["x_g_t_by_w"] =x_g_t_by_w
+        # self.image_list["y_g_t_by_w"] =y_g_t_by_w
+        self.image_list["z_g_t_by_w"] =z_g_t_by_w
 
-        self.prob_list["label_expand_x"] = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
-        self.prob_list["label_expand_y"] = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
-        self.prob_list["label_expand_z"] = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
-        self.prob_list["label_expand_w"] = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+        self.prob_list["label_expand_x"] =label_expand_x
+        self.prob_list["label_expand_y"] =label_expand_y
+        self.prob_list["label_expand_z"] =label_expand_z
+        self.prob_list["label_expand_w"] =label_expand_w
 
-        self.image_list["mask_x"] = self.get_mask(x)
-        self.image_list["mask_y"] = self.get_mask(y)
-        self.image_list["mask_z"] = self.get_mask(z)
-        self.image_list["mask_w"] = self.get_mask(w)
+        self.image_list["mask_x"] =mask_x
+        self.image_list["mask_y"] =mask_y
+        self.image_list["mask_z"] =mask_z
+        self.image_list["mask_w"] =mask_w
 
-        self.code_list["code_x"] = self.EC_X(x)
-        self.code_list["code_y"] = self.EC_Y(y)
-        self.code_list["code_z"] = self.EC_Z(z)
-        self.code_list["code_w"] = self.EC_W(w)
+        self.code_list["code_x"] =code_x
+        self.code_list["code_y"] =code_y
+        self.code_list["code_z"] =code_z
+        self.code_list["code_w"] =code_w
 
-        self.prob_list["l_f_prob_by_x"] = self.DC_L(self.code_list["code_x"])
-        self.prob_list["l_f_prob_by_y"] = self.DC_L(self.code_list["code_y"])
-        self.prob_list["l_f_prob_by_z"] = self.DC_L(self.code_list["code_z"])
-        self.prob_list["l_f_prob_by_w"] = self.DC_L(self.code_list["code_w"])
-        self.image_list["l_f_by_x"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_f_prob_by_x"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        self.image_list["l_f_by_y"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_f_prob_by_y"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        self.image_list["l_f_by_z"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_f_prob_by_z"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        self.image_list["l_f_by_w"] = tf.reshape(
-            tf.cast(tf.argmax(self.prob_list["l_f_prob_by_w"], axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
+        self.prob_list["l_f_prob_by_x"] =l_f_prob_by_x
+        self.prob_list["l_f_prob_by_y"] =l_f_prob_by_y
+        self.prob_list["l_f_prob_by_z"] =l_f_prob_by_z
+        self.prob_list["l_f_prob_by_w"] =l_f_prob_by_w
+        self.image_list["l_f_by_x"] =l_f_by_x
+        self.image_list["l_f_by_y"] =l_f_by_y
+        self.image_list["l_f_by_z"] =l_f_by_z
+        self.image_list["l_f_by_w"] =l_f_by_w
 
-        self.image_list["x_r"] = self.DC_X(self.code_list["code_x"])
-        self.image_list["y_r"] = self.DC_Y(self.code_list["code_y"])
-        self.image_list["z_r"] = self.DC_Z(self.code_list["code_z"])
-        self.image_list["w_r"] = self.DC_W(self.code_list["code_w"])
+        self.image_list["x_r"] =x_r
+        self.image_list["y_r"] =y_r
+        self.image_list["z_r"] =z_r
+        self.image_list["w_r"] =w_r
 
-        self.image_list["y_t_by_x"] = self.DC_Y(self.code_list["code_x"])
-        self.code_list["code_y_t_by_x"] = self.EC_Y(self.image_list["y_t_by_x"])
-        self.image_list["x_r_c_by_y"] = self.DC_X(self.code_list["code_y_t_by_x"])
-        # self.image_list["z_t_by_x"] = self.DC_Z(self.code_list["code_x"])
-        # self.code_list["code_z_t_by_x"] = self.EC_Z(self.image_list["z_t_by_x"])
-        # self.image_list["x_r_c_by_z"] = self.DC_X(self.code_list["code_z_t_by_x"])
-        self.image_list["w_t_by_x"] = self.DC_W(self.code_list["code_x"])
-        self.code_list["code_w_t_by_x"] = self.EC_W(self.image_list["w_t_by_x"])
-        self.image_list["x_r_c_by_w"] = self.DC_X(self.code_list["code_w_t_by_x"])
+        self.image_list["y_t_by_x"] =y_t_by_x
+        self.code_list["code_y_t_by_x"] =code_y_t_by_x
+        self.image_list["x_r_c_by_y"] =x_r_c_by_y
+        # self.image_list["z_t_by_x"] =z_t_by_x
+        # self.code_list["code_z_t_by_x"] =code_z_t_by_x
+        # self.image_list["x_r_c_by_z"] =x_r_c_by_z
+        self.image_list["w_t_by_x"] =w_t_by_x
+        self.code_list["code_w_t_by_x"] =code_w_t_by_x
+        self.image_list["x_r_c_by_w"] =x_r_c_by_w
 
-        self.image_list["x_t_by_y"] = self.DC_X(self.code_list["code_y"])
-        self.code_list["code_x_t_by_y"] = self.EC_X(self.image_list["x_t_by_y"])
-        self.image_list["y_r_c_by_x"] = self.DC_Y(self.code_list["code_x_t_by_y"])
-        self.image_list["z_t_by_y"] = self.DC_Z(self.code_list["code_y"])
-        self.code_list["code_z_t_by_y"] = self.EC_Z(self.image_list["x_t_by_y"])
-        self.image_list["y_r_c_by_z"] = self.DC_Y(self.code_list["code_z_t_by_y"])
-        # self.image_list["w_t_by_y"] = self.DC_W(self.code_list["code_y"])
-        # self.code_list["code_w_t_by_y"] = self.EC_W(self.image_list["x_t_by_y"])
-        # self.image_list["y_r_c_by_w"] = self.DC_Y(self.code_list["code_w_t_by_y"])
+        self.image_list["x_t_by_y"] =x_t_by_y
+        self.code_list["code_x_t_by_y"] =code_x_t_by_y
+        self.image_list["y_r_c_by_x"] =y_r_c_by_x
+        self.image_list["z_t_by_y"] =z_t_by_y
+        self.code_list["code_z_t_by_y"] =code_z_t_by_y
+        self.image_list["y_r_c_by_z"] =y_r_c_by_z
+        # self.image_list["w_t_by_y"] =w_t_by_y
+        # self.code_list["code_w_t_by_y"] =code_w_t_by_y
+        # self.image_list["y_r_c_by_w"] =y_r_c_by_w
 
-        # self.image_list["x_t_by_z"] = self.DC_X(self.code_list["code_z"])
-        # self.code_list["code_x_t_by_z"] = self.EC_X(self.image_list["x_t_by_z"])
-        # self.image_list["z_r_c_by_x"] = self.DC_Z(self.code_list["code_x_t_by_z"])
-        self.image_list["y_t_by_z"] = self.DC_Y(self.code_list["code_z"])
-        self.code_list["code_y_t_by_z"] = self.EC_Y(self.image_list["y_t_by_z"])
-        self.image_list["z_r_c_by_y"] = self.DC_Z(self.code_list["code_y_t_by_z"])
-        self.image_list["w_t_by_z"] = self.DC_W(self.code_list["code_z"])
-        self.code_list["code_w_t_by_z"] = self.EC_W(self.image_list["w_t_by_z"])
-        self.image_list["z_r_c_by_w"] = self.DC_Z(self.code_list["code_w_t_by_z"])
+        # self.image_list["x_t_by_z"] =x_t_by_z
+        # self.code_list["code_x_t_by_z"] =code_x_t_by_z
+        # self.image_list["z_r_c_by_x"] =z_r_c_by_x
+        self.image_list["y_t_by_z"] =y_t_by_z
+        self.code_list["code_y_t_by_z"] =code_y_t_by_z
+        self.image_list["z_r_c_by_y"] =z_r_c_by_y
+        self.image_list["w_t_by_z"] =w_t_by_z
+        self.code_list["code_w_t_by_z"] =code_w_t_by_z
+        self.image_list["z_r_c_by_w"] =z_r_c_by_w
 
-        self.image_list["x_t_by_w"] = self.DC_X(self.code_list["code_w"])
-        self.code_list["code_x_t_by_w"] = self.EC_X(self.image_list["x_t_by_w"])
-        self.image_list["w_r_c_by_x"] = self.DC_W(self.code_list["code_x_t_by_w"])
-        # self.image_list["y_t_by_w"] = self.DC_Y(self.code_list["code_w"])
-        # self.code_list["code_y_t_by_w"] = self.EC_Y(self.image_list["y_t_by_w"])
-        # self.image_list["w_r_c_by_y"] = self.DC_W(self.code_list["code_y_t_by_w"])
-        self.image_list["z_t_by_w"] = self.DC_Z(self.code_list["code_w"])
-        self.code_list["code_z_t_by_w"] = self.EC_Z(self.image_list["z_t_by_w"])
-        self.image_list["w_r_c_by_z"] = self.DC_W(self.code_list["code_z_t_by_w"])
+        self.image_list["x_t_by_w"] =x_t_by_w
+        self.code_list["code_x_t_by_w"] =code_x_t_by_w
+        self.image_list["w_r_c_by_x"] =w_r_c_by_x
+        # self.image_list["y_t_by_w"] =y_t_by_w
+        # self.code_list["code_y_t_by_w"] =code_y_t_by_w
+        # self.image_list["w_r_c_by_y"] =w_r_c_by_y
+        self.image_list["z_t_by_w"] =z_t_by_w
+        self.code_list["code_z_t_by_w"] =code_z_t_by_w
+        self.image_list["w_r_c_by_z"] =w_r_c_by_z
 
-        self.judge_list["j_x_g"], self.judge_list["j_x_g_c"] = self.D_M(self.image_list["x_g"])
-        self.judge_list["j_y_g"], self.judge_list["j_y_g_c"] = self.D_M(self.image_list["y_g"])
-        self.judge_list["j_z_g"], self.judge_list["j_z_g_c"] = self.D_M(self.image_list["z_g"])
-        self.judge_list["j_w_g"], self.judge_list["j_w_g_c"] = self.D_M(self.image_list["w_g"])
+        self.judge_list["j_x_g"], self.judge_list["j_x_g_c"] =j_x_g,j_x_g_c
+        self.judge_list["j_y_g"], self.judge_list["j_y_g_c"] =j_y_g,j_y_g_c
+        self.judge_list["j_z_g"], self.judge_list["j_z_g_c"] =j_z_g,j_z_g_c
+        self.judge_list["j_w_g"], self.judge_list["j_w_g_c"] =j_w_g,j_w_g_c
 
-        self.judge_list["j_x"], self.judge_list["j_x_c"] = self.D_M(x)
-        self.judge_list["j_y"], self.judge_list["j_y_c"] = self.D_M(y)
-        self.judge_list["j_z"], self.judge_list["j_z_c"] = self.D_M(z)
-        self.judge_list["j_w"], self.judge_list["j_w_c"] = self.D_M(w)
+        self.judge_list["j_x"], self.judge_list["j_x_c"] =j_x,j_x_c
+        self.judge_list["j_y"], self.judge_list["j_y_c"] =j_y,j_y_c
+        self.judge_list["j_z"], self.judge_list["j_z_c"] =j_z,j_z_c
+        self.judge_list["j_w"], self.judge_list["j_w_c"] =j_w,j_w_c
 
-        self.judge_list["j_x_t_by_y"], self.judge_list["j_x_t_c_by_y"] = self.D_M(self.image_list["x_t_by_y"])
-        # self.judge_list["j_x_t_by_z"], self.judge_list["j_x_t_c_by_z"] = self.D_M(self.image_list["x_t_by_z"])
-        self.judge_list["j_x_t_by_w"], self.judge_list["j_x_t_c_by_w"] = self.D_M(self.image_list["x_t_by_w"])
+        self.judge_list["j_x_t_by_y"], self.judge_list["j_x_t_c_by_y"] =j_x_t_by_y,j_x_t_c_by_y
+        # self.judge_list["j_x_t_by_z"], self.judge_list["j_x_t_c_by_z"] =j_x_t_by_z,j_x_t_c_by_z
+        self.judge_list["j_x_t_by_w"], self.judge_list["j_x_t_c_by_w"] =j_x_t_by_w,j_x_t_c_by_w
 
-        self.judge_list["j_y_t_by_x"], self.judge_list["j_y_t_c_by_x"] = self.D_M(self.image_list["y_t_by_x"])
-        self.judge_list["j_y_t_by_z"], self.judge_list["j_y_t_c_by_z"] = self.D_M(self.image_list["y_t_by_z"])
-        # self.judge_list["j_y_t_by_w"], self.judge_list["j_y_t_c_by_w"] = self.D_M(self.image_list["y_t_by_w"])
+        self.judge_list["j_y_t_by_x"], self.judge_list["j_y_t_c_by_x"] =j_y_t_by_x,j_y_t_c_by_x
+        self.judge_list["j_y_t_by_z"], self.judge_list["j_y_t_c_by_z"] =j_y_t_by_z,j_y_t_c_by_z
+        # self.judge_list["j_y_t_by_w"], self.judge_list["j_y_t_c_by_w"] =j_y_t_by_w,j_y_t_c_by_w
 
-        # self.judge_list["j_z_t_by_x"], self.judge_list["j_z_t_c_by_x"] = self.D_M(self.image_list["z_t_by_x"])
-        self.judge_list["j_z_t_by_y"], self.judge_list["j_z_t_c_by_y"] = self.D_M(self.image_list["z_t_by_y"])
-        self.judge_list["j_z_t_by_w"], self.judge_list["j_z_t_c_by_w"] = self.D_M(self.image_list["z_t_by_w"])
+        # self.judge_list["j_z_t_by_x"], self.judge_list["j_z_t_c_by_x"] =j_z_t_by_x,j_z_t_c_by_x
+        self.judge_list["j_z_t_by_y"], self.judge_list["j_z_t_c_by_y"] =j_z_t_by_y,j_z_t_c_by_y
+        self.judge_list["j_z_t_by_w"], self.judge_list["j_z_t_c_by_w"] =j_z_t_by_w,j_z_t_c_by_w
 
-        self.judge_list["j_w_t_by_x"], self.judge_list["j_w_t_c_by_x"] = self.D_M(self.image_list["w_t_by_x"])
-        # self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] = self.D_M(self.image_list["w_t_by_y"])
-        self.judge_list["j_w_t_by_z"], self.judge_list["j_w_t_c_by_z"] = self.D_M(self.image_list["w_t_by_z"])
+        self.judge_list["j_w_t_by_x"], self.judge_list["j_w_t_c_by_x"] =j_w_t_by_x,j_w_t_c_by_x
+        # self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] =j_w_t_by_y,j_w_t_c_by_y
+        self.judge_list["j_w_t_by_z"], self.judge_list["j_w_t_c_by_z"] =j_w_t_by_z,j_w_t_c_by_z
 
-        self.judge_list["j_code_x"] = self.FD_R(self.code_list["code_x"])
-        self.judge_list["j_code_y"] = self.FD_R(self.code_list["code_y"])
-        self.judge_list["j_code_z"] = self.FD_R(self.code_list["code_z"])
-        self.judge_list["j_code_w"] = self.FD_R(self.code_list["code_w"])
-        self.judge_list["j_code_rm"] = self.FD_R(self.code_list["code_rm"])
+        self.judge_list["j_code_x"] =j_code_x
+        self.judge_list["j_code_y"] =j_code_y
+        self.judge_list["j_code_z"] =j_code_z
+        self.judge_list["j_code_w"] = j_code_w
+        self.judge_list["j_code_rm"] =j_code_rm
+
 
         D_loss = 0.0
         G_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(self.judge_list["j_x"], 1.0) * 35
-        D_loss += self.mse_loss(self.judge_list["j_x_g"], 0.0) * 20
-        G_loss += self.mse_loss(self.judge_list["j_x_g"], 1.0) * 25
-        D_loss += self.mse_loss(self.judge_list["j_x_t_by_y"], 0.0) * 10
-        # D_loss += self.mse_loss(self.judge_list["j_x_t_by_z"], 0.0) * 10
-        D_loss += self.mse_loss(self.judge_list["j_x_t_by_w"], 0.0) * 10
-        G_loss += self.mse_loss(self.judge_list["j_x_t_by_y"], 1.0) * 15
-        # G_loss += self.mse_loss(self.judge_list["j_x_t_by_z"], 1.0) * 15
-        G_loss += self.mse_loss(self.judge_list["j_x_t_by_w"], 1.0) * 15
+        D_loss += self.mse_loss(j_x, 1.0) * 35
+        D_loss += self.mse_loss(j_x_g, 0.0) * 20
+        G_loss += self.mse_loss(j_x_g, 1.0) * 25
+        D_loss += self.mse_loss(j_x_t_by_y, 0.0) * 10
+        # D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 10
+        D_loss += self.mse_loss(j_x_t_by_w, 0.0) * 10
+        G_loss += self.mse_loss(j_x_t_by_y, 1.0) * 15
+        # G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 15
+        G_loss += self.mse_loss(j_x_t_by_w, 1.0) * 15
 
-        D_loss += self.mse_loss(self.judge_list["j_y"], 1.0) * 35
-        D_loss += self.mse_loss(self.judge_list["j_y_g"], 0.0) * 20
-        G_loss += self.mse_loss(self.judge_list["j_y_g"], 1.0) * 25
-        D_loss += self.mse_loss(self.judge_list["j_y_t_by_x"], 0.0) * 10
-        D_loss += self.mse_loss(self.judge_list["j_y_t_by_z"], 0.0) * 10
-        # D_loss += self.mse_loss(self.judge_list["j_y_t_by_w"], 0.0) * 10
-        G_loss += self.mse_loss(self.judge_list["j_y_t_by_x"], 1.0) * 15
-        G_loss += self.mse_loss(self.judge_list["j_y_t_by_z"], 1.0) * 15
-        # G_loss += self.mse_loss(self.judge_list["j_y_t_by_w"], 1.0) * 15
+        D_loss += self.mse_loss(j_y, 1.0) * 35
+        D_loss += self.mse_loss(j_y_g, 0.0) * 20
+        G_loss += self.mse_loss(j_y_g, 1.0) * 25
+        D_loss += self.mse_loss(j_y_t_by_x, 0.0) * 10
+        D_loss += self.mse_loss(j_y_t_by_z, 0.0) * 10
+        # D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 10
+        G_loss += self.mse_loss(j_y_t_by_x, 1.0) * 15
+        G_loss += self.mse_loss(j_y_t_by_z, 1.0) * 15
+        # G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 15
 
-        D_loss += self.mse_loss(self.judge_list["j_z"], 1.0) * 35
-        D_loss += self.mse_loss(self.judge_list["j_z_g"], 0.0) * 20
-        G_loss += self.mse_loss(self.judge_list["j_z_g"], 1.0) * 25
-        # D_loss += self.mse_loss(self.judge_list["j_z_t_by_x"], 0.0) * 10
-        D_loss += self.mse_loss(self.judge_list["j_z_t_by_y"], 0.0) * 10
-        D_loss += self.mse_loss(self.judge_list["j_z_t_by_w"], 0.0) * 10
-        # G_loss += self.mse_loss(self.judge_list["j_z_t_by_x"], 1.0) * 15
-        G_loss += self.mse_loss(self.judge_list["j_z_t_by_y"], 1.0) * 15
-        G_loss += self.mse_loss(self.judge_list["j_z_t_by_w"], 1.0) * 15
+        D_loss += self.mse_loss(j_z, 1.0) * 35
+        D_loss += self.mse_loss(j_z_g, 0.0) * 20
+        G_loss += self.mse_loss(j_z_g, 1.0) * 25
+        # D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 10
+        D_loss += self.mse_loss(j_z_t_by_y, 0.0) * 10
+        D_loss += self.mse_loss(j_z_t_by_w, 0.0) * 10
+        # G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 15
+        G_loss += self.mse_loss(j_z_t_by_y, 1.0) * 15
+        G_loss += self.mse_loss(j_z_t_by_w, 1.0) * 15
 
-        D_loss += self.mse_loss(self.judge_list["j_w"], 1.0) * 35
-        D_loss += self.mse_loss(self.judge_list["j_w_g"], 0.0) * 20
-        G_loss += self.mse_loss(self.judge_list["j_w_g"], 1.0) * 25
-        D_loss += self.mse_loss(self.judge_list["j_w_t_by_x"], 0.0) * 10
-        # D_loss += self.mse_loss(self.judge_list["j_w_t_by_y"], 0.0) * 10
-        D_loss += self.mse_loss(self.judge_list["j_w_t_by_z"], 0.0) * 10
-        G_loss += self.mse_loss(self.judge_list["j_w_t_by_x"], 1.0) * 15
-        # G_loss += self.mse_loss(self.judge_list["j_w_t_by_y"], 1.0) * 15
-        G_loss += self.mse_loss(self.judge_list["j_w_t_by_z"], 1.0) * 15
+        D_loss += self.mse_loss(j_w, 1.0) * 35
+        D_loss += self.mse_loss(j_w_g, 0.0) * 20
+        G_loss += self.mse_loss(j_w_g, 1.0) * 25
+        D_loss += self.mse_loss(j_w_t_by_x, 0.0) * 10
+        # D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 10
+        D_loss += self.mse_loss(j_w_t_by_z, 0.0) * 10
+        G_loss += self.mse_loss(j_w_t_by_x, 1.0) * 15
+        # G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 15
+        G_loss += self.mse_loss(j_w_t_by_z, 1.0) * 15
 
-        D_loss += self.mse_loss(self.judge_list["j_x_c"], cx) * 25
-        D_loss += self.mse_loss(self.judge_list["j_y_c"], cy) * 25
-        D_loss += self.mse_loss(self.judge_list["j_z_c"], cz) * 25
-        D_loss += self.mse_loss(self.judge_list["j_w_c"], cw) * 25
+        D_loss += self.mse_loss(j_x_c, cx) * 25
+        D_loss += self.mse_loss(j_y_c, cy) * 25
+        D_loss += self.mse_loss(j_z_c, cz) * 25
+        D_loss += self.mse_loss(j_w_c, cw) * 25
 
-        G_loss += self.mse_loss(self.judge_list["j_x_g_c"], cx) * 25
-        G_loss += self.mse_loss(self.judge_list["j_y_g_c"], cy) * 25
-        G_loss += self.mse_loss(self.judge_list["j_z_g_c"], cz) * 25
-        G_loss += self.mse_loss(self.judge_list["j_w_g_c"], cw) * 25
+        G_loss += self.mse_loss(j_x_g_c, cx) * 25
+        G_loss += self.mse_loss(j_y_g_c, cy) * 25
+        G_loss += self.mse_loss(j_z_g_c, cz) * 25
+        G_loss += self.mse_loss(j_w_g_c, cw) * 25
 
-        G_loss += self.mse_loss(self.judge_list["j_x_t_by_y"], cx) * 25
-        # G_loss += self.mse_loss(self.judge_list["j_x_t_by_z"], cx) * 25
-        G_loss += self.mse_loss(self.judge_list["j_x_t_by_w"], cx) * 25
+        G_loss += self.mse_loss(j_x_t_by_y, cx) * 25
+        # G_loss += self.mse_loss(j_x_t_by_z, cx) * 25
+        G_loss += self.mse_loss(j_x_t_by_w, cx) * 25
 
-        G_loss += self.mse_loss(self.judge_list["j_y_t_by_x"], cx) * 25
-        G_loss += self.mse_loss(self.judge_list["j_y_t_by_z"], cx) * 25
-        # G_loss += self.mse_loss(self.judge_list["j_y_t_by_w"], cx) * 25
+        G_loss += self.mse_loss(j_y_t_by_x, cx) * 25
+        G_loss += self.mse_loss(j_y_t_by_z, cx) * 25
+        # G_loss += self.mse_loss(j_y_t_by_w, cx) * 25
 
-        # G_loss += self.mse_loss(self.judge_list["j_z_t_by_x"], cx) * 25
-        G_loss += self.mse_loss(self.judge_list["j_z_t_by_y"], cx) * 25
-        G_loss += self.mse_loss(self.judge_list["j_z_t_by_w"], cx) * 25
+        # G_loss += self.mse_loss(j_z_t_by_x, cx) * 25
+        G_loss += self.mse_loss(j_z_t_by_y, cx) * 25
+        G_loss += self.mse_loss(j_z_t_by_w, cx) * 25
 
-        G_loss += self.mse_loss(self.judge_list["j_w_t_by_x"], cx) * 25
-        # G_loss += self.mse_loss(self.judge_list["j_w_t_by_y"], cx) * 25
-        G_loss += self.mse_loss(self.judge_list["j_w_t_by_z"], cx) * 25
+        G_loss += self.mse_loss(j_w_t_by_x, cx) * 25
+        # G_loss += self.mse_loss(j_w_t_by_y, cx) * 25
+        G_loss += self.mse_loss(j_w_t_by_z, cx) * 25
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图
-        D_loss += self.mse_loss(self.judge_list["j_code_rm"], 0.0) * 4
-        D_loss += self.mse_loss(self.judge_list["j_code_x"], 1.0)
-        D_loss += self.mse_loss(self.judge_list["j_code_y"], 1.0)
-        D_loss += self.mse_loss(self.judge_list["j_code_z"], 1.0)
-        D_loss += self.mse_loss(self.judge_list["j_code_w"], 1.0)
-        G_loss += self.mse_loss(self.judge_list["j_code_rm"], 1.0) * 4
+        D_loss += self.mse_loss(j_code_rm, 0.0) * 4
+        D_loss += self.mse_loss(j_code_x, 1.0)
+        D_loss += self.mse_loss(j_code_y, 1.0)
+        D_loss += self.mse_loss(j_code_z, 1.0)
+        D_loss += self.mse_loss(j_code_w, 1.0)
+        G_loss += self.mse_loss(j_code_rm, 1.0) * 4
 
         # 输入的结构特征图的重建自监督损失
-        G_loss += self.mse_loss(self.image_list["f"], self.image_list["f_x_g_r"]) * 20
-        G_loss += self.mse_loss(self.image_list["f"], self.image_list["f_y_g_r"]) * 20
-        G_loss += self.mse_loss(self.image_list["f"], self.image_list["f_z_g_r"]) * 20
-        G_loss += self.mse_loss(self.image_list["f"], self.image_list["f_w_g_r"]) * 20
+        G_loss += self.mse_loss(f, f_x_g_r) * 20
+        G_loss += self.mse_loss(f, f_y_g_r) * 20
+        G_loss += self.mse_loss(f, f_z_g_r) * 20
+        G_loss += self.mse_loss(f, f_w_g_r) * 20
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        G_loss += self.mse_loss(self.prob_list["label_expand"][:, :, :, 0],
-                                self.prob_list["l_g_prob"][:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 1], self.prob_list["l_g_prob"][:, :, :, 1]) \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 2],
-                                  self.prob_list["l_g_prob"][:, :, :, 2]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 3],
-                                  self.prob_list["l_g_prob"][:, :, :, 3]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 4],
-                                  self.prob_list["l_g_prob"][:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, self.image_list["l_g"])
+        G_loss += self.mse_loss(label_expand[:, :, :, 0],
+                                l_g_prob[:, :, :, 0]) * 0.1 \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2],
+                                  l_g_prob[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 3],
+                                  l_g_prob[:, :, :, 3]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 4],
+                                  l_g_prob[:, :, :, 4]) * 5
+        G_loss += self.mse_loss(l, l_g)
 
-        G_loss += self.mse_loss(self.prob_list["label_expand"][:, :, :, 0],
-                                self.prob_list["l_g_prob_by_x"][:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 1],
-                                  self.prob_list["l_g_prob_by_x"][:, :, :, 1]) \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 2],
-                                  self.prob_list["l_g_prob_by_x"][:, :, :, 2]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 3],
-                                  self.prob_list["l_g_prob_by_x"][:, :, :, 3]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 4],
-                                  self.prob_list["l_g_prob_by_x"][:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, self.image_list["l_g_by_x"])
+        G_loss += self.mse_loss(label_expand[:, :, :, 0],
+                                l_g_prob_by_x[:, :, :, 0]) * 0.1 \
+                  + self.mse_loss(label_expand[:, :, :, 1],
+                                  l_g_prob_by_x[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2],
+                                  l_g_prob_by_x[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 3],
+                                  l_g_prob_by_x[:, :, :, 3]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 4],
+                                  l_g_prob_by_x[:, :, :, 4]) * 5
+        G_loss += self.mse_loss(l, l_g_by_x)
 
-        G_loss += self.mse_loss(self.prob_list["label_expand"][:, :, :, 0],
-                                self.prob_list["l_g_prob_by_y"][:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 1],
-                                  self.prob_list["l_g_prob_by_y"][:, :, :, 1]) \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 2],
-                                  self.prob_list["l_g_prob_by_y"][:, :, :, 2]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 3],
-                                  self.prob_list["l_g_prob_by_y"][:, :, :, 3]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 4],
-                                  self.prob_list["l_g_prob_by_y"][:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, self.image_list["l_g_by_y"])
+        G_loss += self.mse_loss(label_expand[:, :, :, 0],
+                                l_g_prob_by_y[:, :, :, 0]) * 0.1 \
+                  + self.mse_loss(label_expand[:, :, :, 1],
+                                  l_g_prob_by_y[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2],
+                                  l_g_prob_by_y[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 3],
+                                  l_g_prob_by_y[:, :, :, 3]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 4],
+                                  l_g_prob_by_y[:, :, :, 4]) * 5
+        G_loss += self.mse_loss(l, l_g_by_y)
 
-        G_loss += self.mse_loss(self.prob_list["label_expand"][:, :, :, 0],
-                                self.prob_list["l_g_prob_by_z"][:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 1],
-                                  self.prob_list["l_g_prob_by_z"][:, :, :, 1]) \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 2],
-                                  self.prob_list["l_g_prob_by_z"][:, :, :, 2]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 3],
-                                  self.prob_list["l_g_prob_by_z"][:, :, :, 3]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 4],
-                                  self.prob_list["l_g_prob_by_z"][:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, self.image_list["l_g_by_z"])
+        G_loss += self.mse_loss(label_expand[:, :, :, 0],
+                                l_g_prob_by_z[:, :, :, 0]) * 0.1 \
+                  + self.mse_loss(label_expand[:, :, :, 1],
+                                  l_g_prob_by_z[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2],
+                                  l_g_prob_by_z[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 3],
+                                  l_g_prob_by_z[:, :, :, 3]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 4],
+                                  l_g_prob_by_z[:, :, :, 4]) * 5
+        G_loss += self.mse_loss(l, l_g_by_z)
 
-        G_loss += self.mse_loss(self.prob_list["label_expand"][:, :, :, 0],
-                                self.prob_list["l_g_prob_by_w"][:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 1],
-                                  self.prob_list["l_g_prob_by_w"][:, :, :, 1]) \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 2],
-                                  self.prob_list["l_g_prob_by_w"][:, :, :, 2]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 3],
-                                  self.prob_list["l_g_prob_by_w"][:, :, :, 3]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand"][:, :, :, 4],
-                                  self.prob_list["l_g_prob_by_w"][:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, self.image_list["l_g_by_w"])
+        G_loss += self.mse_loss(label_expand[:, :, :, 0],
+                                l_g_prob_by_w[:, :, :, 0]) * 0.1 \
+                  + self.mse_loss(label_expand[:, :, :, 1],
+                                  l_g_prob_by_w[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2],
+                                  l_g_prob_by_w[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 3],
+                                  l_g_prob_by_w[:, :, :, 3]) * 5 \
+                  + self.mse_loss(label_expand[:, :, :, 4],
+                                  l_g_prob_by_w[:, :, :, 4]) * 5
+        G_loss += self.mse_loss(l, l_g_by_w)
 
         # X模态图分割训练的有监督损失
-        G_loss += self.mse_loss(self.prob_list["label_expand_x"][:, :, :, 0],
-                                self.prob_list["l_f_prob_by_x"][:, :, :, 0]) \
-                  + self.mse_loss(self.prob_list["label_expand_x"][:, :, :, 1],
-                                  self.prob_list["l_f_prob_by_x"][:, :, :, 1]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand_x"][:, :, :, 2],
-                                  self.prob_list["l_f_prob_by_x"][:, :, :, 2]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_x"][:, :, :, 3],
-                                  self.prob_list["l_f_prob_by_x"][:, :, :, 3]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_x"][:, :, :, 4],
-                                  self.prob_list["l_f_prob_by_x"][:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_x, self.image_list["l_f_by_x"]) * 5
+        G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
+                                l_f_prob_by_x[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_x[:, :, :, 1],
+                                  l_f_prob_by_x[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_x[:, :, :, 2],
+                                  l_f_prob_by_x[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_x[:, :, :, 3],
+                                  l_f_prob_by_x[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_x[:, :, :, 4],
+                                  l_f_prob_by_x[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_x, l_f_by_x) * 5
 
-        G_loss += self.mse_loss(self.prob_list["label_expand_y"][:, :, :, 0],
-                                self.prob_list["l_f_prob_by_y"][:, :, :, 0]) \
-                  + self.mse_loss(self.prob_list["label_expand_y"][:, :, :, 1],
-                                  self.prob_list["l_f_prob_by_y"][:, :, :, 1]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand_y"][:, :, :, 2],
-                                  self.prob_list["l_f_prob_by_y"][:, :, :, 2]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_y"][:, :, :, 3],
-                                  self.prob_list["l_f_prob_by_y"][:, :, :, 3]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_y"][:, :, :, 4],
-                                  self.prob_list["l_f_prob_by_y"][:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_y, self.image_list["l_f_by_y"]) * 5
+        G_loss += self.mse_loss(label_expand_y[:, :, :, 0],
+                                l_f_prob_by_y[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_y[:, :, :, 1],
+                                  l_f_prob_by_y[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_y[:, :, :, 2],
+                                  l_f_prob_by_y[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_y[:, :, :, 3],
+                                  l_f_prob_by_y[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_y[:, :, :, 4],
+                                  l_f_prob_by_y[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_y, l_f_by_y) * 5
 
-        G_loss += self.mse_loss(self.prob_list["label_expand_z"][:, :, :, 0],
-                                self.prob_list["l_f_prob_by_z"][:, :, :, 0]) \
-                  + self.mse_loss(self.prob_list["label_expand_z"][:, :, :, 1],
-                                  self.prob_list["l_f_prob_by_z"][:, :, :, 1]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand_z"][:, :, :, 2],
-                                  self.prob_list["l_f_prob_by_z"][:, :, :, 2]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_z"][:, :, :, 3],
-                                  self.prob_list["l_f_prob_by_z"][:, :, :, 3]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_z"][:, :, :, 4],
-                                  self.prob_list["l_f_prob_by_z"][:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_z, self.image_list["l_f_by_z"]) * 5
+        G_loss += self.mse_loss(label_expand_z[:, :, :, 0],
+                                l_f_prob_by_z[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_z[:, :, :, 1],
+                                  l_f_prob_by_z[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_z[:, :, :, 2],
+                                  l_f_prob_by_z[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_z[:, :, :, 3],
+                                  l_f_prob_by_z[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_z[:, :, :, 4],
+                                  l_f_prob_by_z[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_z, l_f_by_z) * 5
 
-        G_loss += self.mse_loss(self.prob_list["label_expand_w"][:, :, :, 0],
-                                self.prob_list["l_f_prob_by_w"][:, :, :, 0]) \
-                  + self.mse_loss(self.prob_list["label_expand_w"][:, :, :, 1],
-                                  self.prob_list["l_f_prob_by_w"][:, :, :, 1]) * 5 \
-                  + self.mse_loss(self.prob_list["label_expand_w"][:, :, :, 2],
-                                  self.prob_list["l_f_prob_by_w"][:, :, :, 2]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_w"][:, :, :, 3],
-                                  self.prob_list["l_f_prob_by_w"][:, :, :, 3]) * 15 \
-                  + self.mse_loss(self.prob_list["label_expand_w"][:, :, :, 4],
-                                  self.prob_list["l_f_prob_by_w"][:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_w, self.image_list["l_f_by_w"]) * 5
+        G_loss += self.mse_loss(label_expand_w[:, :, :, 0],
+                                l_f_prob_by_w[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_w[:, :, :, 1],
+                                  l_f_prob_by_w[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_w[:, :, :, 2],
+                                  l_f_prob_by_w[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_w[:, :, :, 3],
+                                  l_f_prob_by_w[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_w[:, :, :, 4],
+                                  l_f_prob_by_w[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_w, l_f_by_w) * 5
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
-        G_loss += self.mse_loss(self.image_list["x_g"], self.image_list["x_g_t_by_y"]) * 2
-        # G_loss += self.mse_loss(self.image_list["x_g"], self.image_list["x_g_t_by_z"]) * 2
-        G_loss += self.mse_loss(self.image_list["x_g"], self.image_list["x_g_t_by_w"]) * 2
+        G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2
+        # G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2
+        G_loss += self.mse_loss(x_g, x_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(self.image_list["y_g"], self.image_list["y_g_t_by_x"]) * 2
-        G_loss += self.mse_loss(self.image_list["y_g"], self.image_list["y_g_t_by_z"]) * 2
-        # G_loss += self.mse_loss(self.image_list["y_g"], self.image_list["y_g_t_by_w"]) * 2
+        G_loss += self.mse_loss(y_g, y_g_t_by_x) * 2
+        G_loss += self.mse_loss(y_g, y_g_t_by_z) * 2
+        # G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2
 
-        # G_loss += self.mse_loss(self.image_list["z_g"], self.image_list["z_g_t_by_x"]) * 2
-        G_loss += self.mse_loss(self.image_list["z_g"], self.image_list["z_g_t_by_y"]) * 2
-        G_loss += self.mse_loss(self.image_list["z_g"], self.image_list["z_g_t_by_w"]) * 2
+        # G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2
+        G_loss += self.mse_loss(z_g, z_g_t_by_y) * 2
+        G_loss += self.mse_loss(z_g, z_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(self.image_list["w_g"], self.image_list["w_g_t_by_x"]) * 2
-        # G_loss += self.mse_loss(self.image_list["w_g"], self.image_list["w_g_t_by_y"]) * 2
-        G_loss += self.mse_loss(self.image_list["w_g"], self.image_list["w_g_t_by_z"]) * 2
+        G_loss += self.mse_loss(w_g, w_g_t_by_x) * 2
+        # G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2
+        G_loss += self.mse_loss(w_g, w_g_t_by_z) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, self.image_list["x_g"] * self.image_list["mask"]) * 1.5
-        G_loss += self.mse_loss(0.0, self.image_list["y_g"] * self.image_list["mask"]) * 1.5
+        G_loss += self.mse_loss(0.0, x_g * mask) * 1.5
+        G_loss += self.mse_loss(0.0, y_g * mask) * 1.5
 
-        G_loss += self.mse_loss(0.0, self.image_list["x_g_t_by_y"] * self.image_list["mask"]) * 1.5
-        # G_loss += self.mse_loss(0.0, self.image_list["x_g_t_by_z"] * self.image_list["mask"]) * 1.5
-        G_loss += self.mse_loss(0.0, self.image_list["x_g_t_by_w"] * self.image_list["mask"]) * 1.5
+        G_loss += self.mse_loss(0.0, x_g_t_by_y * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, x_g_t_by_z * mask) * 1.5
+        G_loss += self.mse_loss(0.0, x_g_t_by_w * mask) * 1.5
 
-        G_loss += self.mse_loss(0.0, self.image_list["y_g_t_by_x"] * self.image_list["mask"]) * 1.5
-        G_loss += self.mse_loss(0.0, self.image_list["y_g_t_by_z"] * self.image_list["mask"]) * 1.5
-        # G_loss += self.mse_loss(0.0, self.image_list["y_g_t_by_w"] * self.image_list["mask"]) * 1.5
+        G_loss += self.mse_loss(0.0, y_g_t_by_x * mask) * 1.5
+        G_loss += self.mse_loss(0.0, y_g_t_by_z * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, y_g_t_by_w * mask) * 1.5
 
-        # G_loss += self.mse_loss(0.0, self.image_list["z_g_t_by_x"] * self.image_list["mask"]) * 1.5
-        G_loss += self.mse_loss(0.0, self.image_list["z_g_t_by_y"] * self.image_list["mask"]) * 1.5
-        G_loss += self.mse_loss(0.0, self.image_list["z_g_t_by_w"] * self.image_list["mask"]) * 1.5
+        # G_loss += self.mse_loss(0.0, z_g_t_by_x * mask) * 1.5
+        G_loss += self.mse_loss(0.0, z_g_t_by_y * mask) * 1.5
+        G_loss += self.mse_loss(0.0, z_g_t_by_w * mask) * 1.5
 
-        G_loss += self.mse_loss(0.0, self.image_list["w_g_t_by_x"] * self.image_list["mask"]) * 1.5
-        # G_loss += self.mse_loss(0.0, self.image_list["w_g_t_by_y"] * self.image_list["mask"]) * 1.5
-        G_loss += self.mse_loss(0.0, self.image_list["w_g_t_by_z"] * self.image_list["mask"]) * 1.5
+        G_loss += self.mse_loss(0.0, w_g_t_by_x * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, w_g_t_by_y * mask) * 1.5
+        G_loss += self.mse_loss(0.0, w_g_t_by_z * mask) * 1.5
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
-        G_loss += self.mse_loss(x, self.image_list["x_r"]) * 5
-        G_loss += self.mse_loss(y, self.image_list["y_r"]) * 5
-        G_loss += self.mse_loss(z, self.image_list["z_r"]) * 5
-        G_loss += self.mse_loss(w, self.image_list["w_r"]) * 5
+        G_loss += self.mse_loss(x, x_r) * 5
+        G_loss += self.mse_loss(y, y_r) * 5
+        G_loss += self.mse_loss(z, z_r) * 5
+        G_loss += self.mse_loss(w, w_r) * 5
 
         # X模态与Y模态图进行转换得到的转换图与原图的有监督损失
-        G_loss += self.mse_loss(x, self.image_list["x_r_c_by_y"]) * 10
-        # G_loss += self.mse_loss(x, self.image_list["x_r_c_by_z"]) * 10
-        G_loss += self.mse_loss(x, self.image_list["x_r_c_by_w"]) * 10
+        G_loss += self.mse_loss(x, x_r_c_by_y) * 10
+        # G_loss += self.mse_loss(x, x_r_c_by_z) * 10
+        G_loss += self.mse_loss(x, x_r_c_by_w) * 10
 
-        G_loss += self.mse_loss(y, self.image_list["y_r_c_by_x"]) * 10
-        G_loss += self.mse_loss(y, self.image_list["y_r_c_by_z"]) * 10
-        # G_loss += self.mse_loss(y, self.image_list["y_r_c_by_w"]) * 10
+        G_loss += self.mse_loss(y, y_r_c_by_x) * 10
+        G_loss += self.mse_loss(y, y_r_c_by_z) * 10
+        # G_loss += self.mse_loss(y, y_r_c_by_w) * 10
 
-        # G_loss += self.mse_loss(z, self.image_list["z_r_c_by_x"]) * 10
-        G_loss += self.mse_loss(z, self.image_list["z_r_c_by_y"]) * 10
-        G_loss += self.mse_loss(z, self.image_list["z_r_c_by_w"]) * 10
+        # G_loss += self.mse_loss(z, z_r_c_by_x) * 10
+        G_loss += self.mse_loss(z, z_r_c_by_y) * 10
+        G_loss += self.mse_loss(z, z_r_c_by_w) * 10
 
-        G_loss += self.mse_loss(w, self.image_list["w_r_c_by_x"]) * 10
-        # G_loss += self.mse_loss(w, self.image_list["w_r_c_by_y"]) * 10
-        G_loss += self.mse_loss(w, self.image_list["w_r_c_by_z"]) * 10
+        G_loss += self.mse_loss(w, w_r_c_by_x) * 10
+        # G_loss += self.mse_loss(w, w_r_c_by_y) * 10
+        G_loss += self.mse_loss(w, w_r_c_by_z) * 10
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, self.image_list["x_t_by_y"] * self.image_list["mask_x"]) * 2
-        # G_loss += self.mse_loss(0.0, self.image_list["x_t_by_z"] * self.image_list["mask_x"]) * 2
-        G_loss += self.mse_loss(0.0, self.image_list["x_t_by_w"] * self.image_list["mask_x"]) * 2
+        G_loss += self.mse_loss(0.0, x_t_by_y * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, x_t_by_z * mask_x) * 2
+        G_loss += self.mse_loss(0.0, x_t_by_w * mask_x) * 2
 
-        G_loss += self.mse_loss(0.0, self.image_list["y_t_by_x"] * self.image_list["mask_x"]) * 2
-        G_loss += self.mse_loss(0.0, self.image_list["y_t_by_z"] * self.image_list["mask_x"]) * 2
-        # G_loss += self.mse_loss(0.0, self.image_list["y_t_by_w"] * self.image_list["mask_x"]) * 2
+        G_loss += self.mse_loss(0.0, y_t_by_x * mask_x) * 2
+        G_loss += self.mse_loss(0.0, y_t_by_z * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, y_t_by_w * mask_x) * 2
 
-        # G_loss += self.mse_loss(0.0, self.image_list["z_t_by_x"] * self.image_list["mask_x"]) * 2
-        G_loss += self.mse_loss(0.0, self.image_list["z_t_by_y"] * self.image_list["mask_x"]) * 2
-        G_loss += self.mse_loss(0.0, self.image_list["z_t_by_w"] * self.image_list["mask_x"]) * 2
+        # G_loss += self.mse_loss(0.0, z_t_by_x * mask_x) * 2
+        G_loss += self.mse_loss(0.0, z_t_by_y * mask_x) * 2
+        G_loss += self.mse_loss(0.0, z_t_by_w * mask_x) * 2
 
-        G_loss += self.mse_loss(0.0, self.image_list["w_t_by_x"] * self.image_list["mask_x"]) * 2
-        # G_loss += self.mse_loss(0.0, self.image_list["w_t_by_y"] * self.image_list["mask_x"]) * 2
-        G_loss += self.mse_loss(0.0, self.image_list["w_t_by_z"] * self.image_list["mask_x"]) * 2
+        G_loss += self.mse_loss(0.0, w_t_by_x * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, w_t_by_y * mask_x) * 2
+        G_loss += self.mse_loss(0.0, w_t_by_z * mask_x) * 2
 
-        G_loss += self.mse_loss(0.0, self.image_list["x_r"] * self.image_list["mask_x"]) * 0.5
-        G_loss += self.mse_loss(0.0, self.image_list["y_r"] * self.image_list["mask_y"]) * 0.5
-        G_loss += self.mse_loss(0.0, self.image_list["z_r"] * self.image_list["mask_z"]) * 0.5
-        G_loss += self.mse_loss(0.0, self.image_list["w_r"] * self.image_list["mask_w"]) * 0.5
+        G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
+        G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.5
+        G_loss += self.mse_loss(0.0, z_r * mask_z) * 0.5
+        G_loss += self.mse_loss(0.0, w_r * mask_w) * 0.5
 
         # 通过解码器生成X模态与Y模态图的编码与X模态与Y模态图经过编码器得到的编码的自监督语义一致性损失
-        G_loss += self.mse_loss(self.code_list["code_rm"], self.code_list["code_x_g"])
-        G_loss += self.mse_loss(self.code_list["code_rm"], self.code_list["code_y_g"])
-        G_loss += self.mse_loss(self.code_list["code_rm"], self.code_list["code_z_g"])
-        G_loss += self.mse_loss(self.code_list["code_rm"], self.code_list["code_w_g"])
+        G_loss += self.mse_loss(code_rm, code_x_g)
+        G_loss += self.mse_loss(code_rm, code_y_g)
+        G_loss += self.mse_loss(code_rm, code_z_g)
+        G_loss += self.mse_loss(code_rm, code_w_g)
 
-        G_loss += self.mse_loss(self.code_list["code_x_g"], self.code_list["code_y_g"]) * 0.5
-        G_loss += self.mse_loss(self.code_list["code_x_g"], self.code_list["code_z_g"]) * 0.5
-        G_loss += self.mse_loss(self.code_list["code_x_g"], self.code_list["code_w_g"]) * 0.5
-        G_loss += self.mse_loss(self.code_list["code_y_g"], self.code_list["code_z_g"]) * 0.5
-        G_loss += self.mse_loss(self.code_list["code_y_g"], self.code_list["code_w_g"]) * 0.5
-        G_loss += self.mse_loss(self.code_list["code_z_g"], self.code_list["code_w_g"]) * 0.5
+        G_loss += self.mse_loss(code_x_g, code_y_g) * 0.5
+        G_loss += self.mse_loss(code_x_g, code_z_g) * 0.5
+        G_loss += self.mse_loss(code_x_g, code_w_g) * 0.5
+        G_loss += self.mse_loss(code_y_g, code_z_g) * 0.5
+        G_loss += self.mse_loss(code_y_g, code_w_g) * 0.5
+        G_loss += self.mse_loss(code_z_g, code_w_g) * 0.5
 
         # X模态与Y模态图编码的有监督语义一致性损失
-        G_loss += self.mse_loss(self.code_list["code_x"], self.code_list["code_y_t_by_x"]) * 5
-        # G_loss += self.mse_loss(self.code_list["code_x"], self.code_list["code_z_t_by_x"]) * 5
-        G_loss += self.mse_loss(self.code_list["code_x"], self.code_list["code_w_t_by_x"]) * 5
+        G_loss += self.mse_loss(code_x, code_y_t_by_x) * 5
+        # G_loss += self.mse_loss(code_x, code_z_t_by_x) * 5
+        G_loss += self.mse_loss(code_x, code_w_t_by_x) * 5
 
-        G_loss += self.mse_loss(self.code_list["code_y"], self.code_list["code_x_t_by_y"]) * 5
-        G_loss += self.mse_loss(self.code_list["code_y"], self.code_list["code_z_t_by_y"]) * 5
-        # G_loss += self.mse_loss(self.code_list["code_y"], self.code_list["code_w_t_by_y"]) * 5
+        G_loss += self.mse_loss(code_y, code_x_t_by_y) * 5
+        G_loss += self.mse_loss(code_y, code_z_t_by_y) * 5
+        # G_loss += self.mse_loss(code_y, code_w_t_by_y) * 5
 
-        # G_loss += self.mse_loss(self.code_list["code_z"], self.code_list["code_x_t_by_z"]) * 5
-        G_loss += self.mse_loss(self.code_list["code_z"], self.code_list["code_y_t_by_z"]) * 5
-        G_loss += self.mse_loss(self.code_list["code_z"], self.code_list["code_w_t_by_z"]) * 5
+        # G_loss += self.mse_loss(code_z, code_x_t_by_z) * 5
+        G_loss += self.mse_loss(code_z, code_y_t_by_z) * 5
+        G_loss += self.mse_loss(code_z, code_w_t_by_z) * 5
 
-        G_loss += self.mse_loss(self.code_list["code_w"], self.code_list["code_x_t_by_w"]) * 5
-        # G_loss += self.mse_loss(self.code_list["code_w"], self.code_list["code_y_t_by_w"]) * 5
-        G_loss += self.mse_loss(self.code_list["code_w"], self.code_list["code_z_t_by_w"]) * 5
+        G_loss += self.mse_loss(code_w, code_x_t_by_w) * 5
+        # G_loss += self.mse_loss(code_w, code_y_t_by_w) * 5
+        G_loss += self.mse_loss(code_w, code_z_t_by_w) * 5
 
         loss_list = [G_loss, D_loss]
 

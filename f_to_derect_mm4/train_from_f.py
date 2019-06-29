@@ -15,7 +15,7 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 2e-4, 'initial learning rate for Adam, default: 2e-4')
-tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '../mydata/BRATS2015/trainT1', 'X files for training')
 tf.flags.DEFINE_string('Y', '../mydata/BRATS2015/trainT2', 'Y files for training')
 tf.flags.DEFINE_string('Z', '../mydata/BRATS2015/trainT1c', 'X files for training')
