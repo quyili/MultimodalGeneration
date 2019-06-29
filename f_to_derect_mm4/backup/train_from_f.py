@@ -84,48 +84,48 @@ def expand(train_M_arr_, train_L_arr_):
     return L_arr
 
 
-def save_images(image_list, checkpoints_dir, file_index,m="T1_T2"):
-    true_l, true_f,gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y,\
-    gen_f_x_g_r, gen_f_y_g_r, true_x, true_y,trans_x_r, trans_y_r, trans_x_t, trans_y_t, trans_l_f_by_x, trans_l_f_by_y = image_list
+def save_images(image_list, checkpoints_dir, file_index, m="T1_T2"):
+    true_l, true_f, gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y, \
+    gen_f_x_g_r, gen_f_y_g_r, true_x, true_y, trans_x_r, trans_y_r, trans_x_t, trans_y_t, trans_l_f_by_x, trans_l_f_by_y = image_list
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"true_x_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/X/" + m + "true_x_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"true_y_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/Y/" + m + "true_y_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_f)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/f/"+ m +"true_f_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/f/" + m + "true_f_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_l)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+m+"true_l_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/l/" + m + "true_l_" + str(file_index) + ".tiff")
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_x_g)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"gen_x_g_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/X/" + m + "gen_x_g_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_y_g)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"gen_y_g_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/Y/" + m + "gen_y_g_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_x_g_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"gen_x_g_t_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/X/" + m + "gen_x_g_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_y_g_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"gen_y_g_t_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/Y/" + m + "gen_y_g_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_l_g)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"gen_l_g_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/l/" + m + "gen_l_g_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_l_g_by_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"gen_l_g_by_x_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/l/" + m + "gen_l_g_by_x_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_l_g_by_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"gen_l_g_by_y_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/l/" + m + "gen_l_g_by_y_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_f_x_g_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/f/"+ m +"gen_f_x_g_r_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/f/" + m + "gen_f_x_g_r_" + str(file_index) + ".tiff")
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_x_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"trans_x_r_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/X/" + m + "trans_x_r_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_y_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"trans_y_r_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/Y/" + m + "trans_y_r_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_x_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"trans_x_t_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/X/" + m + "trans_x_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_y_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"trans_y_t_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/Y/" + m + "trans_y_t_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_l_f_by_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"trans_l_f_by_x_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/l/" + m + "trans_l_f_by_x_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_l_f_by_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"trans_l_f_by_y_" + str(file_index) + ".tiff")
+                         checkpoints_dir + "/samples/l/" + m + "trans_l_f_by_y_" + str(file_index) + ".tiff")
 
 
 def read_filename(path, shuffle=True):

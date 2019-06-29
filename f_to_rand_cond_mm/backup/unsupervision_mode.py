@@ -136,8 +136,8 @@ class GAN:
         G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 1.0
 
-        self.image_list=[f, l, x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r]
-        self.code_list=[code_rm, code_x_g, code_y_g]
+        self.image_list = [f, l, x_g, y_g, x_g_t, y_g_t, l_g, l_g_by_x, l_g_by_y, f_x_g_r, f_y_g_r]
+        self.code_list = [code_rm, code_x_g, code_y_g]
 
         return G_loss
 
@@ -248,7 +248,7 @@ class GAN:
         D_loss += self.mse_loss(j_code_y, 1.0)
         G_loss += self.mse_loss(j_code_rm, 1.0) * 2
 
-        self.judge_list=[j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm]
+        self.judge_list = [j_x, j_x_g, j_y, j_y_g, j_code_x, j_code_y, j_code_rm]
 
         return G_loss, D_loss
 

@@ -9,7 +9,8 @@ def norm(input):
               ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
     return output
 
-def get_f(x,j=0.1):
+
+def get_f(x, j=0.1):
     x1 = norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
     x2 = norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
 
@@ -41,22 +42,22 @@ with graph.as_default():
     # fz = get_f(z, j=0.07)
     # fw = get_f(w, j=0.07)
 
-
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/0_90.tiff")).astype('float32')
     input_y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT2/0_90.tiff")).astype('float32')
-    input_z = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1c/0_90.tiff")).astype('float32')
-    input_w = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testFlair/0_90.tiff")).astype('float32')
+    input_z = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1c/0_90.tiff")).astype(
+        'float32')
+    input_w = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testFlair/0_90.tiff")).astype(
+        'float32')
     input_x = np.asarray(input_x).reshape([184, 144, 1])
     input_y = np.asarray(input_y).reshape([184, 144, 1])
     input_z = np.asarray(input_z).reshape([184, 144, 1])
     input_w = np.asarray(input_w).reshape([184, 144, 1])
-    fx_, fy_,fz_, fw_= sess.run([fx,fy,fz,fw],feed_dict={x: np.asarray([input_x]),
-                                                       y: np.asarray([input_y]),
-                                                       z: np.asarray([input_z]),
-                                                       w: np.asarray([input_w])
-                                                       })
-
+    fx_, fy_, fz_, fw_ = sess.run([fx, fy, fz, fw], feed_dict={x: np.asarray([input_x]),
+                                                               y: np.asarray([input_y]),
+                                                               z: np.asarray([input_z]),
+                                                               w: np.asarray([input_w])
+                                                               })
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fx_)[0, :, :, 0]), "fx_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fy_)[0, :, :, 0]), "fy_.tiff")
@@ -67,4 +68,3 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_y[:, :, 0]), "input_y.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_z[:, :, 0]), "input_z.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_w[:, :, 0]), "input_w.tiff")
-

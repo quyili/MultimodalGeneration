@@ -50,8 +50,7 @@ class GAN:
         mask = 1.0 - self.ones * tf.cast(x > 0.02, dtype="float32")
         return mask
 
-
-    def model(self,l,l_x ,l_y, x, y,z,w):
+    def model(self, l, l_x, l_y, x, y, z, w):
         # L
         # 选择f来源模态
         rand_f = tf.random_uniform([], 0, 4, dtype=tf.int32)
@@ -135,7 +134,6 @@ class GAN:
         j_y = self.D_Y(y)
         j_y_g = self.D_Y(y_g)
         j_y_t = self.D_Y(y_t)
-
 
         j_code_rm = self.FD_R(code_rm)
         j_code_x = self.FD_R(code_x)
@@ -248,7 +246,7 @@ class GAN:
 
         image_list = [x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
                       l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
-                      f, f_x_g_r,f_y_g_r]
+                      f, f_x_g_r, f_y_g_r]
 
         code_list = [code_x, code_y, code_rm, code_x_g, code_y_g]
 
@@ -256,7 +254,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list,f_rm_expand
+        return image_list, code_list, j_list, loss_list, f_rm_expand
 
     def get_variables(self):
         return [self.EC_R.variables
@@ -324,17 +322,18 @@ class GAN:
     def evaluation(self, image_list):
         x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
         l_input, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
-        f, f_x_g_r,f_y_g_r = \
+        f, f_x_g_r, f_y_g_r = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
-            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17],image_list[18]
+            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17], image_list[
+                18]
         list = [self.PSNR(x, x_t), self.PSNR(x, x_r),
                 self.PSNR(y, y_t), self.PSNR(y, y_r),
                 self.PSNR(x_g, x_g_t),
                 self.PSNR(y_g, y_g_t),
                 self.PSNR(l_input, l_f_by_x), self.PSNR(l_input, l_f_by_y),
                 self.PSNR(l_input, l_g), self.PSNR(l_input, l_g_by_x), self.PSNR(l_input, l_g_by_y),
-                self.PSNR(f, f_x_g_r),self.PSNR(f, f_y_g_r),
+                self.PSNR(f, f_x_g_r), self.PSNR(f, f_y_g_r),
 
                 self.SSIM(x, x_t), self.SSIM(x, x_r),
                 self.SSIM(y, y_t), self.SSIM(y, y_r),
@@ -378,10 +377,11 @@ class GAN:
     def image_summary(self, image_list):
         x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t, \
         l_input, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y, \
-        f, f_x_g_r,f_y_g_r = \
+        f, f_x_g_r, f_y_g_r = \
             image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5], \
             image_list[6], image_list[7], image_list[8], image_list[9], image_list[10], image_list[11], \
-            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17],image_list[18]
+            image_list[12], image_list[13], image_list[14], image_list[15], image_list[16], image_list[17], image_list[
+                18]
         tf.summary.image('image/x_g', x_g)
         tf.summary.image('image/x_g_t', x_g_t)
         tf.summary.image('image/x', x)

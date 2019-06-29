@@ -15,9 +15,13 @@ tf.flags.DEFINE_string('load_model', "20190620-2035",
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/done/test46/test2', 'X files for training')
-tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata//BRATS2015/testLabel', 'Y files for training')
-tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/testMask', 'Y files for training')
+tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/done/test46/test2',
+                       'X files for training')
+tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata//BRATS2015/testLabel',
+                       'Y files for training')
+tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/testMask',
+                       'Y files for training')
+
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -27,12 +31,15 @@ def read_filename(path, shuffle=True):
         np.random.shuffle(index_arr)
         files_ = files_[index_arr]
     return files_
+
+
 def read_file(l_path, Label_train_files, index):
     train_range = len(Label_train_files)
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     L_arr_ = L_arr_.astype('float32')
     return L_arr_
+
 
 def expand(train_M_arr_, train_L_arr_):
     L0 = np.asarray(train_M_arr_ == 0., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
@@ -45,6 +52,7 @@ def expand(train_M_arr_, train_L_arr_):
     L_arr = np.concatenate([L0, L1, L2, L3, L4, L5], axis=-1)
     return L_arr
 
+
 def read_files(x_path, l_path, Label_train_files, index):
     train_range = len(Label_train_files)
     T1_img = SimpleITK.ReadImage(x_path + "/" + Label_train_files[index % train_range])
@@ -54,6 +62,7 @@ def read_files(x_path, l_path, Label_train_files, index):
     T1_arr_ = T1_arr_.astype('float32')
     L_arr_ = L_arr_.astype('float32')
     return T1_arr_, L_arr_
+
 
 def train():
     graph = tf.get_default_graph()
@@ -66,7 +75,7 @@ def train():
     y_g = tf.get_default_graph().get_tensor_by_name("GPU_0/DC_Y/lastconv/Sigmoid:0")
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        checkpoints_dir="./checkpoints/20190621-1650/"
+        checkpoints_dir = "./checkpoints/20190621-1650/"
         saver.restore(sess, tf.train.latest_checkpoint(checkpoints_dir))
 
         L_train_files = read_filename(FLAGS.L_test)
@@ -88,9 +97,9 @@ def train():
                 index = index + 1
 
             print("image gen start:" + str(index))
-            x_g_,y_g_= sess.run([x_g,y_g],
-                                feed_dict={f_input:np.asarray(train_true_f),
-                                            label_expand_input:np.asarray(train_true_l)})
+            x_g_, y_g_ = sess.run([x_g, y_g],
+                                  feed_dict={f_input: np.asarray(train_true_f),
+                                             label_expand_input: np.asarray(train_true_l)})
 
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[0, :, :, 0]),
                                  "./test/fake_x_" + str(index) + ".tiff")

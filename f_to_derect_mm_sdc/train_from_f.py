@@ -20,12 +20,12 @@ tf.flags.DEFINE_string('X', '../mydata/BRATS2015/trainT1', 'X files for training
 tf.flags.DEFINE_string('Y', '../mydata/BRATS2015/trainT2', 'Y files for training')
 tf.flags.DEFINE_string('Z', '../mydata/BRATS2015/trainT1c', 'X files for training')
 tf.flags.DEFINE_string('W', '../mydata/BRATS2015/trainFlair', 'Y files for training')
-tf.flags.DEFINE_string('L', '../mydata/BRATS2015/trainLabelV', 'Y files for training')
+tf.flags.DEFINE_string('L', '../mydata/BRATS2015/trainLabel', 'Y files for training')
 tf.flags.DEFINE_string('X_test', '../mydata/BRATS2015/testT1', 'X files for training')
 tf.flags.DEFINE_string('Y_test', '../mydata/BRATS2015/testT2', 'Y files for training')
 tf.flags.DEFINE_string('Z_test', '../mydata/BRATS2015/testT1c', 'X files for training')
 tf.flags.DEFINE_string('W_test', '../mydata/BRATS2015/testFlair', 'Y files for training')
-tf.flags.DEFINE_string('L_test', '../mydata/BRATS2015/testLabelV', 'Y files for training')
+tf.flags.DEFINE_string('L_test', '../mydata/BRATS2015/testLabel', 'Y files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -58,7 +58,7 @@ def read_file(l_path, Label_train_files, index):
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     L_arr_ = L_arr_.astype('float32')
-    return L_arr_
+    return np.asarray(L_arr_)
 
 
 def read_files(x_path, l_path, Label_train_files, index):
@@ -84,48 +84,24 @@ def expand(train_M_arr_, train_L_arr_):
     return L_arr
 
 
-def save_images(image_list, checkpoints_dir, file_index,m="T1_T2"):
-    true_l, true_f,gen_x_g, gen_y_g, gen_x_g_t, gen_y_g_t, gen_l_g, gen_l_g_by_x, gen_l_g_by_y,\
-    gen_f_x_g_r, gen_f_y_g_r, true_x, true_y,trans_x_r, trans_y_r, trans_x_t, trans_y_t, trans_l_f_by_x, trans_l_f_by_y = image_list
+def norm(input):
+    output = (input - np.min(input, axis=[1, 2, 3])
+              ) / (np.max(input, axis=[1, 2, 3]) - np.min(input, axis=[1, 2, 3]))
+    return output
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"true_x_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"true_y_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_f)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/f/"+ m +"true_f_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(true_l)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+m+"true_l_" + str(file_index) + ".tiff")
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_x_g)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"gen_x_g_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_y_g)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"gen_y_g_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_x_g_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"gen_x_g_t_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_y_g_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"gen_y_g_t_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_l_g)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"gen_l_g_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_l_g_by_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"gen_l_g_by_x_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_l_g_by_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"gen_l_g_by_y_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(gen_f_x_g_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/f/"+ m +"gen_f_x_g_r_" + str(file_index) + ".tiff")
+def save_images(image_dirct, checkpoints_dir, file_index=""):
+    for key in image_dirct:
+        save_image(np.asarray(image_dirct[key])[0, :, :, 0], key + "_" + file_index,
+                   dir=checkpoints_dir + "/samples", form=".tiff")
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_x_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"trans_x_r_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_y_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"trans_y_r_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_x_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/X/"+ m +"trans_x_t_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_y_t)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/Y/"+ m +"trans_y_t_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_l_f_by_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"trans_l_f_by_x_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(trans_l_f_by_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/l/"+ m +"trans_l_f_by_y_" + str(file_index) + ".tiff")
+
+def save_image(image, name, dir="./samples", form=".tiff"):
+    try:
+        os.makedirs(dir)
+    except os.error:
+        pass
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
 
 def read_filename(path, shuffle=True):
@@ -188,16 +164,19 @@ def train():
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
                     with tf.name_scope("GPU_0"):
+                        l_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_x_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_y_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_z_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         x_0 = tf.placeholder(tf.float32, shape=input_shape)
                         y_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_0 = tf.placeholder(tf.float32, shape=input_shape)
                         z_0 = tf.placeholder(tf.float32, shape=input_shape)
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        rande_f_0 = tf.placeholder(tf.int32)
-                        rande_train_0 = tf.placeholder(tf.int32)
-                        loss_list_0 = gan.run(x_0, y_0, z_0, w_0, label_expand_0)
+                        loss_list_0 = gan.model(l_0, m_0, l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
-                        evaluation_list_0 = gan.evaluation(gan.image_list)
+                        evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
@@ -206,14 +185,17 @@ def train():
                         D_grad_list.append(D_grad_0)
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
+                        l_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_x_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_y_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_z_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_w_1 = tf.placeholder(tf.float32, shape=input_shape)
                         x_1 = tf.placeholder(tf.float32, shape=input_shape)
                         y_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_1 = tf.placeholder(tf.float32, shape=input_shape)
                         z_1 = tf.placeholder(tf.float32, shape=input_shape)
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        rande_f_1 = tf.placeholder(tf.int32)
-                        rande_train_1 = tf.placeholder(tf.int32)
-                        loss_list_1 = gan.run(x_1, y_1, z_1, w_1, label_expand_1)
+                        loss_list_1 = gan.model(l_1, m_1, l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
                         image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
@@ -224,14 +206,17 @@ def train():
                         D_grad_list.append(D_grad_1)
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
+                        l_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_x_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_y_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_z_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_w_2 = tf.placeholder(tf.float32, shape=input_shape)
                         x_2 = tf.placeholder(tf.float32, shape=input_shape)
                         y_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_2 = tf.placeholder(tf.float32, shape=input_shape)
                         z_2 = tf.placeholder(tf.float32, shape=input_shape)
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        rande_f_2 = tf.placeholder(tf.int32)
-                        rande_train_2 = tf.placeholder(tf.int32)
-                        loss_list_2 = gan.run(x_2, y_2, z_2, w_2, label_expand_2)
+                        loss_list_2 = gan.model(l_2, m_2, l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
                         image_list_2, code_list_2, j_list_2 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
@@ -242,14 +227,17 @@ def train():
                         D_grad_list.append(D_grad_2)
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
+                        l_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_x_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_y_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_z_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         x_3 = tf.placeholder(tf.float32, shape=input_shape)
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        label_expand_3 = tf.placeholder(tf.float32, shape=input_shape)
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        rande_f_3 = tf.placeholder(tf.int32)
-                        rande_train_3 = tf.placeholder(tf.int32)
-                        loss_list_3 = gan.run(x_3, y_3, z_3, w_3, label_expand_3)
+                        loss_list_3 = gan.model(l_3, m_3, l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
                         image_list_3, code_list_3, j_list_3 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
@@ -311,84 +299,102 @@ def train():
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
             try:
-                Label_train_files = read_filename(FLAGS.L)
+                l_train_files = read_filename(FLAGS.L)
+                l_x_train_files = read_filename(FLAGS.L)
+                l_y_train_files = read_filename(FLAGS.L)
+                l_z_train_files = read_filename(FLAGS.L)
+                l_w_train_files = read_filename(FLAGS.L)
                 index = 0
                 epoch = 0
                 train_loss_list = []
                 train_evaluation_list = []
                 train_evaluation_code_list = []
                 while not coord.should_stop() and epoch <= FLAGS.epoch:
+
+                    train_true_l = []
+                    train_true_m = []
+                    train_true_l_x = []
+                    train_true_l_y = []
+                    train_true_l_z = []
+                    train_true_l_w = []
                     train_true_x = []
                     train_true_y = []
                     train_true_z = []
                     train_true_w = []
-                    train_true_l = []
                     for b in range(FLAGS.batch_size):
-                        train_L_arr_ = read_file(FLAGS.L, Label_train_files, index)
-                        train_X_arr_ = read_file(FLAGS.X, Label_train_files, index)
-                        train_Y_arr_ = read_file(FLAGS.Y, Label_train_files, index)
-                        train_Z_arr_ = read_file(FLAGS.Z, Label_train_files, index)
-                        train_W_arr_ = read_file(FLAGS.W, Label_train_files, index)
-                        L_arr = np.asarray(train_L_arr_).reshape(
-                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2])) * 5
-                        X_arr = np.asarray(train_X_arr_).reshape(
-                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
-                        Y_arr = np.asarray(train_Y_arr_).reshape(
-                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
-                        Z_arr = np.asarray(train_Z_arr_).reshape(
-                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
-                        W_arr = np.asarray(train_W_arr_).reshape(
-                            (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
+                        train_l_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        train_m_arr = read_file(np.asarray([FLAGS.X,FLAGS.Y,FLAGS.Z,FLAGS.W])[np.random.randint(4)], l_train_files, index).reshape(FLAGS.image_size)
+                        train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
+                        train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
+                        train_l_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
+                        train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
+                        train_l_z_arr = read_file(FLAGS.L, l_z_train_files, index).reshape(FLAGS.image_size)
+                        train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
+                        train_l_w_arr = read_file(FLAGS.L, l_w_train_files, index).reshape(FLAGS.image_size)
+                        train_w_arr = read_file(FLAGS.W, l_w_train_files, index).reshape(FLAGS.image_size)
 
-                        train_true_x.append(X_arr)
-                        train_true_y.append(Y_arr)
-                        train_true_z.append(Z_arr)
-                        train_true_w.append(W_arr)
-                        train_true_l.append(L_arr)
-                        epoch = int(index / len(Label_train_files))
+                        train_true_l.append(train_l_arr)
+                        train_true_m.append(train_m_arr)
+                        train_true_l_x.append(train_l_x_arr)
+                        train_true_l_y.append(train_l_y_arr)
+                        train_true_l_z.append(train_l_z_arr)
+                        train_true_l_w.append(train_l_w_arr)
+                        train_true_x.append(train_x_arr)
+                        train_true_y.append(train_y_arr)
+                        train_true_z.append(train_z_arr)
+                        train_true_w.append(train_w_arr)
+
+                        epoch = int(index / len(l_train_files))
                         index = index + 1
-
-                    rande_f = np.random.randint(4)
-                    rande_train = np.random.randint(6)
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    logging.info(
-                        "-----------rande_f: " + str(rande_f) + ", rande_train: " + str(rande_train) + "-------------")
                     _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
                         [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
                         feed_dict={
+                            l_0: np.asarray(train_true_l)[0:1, :, :, :],
+                            m_0: np.asarray(train_true_m)[0:1, :, :, :],
+                            l_x_0: np.asarray(train_true_l_x)[0:1, :, :, :],
+                            l_y_0: np.asarray(train_true_l_y)[0:1, :, :, :],
+                            l_z_0: np.asarray(train_true_l_z)[0:1, :, :, :],
+                            l_w_0: np.asarray(train_true_l_w)[0:1, :, :, :],
                             x_0: np.asarray(train_true_x)[0:1, :, :, :],
                             y_0: np.asarray(train_true_y)[0:1, :, :, :],
                             z_0: np.asarray(train_true_z)[0:1, :, :, :],
                             w_0: np.asarray(train_true_w)[0:1, :, :, :],
-                            rande_f_0: rande_f,
-                            rande_train_0: rande_train,
-                            label_expand_0: np.asarray(train_true_l)[0:1, :, :, :],
 
-                            x_1: np.asarray(train_true_x)[1:2, :, :, :],
-                            y_1: np.asarray(train_true_y)[1:2, :, :, :],
-                            z_1: np.asarray(train_true_z)[1:2, :, :, :],
-                            w_1: np.asarray(train_true_w)[1:2, :, :, :],
-                            rande_f_1: rande_f,
-                            rande_train_1: rande_train,
-                            label_expand_1: np.asarray(train_true_l)[1:2, :, :, :],
+                            l_1: np.asarray(train_true_l)[0:1, :, :, :],
+                            m_1: np.asarray(train_true_m)[0:1, :, :, :],
+                            l_x_1: np.asarray(train_true_l_x)[0:1, :, :, :],
+                            l_y_1: np.asarray(train_true_l_y)[0:1, :, :, :],
+                            l_z_1: np.asarray(train_true_l_z)[0:1, :, :, :],
+                            l_w_1: np.asarray(train_true_l_w)[0:1, :, :, :],
+                            x_1: np.asarray(train_true_x)[0:1, :, :, :],
+                            y_1: np.asarray(train_true_y)[0:1, :, :, :],
+                            z_1: np.asarray(train_true_z)[0:1, :, :, :],
+                            w_1: np.asarray(train_true_w)[0:1, :, :, :],
 
-                            x_2: np.asarray(train_true_x)[2:3, :, :, :],
-                            y_2: np.asarray(train_true_y)[2:3, :, :, :],
-                            z_2: np.asarray(train_true_z)[2:3, :, :, :],
-                            w_2: np.asarray(train_true_w)[2:3, :, :, :],
-                            rande_f_2: rande_f,
-                            rande_train_2: rande_train,
-                            label_expand_2: np.asarray(train_true_l)[2:3, :, :, :],
+                            l_2: np.asarray(train_true_l)[0:1, :, :, :],
+                            m_2: np.asarray(train_true_m)[0:1, :, :, :],
+                            l_x_2: np.asarray(train_true_l_x)[0:1, :, :, :],
+                            l_y_2: np.asarray(train_true_l_y)[0:1, :, :, :],
+                            l_z_2: np.asarray(train_true_l_z)[0:1, :, :, :],
+                            l_w_2: np.asarray(train_true_l_w)[0:1, :, :, :],
+                            x_2: np.asarray(train_true_x)[0:1, :, :, :],
+                            y_2: np.asarray(train_true_y)[0:1, :, :, :],
+                            z_2: np.asarray(train_true_z)[0:1, :, :, :],
+                            w_2: np.asarray(train_true_w)[0:1, :, :, :],
 
-                            x_3: np.asarray(train_true_x)[3:4, :, :, :],
-                            y_3: np.asarray(train_true_y)[3:4, :, :, :],
-                            z_3: np.asarray(train_true_z)[3:4, :, :, :],
-                            w_3: np.asarray(train_true_w)[3:4, :, :, :],
-                            rande_f_3: rande_f,
-                            rande_train_3: rande_train,
-                            label_expand_3: np.asarray(train_true_l)[3:4, :, :, :],
+                            l_3: np.asarray(train_true_l)[0:1, :, :, :],
+                            m_3: np.asarray(train_true_m)[0:1, :, :, :],
+                            l_x_3: np.asarray(train_true_l_x)[0:1, :, :, :],
+                            l_y_3: np.asarray(train_true_l_y)[0:1, :, :, :],
+                            l_z_3: np.asarray(train_true_l_z)[0:1, :, :, :],
+                            l_w_3: np.asarray(train_true_l_w)[0:1, :, :, :],
+                            x_3: np.asarray(train_true_x)[0:1, :, :, :],
+                            y_3: np.asarray(train_true_y)[0:1, :, :, :],
+                            z_3: np.asarray(train_true_z)[0:1, :, :, :],
+                            w_3: np.asarray(train_true_w)[0:1, :, :, :],
                         })
                     train_loss_list.append(train_losses)
                     train_evaluation_list.append(train_evaluations)
@@ -418,39 +424,49 @@ def train():
                         val_evaluation_list = []
                         val_evaluation_code_list = []
                         val_index = 0
-                        Label_test_files = read_filename(FLAGS.L_test)
-                        for j in range(int(math.ceil(len(Label_test_files) / FLAGS.batch_size))):
+
+                        l_val_files = read_filename(FLAGS.L_test)
+                        l_x_val_files = read_filename(FLAGS.L_test)
+                        l_y_val_files = read_filename(FLAGS.L_test)
+                        l_z_val_files = read_filename(FLAGS.L_test)
+                        l_w_val_files = read_filename(FLAGS.L_test)
+                        for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
+                            val_true_l = []
+                            val_true_m = []
+                            val_true_l_x = []
+                            val_true_l_y = []
+                            val_true_l_z = []
+                            val_true_l_w = []
                             val_true_x = []
                             val_true_y = []
                             val_true_z = []
                             val_true_w = []
-                            val_true_l = []
                             for b in range(FLAGS.batch_size):
-                                val_L_arr_ = read_file(FLAGS.L, Label_test_files, val_index)
-                                val_X_arr_ = read_file(FLAGS.X, Label_test_files, val_index)
-                                val_Y_arr_ = read_file(FLAGS.Y, Label_test_files, val_index)
-                                val_Z_arr_ = read_file(FLAGS.Z, Label_test_files, val_index)
-                                val_W_arr_ = read_file(FLAGS.W, Label_test_files, val_index)
-                                L_arr = np.asarray(val_L_arr_).reshape(
-                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2])) * 5
-                                X_arr = np.asarray(val_X_arr_).reshape(
-                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
-                                Y_arr = np.asarray(val_Y_arr_).reshape(
-                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
-                                Z_arr = np.asarray(val_Z_arr_).reshape(
-                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
-                                W_arr = np.asarray(val_W_arr_).reshape(
-                                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
+                                val_l_arr = read_file(FLAGS.L, l_val_files, index).reshape(FLAGS.image_size)
+                                val_m_arr = read_file(
+                                    np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
+                                    l_val_files, index).reshape(FLAGS.image_size)
+                                val_l_x_arr = read_file(FLAGS.L, l_x_val_files, index).reshape(FLAGS.image_size)
+                                val_x_arr = read_file(FLAGS.X, l_x_val_files, index).reshape(FLAGS.image_size)
+                                val_l_y_arr = read_file(FLAGS.L, l_y_val_files, index).reshape(FLAGS.image_size)
+                                val_y_arr = read_file(FLAGS.Y, l_y_val_files, index).reshape(FLAGS.image_size)
+                                val_l_z_arr = read_file(FLAGS.L, l_z_val_files, index).reshape(FLAGS.image_size)
+                                val_z_arr = read_file(FLAGS.Z, l_z_val_files, index).reshape(FLAGS.image_size)
+                                val_l_w_arr = read_file(FLAGS.L, l_w_val_files, index).reshape(FLAGS.image_size)
+                                val_w_arr = read_file(FLAGS.W, l_w_val_files, index).reshape(FLAGS.image_size)
 
-                                val_true_x.append(X_arr)
-                                val_true_y.append(Y_arr)
-                                val_true_z.append(Z_arr)
-                                val_true_w.append(W_arr)
-                                val_true_l.append(L_arr)
+                                val_true_l.append(val_l_arr)
+                                val_true_m.append(val_m_arr)
+                                val_true_l_x.append(val_l_x_arr)
+                                val_true_l_y.append(val_l_y_arr)
+                                val_true_l_z.append(val_l_z_arr)
+                                val_true_l_w.append(val_l_w_arr)
+                                val_true_x.append(val_x_arr)
+                                val_true_y.append(val_y_arr)
+                                val_true_z.append(val_z_arr)
+                                val_true_w.append(val_w_arr)
+
                                 val_index += 1
-
-                            val_rande_f = np.random.randint(4)
-                            val_rande_train = np.random.randint(6)
 
                             val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
@@ -463,37 +479,49 @@ def train():
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
                                  image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3, ],
                                 feed_dict={
+                                    l_0: np.asarray(val_true_l)[0:1, :, :, :],
+                                    m_0: np.asarray(val_true_m)[0:1, :, :, :],
+                                    l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
+                                    l_y_0: np.asarray(val_true_l_y)[0:1, :, :, :],
+                                    l_z_0: np.asarray(val_true_l_z)[0:1, :, :, :],
+                                    l_w_0: np.asarray(val_true_l_w)[0:1, :, :, :],
                                     x_0: np.asarray(val_true_x)[0:1, :, :, :],
                                     y_0: np.asarray(val_true_y)[0:1, :, :, :],
                                     z_0: np.asarray(val_true_z)[0:1, :, :, :],
                                     w_0: np.asarray(val_true_w)[0:1, :, :, :],
-                                    rande_f_0: val_rande_f,
-                                    rande_train_0: val_rande_train,
-                                    label_expand_0: np.asarray(val_true_l)[0:1, :, :, :],
 
-                                    x_1: np.asarray(val_true_x)[1:2, :, :, :],
-                                    y_1: np.asarray(val_true_y)[1:2, :, :, :],
-                                    z_1: np.asarray(val_true_z)[1:2, :, :, :],
-                                    w_1: np.asarray(val_true_w)[1:2, :, :, :],
-                                    rande_f_1: val_rande_f,
-                                    rande_train_1: val_rande_train,
-                                    label_expand_1: np.asarray(val_true_l)[1:2, :, :, :],
+                                    l_1: np.asarray(val_true_l)[0:1, :, :, :],
+                                    m_1: np.asarray(val_true_m)[0:1, :, :, :],
+                                    l_x_1: np.asarray(val_true_l_x)[0:1, :, :, :],
+                                    l_y_1: np.asarray(val_true_l_y)[0:1, :, :, :],
+                                    l_z_1: np.asarray(val_true_l_z)[0:1, :, :, :],
+                                    l_w_1: np.asarray(val_true_l_w)[0:1, :, :, :],
+                                    x_1: np.asarray(val_true_x)[0:1, :, :, :],
+                                    y_1: np.asarray(val_true_y)[0:1, :, :, :],
+                                    z_1: np.asarray(val_true_z)[0:1, :, :, :],
+                                    w_1: np.asarray(val_true_w)[0:1, :, :, :],
 
-                                    x_2: np.asarray(val_true_x)[2:3, :, :, :],
-                                    y_2: np.asarray(val_true_y)[2:3, :, :, :],
-                                    z_2: np.asarray(val_true_z)[2:3, :, :, :],
-                                    w_2: np.asarray(val_true_w)[2:3, :, :, :],
-                                    rande_f_2: val_rande_f,
-                                    rande_train_2: val_rande_train,
-                                    label_expand_2: np.asarray(val_true_l)[2:3, :, :, :],
+                                    l_2: np.asarray(val_true_l)[0:1, :, :, :],
+                                    m_2: np.asarray(val_true_m)[0:1, :, :, :],
+                                    l_x_2: np.asarray(val_true_l_x)[0:1, :, :, :],
+                                    l_y_2: np.asarray(val_true_l_y)[0:1, :, :, :],
+                                    l_z_2: np.asarray(val_true_l_z)[0:1, :, :, :],
+                                    l_w_2: np.asarray(val_true_l_w)[0:1, :, :, :],
+                                    x_2: np.asarray(val_true_x)[0:1, :, :, :],
+                                    y_2: np.asarray(val_true_y)[0:1, :, :, :],
+                                    z_2: np.asarray(val_true_z)[0:1, :, :, :],
+                                    w_2: np.asarray(val_true_w)[0:1, :, :, :],
 
-                                    x_3: np.asarray(val_true_x)[3:4, :, :, :],
-                                    y_3: np.asarray(val_true_y)[3:4, :, :, :],
-                                    z_3: np.asarray(val_true_z)[3:4, :, :, :],
-                                    w_3: np.asarray(val_true_w)[3:4, :, :, :],
-                                    rande_f_3: val_rande_f,
-                                    rande_train_3: val_rande_train,
-                                    label_expand_3: np.asarray(val_true_l)[3:4, :, :, :],
+                                    l_3: np.asarray(val_true_l)[0:1, :, :, :],
+                                    m_3: np.asarray(val_true_m)[0:1, :, :, :],
+                                    l_x_3: np.asarray(val_true_l_x)[0:1, :, :, :],
+                                    l_y_3: np.asarray(val_true_l_y)[0:1, :, :, :],
+                                    l_z_3: np.asarray(val_true_l_z)[0:1, :, :, :],
+                                    l_w_3: np.asarray(val_true_l_w)[0:1, :, :, :],
+                                    x_3: np.asarray(val_true_x)[0:1, :, :, :],
+                                    y_3: np.asarray(val_true_y)[0:1, :, :, :],
+                                    z_3: np.asarray(val_true_z)[0:1, :, :, :],
+                                    w_3: np.asarray(val_true_w)[0:1, :, :, :],
                                 })
                             val_loss_list.append(val_losses_0)
                             val_loss_list.append(val_losses_1)
@@ -509,10 +537,7 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
                             if j == 0:
-                                save_images(val_image_list_3[0], checkpoints_dir, val_index - 1, m="T1_T2_")
-                                save_images(val_image_list_3[1], checkpoints_dir, val_index - 1, m="T2_T1c_")
-                                save_images(val_image_list_3[2], checkpoints_dir, val_index - 1, m="T1c_Flair_")
-                                save_images(val_image_list_3[3], checkpoints_dir, val_index - 1, m="Flair_T1_")
+                                save_images(val_image_list_0, checkpoints_dir, str(0))
 
                         val_summary_op = sess.run(
                             summary_op,
@@ -534,7 +559,6 @@ def train():
             finally:
                 save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
                 logging.info("Model saved in file: %s" % save_path)
-                # When done, ask the threads to stop.
                 coord.request_stop()
                 coord.join(threads)
 

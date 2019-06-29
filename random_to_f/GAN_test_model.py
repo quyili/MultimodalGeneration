@@ -42,20 +42,8 @@ class GAN:
         f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def model(self, l, x, y, z, w):
-        # L
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
-                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
-
-        # X,Y -> F
-        # 选择f来源模态
-        rand_f = tf.random_uniform([], 0, 4, dtype=tf.int32)
-        m = tf.case({tf.equal(rand_f, 0): lambda: x,
-                     tf.equal(rand_f, 1): lambda: y,
-                     tf.equal(rand_f, 2): lambda: z,
-                     tf.equal(rand_f, 3): lambda: w}, exclusive=True)
+    def model(self, m):
         f = self.get_f(m)  # M -> F
-
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
@@ -111,7 +99,7 @@ class GAN:
                                shape=f_r_prob.get_shape().as_list())
         G_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
 
-        image_list = [x, y, l, f, f_r, f_rm]
+        image_list = [m, f, f_r, f_rm]
 
         code_list = [code_f, code_f_r, code_f_rm, code_f_rm_r]
 
@@ -119,7 +107,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list, code_f_rm, code_f
+        return image_list, code_list, j_list, loss_list
 
     def get_variables(self):
         return [self.EC_F.variables

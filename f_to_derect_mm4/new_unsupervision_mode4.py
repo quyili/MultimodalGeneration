@@ -777,8 +777,9 @@ class GAN:
         # tf.summary.scalar('evaluation/SSIM/ZW/y__VS__y_r', evluation_list[22])
         # tf.summary.scalar('evaluation/SSIM/ZW/l_input__VS__l_g', evluation_list[23])
 
-    def image_summary(self, image_list):
-        pass
+    def image_summary(self, image_dirct):
+        for key in image_dirct:
+            tf.summary.image('image/' + key, image_dirct[key])
         # image_list_XY, image_list_XW, image_list_YZ, image_list_ZW = \
         #     image_list[0], image_list[1], image_list[2], image_list[3]
         #

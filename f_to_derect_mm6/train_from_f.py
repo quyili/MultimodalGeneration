@@ -89,18 +89,19 @@ def norm(input):
               ) / (np.max(input, axis=[1, 2, 3]) - np.min(input, axis=[1, 2, 3]))
     return output
 
+
 def save_images(image_dirct, checkpoints_dir, file_index=""):
     for key in image_dirct:
-        save_image(np.asarray(image_dirct[key])[0, :, :, 0], key+"_"+file_index,
-                       dir=checkpoints_dir+"/samples", form=".tiff")
+        save_image(np.asarray(image_dirct[key])[0, :, :, 0], key + "_" + file_index,
+                   dir=checkpoints_dir + "/samples", form=".tiff")
 
 
-def save_image(image,name,dir="./samples",form=".tiff"):
+def save_image(image, name, dir="./samples", form=".tiff"):
     try:
         os.makedirs(dir)
     except os.error:
         pass
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image),dir + "/"+name+form)
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
 
 def read_filename(path, shuffle=True):
@@ -173,7 +174,7 @@ def train():
                         y_0 = tf.placeholder(tf.float32, shape=input_shape)
                         z_0 = tf.placeholder(tf.float32, shape=input_shape)
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_0 = gan.model(l_0,m_0,l_x_0,l_y_0,l_z_0,l_w_0,x_0, y_0, z_0, w_0)
+                        loss_list_0 = gan.model(l_0, m_0, l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
@@ -302,14 +303,14 @@ def train():
                 l_x_train_files = read_filename(FLAGS.L)
                 l_y_train_files = read_filename(FLAGS.L)
                 l_z_train_files = read_filename(FLAGS.L)
-                l_w_train_files = read_filename(FLAGS.L) 
+                l_w_train_files = read_filename(FLAGS.L)
                 index = 0
                 epoch = 0
                 train_loss_list = []
                 train_evaluation_list = []
                 train_evaluation_code_list = []
                 while not coord.should_stop() and epoch <= FLAGS.epoch:
-                    
+
                     train_true_l = []
                     train_true_m = []
                     train_true_l_x = []
@@ -322,15 +323,15 @@ def train():
                     train_true_w = []
                     for b in range(FLAGS.batch_size):
                         train_l_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
-                        train_m_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        train_m_arr = read_file(np.asarray([FLAGS.X,FLAGS.Y,FLAGS.Z,FLAGS.W])[np.random.randint(4)], l_train_files, index).reshape(FLAGS.image_size)
                         train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
-                        train_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
+                        train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
                         train_l_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
-                        train_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
+                        train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
                         train_l_z_arr = read_file(FLAGS.L, l_z_train_files, index).reshape(FLAGS.image_size)
-                        train_z_arr = read_file(FLAGS.L, l_z_train_files, index).reshape(FLAGS.image_size)
+                        train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
                         train_l_w_arr = read_file(FLAGS.L, l_w_train_files, index).reshape(FLAGS.image_size)
-                        train_w_arr = read_file(FLAGS.L, l_w_train_files, index).reshape(FLAGS.image_size)
+                        train_w_arr = read_file(FLAGS.W, l_w_train_files, index).reshape(FLAGS.image_size)
 
                         train_true_l.append(train_l_arr)
                         train_true_m.append(train_m_arr)
@@ -342,7 +343,7 @@ def train():
                         train_true_y.append(train_y_arr)
                         train_true_z.append(train_z_arr)
                         train_true_w.append(train_w_arr)
-         
+
                         epoch = int(index / len(l_train_files))
                         index = index + 1
 
@@ -442,15 +443,17 @@ def train():
                             val_true_w = []
                             for b in range(FLAGS.batch_size):
                                 val_l_arr = read_file(FLAGS.L, l_val_files, index).reshape(FLAGS.image_size)
-                                val_m_arr = read_file(FLAGS.L, l_val_files, index).reshape(FLAGS.image_size)
+                                val_m_arr = read_file(
+                                    np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
+                                    l_val_files, index).reshape(FLAGS.image_size)
                                 val_l_x_arr = read_file(FLAGS.L, l_x_val_files, index).reshape(FLAGS.image_size)
-                                val_x_arr = read_file(FLAGS.L, l_x_val_files, index).reshape(FLAGS.image_size)
+                                val_x_arr = read_file(FLAGS.X, l_x_val_files, index).reshape(FLAGS.image_size)
                                 val_l_y_arr = read_file(FLAGS.L, l_y_val_files, index).reshape(FLAGS.image_size)
-                                val_y_arr = read_file(FLAGS.L, l_y_val_files, index).reshape(FLAGS.image_size)
+                                val_y_arr = read_file(FLAGS.Y, l_y_val_files, index).reshape(FLAGS.image_size)
                                 val_l_z_arr = read_file(FLAGS.L, l_z_val_files, index).reshape(FLAGS.image_size)
-                                val_z_arr = read_file(FLAGS.L, l_z_val_files, index).reshape(FLAGS.image_size)
+                                val_z_arr = read_file(FLAGS.Z, l_z_val_files, index).reshape(FLAGS.image_size)
                                 val_l_w_arr = read_file(FLAGS.L, l_w_val_files, index).reshape(FLAGS.image_size)
-                                val_w_arr = read_file(FLAGS.L, l_w_val_files, index).reshape(FLAGS.image_size)
+                                val_w_arr = read_file(FLAGS.W, l_w_val_files, index).reshape(FLAGS.image_size)
 
                                 val_true_l.append(val_l_arr)
                                 val_true_m.append(val_m_arr)
@@ -462,7 +465,7 @@ def train():
                                 val_true_y.append(val_y_arr)
                                 val_true_z.append(val_z_arr)
                                 val_true_w.append(val_w_arr)
-                                
+
                                 val_index += 1
 
                             val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
