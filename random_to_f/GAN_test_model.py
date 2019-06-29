@@ -22,28 +22,30 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
+        self.ones = tf.ones(self.input_shape, name="ones")
+
         self.EC_F = GEncoder('EC_F', ngf=ngf)
         self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2)
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
-    def get_f(self, x):
+    def get_f(self, x, beta=0.12):
         f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
         f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
         f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
 
-        f1 = tf.ones(f1.get_shape().as_list()) * tf.cast(f1 > 0.07, dtype="float32")
-        f2 = tf.ones(f2.get_shape().as_list()) * tf.cast(f2 > 0.07, dtype="float32")
+        f1 = self.ones * tf.cast(f1 > beta, dtype="float32")
+        f2 = self.ones * tf.cast(f2 > beta, dtype="float32")
 
         f = f1 + f2
-        f = tf.ones(f.get_shape().as_list()) * tf.cast(f > 0.0, dtype="float32")
+        f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def model(self, x, y, label_expand):
+    def model(self, l, x, y, z, w):
         # L
-        l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
-                       shape=self.input_shape)
+        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
+                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
 
         # X,Y -> F
         # 选择f来源模态
@@ -52,7 +54,6 @@ class GAN:
                      tf.equal(rand_f, 1): lambda: y,
                      tf.equal(rand_f, 2): lambda: z,
                      tf.equal(rand_f, 3): lambda: w}, exclusive=True)
-
         f = self.get_f(m)  # M -> F
 
 
