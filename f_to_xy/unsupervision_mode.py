@@ -33,39 +33,47 @@ class GAN:
         self.D_Y = Discriminator('D_Y', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
 
-    def get_f(self, x):
-        f = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f = f - tf.reduce_mean(f, axis=[1, 2, 3])
-        f = self.ones * tf.cast(f > 0.075, dtype=tf.float32)
+    def get_f(self, x, beta=0.12):
+        f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
+        f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
+        f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
+        f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
+
+        f1 = self.ones * tf.cast(f1 > beta, dtype="float32")
+        f2 = self.ones * tf.cast(f2 > beta, dtype="float32")
+
+        f = f1 + f2
+        f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def select_f(self, x, y ):
-        rand_f = tf.random_uniform([], 0, 2, dtype=tf.int32)
-        m = tf.case({tf.equal(rand_f, 0): lambda: x,
-                     tf.equal(rand_f, 1): lambda: y}, exclusive=True)
-        f = self.get_f(m)  # M -> F
-        return f
+    def get_mask(self, x):
+        mask = 1.0 - self.ones * tf.cast(x > 0.02, dtype="float32")
+        return mask
 
-    def model(self, x, y, label_expand):
+
+    def model(self,l,l_x ,l_y, x, y,z,w):
         # L
-        l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
-                       shape=self.input_shape)
-        label_expand_x = label_expand
-        label_expand_y = label_expand
-        l_x = l
-        l_y = l
-        ones = tf.ones(self.input_shape, name="ones")
-
-        # X,Y -> F
-        f = self.select_f(x, y)
-
+        # 选择f来源模态
+        rand_f = tf.random_uniform([], 0, 4, dtype=tf.int32)
+        m = tf.case({tf.equal(rand_f, 0): lambda: x,
+                     tf.equal(rand_f, 1): lambda: y,
+                     tf.equal(rand_f, 2): lambda: z,
+                     tf.equal(rand_f, 3): lambda: w}, exclusive=True)
+        mask = self.get_mask(m)
+        f = self.get_f(m)  # M -> F
+        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
+                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
+        label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
+        label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
         f_rm_expand = tf.concat([
-            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape)
-            + tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
-            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
-            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
-            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8,
-            tf.reshape(ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 5], shape=self.input_shape) + f * 0.8], axis=-1)
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 1], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 2], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 3], shape=self.input_shape) + f * 0.8,
+            tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4], shape=self.input_shape) + f * 0.8],
+            axis=-1)
 
         # F_RM -> X_G,Y_G,L_G
         code_rm = self.EC_R(f_rm_expand)
@@ -248,7 +256,7 @@ class GAN:
 
         loss_list = [G_loss, D_loss]
 
-        return image_list, code_list, j_list, loss_list, ones * 0.5, f_rm_expand
+        return image_list, code_list, j_list, loss_list,f_rm_expand
 
     def get_variables(self):
         return [self.EC_R.variables
