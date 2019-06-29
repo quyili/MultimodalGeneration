@@ -44,21 +44,21 @@ class GAN:
         self.D_M = Discriminator('D_M', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
 
-    def get_f(self, x, beta=0.12):
+    def get_f(self, x ,beta=0.12):
         f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
         f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
         f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
 
-        f1 = self.ones * tf.cast(f1 > beta, dtype="float32")
-        f2 = self.ones * tf.cast(f2 > beta, dtype="float32")
+        f1 =  self.ones * tf.cast(f1 > beta, dtype="float32")
+        f2 =  self.ones * tf.cast(f2 > beta, dtype="float32")
 
         f = f1 + f2
-        f = self.ones * tf.cast(f > 0.0, dtype="float32")
+        f =  self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
     def get_mask(self, x):
-        mask = 1.0 - self.ones * tf.cast(x > 0.02, dtype="float32")
+        mask = 1.0-self.ones * tf.cast(x > 0.02, dtype="float32")
         return mask
 
     def model(self, l, l_x, l_y, l_z, l_w, x, y, z, w):
@@ -117,19 +117,19 @@ class GAN:
         f_w_g_r = self.get_f(w_g)
 
         y_g_t_by_x = self.DC_Y(code_x_g)
-        z_g_t_by_x = self.DC_Z(code_x_g)
+        # z_g_t_by_x = self.DC_Z(code_x_g)
         w_g_t_by_x = self.DC_W(code_x_g)
 
         x_g_t_by_y = self.DC_X(code_y_g)
         z_g_t_by_y = self.DC_Z(code_y_g)
-        w_g_t_by_y = self.DC_W(code_y_g)
+        # w_g_t_by_y = self.DC_W(code_y_g)
 
-        x_g_t_by_z = self.DC_X(code_z_g)
+        # x_g_t_by_z = self.DC_X(code_z_g)
         y_g_t_by_z = self.DC_Y(code_z_g)
         w_g_t_by_z = self.DC_W(code_z_g)
 
         x_g_t_by_w = self.DC_X(code_w_g)
-        y_g_t_by_w = self.DC_Y(code_w_g)
+        # y_g_t_by_w = self.DC_Y(code_w_g)
         z_g_t_by_w = self.DC_Z(code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
@@ -172,7 +172,7 @@ class GAN:
         y_t_by_x = self.DC_Y(code_x);
         code_y_t_by_x = self.EC_Y(y_t_by_x);
         x_r_c_by_y = self.DC_X(code_y_t_by_x)
-        z_t_by_x = self.DC_Z(code_x); code_z_t_by_x = self.EC_Z(z_t_by_x); x_r_c_by_z = self.DC_X(code_z_t_by_x)
+        # z_t_by_x = self.DC_Z(code_x); code_z_t_by_x = self.EC_Z(z_t_by_x); x_r_c_by_z = self.DC_X(code_z_t_by_x)
         w_t_by_x = self.DC_W(code_x);
         code_w_t_by_x = self.EC_W(w_t_by_x);
         x_r_c_by_w = self.DC_X(code_w_t_by_x)
@@ -183,9 +183,9 @@ class GAN:
         z_t_by_y = self.DC_Z(code_y);
         code_z_t_by_y = self.EC_Z(x_t_by_y);
         y_r_c_by_z = self.DC_Y(code_z_t_by_y)
-        w_t_by_y = self.DC_W(code_y); code_w_t_by_y = self.EC_W(x_t_by_y); y_r_c_by_w = self.DC_Y(code_w_t_by_y)
+        # w_t_by_y = self.DC_W(code_y); code_w_t_by_y = self.EC_W(x_t_by_y); y_r_c_by_w = self.DC_Y(code_w_t_by_y)
 
-        x_t_by_z = self.DC_X(code_z); code_x_t_by_z = self.EC_X(x_t_by_z); z_r_c_by_x = self.DC_Z(code_x_t_by_z)
+        # x_t_by_z = self.DC_X(code_z); code_x_t_by_z = self.EC_X(x_t_by_z); z_r_c_by_x = self.DC_Z(code_x_t_by_z)
         y_t_by_z = self.DC_Y(code_z);
         code_y_t_by_z = self.EC_Y(y_t_by_z);
         z_r_c_by_y = self.DC_Z(code_y_t_by_z)
@@ -196,7 +196,7 @@ class GAN:
         x_t_by_w = self.DC_X(code_w);
         code_x_t_by_w = self.EC_X(x_t_by_w);
         w_r_c_by_x = self.DC_W(code_x_t_by_w)
-        y_t_by_w = self.DC_Y(code_w); code_y_t_by_w = self.EC_Y(y_t_by_w); w_r_c_by_y = self.DC_W(code_y_t_by_w)
+        # y_t_by_w = self.DC_Y(code_w); code_y_t_by_w = self.EC_Y(y_t_by_w); w_r_c_by_y = self.DC_W(code_y_t_by_w)
         z_t_by_w = self.DC_Z(code_w);
         code_z_t_by_w = self.EC_Z(z_t_by_w);
         w_r_c_by_z = self.DC_W(code_z_t_by_w)
@@ -212,19 +212,19 @@ class GAN:
         j_w, j_w_c = self.D_M(w)
 
         j_x_t_by_y, j_x_t_c_by_y = self.D_M(x_t_by_y)
-        j_x_t_by_z, j_x_t_c_by_z = self.D_M(x_t_by_z)
+        # j_x_t_by_z, j_x_t_c_by_z = self.D_M(x_t_by_z)
         j_x_t_by_w, j_x_t_c_by_w = self.D_M(x_t_by_w)
 
         j_y_t_by_x, j_y_t_c_by_x = self.D_M(y_t_by_x)
         j_y_t_by_z, j_y_t_c_by_z = self.D_M(y_t_by_z)
-        j_y_t_by_w, j_y_t_c_by_w = self.D_M(y_t_by_w)
+        # j_y_t_by_w, j_y_t_c_by_w = self.D_M(y_t_by_w)
 
-        j_z_t_by_x, j_z_t_c_by_x = self.D_M(z_t_by_x)
+        # j_z_t_by_x, j_z_t_c_by_x = self.D_M(z_t_by_x)
         j_z_t_by_y, j_z_t_c_by_y = self.D_M(z_t_by_y)
         j_z_t_by_w, j_z_t_c_by_w = self.D_M(z_t_by_w)
 
         j_w_t_by_x, j_w_t_c_by_x = self.D_M(w_t_by_x)
-        j_w_t_by_y, j_w_t_c_by_y = self.D_M(w_t_by_y)
+        # j_w_t_by_y, j_w_t_c_by_y = self.D_M(w_t_by_y)
         j_w_t_by_z, j_w_t_c_by_z = self.D_M(w_t_by_z)
 
         j_code_x = self.FD_R(code_x)
@@ -240,10 +240,10 @@ class GAN:
         D_loss += self.mse_loss(j_x_g, 0.0) * 20
         G_loss += self.mse_loss(j_x_g, 1.0) * 25
         D_loss += self.mse_loss(j_x_t_by_y, 0.0) * 10
-        D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 10
+        # D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 10
         D_loss += self.mse_loss(j_x_t_by_w, 0.0) * 10
         G_loss += self.mse_loss(j_x_t_by_y, 1.0) * 15
-        G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 15
+        # G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 15
         G_loss += self.mse_loss(j_x_t_by_w, 1.0) * 15
 
         D_loss += self.mse_loss(j_y, 1.0) * 35
@@ -251,18 +251,18 @@ class GAN:
         G_loss += self.mse_loss(j_y_g, 1.0) * 25
         D_loss += self.mse_loss(j_y_t_by_x, 0.0) * 10
         D_loss += self.mse_loss(j_y_t_by_z, 0.0) * 10
-        D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 10
+        # D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 10
         G_loss += self.mse_loss(j_y_t_by_x, 1.0) * 15
         G_loss += self.mse_loss(j_y_t_by_z, 1.0) * 15
-        G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 15
+        # G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 15
 
         D_loss += self.mse_loss(j_z, 1.0) * 35
         D_loss += self.mse_loss(j_z_g, 0.0) * 20
         G_loss += self.mse_loss(j_z_g, 1.0) * 25
-        D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 10
+        # D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 10
         D_loss += self.mse_loss(j_z_t_by_y, 0.0) * 10
         D_loss += self.mse_loss(j_z_t_by_w, 0.0) * 10
-        G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 15
+        # G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 15
         G_loss += self.mse_loss(j_z_t_by_y, 1.0) * 15
         G_loss += self.mse_loss(j_z_t_by_w, 1.0) * 15
 
@@ -270,10 +270,10 @@ class GAN:
         D_loss += self.mse_loss(j_w_g, 0.0) * 20
         G_loss += self.mse_loss(j_w_g, 1.0) * 25
         D_loss += self.mse_loss(j_w_t_by_x, 0.0) * 10
-        D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 10
+        # D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 10
         D_loss += self.mse_loss(j_w_t_by_z, 0.0) * 10
         G_loss += self.mse_loss(j_w_t_by_x, 1.0) * 15
-        G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 15
+        # G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 15
         G_loss += self.mse_loss(j_w_t_by_z, 1.0) * 15
 
         D_loss += self.mse_loss(j_x_c, cx) * 25
@@ -287,19 +287,19 @@ class GAN:
         G_loss += self.mse_loss(j_w_g_c, cw) * 25
 
         G_loss += self.mse_loss(j_x_t_by_y, cx) * 25
-        G_loss += self.mse_loss(j_x_t_by_z, cx) * 25
+        # G_loss += self.mse_loss(j_x_t_by_z, cx) * 25
         G_loss += self.mse_loss(j_x_t_by_w, cx) * 25
 
         G_loss += self.mse_loss(j_y_t_by_x, cx) * 25
         G_loss += self.mse_loss(j_y_t_by_z, cx) * 25
-        G_loss += self.mse_loss(j_y_t_by_w, cx) * 25
+        # G_loss += self.mse_loss(j_y_t_by_w, cx) * 25
 
-        G_loss += self.mse_loss(j_z_t_by_x, cx) * 25
+        # G_loss += self.mse_loss(j_z_t_by_x, cx) * 25
         G_loss += self.mse_loss(j_z_t_by_y, cx) * 25
         G_loss += self.mse_loss(j_z_t_by_w, cx) * 25
 
         G_loss += self.mse_loss(j_w_t_by_x, cx) * 25
-        G_loss += self.mse_loss(j_w_t_by_y, cx) * 25
+        # G_loss += self.mse_loss(j_w_t_by_y, cx) * 25
         G_loss += self.mse_loss(j_w_t_by_z, cx) * 25
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
@@ -368,19 +368,19 @@ class GAN:
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2
-        G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2
+        # G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_w) * 2
 
         G_loss += self.mse_loss(y_g, y_g_t_by_x) * 2
         G_loss += self.mse_loss(y_g, y_g_t_by_z) * 2
-        G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2
+        # G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2
+        # G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2
         G_loss += self.mse_loss(z_g, z_g_t_by_y) * 2
         G_loss += self.mse_loss(z_g, z_g_t_by_w) * 2
 
         G_loss += self.mse_loss(w_g, w_g_t_by_x) * 2
-        G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2
+        # G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2
         G_loss += self.mse_loss(w_g, w_g_t_by_z) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
@@ -388,19 +388,19 @@ class GAN:
         G_loss += self.mse_loss(0.0, y_g * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, x_g_t_by_y * mask) * 1.5
-        G_loss += self.mse_loss(0.0, x_g_t_by_z * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, x_g_t_by_z * mask) * 1.5
         G_loss += self.mse_loss(0.0, x_g_t_by_w * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, y_g_t_by_x * mask) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t_by_z * mask) * 1.5
-        G_loss += self.mse_loss(0.0, y_g_t_by_w * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, y_g_t_by_w * mask) * 1.5
 
-        G_loss += self.mse_loss(0.0, z_g_t_by_x * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, z_g_t_by_x * mask) * 1.5
         G_loss += self.mse_loss(0.0, z_g_t_by_y * mask) * 1.5
         G_loss += self.mse_loss(0.0, z_g_t_by_w * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, w_g_t_by_x * mask) * 1.5
-        G_loss += self.mse_loss(0.0, w_g_t_by_y * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, w_g_t_by_y * mask) * 1.5
         G_loss += self.mse_loss(0.0, w_g_t_by_z * mask) * 1.5
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
@@ -411,19 +411,19 @@ class GAN:
 
         # X模态与Y模态图进行转换得到的转换图与原图的有监督损失
         G_loss += self.mse_loss(x, x_r_c_by_y) * 10
-        G_loss += self.mse_loss(x, x_r_c_by_z) * 10
+        # G_loss += self.mse_loss(x, x_r_c_by_z) * 10
         G_loss += self.mse_loss(x, x_r_c_by_w) * 10
 
         G_loss += self.mse_loss(y, y_r_c_by_x) * 10
         G_loss += self.mse_loss(y, y_r_c_by_z) * 10
-        G_loss += self.mse_loss(y, y_r_c_by_w) * 10
+        # G_loss += self.mse_loss(y, y_r_c_by_w) * 10
 
-        G_loss += self.mse_loss(z, z_r_c_by_x) * 10
+        # G_loss += self.mse_loss(z, z_r_c_by_x) * 10
         G_loss += self.mse_loss(z, z_r_c_by_y) * 10
         G_loss += self.mse_loss(z, z_r_c_by_w) * 10
 
         G_loss += self.mse_loss(w, w_r_c_by_x) * 10
-        G_loss += self.mse_loss(w, w_r_c_by_y) * 10
+        # G_loss += self.mse_loss(w, w_r_c_by_y) * 10
         G_loss += self.mse_loss(w, w_r_c_by_z) * 10
 
         # X模态图分割训练的有监督损失
@@ -457,36 +457,36 @@ class GAN:
 
         # X模态与Y模态图编码的有监督语义一致性损失
         G_loss += self.mse_loss(code_x, code_y_t_by_x) * 5
-        G_loss += self.mse_loss(code_x, code_z_t_by_x) * 5
+        # G_loss += self.mse_loss(code_x, code_z_t_by_x) * 5
         G_loss += self.mse_loss(code_x, code_w_t_by_x) * 5
 
         G_loss += self.mse_loss(code_y, code_x_t_by_y) * 5
         G_loss += self.mse_loss(code_y, code_z_t_by_y) * 5
-        G_loss += self.mse_loss(code_y, code_w_t_by_y) * 5
+        # G_loss += self.mse_loss(code_y, code_w_t_by_y) * 5
 
-        G_loss += self.mse_loss(code_z, code_x_t_by_z) * 5
+        # G_loss += self.mse_loss(code_z, code_x_t_by_z) * 5
         G_loss += self.mse_loss(code_z, code_y_t_by_z) * 5
         G_loss += self.mse_loss(code_z, code_w_t_by_z) * 5
 
         G_loss += self.mse_loss(code_w, code_x_t_by_w) * 5
-        G_loss += self.mse_loss(code_w, code_y_t_by_w) * 5
+        # G_loss += self.mse_loss(code_w, code_y_t_by_w) * 5
         G_loss += self.mse_loss(code_w, code_z_t_by_w) * 5
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_t_by_y * mask_x) * 2
-        G_loss += self.mse_loss(0.0, x_t_by_z * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, x_t_by_z * mask_x) * 2
         G_loss += self.mse_loss(0.0, x_t_by_w * mask_x) * 2
 
         G_loss += self.mse_loss(0.0, y_t_by_x * mask_x) * 2
         G_loss += self.mse_loss(0.0, y_t_by_z * mask_x) * 2
-        G_loss += self.mse_loss(0.0, y_t_by_w * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, y_t_by_w * mask_x) * 2
 
-        G_loss += self.mse_loss(0.0, z_t_by_x * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, z_t_by_x * mask_x) * 2
         G_loss += self.mse_loss(0.0, z_t_by_y * mask_x) * 2
         G_loss += self.mse_loss(0.0, z_t_by_w * mask_x) * 2
 
         G_loss += self.mse_loss(0.0, w_t_by_x * mask_x) * 2
-        G_loss += self.mse_loss(0.0, w_t_by_y * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, w_t_by_y * mask_x) * 2
         G_loss += self.mse_loss(0.0, w_t_by_z * mask_x) * 2
 
         G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
