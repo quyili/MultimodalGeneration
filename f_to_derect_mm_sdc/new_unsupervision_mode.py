@@ -573,6 +573,165 @@ class GAN:
         G_loss += self.mse_loss(self.code_list["code_w"], self.code_list["code_y_t_by_w"]) * 5
         G_loss += self.mse_loss(self.code_list["code_w"], self.code_list["code_z_t_by_w"]) * 5
 
+        # self.image_list["mask"] = mask
+        # self.image_list["f"] = f
+        # self.prob_list["label_expand"] = label_expand
+        # self.prob_list["f_rm_expand"] = f_rm_expand
+        # self.image_list["l"] = l
+        # self.image_list["l_x"] = l_x
+        # self.image_list["l_y"] = l_y
+        # self.image_list["l_z"] = l_z
+        # self.image_list["l_w"] = l_w
+        # self.image_list["x"] = x
+        # self.image_list["y"] = y
+        # self.image_list["z"] = z
+        # self.image_list["w"] = w
+        #
+        # self.code_list["code_rm"] = code_rm
+        #
+        # self.prob_list["l_g_prob"] = l_g_prob
+        # self.image_list["l_g"] = l_g
+        # self.image_list["x_g"] = x_g
+        # self.image_list["y_g"] = y_g
+        # self.image_list["z_g"] = z_g
+        # self.image_list["w_g"] = w_g
+        #
+        # self.code_list["code_x_g"] = code_x_g
+        # self.code_list["code_y_g"] = code_y_g
+        # self.code_list["code_z_g"] = code_z_g
+        # self.code_list["code_w_g"] = code_w_g
+        #
+        # self.prob_list["l_g_prob_by_x"] = l_g_prob_by_x
+        # self.prob_list["l_g_prob_by_y"] = l_g_prob_by_y
+        # self.prob_list["l_g_prob_by_z"] = l_g_prob_by_z
+        # self.prob_list["l_g_prob_by_w"] = l_g_prob_by_w
+        # self.image_list["l_g_by_x"] = l_g_by_x
+        # self.image_list["l_g_by_y"] = l_g_by_y
+        # self.image_list["l_g_by_z"] = l_g_by_z
+        # self.image_list["l_g_by_w"] = l_g_by_w
+        #
+        # self.image_list["f_x_g_r"] = f_x_g_r
+        # self.image_list["f_y_g_r"] = f_y_g_r
+        # self.image_list["f_z_g_r"] = f_z_g_r
+        # self.image_list["f_w_g_r"] = f_w_g_r
+        #
+        # self.image_list["y_g_t_by_x"] = y_g_t_by_x
+        # self.image_list["z_g_t_by_x"] = z_g_t_by_x
+        # self.image_list["w_g_t_by_x"] = w_g_t_by_x
+        #
+        # self.image_list["x_g_t_by_y"] = x_g_t_by_y
+        # self.image_list["z_g_t_by_y"] = z_g_t_by_y
+        # self.image_list["w_g_t_by_y"] = w_g_t_by_y
+        #
+        # self.image_list["x_g_t_by_z"] = x_g_t_by_z
+        # self.image_list["y_g_t_by_z"] = y_g_t_by_z
+        # self.image_list["w_g_t_by_z"] = w_g_t_by_z
+        #
+        # self.image_list["x_g_t_by_w"] = x_g_t_by_w
+        # self.image_list["y_g_t_by_w"] = y_g_t_by_w
+        # self.image_list["z_g_t_by_w"] = z_g_t_by_w
+        #
+        # self.prob_list["label_expand_x"] = label_expand_x
+        # self.prob_list["label_expand_y"] = label_expand_y
+        # self.prob_list["label_expand_z"] = label_expand_z
+        # self.prob_list["label_expand_w"] = label_expand_w
+        #
+        # self.image_list["mask_x"] = mask_x
+        # self.image_list["mask_y"] = mask_y
+        # self.image_list["mask_z"] = mask_z
+        # self.image_list["mask_w"] = mask_w
+        #
+        # self.code_list["code_x"] = code_x
+        # self.code_list["code_y"] = code_y
+        # self.code_list["code_z"] = code_z
+        # self.code_list["code_w"] = code_w
+        #
+        # self.prob_list["l_f_prob_by_x"] = l_f_prob_by_x
+        # self.prob_list["l_f_prob_by_y"] = l_f_prob_by_y
+        # self.prob_list["l_f_prob_by_z"] = l_f_prob_by_z
+        # self.prob_list["l_f_prob_by_w"] = l_f_prob_by_w
+        # self.image_list["l_f_by_x"] = l_f_by_x
+        # self.image_list["l_f_by_y"] = l_f_by_y
+        # self.image_list["l_f_by_z"] = l_f_by_z
+        # self.image_list["l_f_by_w"] = l_f_by_w
+        #
+        # self.image_list["x_r"] = x_r
+        # self.image_list["y_r"] = y_r
+        # self.image_list["z_r"] = z_r
+        # self.image_list["w_r"] = w_r
+        #
+        # self.image_list["y_t_by_x"] = y_t_by_x
+        # self.code_list["code_y_t_by_x"] = code_y_t_by_x
+        # self.image_list["x_r_c_by_y"] = x_r_c_by_y
+        # self.image_list["z_t_by_x"] = z_t_by_x
+        # self.code_list["code_z_t_by_x"] = code_z_t_by_x
+        # self.image_list["x_r_c_by_z"] = x_r_c_by_z
+        # self.image_list["w_t_by_x"] = w_t_by_x
+        # self.code_list["code_w_t_by_x"] = code_w_t_by_x
+        # self.image_list["x_r_c_by_w"] = x_r_c_by_w
+        #
+        # self.image_list["x_t_by_y"] = x_t_by_y
+        # self.code_list["code_x_t_by_y"] = code_x_t_by_y
+        # self.image_list["y_r_c_by_x"] = y_r_c_by_x
+        # self.image_list["z_t_by_y"] = z_t_by_y
+        # self.code_list["code_z_t_by_y"] = code_z_t_by_y
+        # self.image_list["y_r_c_by_z"] = y_r_c_by_z
+        # self.image_list["w_t_by_y"] = w_t_by_y
+        # self.code_list["code_w_t_by_y"] = code_w_t_by_y
+        # self.image_list["y_r_c_by_w"] = y_r_c_by_w
+        #
+        # self.image_list["x_t_by_z"] = x_t_by_z
+        # self.code_list["code_x_t_by_z"] = code_x_t_by_z
+        # self.image_list["z_r_c_by_x"] = z_r_c_by_x
+        # self.image_list["y_t_by_z"] = y_t_by_z
+        # self.code_list["code_y_t_by_z"] = code_y_t_by_z
+        # self.image_list["z_r_c_by_y"] = z_r_c_by_y
+        # self.image_list["w_t_by_z"] = w_t_by_z
+        # self.code_list["code_w_t_by_z"] = code_w_t_by_z
+        # self.image_list["z_r_c_by_w"] = z_r_c_by_w
+        #
+        # self.image_list["x_t_by_w"] = x_t_by_w
+        # self.code_list["code_x_t_by_w"] = code_x_t_by_w
+        # self.image_list["w_r_c_by_x"] = w_r_c_by_x
+        # self.image_list["y_t_by_w"] = y_t_by_w
+        # self.code_list["code_y_t_by_w"] = code_y_t_by_w
+        # self.image_list["w_r_c_by_y"] = w_r_c_by_y
+        # self.image_list["z_t_by_w"] = z_t_by_w
+        # self.code_list["code_z_t_by_w"] = code_z_t_by_w
+        # self.image_list["w_r_c_by_z"] = w_r_c_by_z
+        #
+        # self.judge_list["j_x_g"], self.judge_list["j_x_g_c"] = j_x_g, j_x_g_c
+        # self.judge_list["j_y_g"], self.judge_list["j_y_g_c"] = j_y_g, j_y_g_c
+        # self.judge_list["j_z_g"], self.judge_list["j_z_g_c"] = j_z_g, j_z_g_c
+        # self.judge_list["j_w_g"], self.judge_list["j_w_g_c"] = j_w_g, j_w_g_c
+        #
+        # self.judge_list["j_x"], self.judge_list["j_x_c"] = j_x, j_x_c
+        # self.judge_list["j_y"], self.judge_list["j_y_c"] = j_y, j_y_c
+        # self.judge_list["j_z"], self.judge_list["j_z_c"] = j_z, j_z_c
+        # self.judge_list["j_w"], self.judge_list["j_w_c"] = j_w, j_w_c
+        #
+        # self.judge_list["j_x_t_by_y"], self.judge_list["j_x_t_c_by_y"] = j_x_t_by_y, j_x_t_c_by_y
+        # self.judge_list["j_x_t_by_z"], self.judge_list["j_x_t_c_by_z"] = j_x_t_by_z, j_x_t_c_by_z
+        # self.judge_list["j_x_t_by_w"], self.judge_list["j_x_t_c_by_w"] = j_x_t_by_w, j_x_t_c_by_w
+        #
+        # self.judge_list["j_y_t_by_x"], self.judge_list["j_y_t_c_by_x"] = j_y_t_by_x, j_y_t_c_by_x
+        # self.judge_list["j_y_t_by_z"], self.judge_list["j_y_t_c_by_z"] = j_y_t_by_z, j_y_t_c_by_z
+        # self.judge_list["j_y_t_by_w"], self.judge_list["j_y_t_c_by_w"] = j_y_t_by_w, j_y_t_c_by_w
+        #
+        # self.judge_list["j_z_t_by_x"], self.judge_list["j_z_t_c_by_x"] = j_z_t_by_x, j_z_t_c_by_x
+        # self.judge_list["j_z_t_by_y"], self.judge_list["j_z_t_c_by_y"] = j_z_t_by_y, j_z_t_c_by_y
+        # self.judge_list["j_z_t_by_w"], self.judge_list["j_z_t_c_by_w"] = j_z_t_by_w, j_z_t_c_by_w
+        #
+        # self.judge_list["j_w_t_by_x"], self.judge_list["j_w_t_c_by_x"] = j_w_t_by_x, j_w_t_c_by_x
+        # self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] = j_w_t_by_y, j_w_t_c_by_y
+        # self.judge_list["j_w_t_by_z"], self.judge_list["j_w_t_c_by_z"] = j_w_t_by_z, j_w_t_c_by_z
+        #
+        # self.judge_list["j_code_x"] = j_code_x
+        # self.judge_list["j_code_y"] = j_code_y
+        # self.judge_list["j_code_z"] = j_code_z
+        # self.judge_list["j_code_w"] = j_code_w
+        # self.judge_list["j_code_rm"] = j_code_rm
+
         loss_list = [G_loss, D_loss]
 
         return loss_list
@@ -650,7 +809,7 @@ class GAN:
         # tf.summary.scalar('loss/D_loss', D_loss)
 
     def evaluation_code(self, code_list):
-        pass
+        return []
         # code_list_XY, code_list_XW, code_list_YZ, code_list_ZW = \
         #     code_list[0], code_list[1], code_list[2], code_list[3]
         #
@@ -707,7 +866,7 @@ class GAN:
         # tf.summary.scalar('evaluation_code/SSIM/ZW/code_x_g__VS__code_y_g', evluation_list[23])
 
     def evaluation(self, image_list):
-        pass
+        return []
         # image_list_XY, image_list_XW, image_list_YZ, image_list_ZW = \
         #     image_list[0], image_list[1], image_list[2], image_list[3]
         #

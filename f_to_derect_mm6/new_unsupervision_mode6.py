@@ -809,7 +809,7 @@ class GAN:
         # tf.summary.scalar('loss/D_loss', D_loss)
 
     def evaluation_code(self, code_list):
-        pass
+        return []
         # code_list_XY, code_list_XW, code_list_YZ, code_list_ZW = \
         #     code_list[0], code_list[1], code_list[2], code_list[3]
         #
@@ -866,7 +866,7 @@ class GAN:
         # tf.summary.scalar('evaluation_code/SSIM/ZW/code_x_g__VS__code_y_g', evluation_list[23])
 
     def evaluation(self, image_list):
-        pass
+        return []
         # image_list_XY, image_list_XW, image_list_YZ, image_list_ZW = \
         #     image_list[0], image_list[1], image_list[2], image_list[3]
         #
