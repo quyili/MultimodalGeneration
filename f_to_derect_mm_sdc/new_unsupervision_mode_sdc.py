@@ -785,49 +785,52 @@ class GAN:
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def evaluation_code(self, code_dirct):
-        name_list_true = ["code_rm", "code_rm", "code_rm", "code_rm",
-                          "code_x", "code_x",
-                          "code_y", "code_y",
-                          "code_z", "code_z",
-                          "code_w", "code_w", ]
-        name_list_false = ["code_x_g", "code_y_g", "code_z_g", "code_w_g",
-                           "code_y_t_by_x", "code_w_t_by_x",
-                           "code_x_t_by_y", "code_z_t_by_y",
-                           "code_y_t_by_z", "code_w_t_by_z",
-                           "code_x_t_by_w", "code_z_t_by_w"]
+        self.name_code_list_true = ["code_rm", "code_rm", "code_rm", "code_rm",
+                                    "code_x", "code_x",
+                                    "code_y", "code_y",
+                                    "code_z", "code_z",
+                                    "code_w", "code_w", ]
+        self.name_code_list_false = ["code_x_g", "code_y_g", "code_z_g", "code_w_g",
+                                     "code_y_t_by_x", "code_w_t_by_x",
+                                     "code_x_t_by_y", "code_z_t_by_y",
+                                     "code_y_t_by_z", "code_w_t_by_z",
+                                     "code_x_t_by_w", "code_z_t_by_w"]
         ssim_list = []
-        for i in range(len(name_list_true)):
-            ssim_list.append(self.SSIM(code_dirct[name_list_true[i]], code_dirct[name_list_false[i]]))
-        return name_list_true, name_list_false, ssim_list
+        for i in range(len(self.name_code_list_true)):
+            ssim_list.append(
+                self.SSIM(code_dirct[self.name_code_list_true[i]], code_dirct[self.name_code_list_false[i]]))
+        return ssim_list
 
-    def evaluation_code_summary(self, name_list_true, name_list_false, ssim_list):
-        for i in range(len(name_list_true)):
-            tf.summary.scalar("evaluation_code/" + name_list_true[i] + "__VS__" + name_list_false[i], ssim_list[i])
+    def evaluation_code_summary(self, ssim_list):
+        for i in range(len(self.name_code_list_true)):
+            tf.summary.scalar(
+                "evaluation_code/" + self.name_code_list_true[i] + "__VS__" + self.name_code_list_false[i],
+                ssim_list[i])
 
     def evaluation(self, image_dirct):
-        name_list_true = ["l", "l", "l", "l", "l",
-                          "l_x", "l_y", "l_z", "l_w",
-                          "x", "y", "z", "w",
-                          "x_g", "x_g",
-                          "y_g", "y_g",
-                          "z_g", "z_g",
-                          "w_g", "w_g", ]
-        name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
-                           "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
-                           "x_r", "y_r", "z_r", "w_r",
-                           "x_g_t_by_y", "x_g_t_by_w",
-                           "y_g_t_by_x", "y_g_t_by_z",
-                           "z_g_t_by_y", "z_g_t_by_w",
-                           "w_g_t_by_x", "w_g_t_by_z",
-                           ]
+        self.name_list_true = ["l", "l", "l", "l", "l",
+                               "l_x", "l_y", "l_z", "l_w",
+                               "x", "y", "z", "w",
+                               "x_g", "x_g",
+                               "y_g", "y_g",
+                               "z_g", "z_g",
+                               "w_g", "w_g", ]
+        self.name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
+                                "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
+                                "x_r", "y_r", "z_r", "w_r",
+                                "x_g_t_by_y", "x_g_t_by_w",
+                                "y_g_t_by_x", "y_g_t_by_z",
+                                "z_g_t_by_y", "z_g_t_by_w",
+                                "w_g_t_by_x", "w_g_t_by_z",
+                                ]
         ssim_list = []
-        for i in range(len(name_list_true)):
-            ssim_list.append(self.SSIM(image_dirct[name_list_true[i]], image_dirct[name_list_false[i]]))
-        return name_list_true, name_list_false, ssim_list
+        for i in range(len(self.name_list_true)):
+            ssim_list.append(self.SSIM(image_dirct[self.name_list_true[i]], image_dirct[self.name_list_false[i]]))
+        return ssim_list
 
-    def evaluation_summary(self, name_list_true, name_list_false, ssim_list):
-        for i in range(len(name_list_true)):
-            tf.summary.scalar("evaluation/" + name_list_true[i] + "__VS__" + name_list_false[i], ssim_list[i])
+    def evaluation_summary(self, ssim_list):
+        for i in range(len(self.name_list_true)):
+            tf.summary.scalar("evaluation/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i], ssim_list[i])
 
     def image_summary(self, image_dirct):
         for key in image_dirct:
