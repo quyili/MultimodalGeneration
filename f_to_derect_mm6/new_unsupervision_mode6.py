@@ -30,7 +30,7 @@ class GAN:
         self.tenaor_name = {}
 
         self.EC_R = Encoder('EC_R', ngf=ngf)
-        self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=6)
+        self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=5)
 
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
