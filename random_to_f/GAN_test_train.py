@@ -18,12 +18,14 @@ tf.flags.DEFINE_float('learning_rate', 2e-4, 'initial learning rate for Adam, de
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '../mydata/BRATS2015/trainT1', 'X files for training')
 tf.flags.DEFINE_string('Y', '../mydata/BRATS2015/trainT2', 'Y files for training')
+tf.flags.DEFINE_string('Z', '../mydata/BRATS2015/trainT1c', 'X files for training')
+tf.flags.DEFINE_string('W', '../mydata/BRATS2015/trainFlair', 'Y files for training')
 tf.flags.DEFINE_string('L', '../mydata/BRATS2015/trainLabel', 'Y files for training')
-tf.flags.DEFINE_string('M', '../mydata/BRATS2015/trainMask', 'Y files for training')
 tf.flags.DEFINE_string('X_test', '../mydata/BRATS2015/testT1', 'X files for training')
 tf.flags.DEFINE_string('Y_test', '../mydata/BRATS2015/testT2', 'Y files for training')
+tf.flags.DEFINE_string('Z_test', '../mydata/BRATS2015/testT1c', 'X files for training')
+tf.flags.DEFINE_string('W_test', '../mydata/BRATS2015/testFlair', 'Y files for training')
 tf.flags.DEFINE_string('L_test', '../mydata/BRATS2015/testLabel', 'Y files for training')
-tf.flags.DEFINE_string('M_test', '../mydata/BRATS2015/testMask', 'Y files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -90,14 +92,10 @@ def save_codes(code_f_rm, code_f, checkpoints_dir, file_index):
 
 
 def save_images(image_list, checkpoints_dir, file_index):
-    val_true_x, val_true_y, val_l, val_f, val_f_r, val_f_rm = image_list
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_l)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_label_" + str(file_index) + ".tiff")
+    val_true_m, val_f, val_f_r, val_f_rm = image_list
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_x)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_x_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_y)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_y_" + str(file_index) + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_m)[0, :, :, 0]),
+                         checkpoints_dir + "/samples/true_m_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_f_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_r)[0, :, :, 0]),

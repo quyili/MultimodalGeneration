@@ -50,15 +50,10 @@ class GAN:
         mask = 1.0 - self.ones * tf.cast(x > 0.02, dtype="float32")
         return mask
 
-    def model(self, l, l_x, l_y, x, y, z, w):
-        # L
-        # 选择f来源模态
-        rand_f = tf.random_uniform([], 0, 4, dtype=tf.int32)
-        m = tf.case({tf.equal(rand_f, 0): lambda: x,
-                     tf.equal(rand_f, 1): lambda: y,
-                     tf.equal(rand_f, 2): lambda: z,
-                     tf.equal(rand_f, 3): lambda: w}, exclusive=True)
+    def model(self, l, m, l_x, l_y, x, y):
         mask = self.get_mask(m)
+        mask_x = self.get_mask(x)
+        mask_y = self.get_mask(y)
         f = self.get_f(m)  # M -> F
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
@@ -141,17 +136,17 @@ class GAN:
 
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss = self.mse_loss(j_x, 1.0) * 30
-        D_loss += self.mse_loss(j_x_g, 0.0) * 20
-        D_loss += self.mse_loss(j_x_t, 0.0) * 20
+        D_loss += self.mse_loss(j_x_g, 0.0) * 25
+        D_loss += self.mse_loss(j_x_t, 0.0) * 5
         G_loss = self.mse_loss(j_x_g, 1.0) * 25
-        G_loss += self.mse_loss(j_x_t, 1.0) * 25
+        G_loss += self.mse_loss(j_x_t, 1.0) * 5
 
         # 使得通过随机结构特征图生成的Y模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_y, 1.0) * 30
-        D_loss += self.mse_loss(j_y_g, 0.0) * 20
-        D_loss += self.mse_loss(j_y_t, 0.0) * 20
+        D_loss += self.mse_loss(j_y_g, 0.0) * 25
+        D_loss += self.mse_loss(j_y_t, 0.0) * 5
         G_loss += self.mse_loss(j_y_g, 1.0) * 25
-        G_loss += self.mse_loss(j_y_t, 1.0) * 25
+        G_loss += self.mse_loss(j_y_t, 1.0) * 5
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图
@@ -166,29 +161,26 @@ class GAN:
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob[:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) * 0.1 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob[:, :, :, 2]) \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob[:, :, :, 2]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 3], l_g_prob[:, :, :, 3]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob[:, :, :, 4]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_g_prob[:, :, :, 5]) * 5
+                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob[:, :, :, 4]) * 5
         G_loss += self.mse_loss(l, l_g)
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图在生成X模态后再次分割的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob_by_x[:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob_by_x[:, :, :, 1]) * 0.1 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob_by_x[:, :, :, 2]) \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob_by_x[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob_by_x[:, :, :, 2]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 3], l_g_prob_by_x[:, :, :, 3]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob_by_x[:, :, :, 4]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_g_prob_by_x[:, :, :, 5]) * 5
+                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob_by_x[:, :, :, 4]) * 5
         G_loss += self.mse_loss(l, l_g_by_x)
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图在生成Y模态后再次分割的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0], l_g_prob_by_y[:, :, :, 0]) * 0.1 \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob_by_y[:, :, :, 1]) * 0.1 \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob_by_y[:, :, :, 2]) \
+                  + self.mse_loss(label_expand[:, :, :, 1], l_g_prob_by_y[:, :, :, 1]) \
+                  + self.mse_loss(label_expand[:, :, :, 2], l_g_prob_by_y[:, :, :, 2]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 3], l_g_prob_by_y[:, :, :, 3]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob_by_y[:, :, :, 4]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_g_prob_by_y[:, :, :, 5]) * 5
+                  + self.mse_loss(label_expand[:, :, :, 4], l_g_prob_by_y[:, :, :, 4]) * 5
         G_loss += self.mse_loss(l, l_g_by_y)
 
         # 通过解码器生成X模态与Y模态图的编码 与 X模态与Y模态图经过编码器得到的编码 的自监督语义一致性损失
@@ -201,12 +193,10 @@ class GAN:
         G_loss += self.mse_loss(x_g, x_g_t) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_g * label_expand[0]) * 1.5
-        G_loss += self.mse_loss(0.0, y_g * label_expand[0]) * 1.0
-        G_loss += self.mse_loss(0.0, x_g_t * label_expand[0]) * 1.5
-        G_loss += self.mse_loss(0.0, y_g_t * label_expand[0]) * 1.0
-        G_loss += self.mse_loss(0.0, x_t * label_expand_y[0]) * 2
-        G_loss += self.mse_loss(0.0, y_t * label_expand_x[0]) * 2
+        G_loss += self.mse_loss(0.0, x_g * mask) * 1.5
+        G_loss += self.mse_loss(0.0, y_g * mask) * 1.0
+        G_loss += self.mse_loss(0.0, x_g_t * mask) * 1.5
+        G_loss += self.mse_loss(0.0, y_g_t * mask) * 1.0
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
         G_loss += self.mse_loss(x, x_r) * 5
@@ -218,20 +208,18 @@ class GAN:
 
         # X模态图分割训练的有监督损失
         G_loss += self.mse_loss(label_expand_x[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) \
-                  + self.mse_loss(label_expand_x[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) \
-                  + self.mse_loss(label_expand_x[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand_x[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_x[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 15 \
                   + self.mse_loss(label_expand_x[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 15 \
-                  + self.mse_loss(label_expand_x[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 15 \
-                  + self.mse_loss(label_expand_x[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 15
+                  + self.mse_loss(label_expand_x[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 15
         G_loss += self.mse_loss(l_x, l_f_by_x) * 5
 
         # Y模态图分割训练的有监督损失
         G_loss += self.mse_loss(label_expand_y[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) \
-                  + self.mse_loss(label_expand_y[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) \
-                  + self.mse_loss(label_expand_y[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 5 \
+                  + self.mse_loss(label_expand_y[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_y[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 15 \
                   + self.mse_loss(label_expand_y[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 15 \
-                  + self.mse_loss(label_expand_y[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 15 \
-                  + self.mse_loss(label_expand_y[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 15
+                  + self.mse_loss(label_expand_y[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 15
         G_loss += self.mse_loss(l_y, l_f_by_y) * 5
 
         # X模态与Y模态图编码的有监督语义一致性损失
@@ -239,11 +227,12 @@ class GAN:
         G_loss += self.mse_loss(code_y, code_x_t) * 5
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_r * label_expand_x[0]) * 0.5
-        G_loss += self.mse_loss(0.0, y_r * label_expand_y[0]) * 0.5
-        G_loss += self.mse_loss(0.0, x_t * label_expand_y[0]) * 0.5
-        G_loss += self.mse_loss(0.0, y_t * label_expand_x[0]) * 0.5
+        G_loss += self.mse_loss(0.0, x_t * mask_y) * 1
+        G_loss += self.mse_loss(0.0, y_t * mask_x) * 1
+        G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.1
+        G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.1
 
+        
         image_list = [x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
                       l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
                       f, f_x_g_r, f_y_g_r]

@@ -29,7 +29,7 @@ class GAN:
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
-    def get_f(self, x, beta=0.12):
+    def get_f(self, x, beta=0.08):
         f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
         f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
@@ -93,7 +93,7 @@ class GAN:
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         G_loss += self.mse_loss(f, f_r) * 50
 
-        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 0.1
+        # G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 0.1
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
@@ -145,7 +145,7 @@ class GAN:
         tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
 
     def evaluation(self, image_list):
-        x, y, l, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]
+        m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]
         list = [self.PSNR(f, f_r),
                 self.SSIM(f, f_r)]
         return list
@@ -167,10 +167,8 @@ class GAN:
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_list):
-        x, y, l, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], image_list[5]
-        tf.summary.image('image/x', x)
-        tf.summary.image('image/y', y)
-        tf.summary.image('image/l_input', l)
+        m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]
+        tf.summary.image('image/m', m)
         tf.summary.image('image/f', f)
         tf.summary.image('image/f_rm', f_rm)
         tf.summary.image('image/f_r', f_r)
