@@ -23,6 +23,7 @@ class GAN:
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.ones = tf.ones(self.input_shape, name="ones")
+        self.tenaor_name = {}
 
         self.EC_F = GEncoder('EC_F', ngf=ngf)
         self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2)
@@ -61,6 +62,8 @@ class GAN:
         f_rm_prob = self.DC_F(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_rm_r = self.EC_F(f_rm)
+        self.tenaor_name["code_f_rm"] = str(code_f_rm)
+        self.tenaor_name["f_rm"] = str(f_rm)
 
         # D,FD
         j_f = self.D_F(f)

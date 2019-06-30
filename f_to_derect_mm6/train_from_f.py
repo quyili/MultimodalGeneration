@@ -176,6 +176,7 @@ def train():
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_0 = gan.model(l_0, m_0, l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
+                        tensor_name_dirct_0 = gan.tenaor_name
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
@@ -197,6 +198,7 @@ def train():
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_1 = gan.model(l_1, m_1, l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
                         image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
+                        tensor_name_dirct_1 = gan.tenaor_name
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
@@ -218,6 +220,7 @@ def train():
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_2 = gan.model(l_2, m_2, l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
                         image_list_2, code_list_2, j_list_2 = gan.image_list, gan.code_list, gan.judge_list
+                        tensor_name_dirct_2 = gan.tenaor_name
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
@@ -239,6 +242,7 @@ def train():
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_3 = gan.model(l_3, m_3, l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
                         image_list_3, code_list_3, j_list_3 = gan.image_list, gan.code_list, gan.judge_list
+                        tensor_name_dirct_3 = gan.tenaor_name
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()
@@ -473,12 +477,14 @@ def train():
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
                             val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
                             val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
-                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
+                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3, \
+                            val_tensor_name_dirct_0, val_tensor_name_dirct_1, val_tensor_name_dirct_2, val_tensor_name_dirct_3 = sess.run(
                                 [loss_list_0, evaluation_list_0, evaluation_code_list_0,
                                  loss_list_1, evaluation_list_1, evaluation_code_list_1,
                                  loss_list_2, evaluation_list_2, evaluation_code_list_2,
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3, ],
+                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3,
+                                 tensor_name_dirct_0,tensor_name_dirct_1,tensor_name_dirct_2,tensor_name_dirct_3],
                                 feed_dict={
                                     l_0: np.asarray(val_true_l)[0:1, :, :, :],
                                     m_0: np.asarray(val_true_m)[0:1, :, :, :],
@@ -538,7 +544,14 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
                             if j == 0:
+                                print(val_tensor_name_dirct_0)
                                 save_images(val_image_list_0, checkpoints_dir, str(0))
+                                # print(val_tensor_name_dirct_1)
+                                # save_images(val_image_list_1, checkpoints_dir, str(1))
+                                # print(val_tensor_name_dirct_2)
+                                # save_images(val_image_list_2, checkpoints_dir, str(2))
+                                # print(val_tensor_name_dirct_3)
+                                # save_images(val_image_list_3, checkpoints_dir, str(3))
 
                         val_summary_op = sess.run(
                             summary_op,

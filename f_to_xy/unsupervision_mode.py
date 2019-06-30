@@ -23,6 +23,7 @@ class GAN:
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.ones = tf.ones(self.input_shape, name="ones")
+        self.tenaor_name = {}
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
@@ -55,6 +56,8 @@ class GAN:
         mask_x = self.get_mask(x)
         mask_y = self.get_mask(y)
         f = self.get_f(m)  # M -> F
+        self.tenaor_name["l"] = str(l)
+        self.tenaor_name["f"] = str(f)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
@@ -73,6 +76,9 @@ class GAN:
         code_rm = self.EC_R(f_rm_expand)
         x_g = self.DC_X(code_rm)
         y_g = self.DC_Y(code_rm)
+        self.tenaor_name["x_g"] = str(x_g)
+        self.tenaor_name["y_g"] = str(y_g)
+
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.2, shape=self.input_shape)
 
