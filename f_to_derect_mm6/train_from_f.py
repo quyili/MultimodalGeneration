@@ -303,6 +303,7 @@ def train():
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
             try:
+                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
                 l_train_files = read_filename(FLAGS.L)
                 l_x_train_files = read_filename(FLAGS.L)
                 l_y_train_files = read_filename(FLAGS.L)
@@ -477,14 +478,12 @@ def train():
                             val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
                             val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
                             val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
-                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3, \
-                            val_tensor_name_dirct_0, val_tensor_name_dirct_1, val_tensor_name_dirct_2, val_tensor_name_dirct_3 = sess.run(
+                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
                                 [loss_list_0, evaluation_list_0, evaluation_code_list_0,
                                  loss_list_1, evaluation_list_1, evaluation_code_list_1,
                                  loss_list_2, evaluation_list_2, evaluation_code_list_2,
                                  loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3,
-                                 tensor_name_dirct_0,tensor_name_dirct_1,tensor_name_dirct_2,tensor_name_dirct_3],
+                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
                                 feed_dict={
                                     l_0: np.asarray(val_true_l)[0:1, :, :, :],
                                     m_0: np.asarray(val_true_m)[0:1, :, :, :],
@@ -544,13 +543,9 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
                             if j == 0:
-                                print(val_tensor_name_dirct_0)
                                 save_images(val_image_list_0, checkpoints_dir, str(0))
-                                # print(val_tensor_name_dirct_1)
                                 # save_images(val_image_list_1, checkpoints_dir, str(1))
-                                # print(val_tensor_name_dirct_2)
                                 # save_images(val_image_list_2, checkpoints_dir, str(2))
-                                # print(val_tensor_name_dirct_3)
                                 # save_images(val_image_list_3, checkpoints_dir, str(3))
 
                         val_summary_op = sess.run(
