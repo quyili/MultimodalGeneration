@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from new_unsupervision_mode6 import GAN
+from new_unsupervision_mode_sdc import GAN
 from datetime import datetime
 import os
 import logging
