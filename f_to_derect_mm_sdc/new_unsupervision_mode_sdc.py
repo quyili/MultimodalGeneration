@@ -141,19 +141,19 @@ class GAN:
         mid_code_w_g = self.SDC(code_w_g)
 
         y_g_t_by_x = self.DC_Y(mid_code_x_g)
-        z_g_t_by_x = self.DC_Z(mid_code_x_g)
+        # z_g_t_by_x = self.DC_Z(mid_code_x_g)
         w_g_t_by_x = self.DC_W(mid_code_x_g)
 
         x_g_t_by_y = self.DC_X(mid_code_y_g)
         z_g_t_by_y = self.DC_Z(mid_code_y_g)
-        w_g_t_by_y = self.DC_W(mid_code_y_g)
+        # w_g_t_by_y = self.DC_W(mid_code_y_g)
 
-        x_g_t_by_z = self.DC_X(mid_code_z_g)
+        # x_g_t_by_z = self.DC_X(mid_code_z_g)
         y_g_t_by_z = self.DC_Y(mid_code_z_g)
         w_g_t_by_z = self.DC_W(mid_code_z_g)
 
         x_g_t_by_w = self.DC_X(mid_code_w_g)
-        y_g_t_by_w = self.DC_Y(mid_code_w_g)
+        # y_g_t_by_w = self.DC_Y(mid_code_w_g)
         z_g_t_by_w = self.DC_Z(mid_code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
@@ -209,9 +209,9 @@ class GAN:
         y_t_by_x = self.DC_Y(mid_code_x)
         code_y_t_by_x = self.EC_Y(y_t_by_x)
         x_r_c_by_y = self.DC_X(self.SDC(code_y_t_by_x))
-        z_t_by_x = self.DC_Z(mid_code_x)
-        code_z_t_by_x = self.EC_Z(z_t_by_x)
-        x_r_c_by_z = self.DC_X(self.SDC(code_z_t_by_x))
+        # z_t_by_x = self.DC_Z(mid_code_x)
+        # code_z_t_by_x = self.EC_Z(z_t_by_x)
+        # x_r_c_by_z = self.DC_X(self.SDC(code_z_t_by_x))
         w_t_by_x = self.DC_W(mid_code_x)
         code_w_t_by_x = self.EC_W(w_t_by_x)
         x_r_c_by_w = self.DC_X(self.SDC(code_w_t_by_x))
@@ -222,13 +222,13 @@ class GAN:
         z_t_by_y = self.DC_Z(mid_code_y)
         code_z_t_by_y = self.EC_Z(x_t_by_y)
         y_r_c_by_z = self.DC_Y(self.SDC(code_z_t_by_y))
-        w_t_by_y = self.DC_W(mid_code_y)
-        code_w_t_by_y = self.EC_W(x_t_by_y)
-        y_r_c_by_w = self.DC_Y(self.SDC(code_w_t_by_y))
+        # w_t_by_y = self.DC_W(mid_code_y)
+        # code_w_t_by_y = self.EC_W(x_t_by_y)
+        # y_r_c_by_w = self.DC_Y(self.SDC(code_w_t_by_y))
 
-        x_t_by_z = self.DC_X(mid_code_z)
-        code_x_t_by_z = self.EC_X(x_t_by_z)
-        z_r_c_by_x = self.DC_Z(self.SDC(code_x_t_by_z))
+        # x_t_by_z = self.DC_X(mid_code_z)
+        # code_x_t_by_z = self.EC_X(x_t_by_z)
+        # z_r_c_by_x = self.DC_Z(self.SDC(code_x_t_by_z))
         y_t_by_z = self.DC_Y(mid_code_z)
         code_y_t_by_z = self.EC_Y(y_t_by_z)
         z_r_c_by_y = self.DC_Z(self.SDC(code_y_t_by_z))
@@ -239,9 +239,9 @@ class GAN:
         x_t_by_w = self.DC_X(mid_code_w)
         code_x_t_by_w = self.EC_X(x_t_by_w)
         w_r_c_by_x = self.DC_W(self.SDC(code_x_t_by_w))
-        y_t_by_w = self.DC_Y(mid_code_w)
-        code_y_t_by_w = self.EC_Y(y_t_by_w)
-        w_r_c_by_y = self.DC_W(self.SDC(code_y_t_by_w))
+        # y_t_by_w = self.DC_Y(mid_code_w)
+        # code_y_t_by_w = self.EC_Y(y_t_by_w)
+        # w_r_c_by_y = self.DC_W(self.SDC(code_y_t_by_w))
         z_t_by_w = self.DC_Z(mid_code_w)
         code_z_t_by_w = self.EC_Z(z_t_by_w)
         w_r_c_by_z = self.DC_W(self.SDC(code_z_t_by_w))
@@ -257,19 +257,19 @@ class GAN:
         j_w, j_w_c = self.D_M(w)
 
         j_x_t_by_y, j_x_t_c_by_y = self.D_M(x_t_by_y)
-        j_x_t_by_z, j_x_t_c_by_z = self.D_M(x_t_by_z)
+        # j_x_t_by_z, j_x_t_c_by_z = self.D_M(x_t_by_z)
         j_x_t_by_w, j_x_t_c_by_w = self.D_M(x_t_by_w)
 
         j_y_t_by_x, j_y_t_c_by_x = self.D_M(y_t_by_x)
         j_y_t_by_z, j_y_t_c_by_z = self.D_M(y_t_by_z)
-        j_y_t_by_w, j_y_t_c_by_w = self.D_M(y_t_by_w)
+        # j_y_t_by_w, j_y_t_c_by_w = self.D_M(y_t_by_w)
 
-        j_z_t_by_x, j_z_t_c_by_x = self.D_M(z_t_by_x)
+        # j_z_t_by_x, j_z_t_c_by_x = self.D_M(z_t_by_x)
         j_z_t_by_y, j_z_t_c_by_y = self.D_M(z_t_by_y)
         j_z_t_by_w, j_z_t_c_by_w = self.D_M(z_t_by_w)
 
         j_w_t_by_x, j_w_t_c_by_x = self.D_M(w_t_by_x)
-        j_w_t_by_y, j_w_t_c_by_y = self.D_M(w_t_by_y)
+        # j_w_t_by_y, j_w_t_c_by_y = self.D_M(w_t_by_y)
         j_w_t_by_z, j_w_t_c_by_z = self.D_M(w_t_by_z)
 
         j_code_x = self.FD_R(code_x)
@@ -285,10 +285,10 @@ class GAN:
         D_loss += self.mse_loss(j_x_g, 0.0) * 20
         G_loss += self.mse_loss(j_x_g, 1.0) * 25
         D_loss += self.mse_loss(j_x_t_by_y, 0.0) * 10
-        D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 10
+        # D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 10
         D_loss += self.mse_loss(j_x_t_by_w, 0.0) * 10
         G_loss += self.mse_loss(j_x_t_by_y, 1.0) * 15
-        G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 15
+        # G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 15
         G_loss += self.mse_loss(j_x_t_by_w, 1.0) * 15
 
         D_loss += self.mse_loss(j_y, 1.0) * 35
@@ -296,18 +296,18 @@ class GAN:
         G_loss += self.mse_loss(j_y_g, 1.0) * 25
         D_loss += self.mse_loss(j_y_t_by_x, 0.0) * 10
         D_loss += self.mse_loss(j_y_t_by_z, 0.0) * 10
-        D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 10
+        # D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 10
         G_loss += self.mse_loss(j_y_t_by_x, 1.0) * 15
         G_loss += self.mse_loss(j_y_t_by_z, 1.0) * 15
-        G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 15
+        # G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 15
 
         D_loss += self.mse_loss(j_z, 1.0) * 35
         D_loss += self.mse_loss(j_z_g, 0.0) * 20
         G_loss += self.mse_loss(j_z_g, 1.0) * 25
-        D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 10
+        # D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 10
         D_loss += self.mse_loss(j_z_t_by_y, 0.0) * 10
         D_loss += self.mse_loss(j_z_t_by_w, 0.0) * 10
-        G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 15
+        # G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 15
         G_loss += self.mse_loss(j_z_t_by_y, 1.0) * 15
         G_loss += self.mse_loss(j_z_t_by_w, 1.0) * 15
 
@@ -315,10 +315,10 @@ class GAN:
         D_loss += self.mse_loss(j_w_g, 0.0) * 20
         G_loss += self.mse_loss(j_w_g, 1.0) * 25
         D_loss += self.mse_loss(j_w_t_by_x, 0.0) * 10
-        D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 10
+        # D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 10
         D_loss += self.mse_loss(j_w_t_by_z, 0.0) * 10
         G_loss += self.mse_loss(j_w_t_by_x, 1.0) * 15
-        G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 15
+        # G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 15
         G_loss += self.mse_loss(j_w_t_by_z, 1.0) * 15
 
         D_loss += self.mse_loss(j_x_c, cx) * 25
@@ -332,19 +332,19 @@ class GAN:
         G_loss += self.mse_loss(j_w_g_c, cw) * 25
 
         G_loss += self.mse_loss(j_x_t_by_y, cx) * 25
-        G_loss += self.mse_loss(j_x_t_by_z, cx) * 25
+        # G_loss += self.mse_loss(j_x_t_by_z, cx) * 25
         G_loss += self.mse_loss(j_x_t_by_w, cx) * 25
 
         G_loss += self.mse_loss(j_y_t_by_x, cx) * 25
         G_loss += self.mse_loss(j_y_t_by_z, cx) * 25
-        G_loss += self.mse_loss(j_y_t_by_w, cx) * 25
+        # G_loss += self.mse_loss(j_y_t_by_w, cx) * 25
 
-        G_loss += self.mse_loss(j_z_t_by_x, cx) * 25
+        # G_loss += self.mse_loss(j_z_t_by_x, cx) * 25
         G_loss += self.mse_loss(j_z_t_by_y, cx) * 25
         G_loss += self.mse_loss(j_z_t_by_w, cx) * 25
 
         G_loss += self.mse_loss(j_w_t_by_x, cx) * 25
-        G_loss += self.mse_loss(j_w_t_by_y, cx) * 25
+        # G_loss += self.mse_loss(j_w_t_by_y, cx) * 25
         G_loss += self.mse_loss(j_w_t_by_z, cx) * 25
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
@@ -473,19 +473,19 @@ class GAN:
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2
-        G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2
+        # G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_w) * 2
 
         G_loss += self.mse_loss(y_g, y_g_t_by_x) * 2
         G_loss += self.mse_loss(y_g, y_g_t_by_z) * 2
-        G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2
+        # G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2
+        # G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2
         G_loss += self.mse_loss(z_g, z_g_t_by_y) * 2
         G_loss += self.mse_loss(z_g, z_g_t_by_w) * 2
 
         G_loss += self.mse_loss(w_g, w_g_t_by_x) * 2
-        G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2
+        # G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2
         G_loss += self.mse_loss(w_g, w_g_t_by_z) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
@@ -493,19 +493,19 @@ class GAN:
         G_loss += self.mse_loss(0.0, y_g * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, x_g_t_by_y * mask) * 1.5
-        G_loss += self.mse_loss(0.0, x_g_t_by_z * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, x_g_t_by_z * mask) * 1.5
         G_loss += self.mse_loss(0.0, x_g_t_by_w * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, y_g_t_by_x * mask) * 1.5
         G_loss += self.mse_loss(0.0, y_g_t_by_z * mask) * 1.5
-        G_loss += self.mse_loss(0.0, y_g_t_by_w * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, y_g_t_by_w * mask) * 1.5
 
-        G_loss += self.mse_loss(0.0, z_g_t_by_x * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, z_g_t_by_x * mask) * 1.5
         G_loss += self.mse_loss(0.0, z_g_t_by_y * mask) * 1.5
         G_loss += self.mse_loss(0.0, z_g_t_by_w * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, w_g_t_by_x * mask) * 1.5
-        G_loss += self.mse_loss(0.0, w_g_t_by_y * mask) * 1.5
+        # G_loss += self.mse_loss(0.0, w_g_t_by_y * mask) * 1.5
         G_loss += self.mse_loss(0.0, w_g_t_by_z * mask) * 1.5
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
@@ -516,36 +516,36 @@ class GAN:
 
         # X模态与Y模态图进行转换得到的转换图与原图的有监督损失
         G_loss += self.mse_loss(x, x_r_c_by_y) * 10
-        G_loss += self.mse_loss(x, x_r_c_by_z) * 10
+        # G_loss += self.mse_loss(x, x_r_c_by_z) * 10
         G_loss += self.mse_loss(x, x_r_c_by_w) * 10
 
         G_loss += self.mse_loss(y, y_r_c_by_x) * 10
         G_loss += self.mse_loss(y, y_r_c_by_z) * 10
-        G_loss += self.mse_loss(y, y_r_c_by_w) * 10
+        # G_loss += self.mse_loss(y, y_r_c_by_w) * 10
 
-        G_loss += self.mse_loss(z, z_r_c_by_x) * 10
+        # G_loss += self.mse_loss(z, z_r_c_by_x) * 10
         G_loss += self.mse_loss(z, z_r_c_by_y) * 10
         G_loss += self.mse_loss(z, z_r_c_by_w) * 10
 
         G_loss += self.mse_loss(w, w_r_c_by_x) * 10
-        G_loss += self.mse_loss(w, w_r_c_by_y) * 10
+        # G_loss += self.mse_loss(w, w_r_c_by_y) * 10
         G_loss += self.mse_loss(w, w_r_c_by_z) * 10
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_t_by_y * mask_x) * 2
-        G_loss += self.mse_loss(0.0, x_t_by_z * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, x_t_by_z * mask_x) * 2
         G_loss += self.mse_loss(0.0, x_t_by_w * mask_x) * 2
 
         G_loss += self.mse_loss(0.0, y_t_by_x * mask_x) * 2
         G_loss += self.mse_loss(0.0, y_t_by_z * mask_x) * 2
-        G_loss += self.mse_loss(0.0, y_t_by_w * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, y_t_by_w * mask_x) * 2
 
-        G_loss += self.mse_loss(0.0, z_t_by_x * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, z_t_by_x * mask_x) * 2
         G_loss += self.mse_loss(0.0, z_t_by_y * mask_x) * 2
         G_loss += self.mse_loss(0.0, z_t_by_w * mask_x) * 2
 
         G_loss += self.mse_loss(0.0, w_t_by_x * mask_x) * 2
-        G_loss += self.mse_loss(0.0, w_t_by_y * mask_x) * 2
+        # G_loss += self.mse_loss(0.0, w_t_by_y * mask_x) * 2
         G_loss += self.mse_loss(0.0, w_t_by_z * mask_x) * 2
 
         G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
@@ -568,19 +568,19 @@ class GAN:
 
         # X模态与Y模态图编码的有监督语义一致性损失
         G_loss += self.mse_loss(code_x, code_y_t_by_x) * 5
-        G_loss += self.mse_loss(code_x, code_z_t_by_x) * 5
+        # G_loss += self.mse_loss(code_x, code_z_t_by_x) * 5
         G_loss += self.mse_loss(code_x, code_w_t_by_x) * 5
 
         G_loss += self.mse_loss(code_y, code_x_t_by_y) * 5
         G_loss += self.mse_loss(code_y, code_z_t_by_y) * 5
-        G_loss += self.mse_loss(code_y, code_w_t_by_y) * 5
+        # G_loss += self.mse_loss(code_y, code_w_t_by_y) * 5
 
-        G_loss += self.mse_loss(code_z, code_x_t_by_z) * 5
+        # G_loss += self.mse_loss(code_z, code_x_t_by_z) * 5
         G_loss += self.mse_loss(code_z, code_y_t_by_z) * 5
         G_loss += self.mse_loss(code_z, code_w_t_by_z) * 5
 
         G_loss += self.mse_loss(code_w, code_x_t_by_w) * 5
-        G_loss += self.mse_loss(code_w, code_y_t_by_w) * 5
+        # G_loss += self.mse_loss(code_w, code_y_t_by_w) * 5
         G_loss += self.mse_loss(code_w, code_z_t_by_w) * 5
 
         self.image_list["mask"] = mask
@@ -626,19 +626,19 @@ class GAN:
         self.image_list["f_w_g_r"] = f_w_g_r
 
         self.image_list["y_g_t_by_x"] = y_g_t_by_x
-        self.image_list["z_g_t_by_x"] = z_g_t_by_x
+        # self.image_list["z_g_t_by_x"] = z_g_t_by_x
         self.image_list["w_g_t_by_x"] = w_g_t_by_x
 
         self.image_list["x_g_t_by_y"] = x_g_t_by_y
         self.image_list["z_g_t_by_y"] = z_g_t_by_y
-        self.image_list["w_g_t_by_y"] = w_g_t_by_y
+        # self.image_list["w_g_t_by_y"] = w_g_t_by_y
 
-        self.image_list["x_g_t_by_z"] = x_g_t_by_z
+        # self.image_list["x_g_t_by_z"] = x_g_t_by_z
         self.image_list["y_g_t_by_z"] = y_g_t_by_z
         self.image_list["w_g_t_by_z"] = w_g_t_by_z
 
         self.image_list["x_g_t_by_w"] = x_g_t_by_w
-        self.image_list["y_g_t_by_w"] = y_g_t_by_w
+        # self.image_list["y_g_t_by_w"] = y_g_t_by_w
         self.image_list["z_g_t_by_w"] = z_g_t_by_w
 
         self.prob_list["label_expand_x"] = label_expand_x
@@ -673,9 +673,9 @@ class GAN:
         self.image_list["y_t_by_x"] = y_t_by_x
         self.code_list["code_y_t_by_x"] = code_y_t_by_x
         self.image_list["x_r_c_by_y"] = x_r_c_by_y
-        self.image_list["z_t_by_x"] = z_t_by_x
-        self.code_list["code_z_t_by_x"] = code_z_t_by_x
-        self.image_list["x_r_c_by_z"] = x_r_c_by_z
+        # self.image_list["z_t_by_x"] = z_t_by_x
+        # self.code_list["code_z_t_by_x"] = code_z_t_by_x
+        # self.image_list["x_r_c_by_z"] = x_r_c_by_z
         self.image_list["w_t_by_x"] = w_t_by_x
         self.code_list["code_w_t_by_x"] = code_w_t_by_x
         self.image_list["x_r_c_by_w"] = x_r_c_by_w
@@ -686,13 +686,13 @@ class GAN:
         self.image_list["z_t_by_y"] = z_t_by_y
         self.code_list["code_z_t_by_y"] = code_z_t_by_y
         self.image_list["y_r_c_by_z"] = y_r_c_by_z
-        self.image_list["w_t_by_y"] = w_t_by_y
-        self.code_list["code_w_t_by_y"] = code_w_t_by_y
-        self.image_list["y_r_c_by_w"] = y_r_c_by_w
+        # self.image_list["w_t_by_y"] = w_t_by_y
+        # self.code_list["code_w_t_by_y"] = code_w_t_by_y
+        # self.image_list["y_r_c_by_w"] = y_r_c_by_w
 
-        self.image_list["x_t_by_z"] = x_t_by_z
-        self.code_list["code_x_t_by_z"] = code_x_t_by_z
-        self.image_list["z_r_c_by_x"] = z_r_c_by_x
+        # self.image_list["x_t_by_z"] = x_t_by_z
+        # self.code_list["code_x_t_by_z"] = code_x_t_by_z
+        # self.image_list["z_r_c_by_x"] = z_r_c_by_x
         self.image_list["y_t_by_z"] = y_t_by_z
         self.code_list["code_y_t_by_z"] = code_y_t_by_z
         self.image_list["z_r_c_by_y"] = z_r_c_by_y
@@ -703,9 +703,9 @@ class GAN:
         self.image_list["x_t_by_w"] = x_t_by_w
         self.code_list["code_x_t_by_w"] = code_x_t_by_w
         self.image_list["w_r_c_by_x"] = w_r_c_by_x
-        self.image_list["y_t_by_w"] = y_t_by_w
-        self.code_list["code_y_t_by_w"] = code_y_t_by_w
-        self.image_list["w_r_c_by_y"] = w_r_c_by_y
+        # self.image_list["y_t_by_w"] = y_t_by_w
+        # self.code_list["code_y_t_by_w"] = code_y_t_by_w
+        # self.image_list["w_r_c_by_y"] = w_r_c_by_y
         self.image_list["z_t_by_w"] = z_t_by_w
         self.code_list["code_z_t_by_w"] = code_z_t_by_w
         self.image_list["w_r_c_by_z"] = w_r_c_by_z
@@ -721,19 +721,19 @@ class GAN:
         self.judge_list["j_w"], self.judge_list["j_w_c"] = j_w, j_w_c
 
         self.judge_list["j_x_t_by_y"], self.judge_list["j_x_t_c_by_y"] = j_x_t_by_y, j_x_t_c_by_y
-        self.judge_list["j_x_t_by_z"], self.judge_list["j_x_t_c_by_z"] = j_x_t_by_z, j_x_t_c_by_z
+        # self.judge_list["j_x_t_by_z"], self.judge_list["j_x_t_c_by_z"] = j_x_t_by_z, j_x_t_c_by_z
         self.judge_list["j_x_t_by_w"], self.judge_list["j_x_t_c_by_w"] = j_x_t_by_w, j_x_t_c_by_w
 
         self.judge_list["j_y_t_by_x"], self.judge_list["j_y_t_c_by_x"] = j_y_t_by_x, j_y_t_c_by_x
         self.judge_list["j_y_t_by_z"], self.judge_list["j_y_t_c_by_z"] = j_y_t_by_z, j_y_t_c_by_z
-        self.judge_list["j_y_t_by_w"], self.judge_list["j_y_t_c_by_w"] = j_y_t_by_w, j_y_t_c_by_w
+        # self.judge_list["j_y_t_by_w"], self.judge_list["j_y_t_c_by_w"] = j_y_t_by_w, j_y_t_c_by_w
 
-        self.judge_list["j_z_t_by_x"], self.judge_list["j_z_t_c_by_x"] = j_z_t_by_x, j_z_t_c_by_x
+        # self.judge_list["j_z_t_by_x"], self.judge_list["j_z_t_c_by_x"] = j_z_t_by_x, j_z_t_c_by_x
         self.judge_list["j_z_t_by_y"], self.judge_list["j_z_t_c_by_y"] = j_z_t_by_y, j_z_t_c_by_y
         self.judge_list["j_z_t_by_w"], self.judge_list["j_z_t_c_by_w"] = j_z_t_by_w, j_z_t_c_by_w
 
         self.judge_list["j_w_t_by_x"], self.judge_list["j_w_t_c_by_x"] = j_w_t_by_x, j_w_t_c_by_x
-        self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] = j_w_t_by_y, j_w_t_c_by_y
+        # self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] = j_w_t_by_y, j_w_t_c_by_y
         self.judge_list["j_w_t_by_z"], self.judge_list["j_w_t_c_by_z"] = j_w_t_by_z, j_w_t_c_by_z
 
         self.judge_list["j_code_x"] = j_code_x
@@ -786,15 +786,15 @@ class GAN:
 
     def evaluation_code(self, code_dirct):
         name_list_true = ["code_rm", "code_rm", "code_rm", "code_rm",
-                          "code_x", "code_x", "code_x",
-                          "code_y", "code_y", "code_y",
-                          "code_z", "code_z", "code_z",
-                          "code_w", "code_w", "code_w"]
+                          "code_x", "code_x",
+                          "code_y", "code_y",
+                          "code_z", "code_z",
+                          "code_w", "code_w", ]
         name_list_false = ["code_x_g", "code_y_g", "code_z_g", "code_w_g",
-                           "code_y_t_by_x", "code_z_t_by_x", "code_w_t_by_x",
-                           "code_x_t_by_y", "code_z_t_by_y", "code_w_t_by_y",
-                           "code_x_t_by_z", "code_y_t_by_z", "code_w_t_by_z",
-                           "code_x_t_by_w", "code_y_t_by_w", "code_z_t_by_w"]
+                           "code_y_t_by_x", "code_w_t_by_x",
+                           "code_x_t_by_y", "code_z_t_by_y",
+                           "code_y_t_by_z", "code_w_t_by_z",
+                           "code_x_t_by_w", "code_z_t_by_w"]
         ssim_list = []
         for i in range(len(name_list_true)):
             ssim_list.append(self.SSIM(code_dirct[name_list_true[i]], code_dirct[name_list_false[i]]))
@@ -808,17 +808,17 @@ class GAN:
         name_list_true = ["l", "l", "l", "l", "l",
                           "l_x", "l_y", "l_z", "l_w",
                           "x", "y", "z", "w",
-                          "x_g", "x_g", "x_g",
-                          "y_g", "y_g", "y_g",
-                          "z_g", "z_g", "z_g",
-                          "w_g", "w_g", "w_g", ]
+                          "x_g", "x_g",
+                          "y_g", "y_g",
+                          "z_g", "z_g",
+                          "w_g", "w_g", ]
         name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
                            "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
                            "x_r", "y_r", "z_r", "w_r",
-                           "x_g_t_by_y", "x_g_t_by_z", "x_g_t_by_w",
-                           "y_g_t_by_x", "y_g_t_by_z", "y_g_t_by_w",
-                           "z_g_t_by_x", "z_g_t_by_y", "z_g_t_by_w",
-                           "w_g_t_by_x", "w_g_t_by_y", "w_g_t_by_z",
+                           "x_g_t_by_y", "x_g_t_by_w",
+                           "y_g_t_by_x", "y_g_t_by_z",
+                           "z_g_t_by_y", "z_g_t_by_w",
+                           "w_g_t_by_x", "w_g_t_by_z",
                            ]
         ssim_list = []
         for i in range(len(name_list_true)):
