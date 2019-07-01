@@ -331,9 +331,16 @@ def train():
                     train_true_x = []
                     train_true_y = []
                     for b in range(FLAGS.batch_size):
-                        train_l_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
                         train_m_arr = read_file(np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
                                                 l_train_files, index).reshape(FLAGS.image_size)
+                        mask = 1.0 - np.ones(train_m_arr.shape, dtype="float32") * (train_m_arr > 0.1)
+                        while True:
+                            train_l_arr = read_file(FLAGS.L, l_train_files,
+                                                    np.random.randint(len(l_train_files))).reshape(
+                                FLAGS.image_size)
+                            if np.sum(mask * train_l_arr) == 0.0: break
+                            logging.info("mask and label not match !")
+
                         train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
                         train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
                         train_l_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
@@ -428,10 +435,17 @@ def train():
                             val_true_z = []
                             val_true_w = []
                             for b in range(FLAGS.batch_size):
-                                val_l_arr = read_file(FLAGS.L, l_val_files, index).reshape(FLAGS.image_size)
                                 val_m_arr = read_file(
                                     np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
                                     l_val_files, index).reshape(FLAGS.image_size)
+                                mask = 1.0 - np.ones(val_m_arr.shape, dtype="float32") * (val_m_arr > 0.1)
+                                while True:
+                                    val_l_arr = read_file(FLAGS.L, l_val_files,
+                                                          np.random.randint(len(l_val_files))).reshape(
+                                        FLAGS.image_size)
+                                    if np.sum(mask * val_l_arr) == 0.0: break
+                                    logging.info("mask and label not match !")
+
                                 val_l_x_arr = read_file(FLAGS.L, l_x_val_files, index).reshape(FLAGS.image_size)
                                 val_x_arr = read_file(FLAGS.X, l_x_val_files, index).reshape(FLAGS.image_size)
                                 val_l_y_arr = read_file(FLAGS.L, l_y_val_files, index).reshape(FLAGS.image_size)
