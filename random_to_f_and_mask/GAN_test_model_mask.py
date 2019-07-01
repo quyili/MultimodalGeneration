@@ -68,7 +68,7 @@ class GAN:
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
         f_rm_prob = self.DC_F(code_f_rm)
-        mask_rm_prob = self.DC_F(code_f_rm)
+        mask_rm_prob = self.DC_M(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         mask_rm = tf.reshape(tf.cast(tf.argmax(mask_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         code_f_rm_r = self.EC_F(f_rm)
