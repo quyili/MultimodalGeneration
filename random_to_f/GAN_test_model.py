@@ -30,7 +30,7 @@ class GAN:
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
-    def get_f(self, x, beta=0.08):
+    def get_f(self, x, beta=0.07):
         f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
         f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
@@ -55,13 +55,13 @@ class GAN:
 
         f_r_prob = self.DC_F(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        code_f_r = self.EC_F(f_r)
+        # code_f_r = self.EC_F(f_r)
 
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
         f_rm_prob = self.DC_F(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        code_f_rm_r = self.EC_F(f_rm)
+        # code_f_rm_r = self.EC_F(f_rm)
         self.tenaor_name["code_f_rm"] = str(code_f_rm)
         self.tenaor_name["f_rm"] = str(f_rm)
 
@@ -69,11 +69,10 @@ class GAN:
         j_f = self.D_F(f)
         j_f_rm = self.D_F(f_rm)
 
-        code_f, code_f_r, code_f_rm, code_f_rm_r = \
-            tf.reshape(code_f, shape=[-1, 64, 64, 1]), \
-            tf.reshape(code_f_r, shape=[-1, 64, 64, 1]), \
-            tf.reshape(code_f_rm, shape=[-1, 64, 64, 1]), \
-            tf.reshape(code_f_rm_r, shape=[-1, 64, 64, 1])
+        code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
+        # code_f_r=tf.reshape(code_f_r, shape=[-1, 64, 64, 1])
+        code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
+        # code_f_rm_r =tf.reshape(code_f_rm_r, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
@@ -85,8 +84,8 @@ class GAN:
         G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
         G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
-        G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 0.5
-        G_loss += self.mse_loss(code_f, code_f_r) * 0.5
+        # G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 0.5
+        # G_loss += self.mse_loss(code_f, code_f_r) * 0.5
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0)
@@ -104,7 +103,7 @@ class GAN:
 
         image_list = [m, f, f_r, f_rm]
 
-        code_list = [code_f, code_f_r, code_f_rm, code_f_rm_r]
+        code_list = [code_f,  code_f_rm]
 
         j_list = [j_code_f, j_code_f_rm, j_f, j_f_rm]
 
@@ -133,19 +132,13 @@ class GAN:
         return G_optimizer, D_optimizer
 
     def evaluation_code(self, code_list):
-        code_f, code_f_r, code_f_rm, code_f_rm_r = \
-            code_list[0], code_list[1], code_list[2], code_list[3]
-        list = [self.PSNR(code_f, code_f_r), self.PSNR(code_f_rm, code_f_rm_r),
-
-                self.SSIM(code_f, code_f_r), self.SSIM(code_f_rm, code_f_rm_r)
-                ]
+        code_f, code_f_rm = \
+            code_list[0], code_list[1]
+        list = [self.PSNR(code_f, code_f_rm)]
         return list
 
     def evaluation_code_summary(self, evluation_list):
-        tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_r', evluation_list[0])
-        tf.summary.scalar('evaluation_code/PSNR/code_f_rm__VS__code_f_rm_r', evluation_list[1])
-        tf.summary.scalar('evaluation_code/SSIM/code_f__VS__code_f_r', evluation_list[2])
-        tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
+        tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_rm', evluation_list[0])
 
     def evaluation(self, image_list):
         m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]

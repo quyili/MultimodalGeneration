@@ -31,7 +31,7 @@ class GAN:
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
-    def get_f(self, x, beta=0.08):
+    def get_f(self, x, beta=0.07):
         f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
         f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
         f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
@@ -44,8 +44,11 @@ class GAN:
         f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def get_mask(self, x):
-        mask = 1.0 - self.ones * tf.cast(x > 0.02, dtype="float32")
+    def get_mask(self, m, p=5):
+        mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
+        shape = m.get_shape().as_list()
+        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
+        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
         return mask
 
     def model(self, m):
@@ -107,7 +110,12 @@ class GAN:
         G_loss += self.mse_loss(f, f_r) * 75
         G_loss += self.mse_loss(mask, mask_r) * 25
 
-        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 5
+        G_loss += self.mse_loss(0.0, f_r * mask) * 5
+        G_loss += self.mse_loss(0.0, f * mask_r) * 5
+        G_loss += self.mse_loss(0.0, f_r * mask_r) * 5
+        G_loss += self.mse_loss(0.0, f_rm * mask_rm) * 5
+
+        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm * (1.0-mask_rm))) * 5
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())* 5

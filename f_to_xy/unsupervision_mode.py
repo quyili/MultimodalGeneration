@@ -47,8 +47,11 @@ class GAN:
         f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def get_mask(self, x):
-        mask = 1.0 - self.ones * tf.cast(x > 0.02, dtype="float32")
+    def get_mask(self, m, p=5):
+        mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
+        shape = m.get_shape().as_list()
+        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
+        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
         return mask
 
     def model(self, l, m, l_x, l_y, x, y):
