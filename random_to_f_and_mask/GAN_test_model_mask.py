@@ -63,7 +63,7 @@ class GAN:
         mask_r_prob = self.DC_MASK(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         mask_r = tf.reshape(tf.cast(tf.argmax(mask_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        code_f_r = self.EC_F(f_r)
+        # code_f_r = self.EC_F(f_r)
 
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
@@ -71,20 +71,19 @@ class GAN:
         mask_rm_prob = self.DC_MASK(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         mask_rm = tf.reshape(tf.cast(tf.argmax(mask_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        code_f_rm_r = self.EC_F(f_rm)
+        # code_f_rm_r = self.EC_F(f_rm)
         self.tenaor_name["code_f_rm"] = str(code_f_rm)
         self.tenaor_name["f_rm"] = str(f_rm)
         self.tenaor_name["mask_rm"] = str(mask_rm)
 
         # D,FD
-        j_f = self.D_F(tf.concat([f,mask],axis=-1,name="j_f"))
-        j_f_rm = self.D_F(tf.concat([f_rm,mask_rm],axis=-1,name="j_f_rm"))
+        j_f = self.D_F(tf.concat([f, mask], axis=-1, name="j_f"))
+        j_f_rm = self.D_F(tf.concat([f_rm, mask_rm], axis=-1, name="j_f_rm"))
 
-        code_f, code_f_r, code_f_rm, code_f_rm_r = \
-            tf.reshape(code_f, shape=[-1, 64, 64, 1]), \
-            tf.reshape(code_f_r, shape=[-1, 64, 64, 1]), \
-            tf.reshape(code_f_rm, shape=[-1, 64, 64, 1]), \
-            tf.reshape(code_f_rm_r, shape=[-1, 64, 64, 1])
+        code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
+        # code_f_r=tf.reshape(code_f_r, shape=[-1, 64, 64, 1])
+        code_f_rm =tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
+        # code_f_rm_r =tf.reshape(code_f_rm_r, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
@@ -96,30 +95,30 @@ class GAN:
         G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
         G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
-        G_loss += self.mse_loss(code_f_rm, code_f_rm_r) * 0.5
-        G_loss += self.mse_loss(code_f, code_f_r) * 0.5
+        # G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
+        # G_loss += self.mse_loss(code_f, code_f_r)
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0)
-        D_loss += self.mse_loss(j_f_rm, 0.0)
-        G_loss = self.mse_loss(j_f_rm, 1.0) * 10
+        D_loss += self.mse_loss(j_f, 1.0)* 5
+        D_loss += self.mse_loss(j_f_rm, 0.0)* 5
+        G_loss = self.mse_loss(j_f_rm, 1.0) * 5
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        G_loss += self.mse_loss(f, f_r) * 50
+        G_loss += self.mse_loss(f, f_r) * 75
         G_loss += self.mse_loss(mask, mask_r) * 25
 
-        # G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 0.1
+        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 5
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
-                               shape=f_r_prob.get_shape().as_list())
-        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
+                               shape=f_r_prob.get_shape().as_list())* 5
+        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 75
         mask_one_hot = tf.reshape(tf.one_hot(tf.cast(mask, dtype=tf.int32), depth=2, axis=-1),
-                               shape=mask_r_prob.get_shape().as_list())
+                                  shape=mask_r_prob.get_shape().as_list())
         G_loss += self.mse_loss(mask_one_hot, mask_r_prob) * 25
 
-        image_list = [m, f, f_r, f_rm]
+        image_list = [m, f, f_r, f_rm, mask, mask_r, mask_rm]
 
-        code_list = [code_f, code_f_r, code_f_rm, code_f_rm_r]
+        code_list = [code_f,  code_f_rm]
 
         j_list = [j_code_f, j_code_f_rm, j_f, j_f_rm]
 
@@ -149,19 +148,13 @@ class GAN:
         return G_optimizer, D_optimizer
 
     def evaluation_code(self, code_list):
-        code_f, code_f_r, code_f_rm, code_f_rm_r = \
-            code_list[0], code_list[1], code_list[2], code_list[3]
-        list = [self.PSNR(code_f, code_f_r), self.PSNR(code_f_rm, code_f_rm_r),
-
-                self.SSIM(code_f, code_f_r), self.SSIM(code_f_rm, code_f_rm_r)
-                ]
+        code_f, code_f_rm = \
+            code_list[0], code_list[1]
+        list = [self.PSNR(code_f, code_f_rm)]
         return list
 
     def evaluation_code_summary(self, evluation_list):
-        tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_r', evluation_list[0])
-        tf.summary.scalar('evaluation_code/PSNR/code_f_rm__VS__code_f_rm_r', evluation_list[1])
-        tf.summary.scalar('evaluation_code/SSIM/code_f__VS__code_f_r', evluation_list[2])
-        tf.summary.scalar('evaluation_code/SSIM/code_f_rm__VS__code_f_rm_r', evluation_list[3])
+        tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_rm', evluation_list[0])
 
     def evaluation(self, image_list):
         m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]
@@ -186,11 +179,15 @@ class GAN:
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_list):
-        m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]
+        m, f, f_r, f_rm, mask, mask_r, mask_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[
+            4], image_list[5], image_list[6]
         tf.summary.image('image/m', m)
         tf.summary.image('image/f', f)
         tf.summary.image('image/f_rm', f_rm)
         tf.summary.image('image/f_r', f_r)
+        tf.summary.image('image/mask', mask)
+        tf.summary.image('image/mask_rm', mask_rm)
+        tf.summary.image('image/mask_r', mask_r)
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)

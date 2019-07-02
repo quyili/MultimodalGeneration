@@ -359,8 +359,8 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if j == 0:
-                                save_images(val_image_list_0, checkpoints_dir, str(0))
+                            # if j == 0:
+                                # save_images(val_image_list_0, checkpoints_dir, str(0))
                                 # save_images(val_image_list_1, checkpoints_dir, str(1))
                                 # save_images(val_image_list_2, checkpoints_dir, str(2))
                                 # save_images(val_image_list_3, checkpoints_dir, str(3))
