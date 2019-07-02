@@ -2,6 +2,7 @@
 import tensorflow as tf
 import numpy as np
 import SimpleITK
+import cv2
 
 
 def norm(input):
@@ -43,10 +44,10 @@ with graph.as_default():
     fz = get_f(z, j=0.12)
     fw = get_f(w, j=0.12)
 
-    mask_x = get_mask(x, j=5)
-    mask_y = get_mask(y, j=5)
-    mask_z = get_mask(z, j=5)
-    mask_w = get_mask(w, j=5)
+    mask_x = get_mask(x, p=5)
+    mask_y = get_mask(y, p=5)
+    mask_z = get_mask(z, p=5)
+    mask_w = get_mask(w, p=5)
 
     out_x = mask_x*fx
     out_y = mask_y*fy
@@ -73,8 +74,10 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
                                                                z: np.asarray([input_z]),
                                                                w: np.asarray([input_w])
                                                                })
+    full_x=np.concatenate([np.asarray(fx_)[0, :, :, 0:1] * 255,np.asarray(fx_)[0, :, :, 0:1] * 255,np.asarray(fx_)[0, :, :, 0:1] * 255],axis=-1)
+    print(full_x.shape)
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fx_)[0, :, :, 0]), "fx_.tiff")
+    cv2.imwrite("full_x.jpg",full_x)
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fy_)[0, :, :, 0]), "fy_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fz_)[0, :, :, 0]), "fz_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fw_)[0, :, :, 0]), "fw_.tiff")
