@@ -25,7 +25,7 @@ class Discriminator:
         with tf.variable_scope(self.name, reuse=self.reuse):
             D_input = tf.nn.dropout(D_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0", reuse=self.reuse):
-                conv0 = tf.layers.conv2d(inputs=D_input, filters=2 * self.ngf, kernel_size=5,
+                conv0 = tf.layers.conv2d(inputs=D_input, filters= self.ngf, kernel_size=5,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
@@ -35,7 +35,7 @@ class Discriminator:
                 norm0 = ops._norm(conv0, self.is_training, self.norm)
                 relu0 = ops.relu(norm0)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=relu0, filters=4 * self.ngf, kernel_size=3,
+                conv1 = tf.layers.conv2d(inputs=relu0, filters=2 * self.ngf, kernel_size=3,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
@@ -45,7 +45,7 @@ class Discriminator:
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
             with tf.variable_scope("conv2", reuse=self.reuse):
-                conv2 = tf.layers.conv2d(inputs=relu1, filters=8 * self.ngf, kernel_size=3,
+                conv2 = tf.layers.conv2d(inputs=relu1, filters=4 * self.ngf, kernel_size=3,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,

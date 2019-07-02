@@ -89,16 +89,7 @@ class Encoder:
                                              mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv7')
                 norm7 = ops._norm(conv7, self.is_training, self.norm)
-                relu7 = ops.relu(norm7)
-            with tf.variable_scope("conv8", reuse=self.reuse):
-                conv8 = tf.layers.conv2d(inputs=relu7, filters=8 * self.ngf, kernel_size=3, strides=1,
-                                         padding="SAME",
-                                         activation=None,
-                                         kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 8 * self.ngf), stddev=0.000001, dtype=tf.float32),
-                                         bias_initializer=tf.constant_initializer(0.0), name='conv8')
-                norm8 = ops._norm(conv8, self.is_training, self.norm)
-                output = tf.nn.sigmoid(norm8)
+                output = ops.relu(norm7)
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
