@@ -115,7 +115,7 @@ class GAN:
         G_loss += self.mse_loss(0.0, f_r * mask_r) * 5
         G_loss += self.mse_loss(0.0, f_rm * mask_rm) * 5
 
-        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm * (1.0-mask_rm))) * 5
+        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm * (1.0-mask_rm))) * 0.1
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())* 5
