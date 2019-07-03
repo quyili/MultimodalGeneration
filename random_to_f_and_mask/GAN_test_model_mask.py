@@ -51,9 +51,15 @@ class GAN:
         mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
         return mask
 
-    def model(self, m):
+    def remove_l(self, l, f):
+        l_mask = self.get_mask(l, p=0)
+        f = f * l_mask  # 去除肿瘤轮廓影响
+        return f
+
+    def model(self, l_m, m):
         mask = self.get_mask(m)
         f = self.get_f(m)  # M->F
+        f = self.remove_l(l_m, f)
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)

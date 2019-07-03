@@ -34,6 +34,7 @@ def get_mask(m, p=5):
 
 graph = tf.Graph()
 with graph.as_default():
+    l = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
     x = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
     y = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
     z = tf.placeholder(tf.float32, shape=[1, 184, 144, 1])
@@ -48,31 +49,36 @@ with graph.as_default():
     mask_y = get_mask(y, p=5)
     mask_z = get_mask(z, p=5)
     mask_w = get_mask(w, p=5)
+    mask_l = get_mask(l, p=0)
 
     out_x = mask_x*fx
     out_y = mask_y*fy
     out_z = mask_z*fz
     out_w = mask_w*fw
+    out_l = mask_l * fy
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/0_90.tiff")).astype('float32')
-    input_y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT2/0_90.tiff")).astype('float32')
-    input_z = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1c/0_90.tiff")).astype(
+    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1/13_96.tiff")).astype('float32')
+    input_l = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testLabel/13_96.tiff")).astype('float32')
+    input_y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT2/13_96.tiff")).astype('float32')
+    input_z = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testT1c/13_96.tiff")).astype(
         'float32')
-    input_w = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testFlair/0_90.tiff")).astype(
+    input_w = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("../mydata/BRATS2015/testFlair/13_96.tiff")).astype(
         'float32')
+    input_l = np.asarray(input_l).reshape([184, 144, 1])
     input_x = np.asarray(input_x).reshape([184, 144, 1])
     input_y = np.asarray(input_y).reshape([184, 144, 1])
     input_z = np.asarray(input_z).reshape([184, 144, 1])
     input_w = np.asarray(input_w).reshape([184, 144, 1])
     fx_, fy_, fz_, fw_ , \
-    mask_x_, mask_y_, mask_z_, mask_w_,\
-    out_x_,out_y_,out_z_,out_w_= sess.run([fx, fy, fz, fw,
-                                   mask_x,mask_y,mask_z,mask_w,
-                                   out_x,out_y,out_z,out_w], feed_dict={x: np.asarray([input_x]),
+    mask_x_, mask_y_, mask_z_, mask_w_,mask_l_,\
+    out_x_,out_y_,out_z_,out_w_,out_l_= sess.run([fx, fy, fz, fw,
+                                   mask_x,mask_y,mask_z,mask_w,mask_l,
+                                   out_x,out_y,out_z,out_w,out_l], feed_dict={x: np.asarray([input_x]),
                                                                y: np.asarray([input_y]),
                                                                z: np.asarray([input_z]),
-                                                               w: np.asarray([input_w])
+                                                               w: np.asarray([input_w]),
+                                                                l: np.asarray([input_l])
                                                                })
     full_x=np.concatenate([np.asarray(fx_)[0, :, :, 0:1] * 255,np.asarray(fx_)[0, :, :, 0:1] * 255,np.asarray(fx_)[0, :, :, 0:1] * 255],axis=-1)
     print(full_x.shape)
@@ -86,11 +92,13 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(mask_y_)[0, :, :, 0]), "mask_y_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(mask_z_)[0, :, :, 0]), "mask_z_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(mask_w_)[0, :, :, 0]), "mask_w_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(mask_l_)[0, :, :, 0]), "mask_l_.tiff")
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_x_)[0, :, :, 0]), "out_x_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_y_)[0, :, :, 0]), "out_y_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_z_)[0, :, :, 0]), "out_z_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_w_)[0, :, :, 0]), "out_w_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_l_)[0, :, :, 0]), "out_l_.tiff")
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_x[:, :, 0]), "input_x.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_y[:, :, 0]), "input_y.tiff")

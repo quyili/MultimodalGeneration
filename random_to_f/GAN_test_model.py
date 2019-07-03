@@ -43,8 +43,21 @@ class GAN:
         f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def model(self, m):
-        f = self.get_f(m)  # M -> F
+    def get_mask(self, m, p=5):
+        mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
+        shape = m.get_shape().as_list()
+        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
+        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
+        return mask
+
+    def remove_l(self, l, f):
+        l_mask = self.get_mask(l, p=0)
+        f = f * l_mask  # 去除肿瘤轮廓影响
+        return f
+
+    def model(self, l_m, m):
+        f = self.get_f(m)  # M->F
+        f = self.remove_l(l_m, f)
 
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)

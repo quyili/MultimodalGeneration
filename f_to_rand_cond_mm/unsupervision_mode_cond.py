@@ -60,8 +60,13 @@ class GAN:
         mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
         return mask
 
+    def remove_l(self, l, f):
+        l_mask = self.get_mask(l, p=0)
+        f = f * l_mask  # 去除肿瘤轮廓影响
+        return f
+
     # TODO input f
-    def model(self, l, m, l_x, l_y, l_z, l_w, x, y, z, w):
+    def model(self, l, l_m, m, l_x, l_y, l_z, l_w, x, y, z, w):
         cx = 0.0
         cy = 1.0
         cz = 2.0
@@ -73,6 +78,7 @@ class GAN:
 
         mask = self.get_mask(m)
         f = self.get_f(m)  # M->F
+        f = self.remove_l(l_m, f)
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
@@ -345,10 +351,10 @@ class GAN:
         G_loss += self.mse_loss(j_code_rm, 1.0) * 4
 
         # 输入的结构特征图的重建自监督损失
-        G_loss += self.mse_loss(f, f_x_g_r) * 50
-        G_loss += self.mse_loss(f, f_y_g_r) * 50
-        G_loss += self.mse_loss(f, f_z_g_r) * 50
-        G_loss += self.mse_loss(f, f_w_g_r) * 50
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_x_g_r)) * 50
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_y_g_r)) * 50
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_z_g_r)) * 50
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_w_g_r)) * 50
         G_loss += self.mse_loss(f_x_g_r, f_y_g_r) * 20
         G_loss += self.mse_loss(f_x_g_r, f_z_g_r) * 20
         G_loss += self.mse_loss(f_x_g_r, f_w_g_r) * 20
