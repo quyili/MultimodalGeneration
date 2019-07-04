@@ -56,6 +56,7 @@ class GAN:
         return f
 
     def model(self, l_m, m):
+        mask = self.get_mask(m)
         f = self.get_f(m)  # M->F
         f = self.remove_l(l_m, f)
 
@@ -108,7 +109,9 @@ class GAN:
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         G_loss += self.mse_loss(f, f_r) * 50
 
-        G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 0.1
+        G_loss += self.mse_loss(0.0, f_r * mask) * 5
+
+        # G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm)) * 0.1
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
