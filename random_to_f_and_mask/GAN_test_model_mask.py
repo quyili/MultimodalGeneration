@@ -72,7 +72,6 @@ class GAN:
         mask_r_prob = self.DC_MASK(code_f)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         mask_r = tf.reshape(tf.cast(tf.argmax(mask_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        # code_f_r = self.EC_F(f_r)
 
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
@@ -80,7 +79,6 @@ class GAN:
         mask_rm_prob = self.DC_MASK(code_f_rm)
         f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
         mask_rm = tf.reshape(tf.cast(tf.argmax(mask_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        # code_f_rm_r = self.EC_F(f_rm)
         self.tenaor_name["code_f_rm"] = str(code_f_rm)
         self.tenaor_name["f_rm"] = str(f_rm)
         self.tenaor_name["mask_rm"] = str(mask_rm)
@@ -90,9 +88,7 @@ class GAN:
         j_f_rm = self.D_F(tf.concat([f_rm, mask_rm], axis=-1, name="j_f_rm"))
 
         code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
-        # code_f_r=tf.reshape(code_f_r, shape=[-1, 64, 64, 1])
         code_f_rm =tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
-        # code_f_rm_r =tf.reshape(code_f_rm_r, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
@@ -105,9 +101,6 @@ class GAN:
 
         G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
         G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
-
-        # G_loss += self.mse_loss(code_f_rm, code_f_rm_r)
-        # G_loss += self.mse_loss(code_f, code_f_r)
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0)* 5
@@ -122,8 +115,6 @@ class GAN:
         G_loss += self.mse_loss(0.0, f * mask_r) * 5
         G_loss += self.mse_loss(0.0, f_r * mask_r) * 5
         G_loss += self.mse_loss(0.0, f_rm * mask_rm) * 5
-
-        # G_loss += (self.mse_loss(tf.reduce_mean(f), tf.reduce_mean(f_r)) - tf.reduce_mean(f_rm * (1.0-mask_rm))) * 0.1
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())* 5
