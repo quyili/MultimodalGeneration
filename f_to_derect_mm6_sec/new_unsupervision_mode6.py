@@ -22,9 +22,7 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.code_shape = [int(batch_size / 4), int(image_size[0] / 4), int(image_size[1] / 4), 4]
         self.ones = tf.ones(self.input_shape, name="ones")
-        self.ones_code = tf.ones(self.code_shape, name="ones_code")
         self.image_list = {}
         self.prob_list = {}
         self.code_list = {}
@@ -34,8 +32,12 @@ class GAN:
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=5)
 
-        self.EC_M = Encoder('EC_M', ngf=ngf)
-        self.DC_M = Decoder('DC_M', ngf=ngf)
+        self.EC = Encoder('EC', ngf=ngf)
+
+        self.DC_X = Decoder('DC_X', ngf=ngf)
+        self.DC_Y = Decoder('DC_Y', ngf=ngf)
+        self.DC_Z = Decoder('DC_Z', ngf=ngf)
+        self.DC_W = Decoder('DC_W', ngf=ngf)
 
         self.D_M = Discriminator('D_M', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
@@ -71,19 +73,14 @@ class GAN:
         cy = 1.0
         cz = 2.0
         cw = 3.0
-        cx_code = self.ones_code * tf.one_hot(tf.cast(cx,dtype=tf.int32), depth=4)
-        cy_code = self.ones_code * tf.one_hot(tf.cast(cy,dtype=tf.int32), depth=4)
-        cz_code = self.ones_code * tf.one_hot(tf.cast(cz,dtype=tf.int32), depth=4)
-        cw_code = self.ones_code * tf.one_hot(tf.cast(cw,dtype=tf.int32), depth=4)
-
         mask = self.get_mask(m)
         f = self.get_f(m)  # M->F
         f = self.remove_l(l_m, f)
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
-                                                    shape=[self.input_shape[0], self.input_shape[1],
-                                                           self.input_shape[2], 5])
+                                  shape=[self.input_shape[0], self.input_shape[1],
+                                         self.input_shape[2], 5])
         l = l * 0.25
         f_rm_expand = tf.concat([
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0],
@@ -97,25 +94,24 @@ class GAN:
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4],
                        shape=self.input_shape) + f * 0.8],
             axis=-1)
-
         code_rm = self.EC_R(f_rm_expand)
 
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(
             tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        x_g = self.DC_M(tf.concat([code_rm, cx_code], axis=-1))
-        y_g = self.DC_M(tf.concat([code_rm, cy_code], axis=-1))
-        z_g = self.DC_M(tf.concat([code_rm, cz_code], axis=-1))
-        w_g = self.DC_M(tf.concat([code_rm, cw_code], axis=-1))
+        x_g = self.DC_X(code_rm)
+        y_g = self.DC_Y(code_rm)
+        z_g = self.DC_Z(code_rm)
+        w_g = self.DC_W(code_rm)
         self.tenaor_name["x_g"] = str(x_g)
         self.tenaor_name["y_g"] = str(y_g)
         self.tenaor_name["z_g"] = str(z_g)
         self.tenaor_name["w_g"] = str(w_g)
 
-        code_x_g = self.EC_M(x_g)
-        code_y_g = self.EC_M(y_g)
-        code_z_g = self.EC_M(z_g)
-        code_w_g = self.EC_M(w_g)
+        code_x_g = self.EC(x_g)
+        code_y_g = self.EC(y_g)
+        code_z_g = self.EC(z_g)
+        code_w_g = self.EC(w_g)
 
         l_g_prob_by_x = self.DC_L(code_x_g)
         l_g_prob_by_y = self.DC_L(code_y_g)
@@ -139,44 +135,44 @@ class GAN:
         f_z_g_r = self.get_f(z_g)
         f_w_g_r = self.get_f(w_g)
 
-        y_g_t_by_x = self.DC_M(tf.concat([code_x_g, cy_code], axis=-1))
-        z_g_t_by_x = self.DC_M(tf.concat([code_x_g, cz_code], axis=-1))
-        w_g_t_by_x = self.DC_M(tf.concat([code_x_g, cw_code], axis=-1))
+        y_g_t_by_x = self.DC_Y(code_x_g)
+        z_g_t_by_x = self.DC_Z(code_x_g)
+        w_g_t_by_x = self.DC_W(code_x_g)
 
-        x_g_t_by_y = self.DC_M(tf.concat([code_y_g, cx_code], axis=-1))
-        z_g_t_by_y = self.DC_M(tf.concat([code_y_g, cz_code], axis=-1))
-        w_g_t_by_y = self.DC_M(tf.concat([code_y_g, cw_code], axis=-1))
+        x_g_t_by_y = self.DC_X(code_y_g)
+        z_g_t_by_y = self.DC_Z(code_y_g)
+        w_g_t_by_y = self.DC_W(code_y_g)
 
-        x_g_t_by_z = self.DC_M(tf.concat([code_z_g, cx_code], axis=-1))
-        y_g_t_by_z = self.DC_M(tf.concat([code_z_g, cy_code], axis=-1))
-        w_g_t_by_z = self.DC_M(tf.concat([code_z_g, cw_code], axis=-1))
+        x_g_t_by_z = self.DC_X(code_z_g)
+        y_g_t_by_z = self.DC_Y(code_z_g)
+        w_g_t_by_z = self.DC_W(code_z_g)
 
-        x_g_t_by_w = self.DC_M(tf.concat([code_w_g, cx_code], axis=-1))
-        y_g_t_by_w = self.DC_M(tf.concat([code_w_g, cy_code], axis=-1))
-        z_g_t_by_w = self.DC_M(tf.concat([code_w_g, cz_code], axis=-1))
+        x_g_t_by_w = self.DC_X(code_w_g)
+        y_g_t_by_w = self.DC_Y(code_w_g)
+        z_g_t_by_w = self.DC_Z(code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
 
         mask_x = self.get_mask(x)
         mask_y = self.get_mask(y)
         mask_z = self.get_mask(z)
         mask_w = self.get_mask(w)
 
-        code_x = self.EC_M(x)
-        code_y = self.EC_M(y)
-        code_z = self.EC_M(z)
-        code_w = self.EC_M(w)
+        code_x = self.EC(x)
+        code_y = self.EC(y)
+        code_z = self.EC(z)
+        code_w = self.EC(w)
 
         l_f_prob_by_x = self.DC_L(code_x)
         l_f_prob_by_y = self.DC_L(code_y)
@@ -195,50 +191,50 @@ class GAN:
             tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
 
-        x_r = self.DC_M(tf.concat([code_x, cx_code], axis=-1))
-        y_r = self.DC_M(tf.concat([code_y, cy_code], axis=-1))
-        z_r = self.DC_M(tf.concat([code_z, cz_code], axis=-1))
-        w_r = self.DC_M(tf.concat([code_w, cw_code], axis=-1))
+        x_r = self.DC_X(code_x)
+        y_r = self.DC_Y(code_y)
+        z_r = self.DC_Z(code_z)
+        w_r = self.DC_W(code_w)
 
-        y_t_by_x = self.DC_M(tf.concat([code_x, cy_code], axis=-1))
-        code_y_t_by_x = self.EC_M(y_t_by_x)
-        x_r_c_by_y = self.DC_M(tf.concat([code_y_t_by_x, cx_code], axis=-1))
-        z_t_by_x = self.DC_M(tf.concat([code_x, cz_code], axis=-1))
-        code_z_t_by_x = self.EC_M(z_t_by_x)
-        x_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_x, cx_code], axis=-1))
-        w_t_by_x = self.DC_M(tf.concat([code_x, cw_code], axis=-1))
-        code_w_t_by_x = self.EC_M(w_t_by_x)
-        x_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_x, cx_code], axis=-1))
+        y_t_by_x = self.DC_Y(code_x)
+        code_y_t_by_x = self.EC(y_t_by_x)
+        x_r_c_by_y = self.DC_X(code_y_t_by_x)
+        z_t_by_x = self.DC_Z(code_x)
+        code_z_t_by_x = self.EC(z_t_by_x)
+        x_r_c_by_z = self.DC_X(code_z_t_by_x)
+        w_t_by_x = self.DC_W(code_x)
+        code_w_t_by_x = self.EC(w_t_by_x)
+        x_r_c_by_w = self.DC_X(code_w_t_by_x)
 
-        x_t_by_y = self.DC_M(tf.concat([code_y, cx_code], axis=-1))
-        code_x_t_by_y = self.EC_M(x_t_by_y)
-        y_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_y, cy_code], axis=-1))
-        z_t_by_y = self.DC_M(tf.concat([code_y, cz_code], axis=-1))
-        code_z_t_by_y = self.EC_M(x_t_by_y)
-        y_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_y, cy_code], axis=-1))
-        w_t_by_y = self.DC_M(tf.concat([code_y, cw_code], axis=-1))
-        code_w_t_by_y = self.EC_M(x_t_by_y)
-        y_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_y, cy_code], axis=-1))
+        x_t_by_y = self.DC_X(code_y)
+        code_x_t_by_y = self.EC(x_t_by_y)
+        y_r_c_by_x = self.DC_Y(code_x_t_by_y)
+        z_t_by_y = self.DC_Z(code_y)
+        code_z_t_by_y = self.EC(x_t_by_y)
+        y_r_c_by_z = self.DC_Y(code_z_t_by_y)
+        w_t_by_y = self.DC_W(code_y)
+        code_w_t_by_y = self.EC(x_t_by_y)
+        y_r_c_by_w = self.DC_Y(code_w_t_by_y)
 
-        x_t_by_z = self.DC_M(tf.concat([code_z, cx_code], axis=-1))
-        code_x_t_by_z = self.EC_M(x_t_by_z)
-        z_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_z, cz_code], axis=-1))
-        y_t_by_z = self.DC_M(tf.concat([code_z, cy_code], axis=-1))
-        code_y_t_by_z = self.EC_M(y_t_by_z)
-        z_r_c_by_y = self.DC_M(tf.concat([code_y_t_by_z, cz_code], axis=-1))
-        w_t_by_z = self.DC_M(tf.concat([code_z, cw_code], axis=-1))
-        code_w_t_by_z = self.EC_M(w_t_by_z)
-        z_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_z, cz_code], axis=-1))
+        x_t_by_z = self.DC_X(code_z)
+        code_x_t_by_z = self.EC(x_t_by_z)
+        z_r_c_by_x = self.DC_Z(code_x_t_by_z)
+        y_t_by_z = self.DC_Y(code_z)
+        code_y_t_by_z = self.EC(y_t_by_z)
+        z_r_c_by_y = self.DC_Z(code_y_t_by_z)
+        w_t_by_z = self.DC_W(code_z)
+        code_w_t_by_z = self.EC(w_t_by_z)
+        z_r_c_by_w = self.DC_Z(code_w_t_by_z)
 
-        x_t_by_w = self.DC_M(tf.concat([code_w, cx_code], axis=-1))
-        code_x_t_by_w = self.EC_M(x_t_by_w)
-        w_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_w, cw_code], axis=-1))
-        y_t_by_w = self.DC_M(tf.concat([code_w, cy_code], axis=-1))
-        code_y_t_by_w = self.EC_M(y_t_by_w)
-        w_r_c_by_y = self.DC_M(tf.concat([code_y_t_by_w, cw_code], axis=-1))
-        z_t_by_w = self.DC_M(tf.concat([code_w, cz_code], axis=-1))
-        code_z_t_by_w = self.EC_M(z_t_by_w)
-        w_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_w, cw_code], axis=-1))
+        x_t_by_w = self.DC_X(code_w)
+        code_x_t_by_w = self.EC(x_t_by_w)
+        w_r_c_by_x = self.DC_W(code_x_t_by_w)
+        y_t_by_w = self.DC_Y(code_w)
+        code_y_t_by_w = self.EC(y_t_by_w)
+        w_r_c_by_y = self.DC_W(code_y_t_by_w)
+        z_t_by_w = self.DC_Z(code_w)
+        code_z_t_by_w = self.EC(z_t_by_w)
+        w_r_c_by_z = self.DC_W(code_z_t_by_w)
 
         j_x_g, j_x_g_c = self.D_M(x_g)
         j_y_g, j_y_g_c = self.D_M(y_g)
@@ -275,45 +271,45 @@ class GAN:
         D_loss = 0.0
         G_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_x, 1.0) * 45
-        D_loss += self.mse_loss(j_x_g, 0.0) * 30
-        G_loss += self.mse_loss(j_x_g, 1.0) * 30
-        D_loss += self.mse_loss(j_x_t_by_y, 0.0) * 10
-        D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 10
-        D_loss += self.mse_loss(j_x_t_by_w, 0.0) * 10
-        G_loss += self.mse_loss(j_x_t_by_y, 1.0) * 10
-        G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 10
-        G_loss += self.mse_loss(j_x_t_by_w, 1.0) * 10
+        D_loss += self.mse_loss(j_x, 1.0) * 50
+        D_loss += self.mse_loss(j_x_g, 0.0) * 35
+        G_loss += self.mse_loss(j_x_g, 1.0) * 35
+        D_loss += self.mse_loss(j_x_t_by_y, 0.0) * 5
+        D_loss += self.mse_loss(j_x_t_by_z, 0.0) * 5
+        D_loss += self.mse_loss(j_x_t_by_w, 0.0) * 5
+        G_loss += self.mse_loss(j_x_t_by_y, 1.0) * 5
+        G_loss += self.mse_loss(j_x_t_by_z, 1.0) * 5
+        G_loss += self.mse_loss(j_x_t_by_w, 1.0) * 5
 
-        D_loss += self.mse_loss(j_y, 1.0) * 45
-        D_loss += self.mse_loss(j_y_g, 0.0) * 30
-        G_loss += self.mse_loss(j_y_g, 1.0) * 30
-        D_loss += self.mse_loss(j_y_t_by_x, 0.0) * 10
-        D_loss += self.mse_loss(j_y_t_by_z, 0.0) * 10
-        D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 10
-        G_loss += self.mse_loss(j_y_t_by_x, 1.0) * 10
-        G_loss += self.mse_loss(j_y_t_by_z, 1.0) * 10
-        G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 10
+        D_loss += self.mse_loss(j_y, 1.0) * 50
+        D_loss += self.mse_loss(j_y_g, 0.0) * 35
+        G_loss += self.mse_loss(j_y_g, 1.0) * 35
+        D_loss += self.mse_loss(j_y_t_by_x, 0.0) * 5
+        D_loss += self.mse_loss(j_y_t_by_z, 0.0) * 5
+        D_loss += self.mse_loss(j_y_t_by_w, 0.0) * 5
+        G_loss += self.mse_loss(j_y_t_by_x, 1.0) * 5
+        G_loss += self.mse_loss(j_y_t_by_z, 1.0) * 5
+        G_loss += self.mse_loss(j_y_t_by_w, 1.0) * 5
 
-        D_loss += self.mse_loss(j_z, 1.0) * 45
-        D_loss += self.mse_loss(j_z_g, 0.0) * 30
-        G_loss += self.mse_loss(j_z_g, 1.0) * 30
-        D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 10
-        D_loss += self.mse_loss(j_z_t_by_y, 0.0) * 10
-        D_loss += self.mse_loss(j_z_t_by_w, 0.0) * 10
-        G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 10
-        G_loss += self.mse_loss(j_z_t_by_y, 1.0) * 10
-        G_loss += self.mse_loss(j_z_t_by_w, 1.0) * 10
+        D_loss += self.mse_loss(j_z, 1.0) * 50
+        D_loss += self.mse_loss(j_z_g, 0.0) * 35
+        G_loss += self.mse_loss(j_z_g, 1.0) * 35
+        D_loss += self.mse_loss(j_z_t_by_x, 0.0) * 5
+        D_loss += self.mse_loss(j_z_t_by_y, 0.0) * 5
+        D_loss += self.mse_loss(j_z_t_by_w, 0.0) * 5
+        G_loss += self.mse_loss(j_z_t_by_x, 1.0) * 5
+        G_loss += self.mse_loss(j_z_t_by_y, 1.0) * 5
+        G_loss += self.mse_loss(j_z_t_by_w, 1.0) * 5
 
-        D_loss += self.mse_loss(j_w, 1.0) * 45
-        D_loss += self.mse_loss(j_w_g, 0.0) * 30
-        G_loss += self.mse_loss(j_w_g, 1.0) * 30
-        D_loss += self.mse_loss(j_w_t_by_x, 0.0) * 10
-        D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 10
-        D_loss += self.mse_loss(j_w_t_by_z, 0.0) * 10
-        G_loss += self.mse_loss(j_w_t_by_x, 1.0) * 10
-        G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 10
-        G_loss += self.mse_loss(j_w_t_by_z, 1.0) * 10
+        D_loss += self.mse_loss(j_w, 1.0) * 50
+        D_loss += self.mse_loss(j_w_g, 0.0) * 35
+        G_loss += self.mse_loss(j_w_g, 1.0) * 35
+        D_loss += self.mse_loss(j_w_t_by_x, 0.0) * 5
+        D_loss += self.mse_loss(j_w_t_by_y, 0.0) * 5
+        D_loss += self.mse_loss(j_w_t_by_z, 0.0) * 5
+        G_loss += self.mse_loss(j_w_t_by_x, 1.0) * 5
+        G_loss += self.mse_loss(j_w_t_by_y, 1.0) * 5
+        G_loss += self.mse_loss(j_w_t_by_z, 1.0) * 5
 
         D_loss += self.mse_loss(j_x_c, cx) * 50
         D_loss += self.mse_loss(j_y_c, cy) * 50
@@ -475,30 +471,30 @@ class GAN:
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2  # + self.ssim_loss(x_g, x_g_t_by_z) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_w) * 2  # + self.ssim_loss(x_g, x_g_t_by_w) * 2
-        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_z) * 2  # + self.ssim_loss(x_g_t_by_y, x_g_t_by_z) * 2
-        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_w) * 2  # + self.ssim_loss(x_g_t_by_y, x_g_t_by_w) * 2
-        G_loss += self.mse_loss(x_g_t_by_z, x_g_t_by_w) * 2  # + self.ssim_loss(x_g_t_by_z, x_g_t_by_w) * 2
+        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_z)  # + self.ssim_loss(x_g_t_by_y, x_g_t_by_z) * 2
+        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_w)  # + self.ssim_loss(x_g_t_by_y, x_g_t_by_w) * 2
+        G_loss += self.mse_loss(x_g_t_by_z, x_g_t_by_w)  # + self.ssim_loss(x_g_t_by_z, x_g_t_by_w) * 2
 
         G_loss += self.mse_loss(y_g, y_g_t_by_x) * 2  # + self.ssim_loss(y_g, y_g_t_by_x) * 2
         G_loss += self.mse_loss(y_g, y_g_t_by_z) * 2  # + self.ssim_loss(y_g, y_g_t_by_z) * 2
         G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2  # + self.ssim_loss(y_g, y_g_t_by_w) * 2
-        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_z) * 2  # + self.ssim_loss(y_g_t_by_x, y_g_t_by_z) * 2
-        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_w) * 2  # + self.ssim_loss(y_g_t_by_x, y_g_t_by_w) * 2
-        G_loss += self.mse_loss(y_g_t_by_z, y_g_t_by_w) * 2  # + self.ssim_loss(y_g_t_by_z, y_g_t_by_w) * 2
+        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_z)  # + self.ssim_loss(y_g_t_by_x, y_g_t_by_z) * 2
+        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_w)  # + self.ssim_loss(y_g_t_by_x, y_g_t_by_w) * 2
+        G_loss += self.mse_loss(y_g_t_by_z, y_g_t_by_w)  # + self.ssim_loss(y_g_t_by_z, y_g_t_by_w) * 2
 
         G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2  # + self.ssim_loss(z_g, z_g_t_by_x) * 2
         G_loss += self.mse_loss(z_g, z_g_t_by_y) * 2  # + self.ssim_loss(z_g, z_g_t_by_y) * 2
         G_loss += self.mse_loss(z_g, z_g_t_by_w) * 2  # + self.ssim_loss(z_g, z_g_t_by_w) * 2
-        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_y) * 2  # + self.ssim_loss(z_g_t_by_x, z_g_t_by_y) * 2
-        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_w) * 2  # + self.ssim_loss(z_g_t_by_x, z_g_t_by_w) * 2
-        G_loss += self.mse_loss(z_g_t_by_y, z_g_t_by_w) * 2  # + self.ssim_loss(z_g_t_by_y, z_g_t_by_w) * 2
+        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_y)  # + self.ssim_loss(z_g_t_by_x, z_g_t_by_y) * 2
+        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_w)  # + self.ssim_loss(z_g_t_by_x, z_g_t_by_w) * 2
+        G_loss += self.mse_loss(z_g_t_by_y, z_g_t_by_w)  # + self.ssim_loss(z_g_t_by_y, z_g_t_by_w) * 2
 
         G_loss += self.mse_loss(w_g, w_g_t_by_x) * 2  # + self.ssim_loss(w_g, w_g_t_by_x) * 2
         G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2  # + self.ssim_loss(w_g, w_g_t_by_y) * 2
         G_loss += self.mse_loss(w_g, w_g_t_by_z) * 2  # + self.ssim_loss(w_g, w_g_t_by_z) * 2
-        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_y) * 2  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_y) * 2
-        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z) * 2  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
-        G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z) * 2  # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
+        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_y)  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_y) * 2
+        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z)  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
+        G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z)  # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_g * mask) * 1.5
@@ -556,21 +552,21 @@ class GAN:
         G_loss += self.mse_loss(w_r_c_by_y, w_r_c_by_z) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_t_by_y * mask_y) * 2
-        G_loss += self.mse_loss(0.0, x_t_by_z * mask_z) * 2
-        G_loss += self.mse_loss(0.0, x_t_by_w * mask_w) * 2
+        G_loss += self.mse_loss(0.0, x_t_by_y * mask_y)
+        G_loss += self.mse_loss(0.0, x_t_by_z * mask_z)
+        G_loss += self.mse_loss(0.0, x_t_by_w * mask_w)
 
-        G_loss += self.mse_loss(0.0, y_t_by_x * mask_x) * 2
-        G_loss += self.mse_loss(0.0, y_t_by_z * mask_z) * 2
-        G_loss += self.mse_loss(0.0, y_t_by_w * mask_w) * 2
+        G_loss += self.mse_loss(0.0, y_t_by_x * mask_x)
+        G_loss += self.mse_loss(0.0, y_t_by_z * mask_z)
+        G_loss += self.mse_loss(0.0, y_t_by_w * mask_w)
 
-        G_loss += self.mse_loss(0.0, z_t_by_x * mask_x) * 2
-        G_loss += self.mse_loss(0.0, z_t_by_y * mask_y) * 2
-        G_loss += self.mse_loss(0.0, z_t_by_w * mask_w) * 2
+        G_loss += self.mse_loss(0.0, z_t_by_x * mask_x)
+        G_loss += self.mse_loss(0.0, z_t_by_y * mask_y)
+        G_loss += self.mse_loss(0.0, z_t_by_w * mask_w)
 
-        G_loss += self.mse_loss(0.0, w_t_by_x * mask_x) * 2
-        G_loss += self.mse_loss(0.0, w_t_by_y * mask_y) * 2
-        G_loss += self.mse_loss(0.0, w_t_by_z * mask_z) * 2
+        G_loss += self.mse_loss(0.0, w_t_by_x * mask_x)
+        G_loss += self.mse_loss(0.0, w_t_by_y * mask_y)
+        G_loss += self.mse_loss(0.0, w_t_by_z * mask_z)
 
         G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
         G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.5
@@ -618,7 +614,6 @@ class GAN:
         G_loss += self.mse_loss(code_x_t_by_w, code_y_t_by_w)
         G_loss += self.mse_loss(code_x_t_by_w, code_z_t_by_w)
         G_loss += self.mse_loss(code_y_t_by_w, code_z_t_by_w)
-
 
         self.image_list["mask"] = mask
         self.image_list["f"] = f
@@ -786,8 +781,11 @@ class GAN:
     def get_variables(self):
         return [self.EC_R.variables
                 + self.DC_L.variables
-                + self.EC_M.variables
-                + self.DC_M.variables
+                + self.EC.variables
+                + self.DC_X.variables
+                + self.DC_Y.variables
+                + self.DC_Z.variables
+                + self.DC_W.variables
             ,
                 self.D_M.variables +
                 self.FD_R.variables
