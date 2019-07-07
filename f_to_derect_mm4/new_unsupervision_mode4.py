@@ -325,21 +325,21 @@ class GAN:
         G_loss += self.mse_loss(j_z_g_c, cz) * 50
         G_loss += self.mse_loss(j_w_g_c, cw) * 50
 
-        G_loss += self.mse_loss(j_x_t_by_y, cx) * 50
-        # G_loss += self.mse_loss(j_x_t_by_z, cx) * 50
-        G_loss += self.mse_loss(j_x_t_by_w, cx) * 50
+        G_loss += self.mse_loss(j_x_t_c_by_y, cx) * 50
+        # G_loss += self.mse_loss(j_x_t_c_by_z, cx) * 50
+        G_loss += self.mse_loss(j_x_t_c_by_w, cx) * 50
 
-        G_loss += self.mse_loss(j_y_t_by_x, cy) * 50
-        G_loss += self.mse_loss(j_y_t_by_z, cy) * 50
-        # G_loss += self.mse_loss(j_y_t_by_w, cy) * 50
+        G_loss += self.mse_loss(j_y_t_c_by_x, cy) * 50
+        G_loss += self.mse_loss(j_y_t_c_by_z, cy) * 50
+        # G_loss += self.mse_loss(j_y_t_c_by_w, cy) * 50
 
-        # G_loss += self.mse_loss(j_z_t_by_x, cz) * 50
-        G_loss += self.mse_loss(j_z_t_by_y, cz) * 50
-        G_loss += self.mse_loss(j_z_t_by_w, cz) * 50
+        # G_loss += self.mse_loss(j_z_t_c_by_x, cz) * 50
+        G_loss += self.mse_loss(j_z_t_c_by_y, cz) * 50
+        G_loss += self.mse_loss(j_z_t_c_by_w, cz) * 50
 
-        G_loss += self.mse_loss(j_w_t_by_x, cw) * 50
-        # G_loss += self.mse_loss(j_w_t_by_y, cw) * 50
-        G_loss += self.mse_loss(j_w_t_by_z, cw) * 50
+        G_loss += self.mse_loss(j_w_t_c_by_x, cw) * 50
+        # G_loss += self.mse_loss(j_w_t_c_by_y, cw) * 50
+        G_loss += self.mse_loss(j_w_t_c_by_z, cw) * 50
 
         # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图

@@ -32,7 +32,10 @@ class GAN:
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=5)
 
-        self.EC = Encoder('EC', ngf=ngf)
+        self.EC_X = Encoder('EC_X', ngf=ngf)
+        self.EC_Y = Encoder('EC_Y', ngf=ngf)
+        self.EC_Z = Encoder('EC_Z', ngf=ngf)
+        self.EC_W = Encoder('EC_W', ngf=ngf)
 
         self.DC_X = Decoder('DC_X', ngf=ngf)
         self.DC_Y = Decoder('DC_Y', ngf=ngf)
@@ -108,10 +111,10 @@ class GAN:
         self.tenaor_name["z_g"] = str(z_g)
         self.tenaor_name["w_g"] = str(w_g)
 
-        code_x_g = self.EC(x_g)
-        code_y_g = self.EC(y_g)
-        code_z_g = self.EC(z_g)
-        code_w_g = self.EC(w_g)
+        code_x_g = self.EC_X(x_g)
+        code_y_g = self.EC_Y(y_g)
+        code_z_g = self.EC_Z(z_g)
+        code_w_g = self.EC_W(w_g)
 
         l_g_prob_by_x = self.DC_L(code_x_g)
         l_g_prob_by_y = self.DC_L(code_y_g)
@@ -169,10 +172,10 @@ class GAN:
         mask_z = self.get_mask(z)
         mask_w = self.get_mask(w)
 
-        code_x = self.EC(x)
-        code_y = self.EC(y)
-        code_z = self.EC(z)
-        code_w = self.EC(w)
+        code_x = self.EC_X(x)
+        code_y = self.EC_Y(y)
+        code_z = self.EC_Z(z)
+        code_w = self.EC_W(w)
 
         l_f_prob_by_x = self.DC_L(code_x)
         l_f_prob_by_y = self.DC_L(code_y)
@@ -197,43 +200,43 @@ class GAN:
         w_r = self.DC_W(code_w)
 
         y_t_by_x = self.DC_Y(code_x)
-        code_y_t_by_x = self.EC(y_t_by_x)
+        code_y_t_by_x = self.EC_Y(y_t_by_x)
         x_r_c_by_y = self.DC_X(code_y_t_by_x)
         z_t_by_x = self.DC_Z(code_x)
-        code_z_t_by_x = self.EC(z_t_by_x)
+        code_z_t_by_x = self.EC_Z(z_t_by_x)
         x_r_c_by_z = self.DC_X(code_z_t_by_x)
         w_t_by_x = self.DC_W(code_x)
-        code_w_t_by_x = self.EC(w_t_by_x)
+        code_w_t_by_x = self.EC_W(w_t_by_x)
         x_r_c_by_w = self.DC_X(code_w_t_by_x)
 
         x_t_by_y = self.DC_X(code_y)
-        code_x_t_by_y = self.EC(x_t_by_y)
+        code_x_t_by_y = self.EC_X(x_t_by_y)
         y_r_c_by_x = self.DC_Y(code_x_t_by_y)
         z_t_by_y = self.DC_Z(code_y)
-        code_z_t_by_y = self.EC(x_t_by_y)
+        code_z_t_by_y = self.EC_Z(x_t_by_y)
         y_r_c_by_z = self.DC_Y(code_z_t_by_y)
         w_t_by_y = self.DC_W(code_y)
-        code_w_t_by_y = self.EC(x_t_by_y)
+        code_w_t_by_y = self.EC_W(x_t_by_y)
         y_r_c_by_w = self.DC_Y(code_w_t_by_y)
 
         x_t_by_z = self.DC_X(code_z)
-        code_x_t_by_z = self.EC(x_t_by_z)
+        code_x_t_by_z = self.EC_X(x_t_by_z)
         z_r_c_by_x = self.DC_Z(code_x_t_by_z)
         y_t_by_z = self.DC_Y(code_z)
-        code_y_t_by_z = self.EC(y_t_by_z)
+        code_y_t_by_z = self.EC_Y(y_t_by_z)
         z_r_c_by_y = self.DC_Z(code_y_t_by_z)
         w_t_by_z = self.DC_W(code_z)
-        code_w_t_by_z = self.EC(w_t_by_z)
+        code_w_t_by_z = self.EC_W(w_t_by_z)
         z_r_c_by_w = self.DC_Z(code_w_t_by_z)
 
         x_t_by_w = self.DC_X(code_w)
-        code_x_t_by_w = self.EC(x_t_by_w)
+        code_x_t_by_w = self.EC_X(x_t_by_w)
         w_r_c_by_x = self.DC_W(code_x_t_by_w)
         y_t_by_w = self.DC_Y(code_w)
-        code_y_t_by_w = self.EC(y_t_by_w)
+        code_y_t_by_w = self.EC_Y(y_t_by_w)
         w_r_c_by_y = self.DC_W(code_y_t_by_w)
         z_t_by_w = self.DC_Z(code_w)
-        code_z_t_by_w = self.EC(z_t_by_w)
+        code_z_t_by_w = self.EC_Z(z_t_by_w)
         w_r_c_by_z = self.DC_W(code_z_t_by_w)
 
         j_x_g, j_x_g_c = self.D_M(x_g)
@@ -468,33 +471,33 @@ class GAN:
         G_loss += self.mse_loss(l_w, l_f_by_w) * 5
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
-        G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
-        G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2  # + self.ssim_loss(x_g, x_g_t_by_z) * 2
-        G_loss += self.mse_loss(x_g, x_g_t_by_w) * 2  # + self.ssim_loss(x_g, x_g_t_by_w) * 2
-        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_z)  # + self.ssim_loss(x_g_t_by_y, x_g_t_by_z) * 2
-        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_w)  # + self.ssim_loss(x_g_t_by_y, x_g_t_by_w) * 2
-        G_loss += self.mse_loss(x_g_t_by_z, x_g_t_by_w)  # + self.ssim_loss(x_g_t_by_z, x_g_t_by_w) * 2
+        G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2 # + self.ssim_loss(x_g, x_g_t_by_y) * 2
+        G_loss += self.mse_loss(x_g, x_g_t_by_z) * 2 # + self.ssim_loss(x_g, x_g_t_by_z) * 2
+        G_loss += self.mse_loss(x_g, x_g_t_by_w) * 2 # + self.ssim_loss(x_g, x_g_t_by_w) * 2
+        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_z) # + self.ssim_loss(x_g_t_by_y, x_g_t_by_z) * 2
+        G_loss += self.mse_loss(x_g_t_by_y, x_g_t_by_w) # + self.ssim_loss(x_g_t_by_y, x_g_t_by_w) * 2
+        G_loss += self.mse_loss(x_g_t_by_z, x_g_t_by_w) # + self.ssim_loss(x_g_t_by_z, x_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(y_g, y_g_t_by_x) * 2  # + self.ssim_loss(y_g, y_g_t_by_x) * 2
-        G_loss += self.mse_loss(y_g, y_g_t_by_z) * 2  # + self.ssim_loss(y_g, y_g_t_by_z) * 2
-        G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2  # + self.ssim_loss(y_g, y_g_t_by_w) * 2
-        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_z)  # + self.ssim_loss(y_g_t_by_x, y_g_t_by_z) * 2
-        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_w)  # + self.ssim_loss(y_g_t_by_x, y_g_t_by_w) * 2
-        G_loss += self.mse_loss(y_g_t_by_z, y_g_t_by_w)  # + self.ssim_loss(y_g_t_by_z, y_g_t_by_w) * 2
+        G_loss += self.mse_loss(y_g, y_g_t_by_x) * 2 # + self.ssim_loss(y_g, y_g_t_by_x) * 2
+        G_loss += self.mse_loss(y_g, y_g_t_by_z) * 2 # + self.ssim_loss(y_g, y_g_t_by_z) * 2
+        G_loss += self.mse_loss(y_g, y_g_t_by_w) * 2 # + self.ssim_loss(y_g, y_g_t_by_w) * 2
+        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_z) # + self.ssim_loss(y_g_t_by_x, y_g_t_by_z) * 2
+        G_loss += self.mse_loss(y_g_t_by_x, y_g_t_by_w) # + self.ssim_loss(y_g_t_by_x, y_g_t_by_w) * 2
+        G_loss += self.mse_loss(y_g_t_by_z, y_g_t_by_w) # + self.ssim_loss(y_g_t_by_z, y_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2  # + self.ssim_loss(z_g, z_g_t_by_x) * 2
-        G_loss += self.mse_loss(z_g, z_g_t_by_y) * 2  # + self.ssim_loss(z_g, z_g_t_by_y) * 2
-        G_loss += self.mse_loss(z_g, z_g_t_by_w) * 2  # + self.ssim_loss(z_g, z_g_t_by_w) * 2
-        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_y)  # + self.ssim_loss(z_g_t_by_x, z_g_t_by_y) * 2
-        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_w)  # + self.ssim_loss(z_g_t_by_x, z_g_t_by_w) * 2
-        G_loss += self.mse_loss(z_g_t_by_y, z_g_t_by_w)  # + self.ssim_loss(z_g_t_by_y, z_g_t_by_w) * 2
+        G_loss += self.mse_loss(z_g, z_g_t_by_x) * 2 # + self.ssim_loss(z_g, z_g_t_by_x) * 2
+        G_loss += self.mse_loss(z_g, z_g_t_by_y) * 2 # + self.ssim_loss(z_g, z_g_t_by_y) * 2
+        G_loss += self.mse_loss(z_g, z_g_t_by_w) * 2 # + self.ssim_loss(z_g, z_g_t_by_w) * 2
+        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_y) # + self.ssim_loss(z_g_t_by_x, z_g_t_by_y) * 2
+        G_loss += self.mse_loss(z_g_t_by_x, z_g_t_by_w) # + self.ssim_loss(z_g_t_by_x, z_g_t_by_w) * 2
+        G_loss += self.mse_loss(z_g_t_by_y, z_g_t_by_w) # + self.ssim_loss(z_g_t_by_y, z_g_t_by_w) * 2
 
-        G_loss += self.mse_loss(w_g, w_g_t_by_x) * 2  # + self.ssim_loss(w_g, w_g_t_by_x) * 2
-        G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2  # + self.ssim_loss(w_g, w_g_t_by_y) * 2
-        G_loss += self.mse_loss(w_g, w_g_t_by_z) * 2  # + self.ssim_loss(w_g, w_g_t_by_z) * 2
-        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_y)  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_y) * 2
-        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z)  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
-        G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z)  # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
+        G_loss += self.mse_loss(w_g, w_g_t_by_x) * 2 # + self.ssim_loss(w_g, w_g_t_by_x) * 2
+        G_loss += self.mse_loss(w_g, w_g_t_by_y) * 2 # + self.ssim_loss(w_g, w_g_t_by_y) * 2
+        G_loss += self.mse_loss(w_g, w_g_t_by_z) * 2 # + self.ssim_loss(w_g, w_g_t_by_z) * 2
+        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_y) # + self.ssim_loss(w_g_t_by_x, w_g_t_by_y) * 2
+        G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z) # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
+        G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z) # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_g * mask) * 1.5
@@ -781,10 +784,13 @@ class GAN:
     def get_variables(self):
         return [self.EC_R.variables
                 + self.DC_L.variables
-                + self.EC.variables
+                + self.EC_X.variables
                 + self.DC_X.variables
+                + self.EC_Y.variables
                 + self.DC_Y.variables
+                + self.EC_Z.variables
                 + self.DC_Z.variables
+                + self.EC_W.variables
                 + self.DC_W.variables
             ,
                 self.D_M.variables +
