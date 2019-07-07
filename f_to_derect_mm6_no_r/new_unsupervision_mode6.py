@@ -194,10 +194,10 @@ class GAN:
             tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
 
-        x_r = self.DC_X(code_x)
-        y_r = self.DC_Y(code_y)
-        z_r = self.DC_Z(code_z)
-        w_r = self.DC_W(code_w)
+        # x_r = self.DC_X(code_x)
+        # y_r = self.DC_Y(code_y)
+        # z_r = self.DC_Z(code_z)
+        # w_r = self.DC_W(code_w)
 
         y_t_by_x = self.DC_Y(code_x)
         code_y_t_by_x = self.EC_Y(y_t_by_x)
@@ -520,10 +520,10 @@ class GAN:
         G_loss += self.mse_loss(0.0, w_g_t_by_z * mask) * 1.5
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
-        G_loss += self.mse_loss(x, x_r) * 5
-        G_loss += self.mse_loss(y, y_r) * 5
-        G_loss += self.mse_loss(z, z_r) * 5
-        G_loss += self.mse_loss(w, w_r) * 5
+        # G_loss += self.mse_loss(x, x_r) * 5
+        # G_loss += self.mse_loss(y, y_r) * 5
+        # G_loss += self.mse_loss(z, z_r) * 5
+        # G_loss += self.mse_loss(w, w_r) * 5
 
         # X模态与Y模态图进行转换得到的转换图与原图的有监督损失
         G_loss += self.mse_loss(x, x_r_c_by_y) * 10
@@ -571,10 +571,10 @@ class GAN:
         G_loss += self.mse_loss(0.0, w_t_by_y * mask_y)
         G_loss += self.mse_loss(0.0, w_t_by_z * mask_z)
 
-        G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
-        G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.5
-        G_loss += self.mse_loss(0.0, z_r * mask_z) * 0.5
-        G_loss += self.mse_loss(0.0, w_r * mask_w) * 0.5
+        # G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
+        # G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.5
+        # G_loss += self.mse_loss(0.0, z_r * mask_z) * 0.5
+        # G_loss += self.mse_loss(0.0, w_r * mask_w) * 0.5
 
         # 通过解码器生成X模态与Y模态图的编码与X模态与Y模态图经过编码器得到的编码的自监督语义一致性损失
         G_loss += self.mse_loss(code_rm, code_x_g)
@@ -700,10 +700,10 @@ class GAN:
         self.image_list["l_f_by_z"] = l_f_by_z
         self.image_list["l_f_by_w"] = l_f_by_w
 
-        self.image_list["x_r"] = x_r
-        self.image_list["y_r"] = y_r
-        self.image_list["z_r"] = z_r
-        self.image_list["w_r"] = w_r
+        # self.image_list["x_r"] = x_r
+        # self.image_list["y_r"] = y_r
+        # self.image_list["z_r"] = z_r
+        # self.image_list["w_r"] = w_r
 
         self.image_list["y_t_by_x"] = y_t_by_x
         self.code_list["code_y_t_by_x"] = code_y_t_by_x
@@ -844,14 +844,14 @@ class GAN:
     def evaluation(self, image_dirct):
         self.name_list_true = ["l", "l", "l", "l", "l",
                                "l_x", "l_y", "l_z", "l_w",
-                               "x", "y", "z", "w",
+                               # "x", "y", "z", "w",
                                "x_g", "x_g", "x_g",
                                "y_g", "y_g", "y_g",
                                "z_g", "z_g", "z_g",
                                "w_g", "w_g", "w_g", ]
         self.name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
                                 "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
-                                "x_r", "y_r", "z_r", "w_r",
+                                # "x_r", "y_r", "z_r", "w_r",
                                 "x_g_t_by_y", "x_g_t_by_z", "x_g_t_by_w",
                                 "y_g_t_by_x", "y_g_t_by_z", "y_g_t_by_w",
                                 "z_g_t_by_x", "z_g_t_by_y", "z_g_t_by_w",
