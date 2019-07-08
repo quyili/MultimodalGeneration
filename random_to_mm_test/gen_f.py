@@ -13,7 +13,7 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_string('load_model', "20190704-1239",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_string('tensor_name', "GPU_0/Reshape_3:0", "default: None")
+tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_3:0", "default: None")
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_integer('epochs', 1, '463 or 5480, default: 5480')
 
@@ -29,24 +29,19 @@ def train():
         print("<load_model> is None.")
         return
     try:
-        os.makedirs("./jpg")
-        os.makedirs("./tiff")
+        os.makedirs("./test_images/F_jpg")
+        os.makedirs("./test_images/F")
+        os.makedirs("./test_images/M")
     except os.error:
         pass
-
-    graph = tf.get_default_graph()
     checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
     model_checkpoint_path = checkpoint.model_checkpoint_path
     latest_checkpoint = tf.train.latest_checkpoint(checkpoints_dir)
     meta_graph_path = model_checkpoint_path + ".meta"
-    print(meta_graph_path)
     saver = tf.train.import_meta_graph(meta_graph_path)
 
-    # for op in tf.get_default_graph().get_tensor_by_name():
-    #     print(op.name)
-    #
-
-    f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.tensor_name)
+    graph = tf.get_default_graph()
+    f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.f_tensor_name)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
@@ -54,11 +49,12 @@ def train():
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
             f = sess.run(f_rm)
+
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("./jpg/fake_f_"+  str(index)  +".jpg", full_x)
+            cv2.imwrite("./test_images/F_jpg/fake_f_"+  str(index)  +".jpg", full_x)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
-                                 "./tiff/fake_f_" + str(index) + ".tiff")
+                                 "./test_images/F/fake_f_" + str(index) + ".tiff")
             print("image gen end:" + str(index))
 
             index += 1

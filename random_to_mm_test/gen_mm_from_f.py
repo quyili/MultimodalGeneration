@@ -10,10 +10,8 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_string('checkpoint_dir', "./checkpoints/20190621-1650/", "default: None")
-tf.flags.DEFINE_string('meta_dir', "model.ckpt-137556.meta", "default: None")
+tf.flags.DEFINE_string('checkpoint_dir', "20190621-1650", "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/done/test46/test2',
                        'X files for training')
 tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata//BRATS2015/testLabel',
@@ -70,9 +68,22 @@ def read_files(x_path, l_path, Label_train_files, index):
 
 
 def train():
-    graph = tf.get_default_graph()
-    saver = tf.train.import_meta_graph(FLAGS.checkpoints_dir + FLAGS.meta_dir)
+    if FLAGS.load_model is not None:
+        if FLAGS.savefile is not None:
+            checkpoints_dir = FLAGS.savefile + "/checkpoints/" + FLAGS.load_model.lstrip("checkpoints/")
+        else:
+            checkpoints_dir = "checkpoints/" + FLAGS.load_model.lstrip("checkpoints/")
 
+    else:
+        print("<load_model> is None.")
+        return
+    checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
+    model_checkpoint_path = checkpoint.model_checkpoint_path
+    latest_checkpoint = tf.train.latest_checkpoint(checkpoints_dir)
+    meta_graph_path = model_checkpoint_path + ".meta"
+    saver = tf.train.import_meta_graph(meta_graph_path)
+
+    graph = tf.get_default_graph()
     f_input = graph.get_tensor_by_name(FLAGS.f_input)
     l_input = graph.get_tensor_by_name(FLAGS.l_input)
 
@@ -82,7 +93,7 @@ def train():
     w_g = tf.get_default_graph().get_tensor_by_name(FLAGS.w_g)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        saver.restore(sess, tf.train.latest_checkpoint(FLAGS.checkpoints_dir))
+        saver.restore(sess, latest_checkpoint)
         try:
             os.makedirs("./test_images/X")
             os.makedirs("./test_images/Y")
@@ -94,7 +105,7 @@ def train():
 
         F_train_files = read_filename(FLAGS.F_test)
         index = 0
-        while index <= FLAGS.epoch_steps:
+        while index <= len(F_train_files):
             train_true_f = []
             train_true_l = []
             for b in range(1):
