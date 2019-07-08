@@ -29,12 +29,9 @@ class GAN:
         self.code_list = {}
         self.judge_list = {}
         self.tenaor_name = {}
-
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=5)
-
         self.EC_M = Encoder('EC_M', ngf=ngf)
         self.DC_M = Decoder('DC_M', ngf=ngf)
-
         self.D_M = Discriminator('D_M', ngf=ngf)
 
 
@@ -108,21 +105,21 @@ class GAN:
         y_t_by_x = self.DC_M(tf.concat([code_x, cy_code], axis=-1))
         code_y_t_by_x = self.EC_M(y_t_by_x)
         x_r_c_by_y = self.DC_M(tf.concat([code_y_t_by_x, cx_code], axis=-1))
-        l_prob_x_r_c_by_y = self.DC_L(x_r_c_by_y)
+        l_prob_x_r_c_by_y = self.DC_L(code_y_t_by_x)
         l_x_r_c_by_y = tf.reshape(
             tf.cast(tf.argmax(l_prob_x_r_c_by_y, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         z_t_by_x = self.DC_M(tf.concat([code_x, cz_code], axis=-1))
         code_z_t_by_x = self.EC_M(z_t_by_x)
         x_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_x, cx_code], axis=-1))
-        l_prob_x_r_c_by_z = self.DC_L(x_r_c_by_z)
+        l_prob_x_r_c_by_z = self.DC_L(code_z_t_by_x)
         l_x_r_c_by_z = tf.reshape(
             tf.cast(tf.argmax(l_prob_x_r_c_by_z, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         w_t_by_x = self.DC_M(tf.concat([code_x, cw_code], axis=-1))
         code_w_t_by_x = self.EC_M(w_t_by_x)
         x_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_x, cx_code], axis=-1))
-        l_prob_x_r_c_by_w = self.DC_L(x_r_c_by_w)
+        l_prob_x_r_c_by_w = self.DC_L(code_w_t_by_x)
         l_x_r_c_by_w = tf.reshape(
             tf.cast(tf.argmax(l_prob_x_r_c_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
@@ -130,21 +127,21 @@ class GAN:
         x_t_by_y = self.DC_M(tf.concat([code_y, cx_code], axis=-1))
         code_x_t_by_y = self.EC_M(x_t_by_y)
         y_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_y, cy_code], axis=-1))
-        l_prob_y_r_c_by_x = self.DC_L(y_r_c_by_x)
+        l_prob_y_r_c_by_x = self.DC_L(code_x_t_by_y)
         l_y_r_c_by_x = tf.reshape(
             tf.cast(tf.argmax(l_prob_y_r_c_by_x, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         z_t_by_y = self.DC_M(tf.concat([code_y, cz_code], axis=-1))
-        code_z_t_by_y = self.EC_M(x_t_by_y)
+        code_z_t_by_y = self.EC_M(z_t_by_y)
         y_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_y, cy_code], axis=-1))
-        l_prob_y_r_c_by_z = self.DC_L(y_r_c_by_z)
+        l_prob_y_r_c_by_z = self.DC_L(code_z_t_by_y)
         l_y_r_c_by_z = tf.reshape(
             tf.cast(tf.argmax(l_prob_y_r_c_by_z, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         w_t_by_y = self.DC_M(tf.concat([code_y, cw_code], axis=-1))
-        code_w_t_by_y = self.EC_M(x_t_by_y)
+        code_w_t_by_y = self.EC_M(w_t_by_y)
         y_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_y, cy_code], axis=-1))
-        l_prob_y_r_c_by_w = self.DC_L(y_r_c_by_w)
+        l_prob_y_r_c_by_w = self.DC_L(code_w_t_by_y)
         l_y_r_c_by_w = tf.reshape(
             tf.cast(tf.argmax(l_prob_y_r_c_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
@@ -152,21 +149,21 @@ class GAN:
         x_t_by_z = self.DC_M(tf.concat([code_z, cx_code], axis=-1))
         code_x_t_by_z = self.EC_M(x_t_by_z)
         z_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_z, cz_code], axis=-1))
-        l_prob_z_r_c_by_x = self.DC_L(z_r_c_by_x)
+        l_prob_z_r_c_by_x = self.DC_L(code_x_t_by_z)
         l_z_r_c_by_x = tf.reshape(
             tf.cast(tf.argmax(l_prob_z_r_c_by_x, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         y_t_by_z = self.DC_M(tf.concat([code_z, cy_code], axis=-1))
         code_y_t_by_z = self.EC_M(y_t_by_z)
         z_r_c_by_y = self.DC_M(tf.concat([code_y_t_by_z, cz_code], axis=-1))
-        l_prob_z_r_c_by_y = self.DC_L(z_r_c_by_y)
+        l_prob_z_r_c_by_y = self.DC_L(code_y_t_by_z)
         l_z_r_c_by_y = tf.reshape(
             tf.cast(tf.argmax(l_prob_z_r_c_by_y, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         w_t_by_z = self.DC_M(tf.concat([code_z, cw_code], axis=-1))
         code_w_t_by_z = self.EC_M(w_t_by_z)
         z_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_z, cz_code], axis=-1))
-        l_prob_z_r_c_by_w = self.DC_L(z_r_c_by_w)
+        l_prob_z_r_c_by_w = self.DC_L(code_w_t_by_z)
         l_z_r_c_by_w = tf.reshape(
             tf.cast(tf.argmax(l_prob_z_r_c_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
@@ -174,21 +171,21 @@ class GAN:
         x_t_by_w = self.DC_M(tf.concat([code_w, cx_code], axis=-1))
         code_x_t_by_w = self.EC_M(x_t_by_w)
         w_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_w, cw_code], axis=-1))
-        l_prob_w_r_c_by_x = self.DC_L(w_r_c_by_x)
+        l_prob_w_r_c_by_x = self.DC_L(code_x_t_by_w)
         l_w_r_c_by_x = tf.reshape(
             tf.cast(tf.argmax(l_prob_w_r_c_by_x, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         y_t_by_w = self.DC_M(tf.concat([code_w, cy_code], axis=-1))
         code_y_t_by_w = self.EC_M(y_t_by_w)
         w_r_c_by_y = self.DC_M(tf.concat([code_y_t_by_w, cw_code], axis=-1))
-        l_prob_w_r_c_by_y = self.DC_L(w_r_c_by_y)
+        l_prob_w_r_c_by_y = self.DC_L(code_y_t_by_w)
         l_w_r_c_by_y = tf.reshape(
             tf.cast(tf.argmax(l_prob_w_r_c_by_y, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
         z_t_by_w = self.DC_M(tf.concat([code_w, cz_code], axis=-1))
         code_z_t_by_w = self.EC_M(z_t_by_w)
         w_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_w, cw_code], axis=-1))
-        l_prob_w_r_c_by_z = self.DC_L(w_r_c_by_z)
+        l_prob_w_r_c_by_z = self.DC_L(code_z_t_by_w)
         l_w_r_c_by_z = tf.reshape(
             tf.cast(tf.argmax(l_prob_w_r_c_by_z, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
@@ -599,11 +596,11 @@ class GAN:
                 ssim_list[i])
 
     def evaluation(self, image_dirct):
-        self.name_list_true = ["l_x", "l_y", "l_z", "l_w",
-                               "x", "y", "z", "w",
+        self.name_list_true = ["x", "x", "x", "x",
+                               "y", "z", "w"
                                ]
-        self.name_list_false = ["l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
-                                "x_r", "y_r", "z_r", "w_r",
+        self.name_list_false = ["x_r", "x_t_by_y", "x_t_by_z", "x_t_by_w",
+                                "y_t_by_x", "z_t_by_x", "w_t_by_x"
                                 ]
         ssim_list = []
         for i in range(len(self.name_list_true)):
