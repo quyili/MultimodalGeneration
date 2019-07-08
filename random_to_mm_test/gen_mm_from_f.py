@@ -10,9 +10,8 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_string('load_model', "20190620-2035",
-                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
-tf.flags.DEFINE_string('checkpoint', None, "default: None")
+tf.flags.DEFINE_string('checkpoint_dir', "./checkpoints/20190621-1650/", "default: None")
+tf.flags.DEFINE_string('meta_dir', "model.ckpt-137556.meta", "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/done/test46/test2',
@@ -21,6 +20,12 @@ tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGenerat
                        'Y files for training')
 tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/testMask',
                        'Y files for training')
+tf.flags.DEFINE_string('x_g', "GPU_0/DC_X/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('y_g', "GPU_0/DC_Y/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('z_g', "GPU_0/DC_Z/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('w_g', "GPU_0/DC_W/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('f_input', "GPU_0/mul_1:0", "default: None")
+tf.flags.DEFINE_string('L_input', "GPU_0/Placeholder_2:0", "default: None")
 
 
 def read_filename(path, shuffle=True):
@@ -66,47 +71,60 @@ def read_files(x_path, l_path, Label_train_files, index):
 
 def train():
     graph = tf.get_default_graph()
-    saver = tf.train.import_meta_graph("./checkpoints/20190621-1650/model.ckpt-137556.meta")
+    saver = tf.train.import_meta_graph(FLAGS.checkpoints_dir + FLAGS.meta_dir)
 
-    f_input = graph.get_tensor_by_name("GPU_0/mul_1:0")
-    label_expand_input = graph.get_tensor_by_name("GPU_0/Placeholder_2:0")
+    f_input = graph.get_tensor_by_name(FLAGS.f_input)
+    l_input = graph.get_tensor_by_name(FLAGS.l_input)
 
-    x_g = tf.get_default_graph().get_tensor_by_name("GPU_0/DC_X/lastconv/Sigmoid:0")
-    y_g = tf.get_default_graph().get_tensor_by_name("GPU_0/DC_Y/lastconv/Sigmoid:0")
+    x_g = tf.get_default_graph().get_tensor_by_name(FLAGS.x_g)
+    y_g = tf.get_default_graph().get_tensor_by_name(FLAGS.y_g)
+    z_g = tf.get_default_graph().get_tensor_by_name(FLAGS.z_g)
+    w_g = tf.get_default_graph().get_tensor_by_name(FLAGS.w_g)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        checkpoints_dir = "./checkpoints/20190621-1650/"
-        saver.restore(sess, tf.train.latest_checkpoint(checkpoints_dir))
+        saver.restore(sess, tf.train.latest_checkpoint(FLAGS.checkpoints_dir))
+        try:
+            os.makedirs("./test_images/X")
+            os.makedirs("./test_images/Y")
+            os.makedirs("./test_images/Z")
+            os.makedirs("./test_images/W")
+            os.makedirs("./test_images/L")
+        except os.error:
+            pass
 
-        L_train_files = read_filename(FLAGS.L_test)
         F_train_files = read_filename(FLAGS.F_test)
         index = 0
         while index <= FLAGS.epoch_steps:
             train_true_f = []
             train_true_l = []
             for b in range(1):
-                train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index)
-                train_L_arr_ = read_file(FLAGS.L_test, L_train_files, index)
-                train_M_arr_ = read_file(FLAGS.M_test, L_train_files, index)
-                L_arr = expand(train_M_arr_, train_L_arr_)
-                F_arr = np.asarray(train_F_arr_).reshape(
-                    (FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]))
+                train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
+                train_Mask_arr_ = read_file(FLAGS.Mask_test, F_train_files, index).reshape(FLAGS.image_size)
+                while True:
+                    train_L_arr_ = read_file(FLAGS.L_test, F_train_files,
+                                             np.random.randint(len(F_train_files))).reshape(FLAGS.image_size)
+                    if np.sum(train_Mask_arr_ * train_L_arr_) == 0.0: break
+                    logging.info("mask and label not match !")
 
-                train_true_f.append(F_arr)
-                train_true_l.append(L_arr)
+                train_true_f.append(train_F_arr_)
+                train_true_l.append(train_L_arr_)
                 index = index + 1
 
             print("image gen start:" + str(index))
-            x_g_, y_g_ = sess.run([x_g, y_g],
-                                  feed_dict={f_input: np.asarray(train_true_f),
-                                             label_expand_input: np.asarray(train_true_l)})
+            x_g_, y_g_, z_g_, w_g_ = sess.run([x_g, y_g, z_g, w_g],
+                                              feed_dict={f_input: np.asarray(train_true_f),
+                                                         l_input: np.asarray(train_true_l)})
 
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[0, :, :, 0]),
-                                 "./test/fake_x_" + str(index) + ".tiff")
+                                 "./test_images/X/fake_x_" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[0, :, :, 0]),
-                                 "./test/fake_y_" + str(index) + ".tiff")
+                                 "./test_images/Y/fake_y_" + str(index) + ".tiff")
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[0, :, :, 0]),
+                                 "./test_images/Z/fake_z_" + str(index) + ".tiff")
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[0, :, :, 0]),
+                                 "./test_images/W/fake_w_" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[0, :, :, 0]),
-                                 "./test/fake_l_" + str(index) + ".tiff")
+                                 "./test_images/L/fake_l_" + str(index) + ".tiff")
 
             print("image gen end:" + str(index))
 
