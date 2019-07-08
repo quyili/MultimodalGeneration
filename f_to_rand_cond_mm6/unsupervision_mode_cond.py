@@ -214,10 +214,10 @@ class GAN:
         code_x_t_by_y = self.EC_M(x_t_by_y)
         y_r_c_by_x = self.DC_M(tf.concat([code_x_t_by_y, cy_code], axis=-1))
         z_t_by_y = self.DC_M(tf.concat([code_y, cz_code], axis=-1))
-        code_z_t_by_y = self.EC_M(x_t_by_y)
+        code_z_t_by_y = self.EC_M(z_t_by_y)
         y_r_c_by_z = self.DC_M(tf.concat([code_z_t_by_y, cy_code], axis=-1))
         w_t_by_y = self.DC_M(tf.concat([code_y, cw_code], axis=-1))
-        code_w_t_by_y = self.EC_M(x_t_by_y)
+        code_w_t_by_y = self.EC_M(w_t_by_y)
         y_r_c_by_w = self.DC_M(tf.concat([code_w_t_by_y, cy_code], axis=-1))
 
         x_t_by_z = self.DC_M(tf.concat([code_z, cx_code], axis=-1))

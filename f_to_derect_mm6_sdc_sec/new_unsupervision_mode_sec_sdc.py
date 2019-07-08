@@ -3,6 +3,8 @@ import tensorflow as tf
 from discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
+from shared_decoder import SDecoder
+from m_decoder import MDecoder
 from decoder import Decoder
 
 
@@ -34,10 +36,12 @@ class GAN:
 
         self.EC = Encoder('EC', ngf=ngf)
 
-        self.DC_X = Decoder('DC_X', ngf=ngf)
-        self.DC_Y = Decoder('DC_Y', ngf=ngf)
-        self.DC_Z = Decoder('DC_Z', ngf=ngf)
-        self.DC_W = Decoder('DC_W', ngf=ngf)
+        self.SDC = SDecoder('SDC', ngf=ngf)
+
+        self.DC_X = MDecoder('DC_X', ngf=ngf)
+        self.DC_Y = MDecoder('DC_Y', ngf=ngf)
+        self.DC_Z = MDecoder('DC_Z', ngf=ngf)
+        self.DC_W = MDecoder('DC_W', ngf=ngf)
 
         self.D_M = Discriminator('D_M', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
@@ -67,7 +71,7 @@ class GAN:
         f = f * l_mask  # 去除肿瘤轮廓影响
         return f
 
-    # TODO input f
+     # TODO input f
     def model(self, l, l_m, m, l_x, l_y, l_z, l_w, x, y, z, w):
         cx = 0.0
         cy = 1.0
@@ -79,8 +83,8 @@ class GAN:
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
-                                  shape=[self.input_shape[0], self.input_shape[1],
-                                         self.input_shape[2], 5])
+                                                    shape=[self.input_shape[0], self.input_shape[1],
+                                                           self.input_shape[2], 5])
         l = l * 0.25
         f_rm_expand = tf.concat([
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0],
@@ -94,15 +98,17 @@ class GAN:
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4],
                        shape=self.input_shape) + f * 0.8],
             axis=-1)
+
         code_rm = self.EC_R(f_rm_expand)
 
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(
             tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        x_g = self.DC_X(code_rm)
-        y_g = self.DC_Y(code_rm)
-        z_g = self.DC_Z(code_rm)
-        w_g = self.DC_W(code_rm)
+        mid_code_rm = self.SDC(code_rm)
+        x_g = self.DC_X(mid_code_rm)
+        y_g = self.DC_Y(mid_code_rm)
+        z_g = self.DC_Z(mid_code_rm)
+        w_g = self.DC_W(mid_code_rm)
         self.tenaor_name["x_g"] = str(x_g)
         self.tenaor_name["y_g"] = str(y_g)
         self.tenaor_name["z_g"] = str(z_g)
@@ -135,34 +141,39 @@ class GAN:
         f_z_g_r = self.get_f(z_g)
         f_w_g_r = self.get_f(w_g)
 
-        y_g_t_by_x = self.DC_Y(code_x_g)
-        z_g_t_by_x = self.DC_Z(code_x_g)
-        w_g_t_by_x = self.DC_W(code_x_g)
+        mid_code_x_g = self.SDC(code_x_g)
+        mid_code_y_g = self.SDC(code_y_g)
+        mid_code_z_g = self.SDC(code_z_g)
+        mid_code_w_g = self.SDC(code_w_g)
 
-        x_g_t_by_y = self.DC_X(code_y_g)
-        z_g_t_by_y = self.DC_Z(code_y_g)
-        w_g_t_by_y = self.DC_W(code_y_g)
+        y_g_t_by_x = self.DC_Y(mid_code_x_g)
+        z_g_t_by_x = self.DC_Z(mid_code_x_g)
+        w_g_t_by_x = self.DC_W(mid_code_x_g)
 
-        x_g_t_by_z = self.DC_X(code_z_g)
-        y_g_t_by_z = self.DC_Y(code_z_g)
-        w_g_t_by_z = self.DC_W(code_z_g)
+        x_g_t_by_y = self.DC_X(mid_code_y_g)
+        z_g_t_by_y = self.DC_Z(mid_code_y_g)
+        w_g_t_by_y = self.DC_W(mid_code_y_g)
 
-        x_g_t_by_w = self.DC_X(code_w_g)
-        y_g_t_by_w = self.DC_Y(code_w_g)
-        z_g_t_by_w = self.DC_Z(code_w_g)
+        x_g_t_by_z = self.DC_X(mid_code_z_g)
+        y_g_t_by_z = self.DC_Y(mid_code_z_g)
+        w_g_t_by_z = self.DC_W(mid_code_z_g)
+
+        x_g_t_by_w = self.DC_X(mid_code_w_g)
+        y_g_t_by_w = self.DC_Y(mid_code_w_g)
+        z_g_t_by_w = self.DC_Z(mid_code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
         label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
 
         mask_x = self.get_mask(x)
         mask_y = self.get_mask(y)
@@ -191,50 +202,55 @@ class GAN:
             tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
 
-        x_r = self.DC_X(code_x)
-        y_r = self.DC_Y(code_y)
-        z_r = self.DC_Z(code_z)
-        w_r = self.DC_W(code_w)
+        mid_code_x = self.SDC(code_x)
+        mid_code_y = self.SDC(code_y)
+        mid_code_z = self.SDC(code_z)
+        mid_code_w = self.SDC(code_w)
 
-        y_t_by_x = self.DC_Y(code_x)
+        x_r = self.DC_X(mid_code_x)
+        y_r = self.DC_Y(mid_code_y)
+        z_r = self.DC_Z(mid_code_z)
+        w_r = self.DC_W(mid_code_w)
+
+        y_t_by_x = self.DC_Y(mid_code_x)
         code_y_t_by_x = self.EC(y_t_by_x)
-        x_r_c_by_y = self.DC_X(code_y_t_by_x)
-        z_t_by_x = self.DC_Z(code_x)
+        x_r_c_by_y = self.DC_X(self.SDC(code_y_t_by_x))
+        z_t_by_x = self.DC_Z(mid_code_x)
         code_z_t_by_x = self.EC(z_t_by_x)
-        x_r_c_by_z = self.DC_X(code_z_t_by_x)
-        w_t_by_x = self.DC_W(code_x)
+        x_r_c_by_z = self.DC_X(self.SDC(code_z_t_by_x))
+        w_t_by_x = self.DC_W(mid_code_x)
         code_w_t_by_x = self.EC(w_t_by_x)
-        x_r_c_by_w = self.DC_X(code_w_t_by_x)
+        x_r_c_by_w = self.DC_X(self.SDC(code_w_t_by_x))
 
-        x_t_by_y = self.DC_X(code_y)
+        x_t_by_y = self.DC_X(mid_code_y)
         code_x_t_by_y = self.EC(x_t_by_y)
-        y_r_c_by_x = self.DC_Y(code_x_t_by_y)
-        z_t_by_y = self.DC_Z(code_y)
-        code_z_t_by_y = self.EC(x_t_by_y)
-        y_r_c_by_z = self.DC_Y(code_z_t_by_y)
-        w_t_by_y = self.DC_W(code_y)
-        code_w_t_by_y = self.EC(x_t_by_y)
-        y_r_c_by_w = self.DC_Y(code_w_t_by_y)
+        y_r_c_by_x = self.DC_Y(self.SDC(code_x_t_by_y))
+        z_t_by_y = self.DC_Z(mid_code_y)
+        code_z_t_by_y = self.EC(z_t_by_y)
+        y_r_c_by_z = self.DC_Y(self.SDC(code_z_t_by_y))
+        w_t_by_y = self.DC_W(mid_code_y)
+        code_w_t_by_y = self.EC(w_t_by_y)
+        y_r_c_by_w = self.DC_Y(self.SDC(code_w_t_by_y))
 
-        x_t_by_z = self.DC_X(code_z)
+        x_t_by_z = self.DC_X(mid_code_z)
         code_x_t_by_z = self.EC(x_t_by_z)
-        z_r_c_by_x = self.DC_Z(code_x_t_by_z)
-        y_t_by_z = self.DC_Y(code_z)
+        z_r_c_by_x = self.DC_Z(self.SDC(code_x_t_by_z))
+        y_t_by_z = self.DC_Y(mid_code_z)
         code_y_t_by_z = self.EC(y_t_by_z)
-        z_r_c_by_y = self.DC_Z(code_y_t_by_z)
-        w_t_by_z = self.DC_W(code_z)
+        z_r_c_by_y = self.DC_Z(self.SDC(code_y_t_by_z))
+        w_t_by_z = self.DC_W(mid_code_z)
         code_w_t_by_z = self.EC(w_t_by_z)
-        z_r_c_by_w = self.DC_Z(code_w_t_by_z)
+        z_r_c_by_w = self.DC_Z(self.SDC(code_w_t_by_z))
 
-        x_t_by_w = self.DC_X(code_w)
+        x_t_by_w = self.DC_X(mid_code_w)
         code_x_t_by_w = self.EC(x_t_by_w)
-        w_r_c_by_x = self.DC_W(code_x_t_by_w)
-        y_t_by_w = self.DC_Y(code_w)
+        w_r_c_by_x = self.DC_W(self.SDC(code_x_t_by_w))
+        y_t_by_w = self.DC_Y(mid_code_w)
         code_y_t_by_w = self.EC(y_t_by_w)
-        w_r_c_by_y = self.DC_W(code_y_t_by_w)
-        z_t_by_w = self.DC_Z(code_w)
+        w_r_c_by_y = self.DC_W(self.SDC(code_y_t_by_w))
+        z_t_by_w = self.DC_Z(mid_code_w)
         code_z_t_by_w = self.EC(z_t_by_w)
-        w_r_c_by_z = self.DC_W(code_z_t_by_w)
+        w_r_c_by_z = self.DC_W(self.SDC(code_z_t_by_w))
 
         j_x_g, j_x_g_c = self.D_M(x_g)
         j_y_g, j_y_g_c = self.D_M(y_g)
@@ -615,6 +631,7 @@ class GAN:
         G_loss += self.mse_loss(code_x_t_by_w, code_z_t_by_w)
         G_loss += self.mse_loss(code_y_t_by_w, code_z_t_by_w)
 
+
         self.image_list["mask"] = mask
         self.image_list["f"] = f
         self.prob_list["label_expand"] = label_expand
@@ -786,6 +803,7 @@ class GAN:
                 + self.DC_Y.variables
                 + self.DC_Z.variables
                 + self.DC_W.variables
+                + self.SDC.variables
             ,
                 self.D_M.variables +
                 self.FD_R.variables

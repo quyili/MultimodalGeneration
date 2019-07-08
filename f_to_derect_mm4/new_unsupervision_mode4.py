@@ -214,10 +214,10 @@ class GAN:
         code_x_t_by_y = self.EC_X(x_t_by_y)
         y_r_c_by_x = self.DC_Y(code_x_t_by_y)
         z_t_by_y = self.DC_Z(code_y)
-        code_z_t_by_y = self.EC_Z(x_t_by_y)
+        code_z_t_by_y = self.EC_Z(z_t_by_y)
         y_r_c_by_z = self.DC_Y(code_z_t_by_y)
         # w_t_by_y = self.DC_W(code_y)
-        # code_w_t_by_y = self.EC_W(x_t_by_y)
+        # code_w_t_by_y = self.EC_W(w_t_by_y)
         # y_r_c_by_w = self.DC_Y(code_w_t_by_y)
 
         # x_t_by_z = self.DC_X(code_z)
