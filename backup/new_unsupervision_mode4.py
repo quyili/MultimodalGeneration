@@ -748,6 +748,7 @@ class GAN:
         #         self.SSIM(zw_l, zw_l_g)
         #         ]
         # return list
+
     def evaluation_summary(self, evluation_list):
         pass
         # tf.summary.scalar('evaluation/PSNR/XY/x__VS__x_r', evluation_list[0])
@@ -778,7 +779,7 @@ class GAN:
 
     def image_summary(self, image_dirct):
         for key in image_dirct:
-            tf.summary.image('image/'+key, image_dirct[key])
+            tf.summary.image('image/' + key, image_dirct[key])
         # image_list_XY, image_list_XW, image_list_YZ, image_list_ZW = \
         #     image_list[0], image_list[1], image_list[2], image_list[3]
         #

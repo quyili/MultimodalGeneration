@@ -25,7 +25,7 @@ class Discriminator:
         with tf.variable_scope(self.name, reuse=self.reuse):
             D_input = tf.nn.dropout(D_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0", reuse=self.reuse):
-                conv0 = tf.layers.conv2d(inputs=D_input, filters= self.ngf, kernel_size=5,
+                conv0 = tf.layers.conv2d(inputs=D_input, filters=self.ngf, kernel_size=5,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,

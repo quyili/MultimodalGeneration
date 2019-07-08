@@ -34,7 +34,6 @@ class GAN:
         self.DC_M = Decoder('DC_M', ngf=ngf)
         self.D_M = Discriminator('D_M', ngf=ngf)
 
-
     def get_mask(self, m, p=5):
         mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
         shape = m.get_shape().as_list()
@@ -53,10 +52,10 @@ class GAN:
         cy = 1.0
         cz = 2.0
         cw = 3.0
-        cx_code = self.ones_code * tf.one_hot(tf.cast(cx,dtype=tf.int32), depth=4)
-        cy_code = self.ones_code * tf.one_hot(tf.cast(cy,dtype=tf.int32), depth=4)
-        cz_code = self.ones_code * tf.one_hot(tf.cast(cz,dtype=tf.int32), depth=4)
-        cw_code = self.ones_code * tf.one_hot(tf.cast(cw,dtype=tf.int32), depth=4)
+        cx_code = self.ones_code * tf.one_hot(tf.cast(cx, dtype=tf.int32), depth=4)
+        cy_code = self.ones_code * tf.one_hot(tf.cast(cy, dtype=tf.int32), depth=4)
+        cz_code = self.ones_code * tf.one_hot(tf.cast(cz, dtype=tf.int32), depth=4)
+        cw_code = self.ones_code * tf.one_hot(tf.cast(cw, dtype=tf.int32), depth=4)
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
                                     shape=[self.input_shape[0], self.input_shape[1],
                                            self.input_shape[2], 5])
@@ -425,7 +424,6 @@ class GAN:
         G_loss += self.mse_loss(code_x_t_by_w, code_y_t_by_w)
         G_loss += self.mse_loss(code_x_t_by_w, code_z_t_by_w)
         G_loss += self.mse_loss(code_y_t_by_w, code_z_t_by_w)
-
 
         self.image_list["l_x"] = l_x
         self.image_list["l_y"] = l_y

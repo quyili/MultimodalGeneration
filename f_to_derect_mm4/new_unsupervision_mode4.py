@@ -58,7 +58,7 @@ class GAN:
         f = self.ones * tf.cast(f > 0.0, dtype="float32")
         return f
 
-    def get_mask(self,m, p=5):
+    def get_mask(self, m, p=5):
         mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
         shape = m.get_shape().as_list()
         mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
@@ -82,8 +82,8 @@ class GAN:
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
-                                                    shape=[self.input_shape[0], self.input_shape[1],
-                                                           self.input_shape[2], 5])
+                                  shape=[self.input_shape[0], self.input_shape[1],
+                                         self.input_shape[2], 5])
         l = l * 0.25
         f_rm_expand = tf.concat([
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0],
@@ -156,17 +156,17 @@ class GAN:
         z_g_t_by_w = self.DC_Z(code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
 
         mask_x = self.get_mask(x)
         mask_y = self.get_mask(y)
@@ -821,46 +821,49 @@ class GAN:
 
     def evaluation_code(self, code_dirct):
         self.name_code_list_true = ["code_rm", "code_rm", "code_rm", "code_rm",
-                          "code_x", "code_x",
-                          "code_y", "code_y",
-                          "code_z", "code_z",
-                          "code_w", "code_w", ]
+                                    "code_x", "code_x",
+                                    "code_y", "code_y",
+                                    "code_z", "code_z",
+                                    "code_w", "code_w", ]
         self.name_code_list_false = ["code_x_g", "code_y_g", "code_z_g", "code_w_g",
-                           "code_y_t_by_x",  "code_w_t_by_x",
-                           "code_x_t_by_y", "code_z_t_by_y",
-                            "code_y_t_by_z", "code_w_t_by_z",
-                           "code_x_t_by_w", "code_z_t_by_w"]
+                                     "code_y_t_by_x", "code_w_t_by_x",
+                                     "code_x_t_by_y", "code_z_t_by_y",
+                                     "code_y_t_by_z", "code_w_t_by_z",
+                                     "code_x_t_by_w", "code_z_t_by_w"]
         ssim_list = []
         for i in range(len(self.name_code_list_true)):
-            ssim_list.append(self.SSIM(code_dirct[self.name_code_list_true[i]], code_dirct[self.name_code_list_false[i]]))
+            ssim_list.append(
+                self.SSIM(code_dirct[self.name_code_list_true[i]], code_dirct[self.name_code_list_false[i]]))
         return ssim_list
 
     def evaluation_code_summary(self, ssim_list):
         for i in range(len(self.name_code_list_true)):
-            tf.summary.scalar("evaluation_code/" + self.name_code_list_true[i] + "__VS__" + self.name_code_list_false[i], ssim_list[i])
+            tf.summary.scalar(
+                "evaluation_code/" + self.name_code_list_true[i] + "__VS__" + self.name_code_list_false[i],
+                ssim_list[i])
 
     def evaluation(self, image_dirct):
         self.name_list_true = ["l", "l", "l", "l", "l",
-                          "l_x", "l_y", "l_z", "l_w",
-                          "x", "y", "z", "w",
-                          "x_g", "x_g",
-                          "y_g", "y_g",
-                          "z_g", "z_g",
-                          "w_g", "w_g", ]
+                               "l_x", "l_y", "l_z", "l_w",
+                               "x", "y", "z", "w",
+                               "x_g", "x_g",
+                               "y_g", "y_g",
+                               "z_g", "z_g",
+                               "w_g", "w_g", ]
         self.name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
-                           "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
-                           "x_r", "y_r", "z_r", "w_r",
-                           "x_g_t_by_y",  "x_g_t_by_w",
-                           "y_g_t_by_x", "y_g_t_by_z",
-                           "z_g_t_by_y", "z_g_t_by_w",
-                           "w_g_t_by_x", "w_g_t_by_z",
-                           ]
+                                "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
+                                "x_r", "y_r", "z_r", "w_r",
+                                "x_g_t_by_y", "x_g_t_by_w",
+                                "y_g_t_by_x", "y_g_t_by_z",
+                                "z_g_t_by_y", "z_g_t_by_w",
+                                "w_g_t_by_x", "w_g_t_by_z",
+                                ]
         ssim_list = []
         for i in range(len(self.name_list_true)):
             ssim_list.append(self.SSIM(image_dirct[self.name_list_true[i]], image_dirct[self.name_list_false[i]]))
         return ssim_list
 
-    def evaluation_summary(self,  ssim_list):
+    def evaluation_summary(self, ssim_list):
         for i in range(len(self.name_list_true)):
             tf.summary.scalar("evaluation/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i], ssim_list[i])
 

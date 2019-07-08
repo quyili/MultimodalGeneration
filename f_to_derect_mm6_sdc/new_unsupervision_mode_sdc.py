@@ -74,7 +74,7 @@ class GAN:
         f = f * l_mask  # 去除肿瘤轮廓影响
         return f
 
-     # TODO input f
+    # TODO input f
     def model(self, l, l_m, m, l_x, l_y, l_z, l_w, x, y, z, w):
         cx = 0.0
         cy = 1.0
@@ -86,8 +86,8 @@ class GAN:
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
-                                                    shape=[self.input_shape[0], self.input_shape[1],
-                                                           self.input_shape[2], 5])
+                                  shape=[self.input_shape[0], self.input_shape[1],
+                                         self.input_shape[2], 5])
         l = l * 0.25
         f_rm_expand = tf.concat([
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 0],
@@ -166,17 +166,17 @@ class GAN:
         z_g_t_by_w = self.DC_Z(mid_code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
 
         mask_x = self.get_mask(x)
         mask_y = self.get_mask(y)
@@ -633,7 +633,6 @@ class GAN:
         G_loss += self.mse_loss(code_x_t_by_w, code_y_t_by_w)
         G_loss += self.mse_loss(code_x_t_by_w, code_z_t_by_w)
         G_loss += self.mse_loss(code_y_t_by_w, code_z_t_by_w)
-
 
         self.image_list["mask"] = mask
         self.image_list["f"] = f

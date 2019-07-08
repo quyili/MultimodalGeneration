@@ -3,7 +3,7 @@ import cv2
 
 imgfile = "full_x.jpg"
 
-img = cv2.imread(imgfile,cv2.IMREAD_GRAYSCALE)
+img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
 
 gray = cv2.GaussianBlur(img, (3, 3), 0)
 

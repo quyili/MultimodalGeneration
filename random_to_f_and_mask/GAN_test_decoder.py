@@ -100,7 +100,7 @@ class GDecoder:
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_3_r')
                 deconv0_3_norm1_r = ops._norm(deconv0_3_r, self.is_training, self.norm)
-                add0 = ops.relu(deconv0_3_norm1_r )
+                add0 = ops.relu(deconv0_3_norm1_r)
             # 46, 36
             with tf.variable_scope("conv1", reuse=self.reuse):
                 conv1 = tf.layers.conv2d(inputs=add0, filters=6 * self.ngf, kernel_size=3, strides=1,

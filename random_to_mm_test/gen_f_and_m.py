@@ -16,8 +16,8 @@ tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('code_tensor_name', "GPU_0/Reshape_3:0", "default: None")
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_3:0", "default: None")
 tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_3:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
-tf.flags.DEFINE_integer('epochs', 1, '463 or 5480, default: 5480')
+tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
+tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 
 
 def train():
@@ -52,16 +52,16 @@ def train():
         index = 0
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
-            code= sess.run(code_rm)
-            f,m = sess.run([f_rm,mask_rm],feed_dict={code_rm,code})
+            code = sess.run(code_rm)
+            f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm, code})
 
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("./test_images/F_jpg/fake_f_"+  str(index)  +".jpg", full_x)
+            cv2.imwrite("./test_images/F_jpg/" + str(index) + ".jpg", full_x)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
-                                 "./test_images/F/fake_f_" + str(index) + ".tiff")
+                                 "./test_images/F/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
-                                 "./test_images/M/fake_m_" + str(index) + ".tiff")
+                                 "./test_images/M/" + str(index) + ".tiff")
             print("image gen end:" + str(index))
 
             index += 1

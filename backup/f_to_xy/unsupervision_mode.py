@@ -242,8 +242,8 @@ class GAN:
         G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.1
 
         self.image_list = [x, y, x_g, y_g, x_g_t, y_g_t, x_r, y_r, x_t, y_t,
-                      l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
-                      f, f_x_g_r, f_y_g_r]
+                           l, l_g, l_f_by_x, l_f_by_y, l_g_by_x, l_g_by_y,
+                           f, f_x_g_r, f_y_g_r]
 
         self.code_list = [code_x, code_y, code_rm, code_x_g, code_y_g]
 

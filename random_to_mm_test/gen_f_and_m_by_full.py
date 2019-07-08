@@ -14,16 +14,17 @@ tf.flags.DEFINE_string('load_model', "20190706-2032",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_3:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
-tf.flags.DEFINE_integer('epochs', 1, '463 or 5480, default: 5480')
+tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
+tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 
-def get_mask_from_f(imgfile,savefile):
+
+def get_mask_from_f(imgfile, savefile):
     # imgfile = "full_x.jpg"
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
     gray = cv2.GaussianBlur(img, (3, 3), 0)
     ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
-    c_list= cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours, hierarchy=c_list[-2],c_list[-1]
+    c_list = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = c_list[-2], c_list[-1]
     cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
     # savefile="mask.tiff"
     cv2.imwrite(savefile, img)
@@ -63,10 +64,10 @@ def train():
 
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("./test_images/F_jpg/fake_f_"+  str(index)  +".jpg", full_x)
+            cv2.imwrite("./test_images/F_jpg/" + str(index) + ".jpg", full_x)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
-                                 "./test_images/F/fake_f_" + str(index) + ".tiff")
-            get_mask_from_f("./test_images/F_jpg/fake_f_"+  str(index)  +".jpg", "./test_images/M/fake_m_" + str(index) + ".tiff")
+                                 "./test_images/F/" + str(index) + ".tiff")
+            get_mask_from_f("./test_images/F_jpg/" + str(index) + ".jpg", "./test_images/M/" + str(index) + ".tiff")
             print("image gen end:" + str(index))
 
             index += 1

@@ -163,7 +163,7 @@ def train():
                     with tf.name_scope("GPU_0"):
                         m_0 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(l_m_0,m_0)
+                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(l_m_0, m_0)
                         tensor_name_dirct_0 = gan.tenaor_name
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
@@ -176,7 +176,7 @@ def train():
                     with tf.name_scope("GPU_1"):
                         m_1 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(l_m_1,m_1)
+                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(l_m_1, m_1)
                         tensor_name_dirct_1 = gan.tenaor_name
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
@@ -189,7 +189,7 @@ def train():
                     with tf.name_scope("GPU_2"):
                         m_2 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(l_m_2,m_2)
+                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(l_m_2, m_2)
                         tensor_name_dirct_2 = gan.tenaor_name
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
@@ -202,7 +202,7 @@ def train():
                     with tf.name_scope("GPU_3"):
                         m_3 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(l_m_3,m_3)
+                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(l_m_3, m_3)
                         tensor_name_dirct_3 = gan.tenaor_name
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
@@ -380,10 +380,10 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
                             # if j == 0:
-                                # save_images(val_image_list_0, checkpoints_dir, str(0))
-                                # save_images(val_image_list_1, checkpoints_dir, str(1))
-                                # save_images(val_image_list_2, checkpoints_dir, str(2))
-                                # save_images(val_image_list_3, checkpoints_dir, str(3))
+                            # save_images(val_image_list_0, checkpoints_dir, str(0))
+                            # save_images(val_image_list_1, checkpoints_dir, str(1))
+                            # save_images(val_image_list_2, checkpoints_dir, str(2))
+                            # save_images(val_image_list_3, checkpoints_dir, str(3))
 
                         val_summary_op = sess.run(
                             summary_op,

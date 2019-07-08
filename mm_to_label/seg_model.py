@@ -36,17 +36,17 @@ class GAN:
 
     def model(self, l_x, l_y, l_z, l_w, x, y, z, w):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                                      shape=[self.input_shape[0], self.input_shape[1],
-                                                             self.input_shape[2], 5])
+                                    shape=[self.input_shape[0], self.input_shape[1],
+                                           self.input_shape[2], 5])
 
         code_x = self.EC_X(x)
         code_y = self.EC_Y(y)
@@ -120,7 +120,6 @@ class GAN:
                                   l_f_prob_by_w[:, :, :, 4]) * 15
         G_loss += self.mse_loss(l_w, l_f_by_w) * 5
 
-
         self.image_list["l_x"] = l_x
         self.image_list["l_y"] = l_y
         self.image_list["l_z"] = l_z
@@ -173,14 +172,14 @@ class GAN:
         tf.summary.scalar('loss/G_loss', G_loss)
 
     def evaluation(self, image_dirct):
-        self.name_list_true = [ "l_x", "l_y", "l_z", "l_w" ]
-        self.name_list_false = [ "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w" ]
+        self.name_list_true = ["l_x", "l_y", "l_z", "l_w"]
+        self.name_list_false = ["l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w"]
         ssim_list = []
         for i in range(len(self.name_list_true)):
             ssim_list.append(self.SSIM(image_dirct[self.name_list_true[i]], image_dirct[self.name_list_false[i]]))
         return ssim_list
 
-    def evaluation_summary(self,  ssim_list):
+    def evaluation_summary(self, ssim_list):
         for i in range(len(self.name_list_true)):
             tf.summary.scalar("evaluation/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i], ssim_list[i])
 

@@ -174,7 +174,7 @@ def train():
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_0 = gan.model(l_0, l_m_0, m_0, l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
-                        tensor_name_dirct_0=gan.tenaor_name
+                        tensor_name_dirct_0 = gan.tenaor_name
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
@@ -195,7 +195,7 @@ def train():
                         y_1 = tf.placeholder(tf.float32, shape=input_shape)
                         z_1 = tf.placeholder(tf.float32, shape=input_shape)
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_1 = gan.model(l_1,l_m_1, m_1, l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
+                        loss_list_1 = gan.model(l_1, l_m_1, m_1, l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
                         image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_1 = gan.tenaor_name
                         evaluation_list_1 = gan.evaluation(image_list_1)
@@ -218,7 +218,7 @@ def train():
                         y_2 = tf.placeholder(tf.float32, shape=input_shape)
                         z_2 = tf.placeholder(tf.float32, shape=input_shape)
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_2 = gan.model(l_2,l_m_2, m_2, l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
+                        loss_list_2 = gan.model(l_2, l_m_2, m_2, l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
                         image_list_2, code_list_2, j_list_2 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_2 = gan.tenaor_name
                         evaluation_list_2 = gan.evaluation(image_list_2)
@@ -241,7 +241,7 @@ def train():
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_3 = gan.model(l_3,l_m_3, m_3, l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
+                        loss_list_3 = gan.model(l_3, l_m_3, m_3, l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
                         image_list_3, code_list_3, j_list_3 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_3 = gan.tenaor_name
                         evaluation_list_3 = gan.evaluation(image_list_3)
@@ -329,13 +329,15 @@ def train():
                     train_true_z = []
                     train_true_w = []
                     for b in range(FLAGS.batch_size):
-                        train_m_arr = read_file(np.asarray([FLAGS.X,FLAGS.Y,FLAGS.Z,FLAGS.W])[np.random.randint(4)], l_train_files, index).reshape(FLAGS.image_size)
-                        train_l_m_arr = read_file(FLAGS.L,l_train_files, index).reshape(FLAGS.image_size)
-                        mask = 1.0 -np.ones(train_m_arr.shape, dtype="float32") * (train_m_arr > 0.1)
+                        train_m_arr = read_file(np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
+                                                l_train_files, index).reshape(FLAGS.image_size)
+                        train_l_m_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        mask = 1.0 - np.ones(train_m_arr.shape, dtype="float32") * (train_m_arr > 0.1)
                         while True:
-                            train_l_arr = read_file(FLAGS.L, l_train_files, np.random.randint(len(l_train_files))).reshape(
+                            train_l_arr = read_file(FLAGS.L, l_train_files,
+                                                    np.random.randint(len(l_train_files))).reshape(
                                 FLAGS.image_size)
-                            if np.sum(mask*train_l_arr) == 0.0:break
+                            if np.sum(mask * train_l_arr) == 0.0: break
                             logging.info("mask and label not match !")
 
                         train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
@@ -469,11 +471,11 @@ def train():
                                 mask = 1.0 - np.ones(val_m_arr.shape, dtype="float32") * (val_m_arr > 0.1)
                                 while True:
                                     val_l_arr = read_file(FLAGS.L, l_val_files,
-                                                            np.random.randint(len(l_val_files))).reshape(
+                                                          np.random.randint(len(l_val_files))).reshape(
                                         FLAGS.image_size)
                                     if np.sum(mask * val_l_arr) == 0.0: break
                                     logging.info("mask and label not match !")
-                                    
+
                                 val_l_x_arr = read_file(FLAGS.L, l_x_val_files, val_index).reshape(FLAGS.image_size)
                                 val_x_arr = read_file(FLAGS.X, l_x_val_files, val_index).reshape(FLAGS.image_size)
                                 val_l_y_arr = read_file(FLAGS.L, l_y_val_files, val_index).reshape(FLAGS.image_size)

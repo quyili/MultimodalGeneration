@@ -112,7 +112,7 @@ class GAN:
 
         image_list = [m, f, f_r, f_rm]
 
-        code_list = [code_f,  code_f_rm]
+        code_list = [code_f, code_f_rm]
 
         j_list = [j_code_f, j_code_f_rm, j_f, j_f_rm]
 
