@@ -105,6 +105,7 @@ def train():
             pass
 
         F_train_files = read_filename(FLAGS.F_test)
+        L_train_files = read_filename(FLAGS.L_test)
         index = 0
         while index <= len(F_train_files):
             train_true_f = []
@@ -114,8 +115,8 @@ def train():
                 train_Mask_arr_ = read_file(FLAGS.M_test, F_train_files, index).reshape(FLAGS.image_size)
                 while True:#TODO 解决mask问题
                     count=0
-                    train_L_arr_ = read_file(FLAGS.L_test, F_train_files,
-                                             np.random.randint(len(F_train_files))).reshape(FLAGS.image_size)
+                    train_L_arr_ = read_file(FLAGS.L_test, L_train_files,
+                                             np.random.randint(len(L_train_files))).reshape(FLAGS.image_size)
                     if np.sum(train_Mask_arr_ * train_L_arr_) == 0.0: break
                     count += 1
                     logging.info("mask and label not match !")
@@ -139,7 +140,7 @@ def train():
                                      "./test_images/Z/" + str(index-b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
                                      "./test_images/W/" + str(index-b) + ".tiff")
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[0, :, :, 0]),
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0]),
                                      "./test_images/L/" + str(index-b) + ".tiff")
 
             print("image gen end:" + str(index))
