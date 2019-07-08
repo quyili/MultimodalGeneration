@@ -24,7 +24,7 @@ tf.flags.DEFINE_string('y_g', "GPU_0/DC_Y/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('z_g', "GPU_0/DC_Z/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('w_g', "GPU_0/DC_W/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('f_input', "GPU_0/mul_5:0", "default: None")
-tf.flags.DEFINE_string('L_input', "GPU_0/Placeholder:0", "default: None")
+tf.flags.DEFINE_string('l_input', "GPU_0/Placeholder:0", "default: None")
 
 
 def read_filename(path, shuffle=True):
