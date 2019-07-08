@@ -11,7 +11,7 @@ FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 1, 'batch size, default: 1')
-tf.flags.DEFINE_string('checkpoint_dir', "20190621-1650", "default: None")
+tf.flags.DEFINE_string('load_model', "20190707-1545", "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/test141/test_images/F',
                        'X files for training')
@@ -23,8 +23,8 @@ tf.flags.DEFINE_string('x_g', "GPU_0/DC_X/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('y_g', "GPU_0/DC_Y/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('z_g', "GPU_0/DC_Z/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('w_g', "GPU_0/DC_W/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('f_input', "GPU_0/mul_1:0", "default: None")
-tf.flags.DEFINE_string('L_input', "GPU_0/Placeholder_2:0", "default: None")
+tf.flags.DEFINE_string('f_input', "GPU_0/mul_5:0", "default: None")
+tf.flags.DEFINE_string('L_input', "GPU_0/Placeholder:0", "default: None")
 
 
 def read_filename(path, shuffle=True):
@@ -112,11 +112,14 @@ def train():
             for b in range(FLAGS.batch_size):
                 train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
                 train_Mask_arr_ = read_file(FLAGS.Mask_test, F_train_files, index).reshape(FLAGS.image_size)
-                while True:
+                while True:#TODO 解决mask问题
+                    count=0
                     train_L_arr_ = read_file(FLAGS.L_test, F_train_files,
                                              np.random.randint(len(F_train_files))).reshape(FLAGS.image_size)
                     if np.sum(train_Mask_arr_ * train_L_arr_) == 0.0: break
+                    count += 1
                     logging.info("mask and label not match !")
+                    if count==15:break
 
                 train_true_f.append(train_F_arr_)
                 train_true_l.append(train_L_arr_)
