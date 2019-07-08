@@ -1,5 +1,7 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
+from discriminator import Discriminator
+from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
 from decoder import Decoder
 
@@ -20,51 +22,146 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
+        self.ones = tf.ones(self.input_shape, name="ones")
+        self.image_list = {}
+        self.prob_list = {}
+        self.code_list = {}
+        self.judge_list = {}
+        self.tenaor_name = {}
+
+        self.DC_L_X = Decoder('DC_L_X', ngf=ngf, output_channl=5)
+        self.DC_L_Y = Decoder('DC_L_Y', ngf=ngf, output_channl=5)
+        self.DC_L_Z = Decoder('DC_L_Z', ngf=ngf, output_channl=5)
+        self.DC_L_W = Decoder('DC_L_W', ngf=ngf, output_channl=5)
+
         self.EC_X = Encoder('EC_X', ngf=ngf)
         self.EC_Y = Encoder('EC_Y', ngf=ngf)
-        self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=6)
+        self.EC_Z = Encoder('EC_Z', ngf=ngf)
+        self.EC_W = Encoder('EC_W', ngf=ngf)
 
-    def model(self, x, y, label_expand):
-        # L
-        l = tf.reshape(tf.cast(tf.argmax(label_expand, axis=-1), dtype=tf.float32) * 0.2,
-                       shape=self.input_shape)
+    def model(self, l_x, l_y, l_z, l_w, x, y, z, w):
+        label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+        label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+        label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
+        label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
+                                                      shape=[self.input_shape[0], self.input_shape[1],
+                                                             self.input_shape[2], 5])
 
-        # X -> L_X
         code_x = self.EC_X(x)
-        l_f_prob_by_x = self.DC_L(code_x)
-        l_f_by_x = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.2,
-                              shape=self.input_shape)
-        # Y -> L_Y
         code_y = self.EC_Y(y)
-        l_f_prob_by_y = self.DC_L(code_y)
-        l_f_by_y = tf.reshape(tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.2,
-                              shape=self.input_shape)
+        code_z = self.EC_Z(z)
+        code_w = self.EC_W(w)
 
+        l_f_prob_by_x = self.DC_L_X(code_x)
+        l_f_prob_by_y = self.DC_L_Y(code_y)
+        l_f_prob_by_z = self.DC_L_Z(code_z)
+        l_f_prob_by_w = self.DC_L_W(code_w)
+        l_f_by_x = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_f_by_y = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_f_by_z = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_z, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+        l_f_by_w = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
+            shape=self.input_shape)
+
+        G_loss = 0.0
         # X模态图分割训练的有监督损失
-        G_loss = self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_x[:, :, :, 0]) \
-                 + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_x[:, :, :, 1]) \
-                 + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_x[:, :, :, 2]) * 5 \
-                 + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_x[:, :, :, 3]) * 15 \
-                 + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_x[:, :, :, 4]) * 15 \
-                 + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_x[:, :, :, 5]) * 15
-        G_loss += self.mse_loss(l, l_f_by_x) * 10
+        G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
+                                l_f_prob_by_x[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_x[:, :, :, 1],
+                                  l_f_prob_by_x[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_x[:, :, :, 2],
+                                  l_f_prob_by_x[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_x[:, :, :, 3],
+                                  l_f_prob_by_x[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_x[:, :, :, 4],
+                                  l_f_prob_by_x[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_x, l_f_by_x) * 5
 
-        # Y模态图分割训练的有监督损失
-        G_loss += self.mse_loss(label_expand[:, :, :, 0], l_f_prob_by_y[:, :, :, 0]) \
-                  + self.mse_loss(label_expand[:, :, :, 1], l_f_prob_by_y[:, :, :, 1]) \
-                  + self.mse_loss(label_expand[:, :, :, 2], l_f_prob_by_y[:, :, :, 2]) * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3], l_f_prob_by_y[:, :, :, 3]) * 15 \
-                  + self.mse_loss(label_expand[:, :, :, 4], l_f_prob_by_y[:, :, :, 4]) * 15 \
-                  + self.mse_loss(label_expand[:, :, :, 5], l_f_prob_by_y[:, :, :, 5]) * 15
-        G_loss += self.mse_loss(l, l_f_by_y) * 10
+        G_loss += self.mse_loss(label_expand_y[:, :, :, 0],
+                                l_f_prob_by_y[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_y[:, :, :, 1],
+                                  l_f_prob_by_y[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_y[:, :, :, 2],
+                                  l_f_prob_by_y[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_y[:, :, :, 3],
+                                  l_f_prob_by_y[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_y[:, :, :, 4],
+                                  l_f_prob_by_y[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_y, l_f_by_y) * 5
 
-        image_list = [x, y, l, l_f_by_x, l_f_by_y]
+        G_loss += self.mse_loss(label_expand_z[:, :, :, 0],
+                                l_f_prob_by_z[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_z[:, :, :, 1],
+                                  l_f_prob_by_z[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_z[:, :, :, 2],
+                                  l_f_prob_by_z[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_z[:, :, :, 3],
+                                  l_f_prob_by_z[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_z[:, :, :, 4],
+                                  l_f_prob_by_z[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_z, l_f_by_z) * 5
 
-        return image_list, G_loss
+        G_loss += self.mse_loss(label_expand_w[:, :, :, 0],
+                                l_f_prob_by_w[:, :, :, 0]) \
+                  + self.mse_loss(label_expand_w[:, :, :, 1],
+                                  l_f_prob_by_w[:, :, :, 1]) * 5 \
+                  + self.mse_loss(label_expand_w[:, :, :, 2],
+                                  l_f_prob_by_w[:, :, :, 2]) * 15 \
+                  + self.mse_loss(label_expand_w[:, :, :, 3],
+                                  l_f_prob_by_w[:, :, :, 3]) * 15 \
+                  + self.mse_loss(label_expand_w[:, :, :, 4],
+                                  l_f_prob_by_w[:, :, :, 4]) * 15
+        G_loss += self.mse_loss(l_w, l_f_by_w) * 5
+
+
+        self.image_list["l_x"] = l_x
+        self.image_list["l_y"] = l_y
+        self.image_list["l_z"] = l_z
+        self.image_list["l_w"] = l_w
+        self.image_list["x"] = x
+        self.image_list["y"] = y
+        self.image_list["z"] = z
+        self.image_list["w"] = w
+
+        self.prob_list["label_expand_x"] = label_expand_x
+        self.prob_list["label_expand_y"] = label_expand_y
+        self.prob_list["label_expand_z"] = label_expand_z
+        self.prob_list["label_expand_w"] = label_expand_w
+
+        self.prob_list["l_f_prob_by_x"] = l_f_prob_by_x
+        self.prob_list["l_f_prob_by_y"] = l_f_prob_by_y
+        self.prob_list["l_f_prob_by_z"] = l_f_prob_by_z
+        self.prob_list["l_f_prob_by_w"] = l_f_prob_by_w
+
+        self.image_list["l_f_by_x"] = l_f_by_x
+        self.image_list["l_f_by_y"] = l_f_by_y
+        self.image_list["l_f_by_z"] = l_f_by_z
+        self.image_list["l_f_by_w"] = l_f_by_w
+
+        return G_loss
 
     def get_variables(self):
-        variables = self.EC_X.variables + self.EC_Y.variables + self.DC_L.variables
-        return variables
+        return [self.EC_X.variables
+                + self.EC_Y.variables
+                + self.EC_Z.variables
+                + self.EC_W.variables
+                + self.DC_L_X.variables
+                + self.DC_L_Y.variables
+                + self.DC_L_Z.variables
+                + self.DC_L_W.variables
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -77,35 +174,24 @@ class GAN:
 
         return G_optimizer
 
-    def loss_summary(self, loss):
-        G_loss = loss
-        tf.summary.scalar('loss', G_loss)
+    def loss_summary(self, G_loss):
+        tf.summary.scalar('loss/G_loss', G_loss)
 
-    def evaluation(self, image_list):
-        x, y, l_input, l_f_by_x, l_f_by_y = \
-            image_list[0], image_list[1], image_list[2], image_list[3], image_list[4]
-        list = [self.iou(l_input, l_f_by_x), self.iou(l_input, l_f_by_y)]
-        return list
+    def evaluation(self, image_dirct):
+        self.name_list_true = [ "l_x", "l_y", "l_z", "l_w" ]
+        self.name_list_false = [ "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w" ]
+        ssim_list = []
+        for i in range(len(self.name_list_true)):
+            ssim_list.append(self.SSIM(image_dirct[self.name_list_true[i]], image_dirct[self.name_list_false[i]]))
+        return ssim_list
 
-    def evaluation_summary(self, evluation_list):
-        tf.summary.scalar('evaluation/IOU/l_input__VS__l_f_by_x', evluation_list[0])
-        tf.summary.scalar('evaluation/IOU/l_input__VS__l_f_by_y', evluation_list[1])
+    def evaluation_summary(self,  ssim_list):
+        for i in range(len(self.name_list_true)):
+            tf.summary.scalar("evaluation/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i], ssim_list[i])
 
-    def image_summary(self, image_list):
-        x, y, l_input, l_f_by_x, l_f_by_y = \
-            image_list[0], image_list[1], image_list[2], image_list[3], image_list[4]
-
-        tf.summary.image('image/x', x)
-        tf.summary.image('image/y', y)
-        tf.summary.image('image/l_input', l_input)
-        tf.summary.image('image/l_f_by_x', l_f_by_x)
-        tf.summary.image('image/l_f_by_y', l_f_by_y)
-
-    def iou(self, label, predict):
-        iou_op = tf.metrics.mean_iou(label, predict, 6)
-        mean_iou = iou_op[0]
-        print(mean_iou)
-        return mean_iou
+    def image_summary(self, image_dirct):
+        for key in image_dirct:
+            tf.summary.image('image/' + key, image_dirct[key])
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
@@ -113,19 +199,19 @@ class GAN:
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
-    # def ssim_loss(self, x, y):
-    #     """ supervised loss (L2 norm)
-    #     """
-    #     loss = (1.0 - self.SSIM(x, y)) * 20
-    #     return loss
-    #
-    # def PSNR(self, output, target):
-    #     psnr = tf.reduce_mean(tf.image.psnr(output, target, max_val=1.0, name="psnr"))
-    #     return psnr
-    #
-    # def SSIM(self, output, target):
-    #     ssim = tf.reduce_mean(tf.image.ssim(output, target, max_val=1.0))
-    #     return ssim
+    def ssim_loss(self, x, y):
+        """ supervised loss (L2 norm)
+        """
+        loss = (1.0 - self.SSIM(x, y)) * 20
+        return loss
+
+    def PSNR(self, output, target):
+        psnr = tf.reduce_mean(tf.image.psnr(output, target, max_val=1.0, name="psnr"))
+        return psnr
+
+    def SSIM(self, output, target):
+        ssim = tf.reduce_mean(tf.image.ssim(output, target, max_val=1.0))
+        return ssim
 
     def norm(self, input):
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])
