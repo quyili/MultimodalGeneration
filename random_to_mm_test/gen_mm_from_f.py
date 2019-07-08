@@ -10,6 +10,7 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
+tf.flags.DEFINE_integer('batch_size', 1, 'batch size, default: 1')
 tf.flags.DEFINE_string('checkpoint_dir', "20190621-1650", "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/test141/test_images/F',
@@ -108,7 +109,7 @@ def train():
         while index <= len(F_train_files):
             train_true_f = []
             train_true_l = []
-            for b in range(1):
+            for b in range(FLAGS.batch_size):
                 train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
                 train_Mask_arr_ = read_file(FLAGS.Mask_test, F_train_files, index).reshape(FLAGS.image_size)
                 while True:
@@ -126,16 +127,17 @@ def train():
                                               feed_dict={f_input: np.asarray(train_true_f),
                                                          l_input: np.asarray(train_true_l)})
 
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[0, :, :, 0]),
-                                 "./test_images/X/" + str(index) + ".tiff")
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[0, :, :, 0]),
-                                 "./test_images/Y/" + str(index) + ".tiff")
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[0, :, :, 0]),
-                                 "./test_images/Z/" + str(index) + ".tiff")
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[0, :, :, 0]),
-                                 "./test_images/W/" + str(index) + ".tiff")
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[0, :, :, 0]),
-                                 "./test_images/L/" + str(index) + ".tiff")
+            for b in range(FLAGS.batch_size):
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
+                                     "./test_images/X/" + str(index-b) + ".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[b, :, :, 0]),
+                                     "./test_images/Y/" + str(index-b) + ".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[b, :, :, 0]),
+                                     "./test_images/Z/" + str(index-b) + ".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
+                                     "./test_images/W/" + str(index-b) + ".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[0, :, :, 0]),
+                                     "./test_images/L/" + str(index-b) + ".tiff")
 
             print("image gen end:" + str(index))
 
