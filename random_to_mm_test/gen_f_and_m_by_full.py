@@ -10,7 +10,7 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_string('load_model', "20190704-1239",
+tf.flags.DEFINE_string('load_model', "20190706-2032",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_3:0", "default: None")
@@ -22,7 +22,8 @@ def get_mask_from_f(imgfile,savefile):
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
     gray = cv2.GaussianBlur(img, (3, 3), 0)
     ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    c_list= cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy=c_list[-2],c_list[-1]
     cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
     # savefile="mask.tiff"
     cv2.imwrite(savefile, img)
