@@ -127,15 +127,15 @@ def train():
                                                          l_input: np.asarray(train_true_l)})
 
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[0, :, :, 0]),
-                                 "./test_images/X/fake_x_" + str(index) + ".tiff")
+                                 "./test_images/X/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[0, :, :, 0]),
-                                 "./test_images/Y/fake_y_" + str(index) + ".tiff")
+                                 "./test_images/Y/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[0, :, :, 0]),
-                                 "./test_images/Z/fake_z_" + str(index) + ".tiff")
+                                 "./test_images/Z/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[0, :, :, 0]),
-                                 "./test_images/W/fake_w_" + str(index) + ".tiff")
+                                 "./test_images/W/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[0, :, :, 0]),
-                                 "./test_images/L/fake_l_" + str(index) + ".tiff")
+                                 "./test_images/L/" + str(index) + ".tiff")
 
             print("image gen end:" + str(index))
 
