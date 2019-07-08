@@ -111,7 +111,7 @@ def train():
             train_true_l = []
             for b in range(FLAGS.batch_size):
                 train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
-                train_Mask_arr_ = read_file(FLAGS.Mask_test, F_train_files, index).reshape(FLAGS.image_size)
+                train_Mask_arr_ = read_file(FLAGS.M_test, F_train_files, index).reshape(FLAGS.image_size)
                 while True:#TODO 解决mask问题
                     count=0
                     train_L_arr_ = read_file(FLAGS.L_test, F_train_files,
