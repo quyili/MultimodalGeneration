@@ -13,11 +13,19 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_string('load_model', "20190704-1239",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_string('code_tensor_name', "GPU_0/Reshape_3:0", "default: None")
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_3:0", "default: None")
-tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_3:0", "default: None")
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_integer('epochs', 1, '463 or 5480, default: 5480')
+
+def get_mask_from_f(imgfile,savefile):
+    # imgfile = "full_x.jpg"
+    img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
+    gray = cv2.GaussianBlur(img, (3, 3), 0)
+    ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
+    # savefile="mask.tiff"
+    cv2.imwrite(savefile, img)
 
 
 def train():
@@ -43,25 +51,21 @@ def train():
     saver = tf.train.import_meta_graph(meta_graph_path)
 
     graph = tf.get_default_graph()
-    code_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.code_tensor_name)
     f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.f_tensor_name)
-    mask_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.m_tensor_name)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
         index = 0
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
-            code= sess.run(code_rm)
-            f,m = sess.run([f_rm,mask_rm],feed_dict={code_rm,code})
+            f = sess.run(f_rm)
 
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
             cv2.imwrite("./test_images/F_jpg/fake_f_"+  str(index)  +".jpg", full_x)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
                                  "./test_images/F/fake_f_" + str(index) + ".tiff")
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
-                                 "./test_images/M/fake_m_" + str(index) + ".tiff")
+            get_mask_from_f("./test_images/F_jpg/fake_f_"+  str(index)  +".jpg", "./test_images/M/fake_m_" + str(index) + ".tiff")
             print("image gen end:" + str(index))
 
             index += 1
