@@ -231,11 +231,9 @@ def train():
 
             loss_list_summary = tf.placeholder(tf.float32)
             evaluation_list_summary = tf.placeholder(tf.float32)
-            evaluation_code_list_summary = tf.placeholder(tf.float32)
 
             gan.loss_summary(loss_list_summary)
             gan.evaluation_summary(evaluation_list_summary)
-            gan.evaluation_code_summary(evaluation_code_list_summary)
 
             summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
