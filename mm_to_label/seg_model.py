@@ -1,7 +1,5 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from discriminator import Discriminator
-from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
 from decoder import Decoder
 
@@ -25,9 +23,6 @@ class GAN:
         self.ones = tf.ones(self.input_shape, name="ones")
         self.image_list = {}
         self.prob_list = {}
-        self.code_list = {}
-        self.judge_list = {}
-        self.tenaor_name = {}
 
         self.DC_L_X = Decoder('DC_L_X', ngf=ngf, output_channl=5)
         self.DC_L_Y = Decoder('DC_L_Y', ngf=ngf, output_channl=5)
