@@ -185,9 +185,8 @@ def train():
                         z_1 = tf.placeholder(tf.float32, shape=input_shape)
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_1 = gan.model( l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
-                        image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
+                        image_list_1= gan.image_list
                         evaluation_list_1 = gan.evaluation(image_list_1)
-                        evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(G_loss_1, var_list=variables_list_1[0])
                         G_grad_list.append(G_grad_1)
