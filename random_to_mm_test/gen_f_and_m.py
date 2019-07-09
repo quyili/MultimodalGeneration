@@ -53,7 +53,7 @@ def train():
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
             code = sess.run(code_rm)
-            f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm, code})
+            f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm:code})
 
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
