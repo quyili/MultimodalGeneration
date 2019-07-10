@@ -47,6 +47,10 @@ class GAN:
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
                                     shape=[self.input_shape[0], self.input_shape[1],
                                            self.input_shape[2], 5])
+        l_x = l_x * 0.25
+        l_y = l_y * 0.25
+        l_z = l_z * 0.25
+        l_w = l_w * 0.25
 
         code_x = self.EC_X(x)
         code_y = self.EC_Y(y)
