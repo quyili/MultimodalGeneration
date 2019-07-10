@@ -10,12 +10,12 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_string('load_model', "20190704-1239",
+tf.flags.DEFINE_string('load_model', "20190706-2032",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_string('code_tensor_name', "GPU_0/Reshape_3:0", "default: None")
-tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_3:0", "default: None")
-tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_3:0", "default: None")
+tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: None")
+tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
+tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
 tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 
@@ -53,7 +53,7 @@ def train():
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
             code = sess.run(code_rm)
-            f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm, code})
+            f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm:code})
 
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
