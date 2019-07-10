@@ -3,8 +3,6 @@ import tensorflow as tf
 from discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
 from encoder import Encoder
-from shared_decoder import SDecoder
-from m_decoder import MDecoder
 from decoder import Decoder
 
 
@@ -39,12 +37,10 @@ class GAN:
         self.EC_Z = Encoder('EC_Z', ngf=ngf)
         self.EC_W = Encoder('EC_W', ngf=ngf)
 
-        self.SDC = SDecoder('SDC', ngf=ngf)
-
-        self.DC_X = MDecoder('DC_X', ngf=ngf)
-        self.DC_Y = MDecoder('DC_Y', ngf=ngf)
-        self.DC_Z = MDecoder('DC_Z', ngf=ngf)
-        self.DC_W = MDecoder('DC_W', ngf=ngf)
+        self.DC_X = Decoder('DC_X', ngf=ngf)
+        self.DC_Y = Decoder('DC_Y', ngf=ngf)
+        self.DC_Z = Decoder('DC_Z', ngf=ngf)
+        self.DC_W = Decoder('DC_W', ngf=ngf)
 
         self.D_M = Discriminator('D_M', ngf=ngf)
         self.FD_R = FeatureDiscriminator('FD_R', ngf=ngf)
@@ -101,17 +97,15 @@ class GAN:
             tf.reshape(self.ones[:, :, :, 0] * 0.2 * label_expand[:, :, :, 4],
                        shape=self.input_shape) + f * 0.8],
             axis=-1)
-
         code_rm = self.EC_R(f_rm_expand)
 
         l_g_prob = self.DC_L(code_rm)
         l_g = tf.reshape(
             tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        mid_code_rm = self.SDC(code_rm)
-        x_g = self.DC_X(mid_code_rm)
-        y_g = self.DC_Y(mid_code_rm)
-        z_g = self.DC_Z(mid_code_rm)
-        w_g = self.DC_W(mid_code_rm)
+        x_g = self.DC_X(code_rm)
+        y_g = self.DC_Y(code_rm)
+        z_g = self.DC_Z(code_rm)
+        w_g = self.DC_W(code_rm)
         self.tenaor_name["x_g"] = str(x_g)
         self.tenaor_name["y_g"] = str(y_g)
         self.tenaor_name["z_g"] = str(z_g)
@@ -144,26 +138,21 @@ class GAN:
         f_z_g_r = self.get_f(z_g)
         f_w_g_r = self.get_f(w_g)
 
-        mid_code_x_g = self.SDC(code_x_g)
-        mid_code_y_g = self.SDC(code_y_g)
-        mid_code_z_g = self.SDC(code_z_g)
-        mid_code_w_g = self.SDC(code_w_g)
+        y_g_t_by_x = self.DC_Y(code_x_g)
+        z_g_t_by_x = self.DC_Z(code_x_g)
+        w_g_t_by_x = self.DC_W(code_x_g)
 
-        y_g_t_by_x = self.DC_Y(mid_code_x_g)
-        z_g_t_by_x = self.DC_Z(mid_code_x_g)
-        w_g_t_by_x = self.DC_W(mid_code_x_g)
+        x_g_t_by_y = self.DC_X(code_y_g)
+        z_g_t_by_y = self.DC_Z(code_y_g)
+        w_g_t_by_y = self.DC_W(code_y_g)
 
-        x_g_t_by_y = self.DC_X(mid_code_y_g)
-        z_g_t_by_y = self.DC_Z(mid_code_y_g)
-        w_g_t_by_y = self.DC_W(mid_code_y_g)
+        x_g_t_by_z = self.DC_X(code_z_g)
+        y_g_t_by_z = self.DC_Y(code_z_g)
+        w_g_t_by_z = self.DC_W(code_z_g)
 
-        x_g_t_by_z = self.DC_X(mid_code_z_g)
-        y_g_t_by_z = self.DC_Y(mid_code_z_g)
-        w_g_t_by_z = self.DC_W(mid_code_z_g)
-
-        x_g_t_by_w = self.DC_X(mid_code_w_g)
-        y_g_t_by_w = self.DC_Y(mid_code_w_g)
-        z_g_t_by_w = self.DC_Z(mid_code_w_g)
+        x_g_t_by_w = self.DC_X(code_w_g)
+        y_g_t_by_w = self.DC_Y(code_w_g)
+        z_g_t_by_w = self.DC_Z(code_w_g)
 
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
                                     shape=[self.input_shape[0], self.input_shape[1],
@@ -209,55 +198,50 @@ class GAN:
             tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
             shape=self.input_shape)
 
-        mid_code_x = self.SDC(code_x)
-        mid_code_y = self.SDC(code_y)
-        mid_code_z = self.SDC(code_z)
-        mid_code_w = self.SDC(code_w)
+        # x_r = self.DC_X(code_x)
+        # y_r = self.DC_Y(code_y)
+        # z_r = self.DC_Z(code_z)
+        # w_r = self.DC_W(code_w)
 
-        x_r = self.DC_X(mid_code_x)
-        y_r = self.DC_Y(mid_code_y)
-        z_r = self.DC_Z(mid_code_z)
-        w_r = self.DC_W(mid_code_w)
-
-        y_t_by_x = self.DC_Y(mid_code_x)
+        y_t_by_x = self.DC_Y(code_x)
         code_y_t_by_x = self.EC_Y(y_t_by_x)
-        x_r_c_by_y = self.DC_X(self.SDC(code_y_t_by_x))
-        z_t_by_x = self.DC_Z(mid_code_x)
+        x_r_c_by_y = self.DC_X(code_y_t_by_x)
+        z_t_by_x = self.DC_Z(code_x)
         code_z_t_by_x = self.EC_Z(z_t_by_x)
-        x_r_c_by_z = self.DC_X(self.SDC(code_z_t_by_x))
-        w_t_by_x = self.DC_W(mid_code_x)
+        x_r_c_by_z = self.DC_X(code_z_t_by_x)
+        w_t_by_x = self.DC_W(code_x)
         code_w_t_by_x = self.EC_W(w_t_by_x)
-        x_r_c_by_w = self.DC_X(self.SDC(code_w_t_by_x))
+        x_r_c_by_w = self.DC_X(code_w_t_by_x)
 
-        x_t_by_y = self.DC_X(mid_code_y)
+        x_t_by_y = self.DC_X(code_y)
         code_x_t_by_y = self.EC_X(x_t_by_y)
-        y_r_c_by_x = self.DC_Y(self.SDC(code_x_t_by_y))
-        z_t_by_y = self.DC_Z(mid_code_y)
+        y_r_c_by_x = self.DC_Y(code_x_t_by_y)
+        z_t_by_y = self.DC_Z(code_y)
         code_z_t_by_y = self.EC_Z(z_t_by_y)
-        y_r_c_by_z = self.DC_Y(self.SDC(code_z_t_by_y))
-        w_t_by_y = self.DC_W(mid_code_y)
+        y_r_c_by_z = self.DC_Y(code_z_t_by_y)
+        w_t_by_y = self.DC_W(code_y)
         code_w_t_by_y = self.EC_W(w_t_by_y)
-        y_r_c_by_w = self.DC_Y(self.SDC(code_w_t_by_y))
+        y_r_c_by_w = self.DC_Y(code_w_t_by_y)
 
-        x_t_by_z = self.DC_X(mid_code_z)
+        x_t_by_z = self.DC_X(code_z)
         code_x_t_by_z = self.EC_X(x_t_by_z)
-        z_r_c_by_x = self.DC_Z(self.SDC(code_x_t_by_z))
-        y_t_by_z = self.DC_Y(mid_code_z)
+        z_r_c_by_x = self.DC_Z(code_x_t_by_z)
+        y_t_by_z = self.DC_Y(code_z)
         code_y_t_by_z = self.EC_Y(y_t_by_z)
-        z_r_c_by_y = self.DC_Z(self.SDC(code_y_t_by_z))
-        w_t_by_z = self.DC_W(mid_code_z)
+        z_r_c_by_y = self.DC_Z(code_y_t_by_z)
+        w_t_by_z = self.DC_W(code_z)
         code_w_t_by_z = self.EC_W(w_t_by_z)
-        z_r_c_by_w = self.DC_Z(self.SDC(code_w_t_by_z))
+        z_r_c_by_w = self.DC_Z(code_w_t_by_z)
 
-        x_t_by_w = self.DC_X(mid_code_w)
+        x_t_by_w = self.DC_X(code_w)
         code_x_t_by_w = self.EC_X(x_t_by_w)
-        w_r_c_by_x = self.DC_W(self.SDC(code_x_t_by_w))
-        y_t_by_w = self.DC_Y(mid_code_w)
+        w_r_c_by_x = self.DC_W(code_x_t_by_w)
+        y_t_by_w = self.DC_Y(code_w)
         code_y_t_by_w = self.EC_Y(y_t_by_w)
-        w_r_c_by_y = self.DC_W(self.SDC(code_y_t_by_w))
-        z_t_by_w = self.DC_Z(mid_code_w)
+        w_r_c_by_y = self.DC_W(code_y_t_by_w)
+        z_t_by_w = self.DC_Z(code_w)
         code_z_t_by_w = self.EC_Z(z_t_by_w)
-        w_r_c_by_z = self.DC_W(self.SDC(code_z_t_by_w))
+        w_r_c_by_z = self.DC_W(code_z_t_by_w)
 
         j_x_g, j_x_g_c = self.D_M(x_g)
         j_y_g, j_y_g_c = self.D_M(y_g)
@@ -360,14 +344,19 @@ class GAN:
         G_loss += self.mse_loss(j_w_t_c_by_y, cw) * 50
         G_loss += self.mse_loss(j_w_t_c_by_z, cw) * 50
 
-        # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的对抗性损失，
+        # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的【【双向对抗性损失】】，
         # 以降低解码器解码难度，保证解码器能顺利解码出模态图
         D_loss += self.mse_loss(j_code_rm, 0.0) * 4
         D_loss += self.mse_loss(j_code_x, 1.0)
         D_loss += self.mse_loss(j_code_y, 1.0)
         D_loss += self.mse_loss(j_code_z, 1.0)
         D_loss += self.mse_loss(j_code_w, 1.0)
+
         G_loss += self.mse_loss(j_code_rm, 1.0) * 4
+        G_loss += self.mse_loss(j_code_x, 0.0)
+        G_loss += self.mse_loss(j_code_y, 0.0)
+        G_loss += self.mse_loss(j_code_z, 0.0)
+        G_loss += self.mse_loss(j_code_w, 0.0)
 
         # 输入的结构特征图的重建自监督损失
         G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_x_g_r)) * 10
@@ -540,10 +529,10 @@ class GAN:
         G_loss += self.mse_loss(0.0, w_g_t_by_z * mask) * 1.5
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
-        G_loss += self.mse_loss(x, x_r) * 5
-        G_loss += self.mse_loss(y, y_r) * 5
-        G_loss += self.mse_loss(z, z_r) * 5
-        G_loss += self.mse_loss(w, w_r) * 5
+        # G_loss += self.mse_loss(x, x_r) * 5
+        # G_loss += self.mse_loss(y, y_r) * 5
+        # G_loss += self.mse_loss(z, z_r) * 5
+        # G_loss += self.mse_loss(w, w_r) * 5
 
         # X模态与Y模态图进行转换得到的转换图与原图的有监督损失
         G_loss += self.mse_loss(x, x_r_c_by_y) * 10
@@ -591,10 +580,10 @@ class GAN:
         G_loss += self.mse_loss(0.0, w_t_by_y * mask_y)
         G_loss += self.mse_loss(0.0, w_t_by_z * mask_z)
 
-        G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
-        G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.5
-        G_loss += self.mse_loss(0.0, z_r * mask_z) * 0.5
-        G_loss += self.mse_loss(0.0, w_r * mask_w) * 0.5
+        # G_loss += self.mse_loss(0.0, x_r * mask_x) * 0.5
+        # G_loss += self.mse_loss(0.0, y_r * mask_y) * 0.5
+        # G_loss += self.mse_loss(0.0, z_r * mask_z) * 0.5
+        # G_loss += self.mse_loss(0.0, w_r * mask_w) * 0.5
 
         # 通过解码器生成X模态与Y模态图的编码与X模态与Y模态图经过编码器得到的编码的自监督语义一致性损失
         G_loss += self.mse_loss(code_rm, code_x_g)
@@ -720,10 +709,10 @@ class GAN:
         self.image_list["l_f_by_z"] = l_f_by_z
         self.image_list["l_f_by_w"] = l_f_by_w
 
-        self.image_list["x_r"] = x_r
-        self.image_list["y_r"] = y_r
-        self.image_list["z_r"] = z_r
-        self.image_list["w_r"] = w_r
+        # self.image_list["x_r"] = x_r
+        # self.image_list["y_r"] = y_r
+        # self.image_list["z_r"] = z_r
+        # self.image_list["w_r"] = w_r
 
         self.image_list["y_t_by_x"] = y_t_by_x
         self.code_list["code_y_t_by_x"] = code_y_t_by_x
@@ -812,7 +801,6 @@ class GAN:
                 + self.DC_Z.variables
                 + self.EC_W.variables
                 + self.DC_W.variables
-                + self.SDC.variables
             ,
                 self.D_M.variables +
                 self.FD_R.variables
@@ -865,14 +853,14 @@ class GAN:
     def evaluation(self, image_dirct):
         self.name_list_true = ["l", "l", "l", "l", "l",
                                "l_x", "l_y", "l_z", "l_w",
-                               "x", "y", "z", "w",
+                               # "x", "y", "z", "w",
                                "x_g", "x_g", "x_g",
                                "y_g", "y_g", "y_g",
                                "z_g", "z_g", "z_g",
                                "w_g", "w_g", "w_g", ]
         self.name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
                                 "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
-                                "x_r", "y_r", "z_r", "w_r",
+                                # "x_r", "y_r", "z_r", "w_r",
                                 "x_g_t_by_y", "x_g_t_by_z", "x_g_t_by_w",
                                 "y_g_t_by_x", "y_g_t_by_z", "y_g_t_by_w",
                                 "z_g_t_by_x", "z_g_t_by_y", "z_g_t_by_w",
