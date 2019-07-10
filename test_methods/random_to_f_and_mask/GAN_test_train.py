@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from GAN_test_model_mask_v2 import GAN
+from GAN_test_model_mask import GAN
 from datetime import datetime
 import os
 import logging
