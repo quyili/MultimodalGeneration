@@ -79,22 +79,22 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     input_w = np.asarray(input_w).reshape([184, 144, 1])
     fx_, fy_, fz_, fw_, \
     mask_x_, mask_y_, mask_z_, mask_w_, mask_l_, \
-    out_x_, out_y_, out_z_, out_w_, out_l_,sw_ = sess.run([fx, fy, fz, fw,
-                                                       mask_x, mask_y, mask_z, mask_w, mask_l,
-                                                       out_x, out_y, out_z, out_w, out_l,sw],
-                                                      feed_dict={x: np.asarray([input_x]),
-                                                                 y: np.asarray([input_y]),
-                                                                 z: np.asarray([input_z]),
-                                                                 w: np.asarray([input_w]),
-                                                                 l: np.asarray([input_l])
-                                                                 })
+    out_x_, out_y_, out_z_, out_w_, out_l_, sw_ = sess.run([fx, fy, fz, fw,
+                                                            mask_x, mask_y, mask_z, mask_w, mask_l,
+                                                            out_x, out_y, out_z, out_w, out_l, sw],
+                                                           feed_dict={x: np.asarray([input_x]),
+                                                                      y: np.asarray([input_y]),
+                                                                      z: np.asarray([input_z]),
+                                                                      w: np.asarray([input_w]),
+                                                                      l: np.asarray([input_l])
+                                                                      })
     full_x = np.concatenate(
         [np.asarray(fx_)[0, :, :, 0:1] * 255, np.asarray(fx_)[0, :, :, 0:1] * 255, np.asarray(fx_)[0, :, :, 0:1] * 255],
         axis=-1)
     print(full_x.shape)
 
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(sw_)[0, :, :, 0,0]), "sw0_.tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(sw_)[0, :, :, 0,1]), "sw1_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(sw_)[0, :, :, 0, 0]), "sw0_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(sw_)[0, :, :, 0, 1]), "sw1_.tiff")
 
     cv2.imwrite("full_x.jpg", full_x)
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fx_)[0, :, :, 0]), "fx_.tiff")

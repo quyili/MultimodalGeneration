@@ -25,7 +25,7 @@ class FeatureDiscriminator:
         with tf.variable_scope(self.name, reuse=self.reuse):
             FD_input = tf.nn.dropout(FD_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=FD_input, filters=2 * self.ngf, kernel_size=7,
+                conv1 = tf.layers.conv2d(inputs=FD_input, filters=self.ngf, kernel_size=7,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
@@ -35,7 +35,7 @@ class FeatureDiscriminator:
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
             with tf.variable_scope("conv2", reuse=self.reuse):
-                conv2 = tf.layers.conv2d(inputs=relu1, filters=2 * self.ngf, kernel_size=5,
+                conv2 = tf.layers.conv2d(inputs=relu1, filters=self.ngf, kernel_size=5,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,

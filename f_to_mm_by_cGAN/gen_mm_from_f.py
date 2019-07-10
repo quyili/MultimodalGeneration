@@ -113,14 +113,14 @@ def train():
             for b in range(FLAGS.batch_size):
                 train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
                 train_Mask_arr_ = read_file(FLAGS.M_test, F_train_files, index).reshape(FLAGS.image_size)
-                while True:#TODO 解决mask问题
-                    count=0
+                while True:  # TODO 解决mask问题
+                    count = 0
                     train_L_arr_ = read_file(FLAGS.L_test, L_train_files,
                                              np.random.randint(len(L_train_files))).reshape(FLAGS.image_size)
                     if np.sum(train_Mask_arr_ * train_L_arr_) == 0.0: break
                     count += 1
                     logging.info("mask and label not match !")
-                    if count==15:break
+                    if count == 15: break
 
                 train_true_f.append(train_F_arr_)
                 train_true_l.append(train_L_arr_)
@@ -133,15 +133,15 @@ def train():
 
             for b in range(FLAGS.batch_size):
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     "./test_images/X/" + str(index-b) + ".tiff")
+                                     "./test_images/X/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[b, :, :, 0]),
-                                     "./test_images/Y/" + str(index-b) + ".tiff")
+                                     "./test_images/Y/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[b, :, :, 0]),
-                                     "./test_images/Z/" + str(index-b) + ".tiff")
+                                     "./test_images/Z/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
-                                     "./test_images/W/" + str(index-b) + ".tiff")
+                                     "./test_images/W/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0]),
-                                     "./test_images/L/" + str(index-b) + ".tiff")
+                                     "./test_images/L/" + str(index - b) + ".tiff")
 
             print("image gen end:" + str(index))
 

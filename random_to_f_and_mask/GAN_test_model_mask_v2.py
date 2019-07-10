@@ -7,6 +7,7 @@ from GAN_test_decoder import GDecoder
 from encoder import Encoder
 from decoder import Decoder
 
+
 class GAN:
     def __init__(self,
                  image_size,
