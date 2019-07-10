@@ -306,10 +306,10 @@ def train():
             try:
                 logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
                 l_train_files = read_filename(FLAGS.L)
-                l_x_train_files = read_filename(FLAGS.L)
-                l_y_train_files = read_filename(FLAGS.L)
-                l_z_train_files = read_filename(FLAGS.L)
-                l_w_train_files = read_filename(FLAGS.L)
+                # l_x_train_files = read_filename(FLAGS.L)
+                # l_y_train_files = read_filename(FLAGS.L)
+                # l_z_train_files = read_filename(FLAGS.L)
+                # l_w_train_files = read_filename(FLAGS.L)
                 index = 0
                 epoch = 0
                 train_loss_list = []
@@ -340,14 +340,14 @@ def train():
                         #     if np.sum(mask * train_l_arr) == 0.0: break
                         #     logging.info("mask and label not match !")
 
-                        train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
-                        train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
-                        train_l_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
-                        train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
-                        train_l_z_arr = read_file(FLAGS.L, l_z_train_files, index).reshape(FLAGS.image_size)
-                        train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
-                        train_l_w_arr = read_file(FLAGS.L, l_w_train_files, index).reshape(FLAGS.image_size)
-                        train_w_arr = read_file(FLAGS.W, l_w_train_files, index).reshape(FLAGS.image_size)
+                        train_l_x_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        train_x_arr = read_file(FLAGS.X, l_train_files, index).reshape(FLAGS.image_size)
+                        train_l_y_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        train_y_arr = read_file(FLAGS.Y, l_train_files, index).reshape(FLAGS.image_size)
+                        train_l_z_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        train_z_arr = read_file(FLAGS.Z, l_train_files, index).reshape(FLAGS.image_size)
+                        train_l_w_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
+                        train_w_arr = read_file(FLAGS.W, l_train_files, index).reshape(FLAGS.image_size)
 
                         # train_true_l.append(train_l_arr)
                         # train_true_l_m.append(train_l_m_arr)
