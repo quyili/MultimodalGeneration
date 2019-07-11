@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from GAN_test_model_mask_v2 import GAN
+from GAN_test_model_mask_v3 import GAN
 from datetime import datetime
 import os
 import logging
@@ -154,9 +154,10 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
             input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-            G_optimizer, D_optimizer = gan.optimize()
+            FG_optimizer, MG_optimizer, D_optimizer = gan.optimize()
 
-            G_grad_list = []
+            FG_grad_list = []
+            MG_grad_list = []
             D_grad_list = []
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
@@ -168,9 +169,11 @@ def train():
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
-                        G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
-                        D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
-                        G_grad_list.append(G_grad_0)
+                        FG_grad_0 = FG_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
+                        MG_grad_0 =MG_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
+                        D_grad_0 = D_optimizer.compute_gradients(loss_list_0[2], var_list=variables_list_0[2])
+                        FG_grad_list.append(FG_grad_0)
+                        MG_grad_list.append(MG_grad_0)
                         D_grad_list.append(D_grad_0)
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
@@ -181,9 +184,11 @@ def train():
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
-                        G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
-                        D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
-                        G_grad_list.append(G_grad_1)
+                        FG_grad_1 = FG_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
+                        MG_grad_1 = MG_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
+                        D_grad_1 = D_optimizer.compute_gradients(loss_list_1[2], var_list=variables_list_1[2])
+                        FG_grad_list.append(FG_grad_1)
+                        MG_grad_list.append(MG_grad_1)
                         D_grad_list.append(D_grad_1)
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
@@ -194,9 +199,11 @@ def train():
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
-                        G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
-                        D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
-                        G_grad_list.append(G_grad_2)
+                        FG_grad_2 = FG_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
+                        MG_grad_2 = MG_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
+                        D_grad_2 = D_optimizer.compute_gradients(loss_list_2[2], var_list=variables_list_2[2])
+                        FG_grad_list.append(FG_grad_2)
+                        MG_grad_list.append(MG_grad_2)
                         D_grad_list.append(D_grad_2)
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
@@ -207,16 +214,20 @@ def train():
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()
-                        G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
-                        D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
-                        G_grad_list.append(G_grad_3)
+                        FG_grad_3 = FG_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
+                        MG_grad_3 = MG_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
+                        D_grad_3 = D_optimizer.compute_gradients(loss_list_3[2], var_list=variables_list_3[2])
+                        FG_grad_list.append(FG_grad_3)
+                        MG_grad_list.append(MG_grad_3)
                         D_grad_list.append(D_grad_3)
 
-            G_ave_grad = average_gradients(G_grad_list)
+            FG_ave_grad = average_gradients(FG_grad_list)
+            MG_ave_grad = average_gradients(MG_grad_list)
             D_ave_grad = average_gradients(D_grad_list)
-            G_optimizer_op = G_optimizer.apply_gradients(G_ave_grad)
+            FG_optimizer_op = FG_optimizer.apply_gradients(FG_ave_grad)
+            MG_optimizer_op = MG_optimizer.apply_gradients(MG_ave_grad)
             D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
-            optimizers = [G_optimizer_op, D_optimizer_op]
+            optimizers = [FG_optimizer_op,MG_optimizer_op, D_optimizer_op]
 
             gan.image_summary(image_list_0)
             gan.histogram_summary(j_list_0)
