@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from GAN_test_discriminator import Discriminator
-from GAN_test_feature_discriminator import FeatureDiscriminator
+from discriminator import Discriminator
+from feature_discriminator import FeatureDiscriminator
 from GAN_test_encoder import GEncoder
 from GAN_test_decoder import GDecoder
 from encoder import Encoder
@@ -104,36 +104,35 @@ class GAN:
         j_code_f = self.FD_F(code_f)
 
         D_loss = 0.0
-        FG_loss = 0.0
-        MG_loss = 0.0
+        G_loss = 0.0
         # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.1
         D_loss += self.mse_loss(j_code_f, 0.0) * 0.1
-        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.1
+        G_loss += self.mse_loss(j_code_f, 1.0) * 0.1
 
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
+        G_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 15
         D_loss += self.mse_loss(j_f_rm, 0.0) * 15
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 15
+        G_loss += self.mse_loss(j_f_rm, 1.0) * 15
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f, f_r) * 75
-        MG_loss += self.mse_loss(mask, mask_r) * 25
+        G_loss += self.mse_loss(f, f_r) * 75
+        G_loss += self.mse_loss(mask, mask_r) * 25
 
-        FG_loss += self.mse_loss(0.0, f_r * mask) * 5
-        MG_loss += self.mse_loss(0.0, f * mask_r) * 5
-        MG_loss += self.mse_loss(0.0, f_r * mask_r) * 5
-        MG_loss += self.mse_loss(0.0, f_rm * mask_rm) * 5
+        G_loss += self.mse_loss(0.0, f_r * mask) * 5
+        G_loss += self.mse_loss(0.0, f * mask_r) * 5
+        G_loss += self.mse_loss(0.0, f_r * mask_r) * 5
+        G_loss += self.mse_loss(0.0, f_rm * mask_rm) * 5
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list()) * 5
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 75
+        G_loss += self.mse_loss(f_one_hot, f_r_prob) * 75
         mask_one_hot = tf.reshape(tf.one_hot(tf.cast(mask, dtype=tf.int32), depth=2, axis=-1),
                                   shape=mask_r_prob.get_shape().as_list())
-        MG_loss += self.mse_loss(mask_one_hot, mask_r_prob) * 25
+        G_loss += self.mse_loss(mask_one_hot, mask_r_prob) * 25
 
         image_list = [m, f, f_r, f_rm, mask, mask_r, mask_rm]
 
@@ -141,17 +140,16 @@ class GAN:
 
         j_list = [j_code_f, j_code_f_rm, j_f, j_f_rm]
 
-        loss_list = [FG_loss, MG_loss, D_loss]
+        loss_list = [G_loss, D_loss]
 
         return image_list, code_list, j_list, loss_list
 
     def get_variables(self):
         return [self.EC_F.variables
                 + self.DC_F.variables
-            ,
-                self.EC_MASK.variables
-                + self.DC_MASK.variables
-            ,
+                + self.EC_MASK.variables
+                + self.DC_MASK.variables,
+
                 self.D_F.variables +
                 self.FD_F.variables
                 ]
@@ -163,11 +161,10 @@ class GAN:
             )
             return learning_step
 
-        FG_optimizer = make_optimizer(name='Adam_FG')
-        MG_optimizer = make_optimizer(name='Adam_MG')
+        G_optimizer = make_optimizer(name='Adam_G')
         D_optimizer = make_optimizer(name='Adam_D')
 
-        return FG_optimizer, MG_optimizer, D_optimizer
+        return G_optimizer, D_optimizer
 
     def evaluation_code(self, code_list):
         code_f, code_f_rm = \
@@ -196,9 +193,8 @@ class GAN:
         tf.summary.histogram('discriminator/FALSE/j_f_rm', j_f_rm)
 
     def loss_summary(self, loss_list):
-        FG_loss, MG_loss, D_loss = loss_list[0], loss_list[1], loss_list[2]
-        tf.summary.scalar('loss/FG_loss', FG_loss)
-        tf.summary.scalar('loss/MG_loss', MG_loss)
+        G_loss, D_loss = loss_list[0], loss_list[1]
+        tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_list):
