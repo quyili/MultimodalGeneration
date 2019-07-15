@@ -95,8 +95,8 @@ class GAN:
         self.tenaor_name["mask_rm"] = str(mask_rm)
 
         # D,FD
-        j_f = self.D_F(tf.concat([f, mask], axis=-1, name="j_f"))
-        j_f_rm = self.D_F(tf.concat([f_rm, mask_rm], axis=-1, name="j_f_rm"))
+        j_f = self.D_F(f)
+        j_f_rm = self.D_F(f_rm)
 
         code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
         code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
