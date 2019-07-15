@@ -360,16 +360,16 @@ class GAN:
         G_loss += self.mse_loss(j_code_w, 0.0)
 
         # 输入的结构特征图的重建自监督损失
-        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_x_g_r)) * 10
-        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_y_g_r)) * 10
-        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_z_g_r)) * 10
-        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_w_g_r)) * 10
-        G_loss += self.mse_loss(f_x_g_r, f_y_g_r) * 2
-        G_loss += self.mse_loss(f_x_g_r, f_z_g_r) * 2
-        G_loss += self.mse_loss(f_x_g_r, f_w_g_r) * 2
-        G_loss += self.mse_loss(f_y_g_r, f_z_g_r) * 2
-        G_loss += self.mse_loss(f_y_g_r, f_w_g_r) * 2
-        G_loss += self.mse_loss(f_z_g_r, f_w_g_r) * 2
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_x_g_r)) * 15
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_y_g_r)) * 15
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_z_g_r)) * 15
+        G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_w_g_r)) * 15
+        G_loss += self.mse_loss(f_x_g_r, f_y_g_r) * 5
+        G_loss += self.mse_loss(f_x_g_r, f_z_g_r) * 5
+        G_loss += self.mse_loss(f_x_g_r, f_w_g_r) * 5
+        G_loss += self.mse_loss(f_y_g_r, f_z_g_r) * 5
+        G_loss += self.mse_loss(f_y_g_r, f_w_g_r) * 5
+        G_loss += self.mse_loss(f_z_g_r, f_w_g_r) * 5
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
@@ -512,6 +512,8 @@ class GAN:
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_g * mask) * 1.5
         G_loss += self.mse_loss(0.0, y_g * mask) * 1.5
+        G_loss += self.mse_loss(0.0, z_g * mask) * 1.5
+        G_loss += self.mse_loss(0.0, w_g * mask) * 1.5
 
         G_loss += self.mse_loss(0.0, x_g_t_by_y * mask) * 1.5
         G_loss += self.mse_loss(0.0, x_g_t_by_z * mask) * 1.5
@@ -528,6 +530,11 @@ class GAN:
         G_loss += self.mse_loss(0.0, w_g_t_by_x * mask) * 1.5
         G_loss += self.mse_loss(0.0, w_g_t_by_y * mask) * 1.5
         G_loss += self.mse_loss(0.0, w_g_t_by_z * mask) * 1.5
+
+        G_loss += self.mse_loss(mask, self.get_mask(x_g)) * 5
+        G_loss += self.mse_loss(mask, self.get_mask(y_g)) * 5
+        G_loss += self.mse_loss(mask, self.get_mask(z_g)) * 5
+        G_loss += self.mse_loss(mask, self.get_mask(w_g)) * 5
 
         # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
         G_loss += self.mse_loss(x, x_r) * 5
