@@ -9,7 +9,7 @@ L = '../mydata/BRATS2015/trainLabel'
 L_E = '../mydata/BRATS2015/trainLabelE'
 L_EV = '../mydata/BRATS2015/trainLabelEV'
 change_times = 2
-epoch = 1
+epoch = 5
 
 
 # 旋转
