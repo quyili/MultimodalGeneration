@@ -111,9 +111,9 @@ def main():
                 op += "resize+"
         print(str(index), op[:-1])
         img = SimpleITK.GetImageFromArray(l_arr.astype('float32'))
-        SimpleITK.WriteImage(img, L_E + "/" + l_train_files[index])
+        SimpleITK.WriteImage(img, L_E + "/" + l_train_files[index % len(l_train_files)])
         img = SimpleITK.GetImageFromArray((l_arr * 0.25).astype('float32'))
-        SimpleITK.WriteImage(img, L_EV + "/" + l_train_files[index])
+        SimpleITK.WriteImage(img, L_EV + "/" + l_train_files[index % len(l_train_files)])
         index = index + 1
 
 
