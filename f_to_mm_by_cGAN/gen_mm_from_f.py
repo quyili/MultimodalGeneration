@@ -19,11 +19,11 @@ tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGenerat
                        'Y files for training')
 tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mm_test/random_to_f_and_mask/test_images/M',
                        'Y files for training')
-tf.flags.DEFINE_string('x_g', "GPU_0/DC_X/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('y_g', "GPU_0/DC_Y/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('z_g', "GPU_0/DC_Z/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('w_g', "GPU_0/DC_W/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('f_input', "GPU_0/mul_5:0", "default: None")
+tf.flags.DEFINE_string('x_g', "GPU_0/DC_M/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('y_g', "GPU_0/DC_M_1/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('z_g', "GPU_0/DC_M_2/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('w_g', "GPU_0/DC_M_3/lastconv/Sigmoid:0", "default: None")
+tf.flags.DEFINE_string('f_input', "GPU_0/mul_9:0", "default: None")
 tf.flags.DEFINE_string('l_input', "GPU_0/Placeholder:0", "default: None")
 
 
