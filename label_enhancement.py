@@ -5,9 +5,9 @@ import os
 import SimpleITK
 
 image_size = [184, 144]
-L = 'data/BRATS2015/trainLabel'
-L_E = 'data/BRATS2015/trainLabelE'
-L_EV = 'data/BRATS2015/trainLabelEV'
+L = '../mydata/BRATS2015/trainLabel'
+L_E = '../mydata/BRATS2015/trainLabelE'
+L_EV = '../mydata/BRATS2015/trainLabelEV'
 change_times = 2
 epoch = 1
 
