@@ -390,14 +390,14 @@ def train():
                                 val_true_z = []
                                 val_true_w = []
                                 for b in range(FLAGS.batch_size):
-                                    val_l_x_arr = read_file(FLAGS.L, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_x_arr = read_file(FLAGS.X, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_l_y_arr = read_file(FLAGS.L, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_y_arr = read_file(FLAGS.Y, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_l_z_arr = read_file(FLAGS.L, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_z_arr = read_file(FLAGS.Z, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_l_w_arr = read_file(FLAGS.L, l_w_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_w_arr = read_file(FLAGS.W, l_w_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_x_arr = read_file(FLAGS.L_test, l_x_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_x_arr = read_file(FLAGS.X_test, l_x_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_y_arr = read_file(FLAGS.L_test, l_y_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_y_arr = read_file(FLAGS.Y_test, l_y_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_z_arr = read_file(FLAGS.L_test, l_z_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_z_arr = read_file(FLAGS.Z_test, l_z_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_w_arr = read_file(FLAGS.L_test, l_w_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_w_arr = read_file(FLAGS.W_test, l_w_val_files, val_index).reshape(FLAGS.image_size)
 
                                     val_true_l_x.append(val_l_x_arr)
                                     val_true_l_y.append(val_l_y_arr)
@@ -499,11 +499,11 @@ def train():
                         val_true_z = []
                         val_true_w = []
                         for b in range(FLAGS.batch_size):
-                            val_l_arr = read_file(FLAGS.L, l_val_files, val_index).reshape(FLAGS.image_size)
-                            val_x_arr = read_file(FLAGS.X, l_val_files, val_index).reshape(FLAGS.image_size)
-                            val_y_arr = read_file(FLAGS.Y, l_val_files, val_index).reshape(FLAGS.image_size)
-                            val_z_arr = read_file(FLAGS.Z, l_val_files, val_index).reshape(FLAGS.image_size)
-                            val_w_arr = read_file(FLAGS.W, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_l_arr = read_file(FLAGS.L_test, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_x_arr = read_file(FLAGS.X_test, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_y_arr = read_file(FLAGS.Y_test, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_z_arr = read_file(FLAGS.Z_test, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_w_arr = read_file(FLAGS.W_test, l_val_files, val_index).reshape(FLAGS.image_size)
 
                             val_true_l_x.append(val_l_arr)
                             val_true_l_y.append(val_l_arr)
@@ -571,6 +571,12 @@ def train():
                         val_evaluation_list.append(val_evaluations_1)
                         val_evaluation_list.append(val_evaluations_2)
                         val_evaluation_list.append(val_evaluations_3)
+
+                        if j == 0:
+                            save_images(val_image_list_0, checkpoints_dir, str(0))
+                            # save_images(val_image_list_1, checkpoints_dir, str(1))
+                            # save_images(val_image_list_2, checkpoints_dir, str(2))
+                            # save_images(val_image_list_3, checkpoints_dir, str(3))
 
                     print("MSE:", mean(val_loss_list))
                     print("MEAN SSIM:",mean_list(val_evaluation_list))
