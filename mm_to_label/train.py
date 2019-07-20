@@ -268,220 +268,319 @@ def train():
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
             try:
-                l_x_train_files = read_filename(FLAGS.L)
-                l_y_train_files = read_filename(FLAGS.L)
-                l_z_train_files = read_filename(FLAGS.L)
-                l_w_train_files = read_filename(FLAGS.L)
-                index = 0
-                epoch = 0
-                train_loss_list = []
-                train_evaluation_list = []
-                while not coord.should_stop() and epoch <= FLAGS.epoch:
+                if FLAGS.stage == "train":
+                    l_x_train_files = read_filename(FLAGS.L)
+                    l_y_train_files = read_filename(FLAGS.L)
+                    l_z_train_files = read_filename(FLAGS.L)
+                    l_w_train_files = read_filename(FLAGS.L)
+                    index = 0
+                    epoch = 0
+                    train_loss_list = []
+                    train_evaluation_list = []
+                    while not coord.should_stop() and epoch <= FLAGS.epoch:
 
-                    train_true_l_x = []
-                    train_true_l_y = []
-                    train_true_l_z = []
-                    train_true_l_w = []
-                    train_true_x = []
-                    train_true_y = []
-                    train_true_z = []
-                    train_true_w = []
-                    for b in range(FLAGS.batch_size):
-                        train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
-                        train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
-                        train_l_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
-                        train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
-                        train_l_z_arr = read_file(FLAGS.L, l_z_train_files, index).reshape(FLAGS.image_size)
-                        train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
-                        train_l_w_arr = read_file(FLAGS.L, l_w_train_files, index).reshape(FLAGS.image_size)
-                        train_w_arr = read_file(FLAGS.W, l_w_train_files, index).reshape(FLAGS.image_size)
+                        train_true_l_x = []
+                        train_true_l_y = []
+                        train_true_l_z = []
+                        train_true_l_w = []
+                        train_true_x = []
+                        train_true_y = []
+                        train_true_z = []
+                        train_true_w = []
+                        for b in range(FLAGS.batch_size):
+                            train_l_x_arr = read_file(FLAGS.L, l_x_train_files, index).reshape(FLAGS.image_size)
+                            train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
+                            train_l_y_arr = read_file(FLAGS.L, l_y_train_files, index).reshape(FLAGS.image_size)
+                            train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
+                            train_l_z_arr = read_file(FLAGS.L, l_z_train_files, index).reshape(FLAGS.image_size)
+                            train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
+                            train_l_w_arr = read_file(FLAGS.L, l_w_train_files, index).reshape(FLAGS.image_size)
+                            train_w_arr = read_file(FLAGS.W, l_w_train_files, index).reshape(FLAGS.image_size)
 
-                        train_true_l_x.append(train_l_x_arr)
-                        train_true_l_y.append(train_l_y_arr)
-                        train_true_l_z.append(train_l_z_arr)
-                        train_true_l_w.append(train_l_w_arr)
-                        train_true_x.append(train_x_arr)
-                        train_true_y.append(train_y_arr)
-                        train_true_z.append(train_z_arr)
-                        train_true_w.append(train_w_arr)
+                            train_true_l_x.append(train_l_x_arr)
+                            train_true_l_y.append(train_l_y_arr)
+                            train_true_l_z.append(train_l_z_arr)
+                            train_true_l_w.append(train_l_w_arr)
+                            train_true_x.append(train_x_arr)
+                            train_true_y.append(train_y_arr)
+                            train_true_z.append(train_z_arr)
+                            train_true_w.append(train_w_arr)
 
-                        epoch = int(index / len(l_x_train_files))
-                        index = index + 1
-
-                    logging.info(
-                        "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses, train_evaluations = sess.run(
-                        [optimizers, image_summary_op, G_loss_0, evaluation_list_0, ],
-                        feed_dict={
-                            l_x_0: np.asarray(train_true_l_x)[0:1, :, :, :],
-                            l_y_0: np.asarray(train_true_l_y)[0:1, :, :, :],
-                            l_z_0: np.asarray(train_true_l_z)[0:1, :, :, :],
-                            l_w_0: np.asarray(train_true_l_w)[0:1, :, :, :],
-                            x_0: np.asarray(train_true_x)[0:1, :, :, :],
-                            y_0: np.asarray(train_true_y)[0:1, :, :, :],
-                            z_0: np.asarray(train_true_z)[0:1, :, :, :],
-                            w_0: np.asarray(train_true_w)[0:1, :, :, :],
-
-                            l_x_1: np.asarray(train_true_l_x)[1:2, :, :, :],
-                            l_y_1: np.asarray(train_true_l_y)[1:2, :, :, :],
-                            l_z_1: np.asarray(train_true_l_z)[1:2, :, :, :],
-                            l_w_1: np.asarray(train_true_l_w)[1:2, :, :, :],
-                            x_1: np.asarray(train_true_x)[1:2, :, :, :],
-                            y_1: np.asarray(train_true_y)[1:2, :, :, :],
-                            z_1: np.asarray(train_true_z)[1:2, :, :, :],
-                            w_1: np.asarray(train_true_w)[1:2, :, :, :],
-
-                            l_x_2: np.asarray(train_true_l_x)[2:3, :, :, :],
-                            l_y_2: np.asarray(train_true_l_y)[2:3, :, :, :],
-                            l_z_2: np.asarray(train_true_l_z)[2:3, :, :, :],
-                            l_w_2: np.asarray(train_true_l_w)[2:3, :, :, :],
-                            x_2: np.asarray(train_true_x)[2:3, :, :, :],
-                            y_2: np.asarray(train_true_y)[2:3, :, :, :],
-                            z_2: np.asarray(train_true_z)[2:3, :, :, :],
-                            w_2: np.asarray(train_true_w)[2:3, :, :, :],
-
-                            l_x_3: np.asarray(train_true_l_x)[3:4, :, :, :],
-                            l_y_3: np.asarray(train_true_l_y)[3:4, :, :, :],
-                            l_z_3: np.asarray(train_true_l_z)[3:4, :, :, :],
-                            l_w_3: np.asarray(train_true_l_w)[3:4, :, :, :],
-                            x_3: np.asarray(train_true_x)[3:4, :, :, :],
-                            y_3: np.asarray(train_true_y)[3:4, :, :, :],
-                            z_3: np.asarray(train_true_z)[3:4, :, :, :],
-                            w_3: np.asarray(train_true_w)[3:4, :, :, :],
-                        })
-                    train_loss_list.append(train_losses)
-                    train_evaluation_list.append(train_evaluations)
-                    logging.info(
-                        "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
-
-                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
-                            FLAGS.epoch_steps * FLAGS.epoch / 4):
-                        logging.info('-----------Train summary start-------------')
-                        train_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean(train_loss_list),
-                                       evaluation_list_summary: mean_list(train_evaluation_list)})
-                        train_writer.add_summary(train_image_summary_op, step)
-                        train_writer.add_summary(train_summary_op, step)
-                        train_writer.flush()
-                        logging.info('-----------Train summary end-------------')
-
-                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                        logging.info("Model saved in file: %s" % save_path)
+                            epoch = int(index / len(l_x_train_files))
+                            index = index + 1
 
                         logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        val_loss_list = []
-                        val_evaluation_list = []
-                        val_index = 0
+                            "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
+                        _, train_image_summary_op, train_losses, train_evaluations = sess.run(
+                            [optimizers, image_summary_op, G_loss_0, evaluation_list_0, ],
+                            feed_dict={
+                                l_x_0: np.asarray(train_true_l_x)[0:1, :, :, :],
+                                l_y_0: np.asarray(train_true_l_y)[0:1, :, :, :],
+                                l_z_0: np.asarray(train_true_l_z)[0:1, :, :, :],
+                                l_w_0: np.asarray(train_true_l_w)[0:1, :, :, :],
+                                x_0: np.asarray(train_true_x)[0:1, :, :, :],
+                                y_0: np.asarray(train_true_y)[0:1, :, :, :],
+                                z_0: np.asarray(train_true_z)[0:1, :, :, :],
+                                w_0: np.asarray(train_true_w)[0:1, :, :, :],
 
-                        l_x_val_files = read_filename(FLAGS.L_test)
-                        l_y_val_files = read_filename(FLAGS.L_test)
-                        l_z_val_files = read_filename(FLAGS.L_test)
-                        l_w_val_files = read_filename(FLAGS.L_test)
-                        for j in range(int(math.ceil(len(l_x_val_files) / FLAGS.batch_size))):
-                            val_true_l_x = []
-                            val_true_l_y = []
-                            val_true_l_z = []
-                            val_true_l_w = []
-                            val_true_x = []
-                            val_true_y = []
-                            val_true_z = []
-                            val_true_w = []
-                            for b in range(FLAGS.batch_size):
-                                val_l_x_arr = read_file(FLAGS.L, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                val_x_arr = read_file(FLAGS.X, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_y_arr = read_file(FLAGS.L, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                val_y_arr = read_file(FLAGS.Y, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_z_arr = read_file(FLAGS.L, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                val_z_arr = read_file(FLAGS.Z, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_w_arr = read_file(FLAGS.L, l_w_val_files, val_index).reshape(FLAGS.image_size)
-                                val_w_arr = read_file(FLAGS.W, l_w_val_files, val_index).reshape(FLAGS.image_size)
+                                l_x_1: np.asarray(train_true_l_x)[1:2, :, :, :],
+                                l_y_1: np.asarray(train_true_l_y)[1:2, :, :, :],
+                                l_z_1: np.asarray(train_true_l_z)[1:2, :, :, :],
+                                l_w_1: np.asarray(train_true_l_w)[1:2, :, :, :],
+                                x_1: np.asarray(train_true_x)[1:2, :, :, :],
+                                y_1: np.asarray(train_true_y)[1:2, :, :, :],
+                                z_1: np.asarray(train_true_z)[1:2, :, :, :],
+                                w_1: np.asarray(train_true_w)[1:2, :, :, :],
 
-                                val_true_l_x.append(val_l_x_arr)
-                                val_true_l_y.append(val_l_y_arr)
-                                val_true_l_z.append(val_l_z_arr)
-                                val_true_l_w.append(val_l_w_arr)
-                                val_true_x.append(val_x_arr)
-                                val_true_y.append(val_y_arr)
-                                val_true_z.append(val_z_arr)
-                                val_true_w.append(val_w_arr)
+                                l_x_2: np.asarray(train_true_l_x)[2:3, :, :, :],
+                                l_y_2: np.asarray(train_true_l_y)[2:3, :, :, :],
+                                l_z_2: np.asarray(train_true_l_z)[2:3, :, :, :],
+                                l_w_2: np.asarray(train_true_l_w)[2:3, :, :, :],
+                                x_2: np.asarray(train_true_x)[2:3, :, :, :],
+                                y_2: np.asarray(train_true_y)[2:3, :, :, :],
+                                z_2: np.asarray(train_true_z)[2:3, :, :, :],
+                                w_2: np.asarray(train_true_w)[2:3, :, :, :],
 
-                                val_index += 1
-
-                            val_losses_0, val_evaluations_0, \
-                            val_losses_1, val_evaluations_1, \
-                            val_losses_2, val_evaluations_2, \
-                            val_losses_3, val_evaluations_3, \
-                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
-                                [G_loss_0, evaluation_list_0,
-                                 G_loss_1, evaluation_list_1,
-                                 G_loss_2, evaluation_list_2,
-                                 G_loss_3, evaluation_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
-                                feed_dict={
-                                    l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
-                                    l_y_0: np.asarray(val_true_l_y)[0:1, :, :, :],
-                                    l_z_0: np.asarray(val_true_l_z)[0:1, :, :, :],
-                                    l_w_0: np.asarray(val_true_l_w)[0:1, :, :, :],
-                                    x_0: np.asarray(val_true_x)[0:1, :, :, :],
-                                    y_0: np.asarray(val_true_y)[0:1, :, :, :],
-                                    z_0: np.asarray(val_true_z)[0:1, :, :, :],
-                                    w_0: np.asarray(val_true_w)[0:1, :, :, :],
-
-                                    l_x_1: np.asarray(val_true_l_x)[1:2, :, :, :],
-                                    l_y_1: np.asarray(val_true_l_y)[1:2, :, :, :],
-                                    l_z_1: np.asarray(val_true_l_z)[1:2, :, :, :],
-                                    l_w_1: np.asarray(val_true_l_w)[1:2, :, :, :],
-                                    x_1: np.asarray(val_true_x)[1:2, :, :, :],
-                                    y_1: np.asarray(val_true_y)[1:2, :, :, :],
-                                    z_1: np.asarray(val_true_z)[1:2, :, :, :],
-                                    w_1: np.asarray(val_true_w)[1:2, :, :, :],
-
-                                    l_x_2: np.asarray(val_true_l_x)[2:3, :, :, :],
-                                    l_y_2: np.asarray(val_true_l_y)[2:3, :, :, :],
-                                    l_z_2: np.asarray(val_true_l_z)[2:3, :, :, :],
-                                    l_w_2: np.asarray(val_true_l_w)[2:3, :, :, :],
-                                    x_2: np.asarray(val_true_x)[2:3, :, :, :],
-                                    y_2: np.asarray(val_true_y)[2:3, :, :, :],
-                                    z_2: np.asarray(val_true_z)[2:3, :, :, :],
-                                    w_2: np.asarray(val_true_w)[2:3, :, :, :],
-
-                                    l_x_3: np.asarray(val_true_l_x)[3:4, :, :, :],
-                                    l_y_3: np.asarray(val_true_l_y)[3:4, :, :, :],
-                                    l_z_3: np.asarray(val_true_l_z)[3:4, :, :, :],
-                                    l_w_3: np.asarray(val_true_l_w)[3:4, :, :, :],
-                                    x_3: np.asarray(val_true_x)[3:4, :, :, :],
-                                    y_3: np.asarray(val_true_y)[3:4, :, :, :],
-                                    z_3: np.asarray(val_true_z)[3:4, :, :, :],
-                                    w_3: np.asarray(val_true_w)[3:4, :, :, :],
-                                })
-                            val_loss_list.append(val_losses_0)
-                            val_loss_list.append(val_losses_1)
-                            val_loss_list.append(val_losses_2)
-                            val_loss_list.append(val_losses_3)
-                            val_evaluation_list.append(val_evaluations_0)
-                            val_evaluation_list.append(val_evaluations_1)
-                            val_evaluation_list.append(val_evaluations_2)
-                            val_evaluation_list.append(val_evaluations_3)
-
-                            if j == 0:
-                                save_images(val_image_list_0, checkpoints_dir, str(0))
-                                # save_images(val_image_list_1, checkpoints_dir, str(1))
-                                # save_images(val_image_list_2, checkpoints_dir, str(2))
-                                # save_images(val_image_list_3, checkpoints_dir, str(3))
-
-                        val_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean(val_loss_list),
-                                       evaluation_list_summary: mean_list(val_evaluation_list)})
-                        val_writer.add_summary(val_image_summary_op, step)
-                        val_writer.add_summary(val_summary_op, step)
-                        val_writer.flush()
-
+                                l_x_3: np.asarray(train_true_l_x)[3:4, :, :, :],
+                                l_y_3: np.asarray(train_true_l_y)[3:4, :, :, :],
+                                l_z_3: np.asarray(train_true_l_z)[3:4, :, :, :],
+                                l_w_3: np.asarray(train_true_l_w)[3:4, :, :, :],
+                                x_3: np.asarray(train_true_x)[3:4, :, :, :],
+                                y_3: np.asarray(train_true_y)[3:4, :, :, :],
+                                z_3: np.asarray(train_true_z)[3:4, :, :, :],
+                                w_3: np.asarray(train_true_w)[3:4, :, :, :],
+                            })
+                        train_loss_list.append(train_losses)
+                        train_evaluation_list.append(train_evaluations)
                         logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
-                    step += 1
+                            "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+
+                        if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
+                                FLAGS.epoch_steps * FLAGS.epoch / 4):
+                            logging.info('-----------Train summary start-------------')
+                            train_summary_op = sess.run(
+                                summary_op,
+                                feed_dict={loss_list_summary: mean(train_loss_list),
+                                           evaluation_list_summary: mean_list(train_evaluation_list)})
+                            train_writer.add_summary(train_image_summary_op, step)
+                            train_writer.add_summary(train_summary_op, step)
+                            train_writer.flush()
+                            logging.info('-----------Train summary end-------------')
+
+                            save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+                            logging.info("Model saved in file: %s" % save_path)
+
+                            logging.info(
+                                "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
+                            val_loss_list = []
+                            val_evaluation_list = []
+                            val_index = 0
+
+                            l_x_val_files = read_filename(FLAGS.L_test)
+                            l_y_val_files = read_filename(FLAGS.L_test)
+                            l_z_val_files = read_filename(FLAGS.L_test)
+                            l_w_val_files = read_filename(FLAGS.L_test)
+                            for j in range(int(math.ceil(len(l_x_val_files) / FLAGS.batch_size))):
+                                val_true_l_x = []
+                                val_true_l_y = []
+                                val_true_l_z = []
+                                val_true_l_w = []
+                                val_true_x = []
+                                val_true_y = []
+                                val_true_z = []
+                                val_true_w = []
+                                for b in range(FLAGS.batch_size):
+                                    val_l_x_arr = read_file(FLAGS.L, l_x_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_x_arr = read_file(FLAGS.X, l_x_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_y_arr = read_file(FLAGS.L, l_y_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_y_arr = read_file(FLAGS.Y, l_y_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_z_arr = read_file(FLAGS.L, l_z_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_z_arr = read_file(FLAGS.Z, l_z_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_w_arr = read_file(FLAGS.L, l_w_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_w_arr = read_file(FLAGS.W, l_w_val_files, val_index).reshape(FLAGS.image_size)
+
+                                    val_true_l_x.append(val_l_x_arr)
+                                    val_true_l_y.append(val_l_y_arr)
+                                    val_true_l_z.append(val_l_z_arr)
+                                    val_true_l_w.append(val_l_w_arr)
+                                    val_true_x.append(val_x_arr)
+                                    val_true_y.append(val_y_arr)
+                                    val_true_z.append(val_z_arr)
+                                    val_true_w.append(val_w_arr)
+
+                                    val_index += 1
+
+                                val_losses_0, val_evaluations_0, \
+                                val_losses_1, val_evaluations_1, \
+                                val_losses_2, val_evaluations_2, \
+                                val_losses_3, val_evaluations_3, \
+                                val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
+                                    [G_loss_0, evaluation_list_0,
+                                     G_loss_1, evaluation_list_1,
+                                     G_loss_2, evaluation_list_2,
+                                     G_loss_3, evaluation_list_3,
+                                     image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
+                                    feed_dict={
+                                        l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
+                                        l_y_0: np.asarray(val_true_l_y)[0:1, :, :, :],
+                                        l_z_0: np.asarray(val_true_l_z)[0:1, :, :, :],
+                                        l_w_0: np.asarray(val_true_l_w)[0:1, :, :, :],
+                                        x_0: np.asarray(val_true_x)[0:1, :, :, :],
+                                        y_0: np.asarray(val_true_y)[0:1, :, :, :],
+                                        z_0: np.asarray(val_true_z)[0:1, :, :, :],
+                                        w_0: np.asarray(val_true_w)[0:1, :, :, :],
+
+                                        l_x_1: np.asarray(val_true_l_x)[1:2, :, :, :],
+                                        l_y_1: np.asarray(val_true_l_y)[1:2, :, :, :],
+                                        l_z_1: np.asarray(val_true_l_z)[1:2, :, :, :],
+                                        l_w_1: np.asarray(val_true_l_w)[1:2, :, :, :],
+                                        x_1: np.asarray(val_true_x)[1:2, :, :, :],
+                                        y_1: np.asarray(val_true_y)[1:2, :, :, :],
+                                        z_1: np.asarray(val_true_z)[1:2, :, :, :],
+                                        w_1: np.asarray(val_true_w)[1:2, :, :, :],
+
+                                        l_x_2: np.asarray(val_true_l_x)[2:3, :, :, :],
+                                        l_y_2: np.asarray(val_true_l_y)[2:3, :, :, :],
+                                        l_z_2: np.asarray(val_true_l_z)[2:3, :, :, :],
+                                        l_w_2: np.asarray(val_true_l_w)[2:3, :, :, :],
+                                        x_2: np.asarray(val_true_x)[2:3, :, :, :],
+                                        y_2: np.asarray(val_true_y)[2:3, :, :, :],
+                                        z_2: np.asarray(val_true_z)[2:3, :, :, :],
+                                        w_2: np.asarray(val_true_w)[2:3, :, :, :],
+
+                                        l_x_3: np.asarray(val_true_l_x)[3:4, :, :, :],
+                                        l_y_3: np.asarray(val_true_l_y)[3:4, :, :, :],
+                                        l_z_3: np.asarray(val_true_l_z)[3:4, :, :, :],
+                                        l_w_3: np.asarray(val_true_l_w)[3:4, :, :, :],
+                                        x_3: np.asarray(val_true_x)[3:4, :, :, :],
+                                        y_3: np.asarray(val_true_y)[3:4, :, :, :],
+                                        z_3: np.asarray(val_true_z)[3:4, :, :, :],
+                                        w_3: np.asarray(val_true_w)[3:4, :, :, :],
+                                    })
+                                val_loss_list.append(val_losses_0)
+                                val_loss_list.append(val_losses_1)
+                                val_loss_list.append(val_losses_2)
+                                val_loss_list.append(val_losses_3)
+                                val_evaluation_list.append(val_evaluations_0)
+                                val_evaluation_list.append(val_evaluations_1)
+                                val_evaluation_list.append(val_evaluations_2)
+                                val_evaluation_list.append(val_evaluations_3)
+
+                                if j == 0:
+                                    save_images(val_image_list_0, checkpoints_dir, str(0))
+                                    # save_images(val_image_list_1, checkpoints_dir, str(1))
+                                    # save_images(val_image_list_2, checkpoints_dir, str(2))
+                                    # save_images(val_image_list_3, checkpoints_dir, str(3))
+
+                            val_summary_op = sess.run(
+                                summary_op,
+                                feed_dict={loss_list_summary: mean(val_loss_list),
+                                           evaluation_list_summary: mean_list(val_evaluation_list)})
+                            val_writer.add_summary(val_image_summary_op, step)
+                            val_writer.add_summary(val_summary_op, step)
+                            val_writer.flush()
+
+                            logging.info(
+                                "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+                        step += 1
+                elif  FLAGS.stage == "test":
+                    val_loss_list = []
+                    val_evaluation_list = []
+                    val_index = 0
+
+                    l_val_files = read_filename(FLAGS.L_test)
+                    for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
+                        val_true_l_x = []
+                        val_true_l_y = []
+                        val_true_l_z = []
+                        val_true_l_w = []
+                        val_true_x = []
+                        val_true_y = []
+                        val_true_z = []
+                        val_true_w = []
+                        for b in range(FLAGS.batch_size):
+                            val_l_arr = read_file(FLAGS.L, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_x_arr = read_file(FLAGS.X, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_y_arr = read_file(FLAGS.Y, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_z_arr = read_file(FLAGS.Z, l_val_files, val_index).reshape(FLAGS.image_size)
+                            val_w_arr = read_file(FLAGS.W, l_val_files, val_index).reshape(FLAGS.image_size)
+
+                            val_true_l_x.append(val_l_arr)
+                            val_true_l_y.append(val_l_arr)
+                            val_true_l_z.append(val_l_arr)
+                            val_true_l_w.append(val_l_arr)
+                            val_true_x.append(val_x_arr)
+                            val_true_y.append(val_y_arr)
+                            val_true_z.append(val_z_arr)
+                            val_true_w.append(val_w_arr)
+
+                            val_index += 1
+
+                        val_losses_0, val_evaluations_0, \
+                        val_losses_1, val_evaluations_1, \
+                        val_losses_2, val_evaluations_2, \
+                        val_losses_3, val_evaluations_3, \
+                        val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
+                            [G_loss_0, evaluation_list_0,
+                             G_loss_1, evaluation_list_1,
+                             G_loss_2, evaluation_list_2,
+                             G_loss_3, evaluation_list_3,
+                             image_list_0, image_list_1, image_list_2, image_list_3],
+                            feed_dict={
+                                l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
+                                l_y_0: np.asarray(val_true_l_y)[0:1, :, :, :],
+                                l_z_0: np.asarray(val_true_l_z)[0:1, :, :, :],
+                                l_w_0: np.asarray(val_true_l_w)[0:1, :, :, :],
+                                x_0: np.asarray(val_true_x)[0:1, :, :, :],
+                                y_0: np.asarray(val_true_y)[0:1, :, :, :],
+                                z_0: np.asarray(val_true_z)[0:1, :, :, :],
+                                w_0: np.asarray(val_true_w)[0:1, :, :, :],
+
+                                l_x_1: np.asarray(val_true_l_x)[1:2, :, :, :],
+                                l_y_1: np.asarray(val_true_l_y)[1:2, :, :, :],
+                                l_z_1: np.asarray(val_true_l_z)[1:2, :, :, :],
+                                l_w_1: np.asarray(val_true_l_w)[1:2, :, :, :],
+                                x_1: np.asarray(val_true_x)[1:2, :, :, :],
+                                y_1: np.asarray(val_true_y)[1:2, :, :, :],
+                                z_1: np.asarray(val_true_z)[1:2, :, :, :],
+                                w_1: np.asarray(val_true_w)[1:2, :, :, :],
+
+                                l_x_2: np.asarray(val_true_l_x)[2:3, :, :, :],
+                                l_y_2: np.asarray(val_true_l_y)[2:3, :, :, :],
+                                l_z_2: np.asarray(val_true_l_z)[2:3, :, :, :],
+                                l_w_2: np.asarray(val_true_l_w)[2:3, :, :, :],
+                                x_2: np.asarray(val_true_x)[2:3, :, :, :],
+                                y_2: np.asarray(val_true_y)[2:3, :, :, :],
+                                z_2: np.asarray(val_true_z)[2:3, :, :, :],
+                                w_2: np.asarray(val_true_w)[2:3, :, :, :],
+
+                                l_x_3: np.asarray(val_true_l_x)[3:4, :, :, :],
+                                l_y_3: np.asarray(val_true_l_y)[3:4, :, :, :],
+                                l_z_3: np.asarray(val_true_l_z)[3:4, :, :, :],
+                                l_w_3: np.asarray(val_true_l_w)[3:4, :, :, :],
+                                x_3: np.asarray(val_true_x)[3:4, :, :, :],
+                                y_3: np.asarray(val_true_y)[3:4, :, :, :],
+                                z_3: np.asarray(val_true_z)[3:4, :, :, :],
+                                w_3: np.asarray(val_true_w)[3:4, :, :, :],
+                            })
+                        val_loss_list.append(val_losses_0)
+                        val_loss_list.append(val_losses_1)
+                        val_loss_list.append(val_losses_2)
+                        val_loss_list.append(val_losses_3)
+                        val_evaluation_list.append(val_evaluations_0)
+                        val_evaluation_list.append(val_evaluations_1)
+                        val_evaluation_list.append(val_evaluations_2)
+                        val_evaluation_list.append(val_evaluations_3)
+
+                        if j == 0:
+                            save_images(val_image_list_0, checkpoints_dir, str(0))
+                            # save_images(val_image_list_1, checkpoints_dir, str(1))
+                            # save_images(val_image_list_2, checkpoints_dir, str(2))
+                            # save_images(val_image_list_3, checkpoints_dir, str(3))
+
+                    print("MSE:", mean(val_loss_list))
+                    print("MEAN SSIM:",mean_list(val_evaluation_list))
+
             except KeyboardInterrupt:
                 logging.info('Interrupted')
                 coord.request_stop()
