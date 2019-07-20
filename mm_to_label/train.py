@@ -572,12 +572,6 @@ def train():
                         val_evaluation_list.append(val_evaluations_2)
                         val_evaluation_list.append(val_evaluations_3)
 
-                        if j == 0:
-                            save_images(val_image_list_0, checkpoints_dir, str(0))
-                            # save_images(val_image_list_1, checkpoints_dir, str(1))
-                            # save_images(val_image_list_2, checkpoints_dir, str(2))
-                            # save_images(val_image_list_3, checkpoints_dir, str(3))
-
                     print("MSE:", mean(val_loss_list))
                     print("MEAN SSIM:",mean_list(val_evaluation_list))
 
