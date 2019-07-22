@@ -179,9 +179,13 @@ class GAN:
         self.name_list_true = ["l_x", "l_y", "l_z", "l_w"]
         self.name_list_false = ["l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w"]
         ssim_list = []
+        mse_list =[]
         for i in range(len(self.name_list_true)):
-            ssim_list.append(self.SSIM(image_dirct[self.name_list_true[i]], image_dirct[self.name_list_false[i]]))
-        return ssim_list
+            ssim_list.append(
+                self.SSIM(image_dirct[self.name_list_true[i]]*4, image_dirct[self.name_list_false[i]]*4))
+            mse_list.append(
+                self.mse_loss(image_dirct[self.name_list_true[i]] * 4, image_dirct[self.name_list_false[i]] * 4))
+        return ssim_list,mse_list
 
     def evaluation_summary(self, ssim_list):
         for i in range(len(self.name_list_true)):
