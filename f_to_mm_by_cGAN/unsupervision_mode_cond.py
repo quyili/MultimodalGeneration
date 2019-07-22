@@ -393,7 +393,7 @@ class GAN:
                                   l_g_prob_by_x[:, :, :, 3]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 4],
                                   l_g_prob_by_x[:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, l_g_by_x)
+        G_loss += self.mse_loss(l, l_g_by_x)* 5
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
                                 l_g_prob_by_y[:, :, :, 0]) * 0.1 \
@@ -405,7 +405,7 @@ class GAN:
                                   l_g_prob_by_y[:, :, :, 3]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 4],
                                   l_g_prob_by_y[:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, l_g_by_y)
+        G_loss += self.mse_loss(l, l_g_by_y)* 5
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
                                 l_g_prob_by_z[:, :, :, 0]) * 0.1 \
@@ -417,7 +417,7 @@ class GAN:
                                   l_g_prob_by_z[:, :, :, 3]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 4],
                                   l_g_prob_by_z[:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, l_g_by_z)
+        G_loss += self.mse_loss(l, l_g_by_z)* 5
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
                                 l_g_prob_by_w[:, :, :, 0]) * 0.1 \
@@ -429,7 +429,7 @@ class GAN:
                                   l_g_prob_by_w[:, :, :, 3]) * 5 \
                   + self.mse_loss(label_expand[:, :, :, 4],
                                   l_g_prob_by_w[:, :, :, 4]) * 5
-        G_loss += self.mse_loss(l, l_g_by_w)
+        G_loss += self.mse_loss(l, l_g_by_w)* 5
 
         # X模态图分割训练的有监督损失
         G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
@@ -437,48 +437,48 @@ class GAN:
                   + self.mse_loss(label_expand_x[:, :, :, 1],
                                   l_f_prob_by_x[:, :, :, 1]) * 5 \
                   + self.mse_loss(label_expand_x[:, :, :, 2],
-                                  l_f_prob_by_x[:, :, :, 2]) * 15 \
+                                  l_f_prob_by_x[:, :, :, 2]) * 25 \
                   + self.mse_loss(label_expand_x[:, :, :, 3],
-                                  l_f_prob_by_x[:, :, :, 3]) * 15 \
+                                  l_f_prob_by_x[:, :, :, 3]) * 25 \
                   + self.mse_loss(label_expand_x[:, :, :, 4],
-                                  l_f_prob_by_x[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_x, l_f_by_x) * 5
+                                  l_f_prob_by_x[:, :, :, 4]) * 25
+        G_loss += self.mse_loss(l_x, l_f_by_x) * 25
 
         G_loss += self.mse_loss(label_expand_y[:, :, :, 0],
                                 l_f_prob_by_y[:, :, :, 0]) \
                   + self.mse_loss(label_expand_y[:, :, :, 1],
                                   l_f_prob_by_y[:, :, :, 1]) * 5 \
                   + self.mse_loss(label_expand_y[:, :, :, 2],
-                                  l_f_prob_by_y[:, :, :, 2]) * 15 \
+                                  l_f_prob_by_y[:, :, :, 2]) * 25 \
                   + self.mse_loss(label_expand_y[:, :, :, 3],
-                                  l_f_prob_by_y[:, :, :, 3]) * 15 \
+                                  l_f_prob_by_y[:, :, :, 3]) * 25 \
                   + self.mse_loss(label_expand_y[:, :, :, 4],
-                                  l_f_prob_by_y[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_y, l_f_by_y) * 5
+                                  l_f_prob_by_y[:, :, :, 4]) * 25
+        G_loss += self.mse_loss(l_y, l_f_by_y) * 25
 
         G_loss += self.mse_loss(label_expand_z[:, :, :, 0],
                                 l_f_prob_by_z[:, :, :, 0]) \
                   + self.mse_loss(label_expand_z[:, :, :, 1],
                                   l_f_prob_by_z[:, :, :, 1]) * 5 \
                   + self.mse_loss(label_expand_z[:, :, :, 2],
-                                  l_f_prob_by_z[:, :, :, 2]) * 15 \
+                                  l_f_prob_by_z[:, :, :, 2]) * 25 \
                   + self.mse_loss(label_expand_z[:, :, :, 3],
-                                  l_f_prob_by_z[:, :, :, 3]) * 15 \
+                                  l_f_prob_by_z[:, :, :, 3]) * 25 \
                   + self.mse_loss(label_expand_z[:, :, :, 4],
-                                  l_f_prob_by_z[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_z, l_f_by_z) * 5
+                                  l_f_prob_by_z[:, :, :, 4]) * 25
+        G_loss += self.mse_loss(l_z, l_f_by_z) * 25
 
         G_loss += self.mse_loss(label_expand_w[:, :, :, 0],
                                 l_f_prob_by_w[:, :, :, 0]) \
                   + self.mse_loss(label_expand_w[:, :, :, 1],
                                   l_f_prob_by_w[:, :, :, 1]) * 5 \
                   + self.mse_loss(label_expand_w[:, :, :, 2],
-                                  l_f_prob_by_w[:, :, :, 2]) * 15 \
+                                  l_f_prob_by_w[:, :, :, 2]) * 25 \
                   + self.mse_loss(label_expand_w[:, :, :, 3],
-                                  l_f_prob_by_w[:, :, :, 3]) * 15 \
+                                  l_f_prob_by_w[:, :, :, 3]) * 25 \
                   + self.mse_loss(label_expand_w[:, :, :, 4],
-                                  l_f_prob_by_w[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_w, l_f_by_w) * 5
+                                  l_f_prob_by_w[:, :, :, 4]) * 25
+        G_loss += self.mse_loss(l_w, l_f_by_w) * 25
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2  # + self.ssim_loss(x_g, x_g_t_by_y) * 2

@@ -404,10 +404,75 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 \section{结果}
 \subsection{实验量化结果}
 \subsubsection{病灶检测实验结果}
+\begin{table}[t]
+	\caption{病灶检测实验结果.}\smallskip
+	\centering
+	\resizebox{.95\columnwidth}{!}{
+		\smallskip\begin{tabular}{l|l|l|l}
+			数据类别 & 测试集大小  & MSE & SSIM\\
+			真实 & 1650 & 0.033 & 0.954\\
+			合成 & 1650 &  & \\
+			合成 & 15070 & 0.428 &0.845 \\
+		\end{tabular}
+	}
+	\label{label_test}
+\end{table}
+如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.033的MSE和0.954的SSIM。之后我们使用这个表现优秀的分割网络对我们的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，分割测试结果达到【】的MSE和【】的SSIM，在一个与真实训练数据集相同数据量的合成数据集上，，分割测试结果达到【】的MSE和【】的SSIM。从实验结果看，我们的合成数据集能够使用训练好的分割网络进行病灶分割，也就是说，我们的合成数据中，成功合成了与输入标签一致的肿瘤病灶。
 
 \subsubsection{合成数据可用性验证实验结果}
+\begin{table}[t]
+	\caption{合成数据可用性验证实验结果.}\smallskip
+	\centering
+	\resizebox{.95\columnwidth}{!}{
+		\smallskip\begin{tabular}{l|l|l|l|l}
+			真实训练量 & 合成训练量  & 混合方式  & MSE & SSIM\\
+			15070 & 0 &无混合 & & \\
+			0 & 15070 &无混合 & & \\
+			15070$\times$ 0.5 & 15070$\times$ 0.5 &随机混合 & & \\
+			15070$\times$ 0.25 & 15070$\times$ 0.75 &随机混合 & & \\
+			15070$\times$ 0.75 & 15070$\times$ 0.25 &随机混合 & & \\
+			15070 & 15070 &随机混合 & & \\
+			15070 & 15070 &先真后假 & & \\
+			15070 & 15070 &先假后真 & & \\
+			15070 & 15070$\times$ 2 &随机混合 & & \\
+			15070 & 15070$\times$ 3  &随机混合 & & \\
+			15070 & 15070$\times$ 4  &随机混合 & & \\
+			15070 & 15070$\times$ 5  &随机混合 & & \\
+		\end{tabular}
+	}
+	\label{use_test}
+\end{table}
+如表~\ref{use_test}所示，我们在不同的成分和数量的数据集上都经过训练100个epoch的充分训练后，得到了表中的结果。从表中结果看，我们的合成数据尚不能完全替代真实数据充当训练集，但在真实数据充当训练集的基础上，可以使用合成数据集作为增强数据来提高模型泛化能力，数据最好的组合使用方式是随机混合使用。我们也注意到，合成数据也并不是越多越好的，当合成数据所占比重过大时，为降低真实数据的影响力。在我们的实验中，采用【】倍的合成数据与真实数据进行随机混合取得了最好的提升效果，相比完全的真实数据，分割测试结果提升了【\%】的MSE和【\%】的SSIM。
 
 \subsection{合成数据可视化}
+上述各项实验的一些生成结果如图~\ref{generated_f}~\ref{generated_mri}~\ref{label_from_diff_test}~\ref{label_from_diff_train}所示，从图中我们能更直观的取得结论。
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/placeholder}
+	\caption{合成的结构特征图机器掩膜.}
+	\label{generated_f}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/placeholder}
+	\caption{合成的多模态MRI.}
+	\label{generated_mri}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/placeholder}
+	\caption{使用真实训练数据的分割模型在不同测试集上的分割示例.}
+	\label{label_from_diff_test}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/placeholder}
+	\caption{使用不同训练数据的分割模型在真实测试集上的分割示例.}
+	\label{label_from_diff_train}
+\end{figure}
 
 \section{结论与未来工作}
 我们基于条件生成对抗网络，通过无监督的训练，实现了能在已有单模态数据时可扩展出多模态影像数据并保留原模态的病灶信息，同时可从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们通过病灶分割实验验证了合成的医学影像可以用于医学影像智能处理任务的预训练或者补充训练来提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
