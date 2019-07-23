@@ -178,14 +178,14 @@ class GAN:
     def evaluation(self, image_dirct):
         self.name_list_true = ["l_x", "l_y", "l_z", "l_w"]
         self.name_list_false = ["l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w"]
-        ssim_list = []
-        mse_list =[]
+        dice_score_list = []
+        mse_list = []
         for i in range(len(self.name_list_true)):
-            ssim_list.append(
-                self.SSIM(image_dirct[self.name_list_true[i]]*4, image_dirct[self.name_list_false[i]]*4))
+            dice_score_list.append(
+                self.dice_score(image_dirct[self.name_list_true[i]] * 4, image_dirct[self.name_list_false[i]] * 4))
             mse_list.append(
                 self.mse_loss(image_dirct[self.name_list_true[i]] * 4, image_dirct[self.name_list_false[i]] * 4))
-        return ssim_list,mse_list
+        return dice_score_list, mse_list
 
     def evaluation_summary(self, ssim_list):
         for i in range(len(self.name_list_true)):
@@ -214,6 +214,39 @@ class GAN:
     def SSIM(self, output, target):
         ssim = tf.reduce_mean(tf.image.ssim(output, target, max_val=1.0))
         return ssim
+
+    def dice_score(self, output, target, loss_type='jaccard', axis=(1, 2, 3), smooth=1e-5):
+        inse = tf.reduce_sum(output * target, axis=axis)
+        if loss_type == 'jaccard':
+            l = tf.reduce_sum(output * output, axis=axis)
+            r = tf.reduce_sum(target * target, axis=axis)
+        elif loss_type == 'sorensen':
+            l = tf.reduce_sum(output, axis=axis)
+            r = tf.reduce_sum(target, axis=axis)
+        else:
+            raise Exception("Unknow loss_type")
+        dice = (2. * inse + smooth) / (l + r + smooth)
+        dice = tf.reduce_mean(dice)
+        return dice
+
+    def cos_score(self, output, target, axis=(1, 2, 3), smooth=1e-5):
+        pooled_len_1 = tf.sqrt(tf.reduce_sum(tf.square(output), axis))
+        pooled_len_2 = tf.sqrt(tf.reduce_sum(tf.square(target), axis))
+        pooled_mul_12 = tf.reduce_sum(tf.multiply(output, target), axis)
+        score = tf.reduce_mean(tf.div(pooled_mul_12, pooled_len_1 * pooled_len_2 + smooth))
+        return score
+
+    def euclidean_distance(self, output, target, axis=(1, 2, 3)):
+        euclidean = tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.square(output - target), axis)))
+        return euclidean
+
+    def MSE(self, output, target):
+        mse = tf.reduce_mean(tf.square(output - target))
+        return mse
+
+    def MAE(self, output, target):
+        mae = tf.reduce_mean(tf.abs(output - target))
+        return mae
 
     def norm(self, input):
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])
