@@ -24,7 +24,7 @@ tf.flags.DEFINE_float('max_count', 50, 'default: 50')
 tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
 
 
-def get_mask_from_f(imgfile, savefile):
+def get_mask_from_f(imgfile):
     # imgfile = "full_x.jpg"
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
     gray = cv2.GaussianBlur(img, (3, 3), 0)
@@ -47,10 +47,7 @@ def train():
         print("<load_model> is None.")
         return
     try:
-        os.makedirs("./test_images/F_jpg")
-        os.makedirs("./test_images/Temp/F")
-        os.makedirs("./test_images/Temp/M1")
-        os.makedirs("./test_images/Temp/M2")
+        os.makedirs("./test_images/Temp")
         os.makedirs("./test_images/F")
         os.makedirs("./test_images/M")
     except os.error:
@@ -86,16 +83,10 @@ def train():
 
                 jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                         np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-                cv2.imwrite("./test_images/Temp/F/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                cv2.imwrite("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
 
-                m_arr_1 = get_mask_from_f("./test_images/Temp/F/f_" + str(index) + "_" + str(count) + ".jpg",
-                                          "./test_images/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
+                m_arr_1 = get_mask_from_f("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
-
-                # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(m_arr_1),
-                #                      "./test_images/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
-                # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(m_arr_2),
-                #                      "./test_images/Temp/M2/m_2_" + str(index) + "_" + str(count) + ".tiff")
 
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
                 print(count, "mae: ", mae)
@@ -116,9 +107,6 @@ def train():
 
                 count = count + 1
 
-            jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
-                                    np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("./test_images/F_jpg/" + str(index) + ".jpg", jpg_f)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
                                  "./test_images/F/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
@@ -130,7 +118,7 @@ def train():
 
 def main(unused_argv):
     train()
-    os.system("rm -r "+"./test_images/Temp")
+    os.system("rm -r " + "./test_images/Temp")
 
 
 if __name__ == '__main__':
