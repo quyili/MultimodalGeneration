@@ -491,17 +491,23 @@ def train():
                                 "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                         step += 1
                 elif  FLAGS.stage == "test":
+                    try:
+                        os.makedirs(checkpoints_dir + "/samples")
+                        os.makedirs("./seg_res/T1")
+                        os.makedirs("./seg_res/T2")
+                        os.makedirs("./seg_res/T1c")
+                        os.makedirs("./seg_res/Flair")
+                    except os.error:
+                        pass
+
                     val_loss_list = []
                     val_evaluation_list = []
                     val_mse_list = []
                     val_index = 0
 
-                    l_val_files = read_filename(FLAGS.L_test)
+                    l_val_files = read_filename(FLAGS.L_test,shuffle=False)
                     for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
-                        val_true_l_x = []
-                        val_true_l_y = []
-                        val_true_l_z = []
-                        val_true_l_w = []
+                        val_true_l = []
                         val_true_x = []
                         val_true_y = []
                         val_true_z = []
@@ -513,10 +519,7 @@ def train():
                             val_z_arr = read_file(FLAGS.Z_test, l_val_files, val_index).reshape(FLAGS.image_size)
                             val_w_arr = read_file(FLAGS.W_test, l_val_files, val_index).reshape(FLAGS.image_size)
 
-                            val_true_l_x.append(val_l_arr)
-                            val_true_l_y.append(val_l_arr)
-                            val_true_l_z.append(val_l_arr)
-                            val_true_l_w.append(val_l_arr)
+                            val_true_l.append(val_l_arr)
                             val_true_x.append(val_x_arr)
                             val_true_y.append(val_y_arr)
                             val_true_z.append(val_z_arr)
@@ -535,37 +538,37 @@ def train():
                              G_loss_3, evaluation_list_3, mse_list_3,
                              image_list_0, image_list_1, image_list_2, image_list_3],
                             feed_dict={
-                                l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
-                                l_y_0: np.asarray(val_true_l_y)[0:1, :, :, :],
-                                l_z_0: np.asarray(val_true_l_z)[0:1, :, :, :],
-                                l_w_0: np.asarray(val_true_l_w)[0:1, :, :, :],
+                                l_x_0: np.asarray(val_true_l)[0:1, :, :, :],
+                                l_y_0: np.asarray(val_true_l)[0:1, :, :, :],
+                                l_z_0: np.asarray(val_true_l)[0:1, :, :, :],
+                                l_w_0: np.asarray(val_true_l)[0:1, :, :, :],
                                 x_0: np.asarray(val_true_x)[0:1, :, :, :],
                                 y_0: np.asarray(val_true_y)[0:1, :, :, :],
                                 z_0: np.asarray(val_true_z)[0:1, :, :, :],
                                 w_0: np.asarray(val_true_w)[0:1, :, :, :],
 
-                                l_x_1: np.asarray(val_true_l_x)[1:2, :, :, :],
-                                l_y_1: np.asarray(val_true_l_y)[1:2, :, :, :],
-                                l_z_1: np.asarray(val_true_l_z)[1:2, :, :, :],
-                                l_w_1: np.asarray(val_true_l_w)[1:2, :, :, :],
+                                l_x_1: np.asarray(val_true_l)[1:2, :, :, :],
+                                l_y_1: np.asarray(val_true_l)[1:2, :, :, :],
+                                l_z_1: np.asarray(val_true_l)[1:2, :, :, :],
+                                l_w_1: np.asarray(val_true_l)[1:2, :, :, :],
                                 x_1: np.asarray(val_true_x)[1:2, :, :, :],
                                 y_1: np.asarray(val_true_y)[1:2, :, :, :],
                                 z_1: np.asarray(val_true_z)[1:2, :, :, :],
                                 w_1: np.asarray(val_true_w)[1:2, :, :, :],
 
-                                l_x_2: np.asarray(val_true_l_x)[2:3, :, :, :],
-                                l_y_2: np.asarray(val_true_l_y)[2:3, :, :, :],
-                                l_z_2: np.asarray(val_true_l_z)[2:3, :, :, :],
-                                l_w_2: np.asarray(val_true_l_w)[2:3, :, :, :],
+                                l_x_2: np.asarray(val_true_l)[2:3, :, :, :],
+                                l_y_2: np.asarray(val_true_l)[2:3, :, :, :],
+                                l_z_2: np.asarray(val_true_l)[2:3, :, :, :],
+                                l_w_2: np.asarray(val_true_l)[2:3, :, :, :],
                                 x_2: np.asarray(val_true_x)[2:3, :, :, :],
                                 y_2: np.asarray(val_true_y)[2:3, :, :, :],
                                 z_2: np.asarray(val_true_z)[2:3, :, :, :],
                                 w_2: np.asarray(val_true_w)[2:3, :, :, :],
 
-                                l_x_3: np.asarray(val_true_l_x)[3:4, :, :, :],
-                                l_y_3: np.asarray(val_true_l_y)[3:4, :, :, :],
-                                l_z_3: np.asarray(val_true_l_z)[3:4, :, :, :],
-                                l_w_3: np.asarray(val_true_l_w)[3:4, :, :, :],
+                                l_x_3: np.asarray(val_true_l)[3:4, :, :, :],
+                                l_y_3: np.asarray(val_true_l)[3:4, :, :, :],
+                                l_z_3: np.asarray(val_true_l)[3:4, :, :, :],
+                                l_w_3: np.asarray(val_true_l)[3:4, :, :, :],
                                 x_3: np.asarray(val_true_x)[3:4, :, :, :],
                                 y_3: np.asarray(val_true_y)[3:4, :, :, :],
                                 z_3: np.asarray(val_true_z)[3:4, :, :, :],
@@ -580,15 +583,42 @@ def train():
                         val_evaluation_list.append(val_evaluations_2)
                         val_evaluation_list.append(val_evaluations_3)
                         val_mse_list.append(val_mses_0)
-                        val_mse_list.append(val_mses_1)
-                        val_mse_list.append(val_mses_2)
-                        val_mse_list.append(val_mses_3)
 
-                        if j == 0:
-                            save_images(val_image_list_0, checkpoints_dir, str(0))
-                            # save_images(val_image_list_1, checkpoints_dir, str(1))
-                            # save_images(val_image_list_2, checkpoints_dir, str(2))
-                            # save_images(val_image_list_3, checkpoints_dir, str(3))
+                        save_image(np.asarray(image_list_0["l_f_by_x"])[0, :, :, 0], l_val_files[val_index-4],
+                                   dir="./seg_res/T1", form=".tiff")
+                        save_image(np.asarray(image_list_0["l_f_by_y"])[0, :, :, 0], l_val_files[val_index-4],
+                                   dir="./seg_res/T2", form=".tiff")
+                        save_image(np.asarray(image_list_0["l_f_by_z"])[0, :, :, 0], l_val_files[val_index-4],
+                                   dir="./seg_res/T1c", form=".tiff")
+                        save_image(np.asarray(image_list_0["l_f_by_w"])[0, :, :, 0], l_val_files[val_index-4],
+                                   dir="./seg_res/Flair", form=".tiff")
+
+                        save_image(np.asarray(image_list_1["l_f_by_x"])[0, :, :, 0], l_val_files[val_index-3],
+                                   dir="./seg_res/T1", form=".tiff")
+                        save_image(np.asarray(image_list_1["l_f_by_y"])[0, :, :, 0], l_val_files[val_index-3],
+                                   dir="./seg_res/T2", form=".tiff")
+                        save_image(np.asarray(image_list_1["l_f_by_z"])[0, :, :, 0], l_val_files[val_index-3],
+                                   dir="./seg_res/T1c", form=".tiff")
+                        save_image(np.asarray(image_list_1["l_f_by_w"])[0, :, :, 0], l_val_files[val_index-3],
+                                   dir="./seg_res/Flair", form=".tiff")
+
+                        save_image(np.asarray(image_list_2["l_f_by_x"])[0, :, :, 0], l_val_files[val_index-2],
+                                   dir="./seg_res/T1", form=".tiff")
+                        save_image(np.asarray(image_list_2["l_f_by_y"])[0, :, :, 0], l_val_files[val_index-2],
+                                   dir="./seg_res/T2", form=".tiff")
+                        save_image(np.asarray(image_list_2["l_f_by_z"])[0, :, :, 0], l_val_files[val_index-2],
+                                   dir="./seg_res/T1c", form=".tiff")
+                        save_image(np.asarray(image_list_2["l_f_by_w"])[0, :, :, 0], l_val_files[val_index-2],
+                                   dir="./seg_res/Flair", form=".tiff")
+
+                        save_image(np.asarray(image_list_3["l_f_by_x"])[0, :, :, 0], l_val_files[val_index-1],
+                                   dir="./seg_res/T1", form=".tiff")
+                        save_image(np.asarray(image_list_3["l_f_by_y"])[0, :, :, 0], l_val_files[val_index-1],
+                                   dir="./seg_res/T2", form=".tiff")
+                        save_image(np.asarray(image_list_3["l_f_by_z"])[0, :, :, 0], l_val_files[val_index-1],
+                                   dir="./seg_res/T1c", form=".tiff")
+                        save_image(np.asarray(image_list_3["l_f_by_w"])[0, :, :, 0], l_val_files[val_index-1],
+                                   dir="./seg_res/Flair", form=".tiff")
 
                     print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))
