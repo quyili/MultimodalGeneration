@@ -592,7 +592,7 @@ def train():
 
                     print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))
-                    print("MEAN SSIM:",mean_list(val_evaluation_list),mean(mean_list(val_evaluation_list)))
+                    print("MEAN Dice Score:",mean_list(val_evaluation_list),mean(mean_list(val_evaluation_list)))
 
             except KeyboardInterrupt:
                 logging.info('Interrupted')
