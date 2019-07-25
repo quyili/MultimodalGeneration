@@ -10,7 +10,7 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_string('load_model', "20190706-2032",
+tf.flags.DEFINE_string('load_model', "20190719-1738",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: None")
@@ -20,7 +20,20 @@ tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "
 tf.flags.DEFINE_integer('epoch_steps', 1650, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
-tf.flags.DEFINE_float('max_count', 10, 'default: 10')
+tf.flags.DEFINE_float('max_count', 50, 'default: 50')
+tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
+
+
+def get_mask_from_f(imgfile, savefile):
+    # imgfile = "full_x.jpg"
+    img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
+    gray = cv2.GaussianBlur(img, (3, 3), 0)
+    ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
+    c_list = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = c_list[-2], c_list[-1]
+    cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
+    # savefile="mask.tiff"
+    return np.asarray(1.0 - img / 255.0, dtype="float32")
 
 
 def train():
@@ -35,6 +48,9 @@ def train():
         return
     try:
         os.makedirs("./test_images/F_jpg")
+        os.makedirs("./test_images/Temp/F")
+        os.makedirs("./test_images/Temp/M1")
+        os.makedirs("./test_images/Temp/M2")
         os.makedirs("./test_images/F")
         os.makedirs("./test_images/M")
     except os.error:
@@ -63,24 +79,46 @@ def train():
                 code = sess.run(code_rm)
                 f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: code})
                 j_f = np.mean(np.asarray(j_f))
-                print(j_f)
+                print(count, "j_f: ", j_f)
 
+                # 根据置信度过滤
                 if j_f >= FLAGS.min_j_f: break
+
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./test_images/Temp/F/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+
+                m_arr_1 = get_mask_from_f("./test_images/Temp/F/f_" + str(index) + "_" + str(count) + ".jpg",
+                                          "./test_images/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+
+                # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(m_arr_1),
+                #                      "./test_images/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
+                # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(m_arr_2),
+                #                      "./test_images/Temp/M2/m_2_" + str(index) + "_" + str(count) + ".tiff")
+
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                print(count, "mae: ", mae)
+
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae: break
 
                 if j_f > best_j_f:
                     best_j_f = j_f
                     best_f = f
                     best_m = m
 
-                count = count + 1
+                # 根据生成次数过滤
                 if count >= FLAGS.max_count:
                     f = best_f
                     m = best_m
                     break
 
-            full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
-                                     np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("./test_images/F_jpg/" + str(index) + ".jpg", full_x)
+                count = count + 1
+
+            jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                    np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+            cv2.imwrite("./test_images/F_jpg/" + str(index) + ".jpg", jpg_f)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
                                  "./test_images/F/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
@@ -92,6 +130,7 @@ def train():
 
 def main(unused_argv):
     train()
+    os.system("rm -r "+"./test_images/Temp")
 
 
 if __name__ == '__main__':
