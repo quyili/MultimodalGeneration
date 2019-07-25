@@ -103,6 +103,7 @@ def train():
             os.makedirs("./test_images/T1c")
             os.makedirs("./test_images/Flair")
             os.makedirs("./test_images/Label")
+            os.makedirs("./test_images/LabelV")
         except os.error:
             pass
 
@@ -142,8 +143,10 @@ def train():
                                      "./test_images/T1c/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
                                      "./test_images/Flair/" + str(index - b) + ".tiff")
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0] * 0.25),
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0]),
                                      "./test_images/Label/" + str(index - b) + ".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0] * 0.25),
+                                     "./test_images/LabelV/" + str(index - b) + ".tiff")
 
             print("image gen end:" + str(index))
 
