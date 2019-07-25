@@ -116,9 +116,9 @@ class GAN:
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 0.05
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.05
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 80
+        D_loss += self.mse_loss(j_f, 1.0) * 0.01
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.01
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 100
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         FG_loss += self.mse_loss(f, f_r) * 50
