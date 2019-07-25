@@ -97,6 +97,7 @@ class GAN:
         # D,FD
         j_f = self.D_F(f)
         j_f_rm = self.D_F(f_rm)
+        self.tenaor_name["j_f_rm"] = str(j_f_rm)
 
         code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
         code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
@@ -115,9 +116,9 @@ class GAN:
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 50
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 50
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 50
+        D_loss += self.mse_loss(j_f, 1.0) * 0.05
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.05
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 80
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         FG_loss += self.mse_loss(f, f_r) * 50

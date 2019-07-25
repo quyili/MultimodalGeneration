@@ -16,8 +16,11 @@ tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: None")
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
+tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
+tf.flags.DEFINE_integer('epoch_steps', 1650, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
+tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
+tf.flags.DEFINE_float('max_count', 10, 'default: 10')
 
 
 def train():
@@ -46,14 +49,34 @@ def train():
     code_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.code_tensor_name)
     f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.f_tensor_name)
     mask_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.m_tensor_name)
+    j_f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.j_f_tensor_name)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
         index = 0
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
-            code = sess.run(code_rm)
-            f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm: code})
+
+            count = 0
+            best_j_f = -1000.0
+            while True:
+                code = sess.run(code_rm)
+                f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: code})
+                j_f = np.mean(np.asarray(j_f))
+                print(j_f)
+
+                if j_f >= FLAGS.min_j_f: break
+
+                if j_f > best_j_f:
+                    best_j_f = j_f
+                    best_f = f
+                    best_m = m
+
+                count = count + 1
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
 
             full_x = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                      np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
