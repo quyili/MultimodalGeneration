@@ -13,11 +13,13 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 1, 'batch size, default: 1')
 tf.flags.DEFINE_string('load_model', "20190707-1545", "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mm_test/random_to_f_and_mask/test_images/F',
+tf.flags.DEFINE_string('F_test',
+                       '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mm_test/random_to_f_and_mask/test_images/F',
                        'X files for training')
 tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/trainLabelE',
                        'Y files for training')
-tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mm_test/random_to_f_and_mask/test_images/M',
+tf.flags.DEFINE_string('M_test',
+                       '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mm_test/random_to_f_and_mask/test_images/M',
                        'Y files for training')
 tf.flags.DEFINE_string('x_g', "GPU_0/DC_M/lastconv/Sigmoid:0", "default: None")
 tf.flags.DEFINE_string('y_g', "GPU_0/DC_M_1/lastconv/Sigmoid:0", "default: None")
@@ -96,11 +98,11 @@ def train():
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
         try:
-            os.makedirs("./test_images/X")
-            os.makedirs("./test_images/Y")
-            os.makedirs("./test_images/Z")
-            os.makedirs("./test_images/W")
-            os.makedirs("./test_images/L")
+            os.makedirs("./test_images/T1")
+            os.makedirs("./test_images/T2")
+            os.makedirs("./test_images/T1c")
+            os.makedirs("./test_images/Flair")
+            os.makedirs("./test_images/Label")
         except os.error:
             pass
 
@@ -120,7 +122,7 @@ def train():
                     if np.sum(train_Mask_arr_ * train_L_arr_) == 0.0: break
                     count += 1
                     logging.info("mask and label not match !")
-                    if count == 15: break
+                    if count == 50: break
 
                 train_true_f.append(train_F_arr_)
                 train_true_l.append(train_L_arr_)
@@ -133,15 +135,15 @@ def train():
 
             for b in range(FLAGS.batch_size):
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     "./test_images/X/" + str(index - b) + ".tiff")
+                                     "./test_images/T1/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[b, :, :, 0]),
-                                     "./test_images/Y/" + str(index - b) + ".tiff")
+                                     "./test_images/T2/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[b, :, :, 0]),
-                                     "./test_images/Z/" + str(index - b) + ".tiff")
+                                     "./test_images/T1c/" + str(index - b) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
-                                     "./test_images/W/" + str(index - b) + ".tiff")
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0]),
-                                     "./test_images/L/" + str(index - b) + ".tiff")
+                                     "./test_images/Flair/" + str(index - b) + ".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0] * 0.25),
+                                     "./test_images/Label/" + str(index - b) + ".tiff")
 
             print("image gen end:" + str(index))
 
