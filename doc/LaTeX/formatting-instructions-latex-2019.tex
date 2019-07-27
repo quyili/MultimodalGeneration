@@ -230,12 +230,73 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 
 \end{itemize}
 
+\subsection{辅助的模态重建和模态转换训练}
+在辅助的模态重建和模态转换训练中，我们用到了一套模态编码器、模态解码器和鉴别器，以及一个病灶标签解码器，我们在真实的MRI上对这三个部件进行了下面同步的模态重建和模态转换训练，以约束三个部件在多模态MRI生成的训练中完成我们指定的学习任务。此外我们还通过一个特征鉴别器来对两个训练过程进行一致性指导。
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/trans_train}
+	\caption{辅助的模态重建和模态转换训练.}
+	\label{trans_train}
+\end{figure}
+
+如图所示，模态转换和重建时，编码器将模态$i$的真实MRI$x_i$编码得到语义特征图$code_{x,i}$，然后我们将其与不同的条件向量连接，通过解码器解码出全部的模态。循环重建时，我们对所得到的转换图采用编码器全部进行再编码，将全部再编码得到的语义特征图均与模态$i$的条件向量进行连接，最后再用解码器全部解码得到循环重建的$x_{rc,i}$。模态重建的循环重建都是自监督训练。在上述过程中，我们以原始输入模态$x_i$对应的病灶标签$l_i$作为病灶还原训练的监督标签，对$code_{x,i}$用病灶标签解码器解码得到$l_{r,i}$。
+
+我们的鉴别器模块独立更新，其他模块通过一个优化器更新训练，损失项包括鉴别器提供的对抗性损失、模态重建自监督损失、模态循环重建自监督损失、模态循环重建一致性损失、语义一致性损失、病灶监督损失、病灶一致性损失。详细损失如下，其中$x_{r,i})$表示模态$i$重建得到的MRI，$x_{j,t,i}$指由模态$j$转换生成的模态$i$的MRI，$d_{x,j,t,i}$和$c_{x,j,t,i}$分别为鉴别器对$x_{j,t,i}$的真假鉴别和类别鉴别结果，$x_{cr,j,i}$表示模态$i$转换为模态$j$再转换回模态$i$的MRI；$code_i$表示编$x_i$编码器编码后得到的语义特征图，$code_{i,t,j}$表示$x_i$转换生成的模态$j$的MRI再经过编码器编码后得到的语义特征图；$l_i$表示$x_i$的真实病灶标签，$l_{g,i}$表示$x_i$经过编码器编码后再经过病灶解码器解码生成的病灶标签：
+
+\begin{itemize}
+	\item 鉴别器损失
+	
+	\begin{center}
+		$loss_{D,aided}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{x,j,t,i}}\Vert_{2}^{2}+\Vert{c_{x,j,t,i}-i}\Vert_{2}^{2})$
+	\end{center}
+	
+	\item 对抗性损失和类别指导损失
+	
+	\begin{center}
+		$loss_{G,aided}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{x,j,t,i}-1}\Vert_{2}^{2}+\Vert{c_{x,j,t,i}-i}\Vert_{2}^{2})$
+	\end{center}
+	
+	\item 模态重建自监督损失
+	
+	\begin{center}
+		$loss_{sv}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
+	\end{center}
+	
+	\item 模态循环重建自监督损失
+	
+	\begin{center}
+		$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})$
+	\end{center}
+	
+	\item 模态循环重建一致性损失
+	
+	\begin{center}
+		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,j\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
+	\end{center}
+	
+	\item 语义一致性损失
+	
+	\begin{center}
+		$loss_{code,consistency}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{i,t,j}}\Vert_{2}^{2})$
+	\end{center}
+	
+	\item 病灶监督损失
+	
+	\begin{center}
+		$loss_{sv,l}=\sum\limits_{i=0}\Vert{l_i-l_{g,i}}\Vert_{2}^{2}$
+	\end{center}
+	
+\end{itemize}
+
+
 \subsection{结构特征图与分割标签图的融合}
 我们已经可以得到从标准正态分布随机生成的结构特征图$f_g$，然后我们随机选择分割标签图$l$，将包含$n$个类别的分割标签图转为$n$个通道的独热矩阵$onehot_l$，每个通道对应一个分割类别，每个通道内的像素值为0或1，与对应类别分割位置相同的区域像素值为1其余部分为0，这样各个1像素区域与分割标签图中的各个分割区域是配准的。接下来，我们将$onehot_l$的每个通道与$f_g$按位求取加权和，得到一个新的融合了$f_g$和$l$信息的矩阵。
 
 如果结构特征图$f'$是从随机MRI$m$中提取的，那么提取出的结构特征有可能包含肿瘤结构信息，会干扰与随机标签$l$中的肿瘤信息，影响融合后生成的图像，所以$f'$需要在与随机标签$l$融合前消除肿瘤信息，得到无肿瘤信息的结构特征图$f$，使生成图像的肿瘤信息只来源于标签$l$。我们通过$m$的分割标签$l_m$生成无边界扩充的分割掩膜$mask_{l,m}$,则$f=mask_{l,m}\times f'$。
 
-由于随机选择的病灶的位置上可能出现在结构特征图的脑部轮廓之外，因此我们选取标签图时需要获取结构特征图的脑部区域掩膜$mask$，若$mask$与选取的$l$求积后为0，则说明肿瘤标签像素在$mask$的脑轮廓内部，可以采用，否则需要重修选取$l$。
+由于随机选择的病灶的位置上可能出现在结构特征图的脑部轮廓之外，因此我们选取标签图时需要获取结构特征图的脑部区域掩膜$mask$，若$mask$与选取的$l$求积后为0，则说明肿瘤标签像素在$mask$的脑轮廓内部，可以采用，否则需要重新选取$l$。
+
 
 \subsection{多模态MRI生成}
 \begin{figure}
@@ -246,7 +307,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 \end{figure}
 结构特征图与分割标签图的信息融合图包含了目标部位的基本解剖结构信息和病灶信息，从该图生成多模态图比直接从随机噪声生成多模态图更易训练，生成的模态图更加合理和逼真。多模态MRI生成过程如图所示，首先，我们使用一个单独的编码器对信息融合图进行编码得到语义特征图，语义特征图与不同的条件向量堆叠后通过一个模态解码器解码，得到不同模态的合成图。我们通过一个模态鉴别器提供的对抗性损失和类别指导损失来使得生成的各个模态的合成图逼近于真实的MRI。各个模态的合成图再通过一个模态编码器得到模态语义特征图，然后这些语义特征图与不同的条件向量堆叠后通过模态解码器解码就实现了模态的转换，我们通过损失约束所有语义特征图的一致性，以及转换图的一致性，以此保证了生成的多模态影像互相配准。此外，我们使用一个病灶标签解码器从各项语义特征图中解码还原出肿瘤分割标签，确保生成的多模态影像根据输入病灶标签生成了对应的病灶内容。
 
-多模态MRI生成过程的具体损失函数如下，其中$d_{x,i}$和$c_{x,i}$为鉴别器$D(x_i)$的真假鉴别输出和类别鉴别输出,$d_{x,g,i}$,$c_{x,g,i}$为$D(x_{i,g})$的输出；$x_i$为模态$i$的真实MRI，$x_{g,i}$为模态$i$的合成图，$x_{g,j,t,i}$为模态$j$的合成图转换生成的模态$i$的转换图；$code_g$为输入信息编码后的语义特征图，$code_{x,g,i}$为$x_i$编码后的语义特征图；$l$为输入的标签图，$l_r$为从$code_g$解码得到的重建标签图，$l_{x,g,i}$为$code_{x,g,i}$解码得到的重建标签图；$f$为输入的结构特征图，$f_{x,g,i}$为从$x_{g,i}$提取得到的结构特征图：
+我们的鉴别器模块独立更新，除病灶解码器外其他模块通过一个优化器更新训练，病灶解码器仅在辅助的转换和重建训练中采用真实数据训练更新，合成训练过程仅用于为生成模块提供语义指导损失。多模态MRI生成过程的具体损失函数如下，其中$d_{x,i}$和$c_{x,i}$为鉴别器$D(x_i)$的真假鉴别输出和类别鉴别输出,$d_{x,g,i}$,$c_{x,g,i}$为$D(x_{i,g})$的输出；$x_{g,i}$为模态$i$的合成图，$x_{g,j,t,i}$为模态$j$的合成图转换生成的模态$i$的转换图；$code_g$为输入信息编码后的语义特征图，$code_{x,g,i}$为$x_i$编码后的语义特征图；$l$为输入的标签图，$l_r$为从$code_g$解码得到的重建标签图，$l_{x,g,i}$为$code_{x,g,i}$解码得到的重建标签图；$f$为输入的结构特征图，$f_{x,g,i}$为从$x_{g,i}$提取得到的结构特征图：
 
 \begin{itemize}
 	\item 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
@@ -295,65 +356,6 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 
 \end{itemize}
 
-\subsection{辅助的模态重建和模态转换训练}
-在多模态MRI生成的训练中，我们用到了一套模态编码器、模态解码器和鉴别器，以及一个病灶标签解码器，我们在真实的MRI上对这三个部件进行了下面同步的模态重建和模态转换训练，以约束三个部件在多模态MRI生成的训练中完成我们指定的学习任务。此外我们还通过一个特征鉴别器来对两个训练过程进行一致性指导。
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/trans_train}
-	\caption{辅助的模态重建和模态转换训练.}
-	\label{trans_train}
-\end{figure}
-
-如图所示，模态转换和重建时，编码器将$x_i$编码得到语义特征图$code_{x,i}$，然后我们将其与不同的条件向量连接，通过解码器解码出全部的模态。循环重建时，我们对所得到的转换图采用编码器全部进行再编码，将全部再编码得到的语义特征图均与模态$i$的条件向量进行连接，最后再用解码器全部解码得到循环重建的$x_{rc,i}$。模态重建的循环重建都是自监督训练。在上述过程中，我们以原始输入模态$x_i$对应的病灶标签$l_i$作为病灶还原训练的监督标签，对$code_{x,i}$用病灶标签解码器解码得到$l_{r,i}$。
-
-我们的鉴别器模块独立更新，其他模块通过一个优化器更新训练，损失项包括鉴别器提供的对抗性损失、模态重建自监督损失、模态循环重建自监督损失、模态循环重建一致性损失、语义一致性损失、病灶监督损失、病灶一致性损失。详细损失如下，其中$x_{r,i})$表示模态$i$重建得到的MRI，$x_{j,t,i}$指由模态$j$转换生成的模态$i$的MRI，$d_{x,j,t,i}$和$c_{x,j,t,i}$分别为鉴别器对$x_{j,t,i}$的真假鉴别和类别鉴别结果，$x_{cr,j,i}$表示模态$i$转换为模态$j$再转换回模态$i$的MRI；$code_i$表示编$x_i$编码器编码后得到的语义特征图，$code_{i,t,j}$表示$x_i$转换生成的模态$j$的MRI再经过编码器编码后得到的语义特征图；$l_i$表示$x_i$的真实病灶标签，$l_{g,i}$表示$x_i$经过编码器编码后再经过病灶解码器解码生成的病灶标签：
-
-\begin{itemize}
-	\item 鉴别器损失为
-
-\begin{center}
-	$loss_{D,aided}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{x,j,t,i}}\Vert_{2}^{2}+\Vert{c_{x,j,t,i}-i}\Vert_{2}^{2})$
-\end{center}
-
-	\item 对抗性损失和类别指导损失
-
-\begin{center}
-	$loss_{G,aided}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{x,j,t,i}-1}\Vert_{2}^{2}+\Vert{c_{x,j,t,i}-i}\Vert_{2}^{2})$
-\end{center}
-
-	\item 模态重建自监督损失
-	
-\begin{center}
-	$loss_{sv}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
-\end{center}
-
-	\item 模态循环重建自监督损失
-
-\begin{center}
-	$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})$
-\end{center}
-
-	\item 模态循环重建一致性损失
-
-\begin{center}
-	$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,j\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
-\end{center}
-
-	\item 语义一致性损失
-
-\begin{center}
-	$loss_{code,consistency}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{i,t,j}}\Vert_{2}^{2})$
-\end{center}
-
-	\item 病灶监督损失
-	
-\begin{center}
-	$loss_{sv,l}=\sum\limits_{i=0}\Vert{l_i-l_{g,i}}\Vert_{2}^{2}$
-\end{center}
-
-\end{itemize}
-
 \subsection{构建合成数据集}
 如图所示，我们通过训练好的结构特征图解码器即可从随机生成的正太分布矩阵生成任意数量的结构特征图，然后，我们再将随机生成的结构特征图和随机选择的病灶信息标签融合，通过多模态生成模型即可生成配准的多模态影像，选取的病灶信息标签就是生成的多模态影像的病灶标签。由此，我们可以从随机矩阵构建带有病灶标签的多模态配准影像数据集。
 \begin{figure}
@@ -362,6 +364,23 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\caption{构建合成数据集.}
 	\label{make_data}
 \end{figure}
+
+由于训练时去除肿瘤部分的结构的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图和其对应的掩膜，我们先对结构特征图进行高斯模糊，再采用OpenCV提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用通常的算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用通常的算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
+\begin{quote}
+	\begin{scriptsize}\begin{verbatim}
+		算法3 结构特征图过滤
+		def get_mask_from_f(img):
+			contours = OpenCV.findContours(img)
+			img = OpenCV.drawContours(img，contours)
+			return img
+		
+		mae=0.05
+		while True:
+			f, m = Generator()
+			m_= get_mask_from_f(f)	
+			if MAE(m_,m) <= mae: break
+		\end{verbatim}\end{scriptsize}
+\end{quote}
 
 \subsection{病灶分割}
 \begin{figure}
