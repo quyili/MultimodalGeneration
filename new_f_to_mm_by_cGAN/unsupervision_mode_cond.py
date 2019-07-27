@@ -804,10 +804,10 @@ class GAN:
         return [self.EC_R.variables
                 + self.EC_M.variables
                 + self.DC_M.variables
-                ,
+            ,
                 self.D_M.variables +
                 self.FD_R.variables
-                ,
+            ,
                 self.DC_L.variables
                 ]
 
@@ -820,17 +820,19 @@ class GAN:
 
         G_optimizer = make_optimizer(name='Adam_G')
         D_optimizer = make_optimizer(name='Adam_D')
+        S_optimizer = make_optimizer(name='Adam_S')
 
-        return G_optimizer, D_optimizer
+        return G_optimizer, D_optimizer, S_optimizer
 
     def histogram_summary(self, judge_dirct):
         for key in judge_dirct:
-            tf.summary.image('judge/' + key, judge_dirct[key])
+            tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_loss, D_loss = loss_list[0], loss_list[1]
+        G_loss, D_loss, S_loss = loss_list[0], loss_list[1], loss_list[2]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
+        tf.summary.scalar('loss/S_loss', S_loss)
 
     def evaluation_code(self, code_dirct):
         self.name_code_list_true = ["code_rm", "code_rm", "code_rm", "code_rm",
