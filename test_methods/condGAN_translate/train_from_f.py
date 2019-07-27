@@ -154,10 +154,11 @@ def train():
         with graph.as_default():
             gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
             input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-            G_optimizer, D_optimizer = gan.optimize()
+            G_optimizer, D_optimizer, S_optimizer = gan.optimize()
 
             G_grad_list = []
             D_grad_list = []
+            S_grad_list = []
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
                     with tf.name_scope("GPU_0"):
@@ -180,8 +181,10 @@ def train():
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
+                        S_grad_0 = D_optimizer.compute_gradients(loss_list_0[2], var_list=variables_list_0[2])
                         G_grad_list.append(G_grad_0)
                         D_grad_list.append(D_grad_0)
+                        S_grad_list.append(S_grad_0)
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
                         # l_1 = tf.placeholder(tf.float32, shape=input_shape)
@@ -203,8 +206,10 @@ def train():
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
+                        S_grad_1 = D_optimizer.compute_gradients(loss_list_1[2], var_list=variables_list_1[2])
                         G_grad_list.append(G_grad_1)
                         D_grad_list.append(D_grad_1)
+                        S_grad_list.append(S_grad_1)
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
                         # l_2 = tf.placeholder(tf.float32, shape=input_shape)
@@ -226,8 +231,10 @@ def train():
                         variables_list_2 = gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                         D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
+                        S_grad_2 = D_optimizer.compute_gradients(loss_list_2[2], var_list=variables_list_2[2])
                         G_grad_list.append(G_grad_2)
                         D_grad_list.append(D_grad_2)
+                        S_grad_list.append(S_grad_2)
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
                         # l_3 = tf.placeholder(tf.float32, shape=input_shape)
@@ -249,19 +256,22 @@ def train():
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
+                        S_grad_3 = D_optimizer.compute_gradients(loss_list_3[2], var_list=variables_list_3[2])
                         G_grad_list.append(G_grad_3)
                         D_grad_list.append(D_grad_3)
+                        S_grad_list.append(S_grad_3)
 
             G_ave_grad = average_gradients(G_grad_list)
             D_ave_grad = average_gradients(D_grad_list)
+            S_ave_grad = average_gradients(S_grad_list)
             G_optimizer_op = G_optimizer.apply_gradients(G_ave_grad)
             D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
-            optimizers = [G_optimizer_op, D_optimizer_op]
+            S_optimizer_op = S_optimizer.apply_gradients(S_ave_grad)
+            optimizers = [G_optimizer_op, D_optimizer_op, S_optimizer_op]
 
             gan.image_summary(image_list_0)
             gan.histogram_summary(j_list_0)
-            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image'),
-                                                 tf.get_collection(tf.GraphKeys.SUMMARIES, 'discriminator')])
+            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image')])
 
             loss_list_summary = tf.placeholder(tf.float32)
             evaluation_list_summary = tf.placeholder(tf.float32)

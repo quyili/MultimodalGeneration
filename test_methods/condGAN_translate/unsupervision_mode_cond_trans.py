@@ -216,6 +216,7 @@ class GAN:
 
         D_loss = 0.0
         G_loss = 0.0
+        S_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_x, 1.0) * 45
         D_loss += self.mse_loss(j_x_t_by_y, 0.0) * 10
@@ -271,7 +272,7 @@ class GAN:
         G_loss += self.mse_loss(j_w_t_c_by_z, cw) * 50
 
         # X模态图分割训练的有监督损失
-        G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
+        S_loss += self.mse_loss(label_expand_x[:, :, :, 0],
                                 l_f_prob_by_x[:, :, :, 0]) \
                   + self.mse_loss(label_expand_x[:, :, :, 1],
                                   l_f_prob_by_x[:, :, :, 1]) * 5 \
@@ -281,7 +282,7 @@ class GAN:
                                   l_f_prob_by_x[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_x[:, :, :, 4],
                                   l_f_prob_by_x[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_x, l_f_by_x) * 5
+        S_loss += self.mse_loss(l_x, l_f_by_x) * 5
         G_loss += self.mse_loss(l_x, l_x_r_c_by_y) * 5
         G_loss += self.mse_loss(l_x, l_x_r_c_by_z) * 5
         G_loss += self.mse_loss(l_x, l_x_r_c_by_w) * 5
@@ -289,7 +290,7 @@ class GAN:
         G_loss += self.mse_loss(l_x_r_c_by_y, l_x_r_c_by_w)
         G_loss += self.mse_loss(l_x_r_c_by_z, l_x_r_c_by_w)
 
-        G_loss += self.mse_loss(label_expand_y[:, :, :, 0],
+        S_loss += self.mse_loss(label_expand_y[:, :, :, 0],
                                 l_f_prob_by_y[:, :, :, 0]) \
                   + self.mse_loss(label_expand_y[:, :, :, 1],
                                   l_f_prob_by_y[:, :, :, 1]) * 5 \
@@ -299,7 +300,7 @@ class GAN:
                                   l_f_prob_by_y[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_y[:, :, :, 4],
                                   l_f_prob_by_y[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_y, l_f_by_y) * 5
+        S_loss += self.mse_loss(l_y, l_f_by_y) * 5
         G_loss += self.mse_loss(l_y, l_y_r_c_by_x) * 5
         G_loss += self.mse_loss(l_y, l_y_r_c_by_z) * 5
         G_loss += self.mse_loss(l_y, l_y_r_c_by_w) * 5
@@ -307,7 +308,7 @@ class GAN:
         G_loss += self.mse_loss(l_y_r_c_by_x, l_y_r_c_by_w)
         G_loss += self.mse_loss(l_y_r_c_by_z, l_y_r_c_by_w)
 
-        G_loss += self.mse_loss(label_expand_z[:, :, :, 0],
+        S_loss += self.mse_loss(label_expand_z[:, :, :, 0],
                                 l_f_prob_by_z[:, :, :, 0]) \
                   + self.mse_loss(label_expand_z[:, :, :, 1],
                                   l_f_prob_by_z[:, :, :, 1]) * 5 \
@@ -317,7 +318,7 @@ class GAN:
                                   l_f_prob_by_z[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_z[:, :, :, 4],
                                   l_f_prob_by_z[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_z, l_f_by_z) * 5
+        S_loss += self.mse_loss(l_z, l_f_by_z) * 5
         G_loss += self.mse_loss(l_z, l_z_r_c_by_x) * 5
         G_loss += self.mse_loss(l_z, l_z_r_c_by_y) * 5
         G_loss += self.mse_loss(l_z, l_z_r_c_by_w) * 5
@@ -325,7 +326,7 @@ class GAN:
         G_loss += self.mse_loss(l_z_r_c_by_x, l_z_r_c_by_w)
         G_loss += self.mse_loss(l_z_r_c_by_y, l_z_r_c_by_w)
 
-        G_loss += self.mse_loss(label_expand_w[:, :, :, 0],
+        S_loss += self.mse_loss(label_expand_w[:, :, :, 0],
                                 l_f_prob_by_w[:, :, :, 0]) \
                   + self.mse_loss(label_expand_w[:, :, :, 1],
                                   l_f_prob_by_w[:, :, :, 1]) * 5 \
@@ -335,7 +336,7 @@ class GAN:
                                   l_f_prob_by_w[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_w[:, :, :, 4],
                                   l_f_prob_by_w[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_w, l_f_by_w) * 5
+        S_loss += self.mse_loss(l_w, l_f_by_w) * 5
         G_loss += self.mse_loss(l_w, l_w_r_c_by_x) * 5
         G_loss += self.mse_loss(l_w, l_w_r_c_by_y) * 5
         G_loss += self.mse_loss(l_w, l_w_r_c_by_z) * 5
@@ -544,16 +545,17 @@ class GAN:
         self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] = j_w_t_by_y, j_w_t_c_by_y
         self.judge_list["j_w_t_by_z"], self.judge_list["j_w_t_c_by_z"] = j_w_t_by_z, j_w_t_c_by_z
 
-        loss_list = [G_loss, D_loss]
+        loss_list = [G_loss, D_loss, S_loss]
 
         return loss_list
 
     def get_variables(self):
-        return [self.DC_L.variables
-                + self.EC_M.variables
+        return [self.EC_M.variables
                 + self.DC_M.variables
-            ,
-                self.D_M.variables]
+                ,
+                self.D_M.variables
+                ,
+                self.DC_L.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
