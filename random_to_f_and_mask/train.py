@@ -231,8 +231,7 @@ def train():
 
             gan.image_summary(image_list_0)
             gan.histogram_summary(j_list_0)
-            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image'),
-                                                 tf.get_collection(tf.GraphKeys.SUMMARIES, 'discriminator')])
+            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image')])
 
             loss_list_summary = tf.placeholder(tf.float32)
             evaluation_list_summary = tf.placeholder(tf.float32)
