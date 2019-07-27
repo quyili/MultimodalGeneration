@@ -545,7 +545,7 @@ class GAN:
         self.judge_list["j_w_t_by_y"], self.judge_list["j_w_t_c_by_y"] = j_w_t_by_y, j_w_t_c_by_y
         self.judge_list["j_w_t_by_z"], self.judge_list["j_w_t_c_by_z"] = j_w_t_by_z, j_w_t_c_by_z
 
-        loss_list = [G_loss, D_loss, S_loss]
+        loss_list = [G_loss+S_loss, D_loss, S_loss]
 
         return loss_list
 
