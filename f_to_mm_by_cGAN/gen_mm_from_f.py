@@ -107,7 +107,7 @@ def train():
         except os.error:
             pass
 
-        F_train_files = read_filename(FLAGS.F_test)
+        F_train_files = read_filename(FLAGS.F_test, shuffle=False)
         L_train_files = read_filename(FLAGS.L_test)
         index = 0
         while index <= len(F_train_files):
@@ -136,17 +136,17 @@ def train():
 
             for b in range(FLAGS.batch_size):
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     "./test_images/T1/" + str(index - b) + ".tiff")
+                                     "./test_images/T1/" + str(index - b - 1) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[b, :, :, 0]),
-                                     "./test_images/T2/" + str(index - b) + ".tiff")
+                                     "./test_images/T2/" + str(index - b - 1) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[b, :, :, 0]),
-                                     "./test_images/T1c/" + str(index - b) + ".tiff")
+                                     "./test_images/T1c/" + str(index - b - 1) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
-                                     "./test_images/Flair/" + str(index - b) + ".tiff")
+                                     "./test_images/Flair/" + str(index - b - 1) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0]),
-                                     "./test_images/Label/" + str(index - b) + ".tiff")
+                                     "./test_images/Label/" + str(index - b - 1) + ".tiff")
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0] * 0.25),
-                                     "./test_images/LabelV/" + str(index - b) + ".tiff")
+                                     "./test_images/LabelV/" + str(index - b - 1) + ".tiff")
 
             print("image gen end:" + str(index))
 
