@@ -272,7 +272,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\item 模态循环重建一致性损失
 	
 	\begin{center}
-		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,j\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
+		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,k\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item 语义一致性损失
@@ -428,10 +428,10 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\centering
 	\resizebox{.95\columnwidth}{!}{
 		\smallskip\begin{tabular}{l|l|l|l}
-			数据类别 & 测试集大小  & MSE & SSIM\\
-			真实 & 1650 & 0.033 & 0.954\\
-			合成 & 1650 &  & \\
-			合成 & 15070 & 0.428 &0.845 \\
+			test data type &test data size  &MSE   &Dice Score \\
+			real 		   &1650            &0.033 &0.954 \\
+			synthetic 	   &1650            &0.208 &0.868 \\
+			synthetic      &15070           &      & \\
 		\end{tabular}
 	}
 	\label{label_test}
