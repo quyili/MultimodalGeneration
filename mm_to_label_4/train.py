@@ -26,6 +26,11 @@ tf.flags.DEFINE_string('Y_test', '../mydata/BRATS2015/testT2', 'Y files for trai
 tf.flags.DEFINE_string('Z_test', '../mydata/BRATS2015/testT1c', 'X files for training')
 tf.flags.DEFINE_string('W_test', '../mydata/BRATS2015/testFlair', 'Y files for training')
 tf.flags.DEFINE_string('L_test', '../mydata/BRATS2015/testLabel', 'Y files for training')
+# tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/T1', 'X files for training')
+# tf.flags.DEFINE_string('Y_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/T2', 'Y files for training')
+# tf.flags.DEFINE_string('Z_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/T1c', 'X files for training')
+# tf.flags.DEFINE_string('W_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/Flair', 'Y files for training')
+# tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/Label', 'Y files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
