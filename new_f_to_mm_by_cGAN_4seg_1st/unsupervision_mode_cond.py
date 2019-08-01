@@ -838,14 +838,14 @@ class GAN:
                 ssim_list[i])
 
     def evaluation(self, image_dirct):
-        self.name_list_true = ["l", "l", "l", "l", "l",
+        self.name_list_true = ["l", "l", "l", "l",
                                "l_x", "l_y", "l_z", "l_w",
                                "x", "y", "z", "w",
                                "x_g", "x_g", "x_g",
                                "y_g", "y_g", "y_g",
                                "z_g", "z_g", "z_g",
                                "w_g", "w_g", "w_g", ]
-        self.name_list_false = ["l_g", "l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
+        self.name_list_false = ["l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
                                 "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
                                 "x_r", "y_r", "z_r", "w_r",
                                 "x_g_t_by_y", "x_g_t_by_z", "x_g_t_by_w",
