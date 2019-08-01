@@ -24,15 +24,11 @@ class GAN:
         self.image_list = {}
         self.prob_list = {}
 
+        self.EC_L = Encoder('EC_L', ngf=ngf)
         self.DC_L_X = Decoder('DC_L_X', ngf=ngf, output_channl=5)
         self.DC_L_Y = Decoder('DC_L_Y', ngf=ngf, output_channl=5)
         self.DC_L_Z = Decoder('DC_L_Z', ngf=ngf, output_channl=5)
         self.DC_L_W = Decoder('DC_L_W', ngf=ngf, output_channl=5)
-
-        self.EC_X = Encoder('EC_X', ngf=ngf)
-        self.EC_Y = Encoder('EC_Y', ngf=ngf)
-        self.EC_Z = Encoder('EC_Z', ngf=ngf)
-        self.EC_W = Encoder('EC_W', ngf=ngf)
 
     def model(self, l_x, l_y, l_z, l_w, x, y, z, w):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
@@ -52,10 +48,10 @@ class GAN:
         l_z = l_z * 0.25
         l_w = l_w * 0.25
 
-        code_x = self.EC_X(x)
-        code_y = self.EC_Y(y)
-        code_z = self.EC_Z(z)
-        code_w = self.EC_W(w)
+        code_x = self.EC_L(x)
+        code_y = self.EC_L(y)
+        code_z = self.EC_L(z)
+        code_w = self.EC_L(w)
 
         l_f_prob_by_x = self.DC_L_X(code_x)
         l_f_prob_by_y = self.DC_L_Y(code_y)
@@ -151,10 +147,7 @@ class GAN:
         return G_loss
 
     def get_variables(self):
-        return [self.EC_X.variables
-                + self.EC_Y.variables
-                + self.EC_Z.variables
-                + self.EC_W.variables
+        return [self.EC_L.variables
                 + self.DC_L_X.variables
                 + self.DC_L_Y.variables
                 + self.DC_L_Z.variables
