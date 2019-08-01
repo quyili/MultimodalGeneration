@@ -1,12 +1,12 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 import ops as ops
-import logging
+
 
 class Encoder:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0,reuse=False):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0):
         self.name = name
-        self.reuse = reuse
+        self.reuse = False
         self.ngf = ngf
         self.norm = norm
         self.is_training = is_training
@@ -21,32 +21,32 @@ class Encoder:
           output: same size as input
         """
 
-        with tf.variable_scope(self.name, reuse=self.reuse):
+        with tf.variable_scope(self.name):
             EC_input = tf.nn.dropout(EC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
                 conv1 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=3, strides=1, padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * 1), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
             with tf.variable_scope("conv2", reuse=self.reuse):
-                conv2 = tf.layers.conv2d(inputs=relu1, filters=2 * self.ngf, kernel_size=3, strides=1, padding="SAME",
+                conv2 = tf.layers.conv2d(inputs=relu1, filters=self.ngf, kernel_size=3, strides=1, padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
             # pool1
             with tf.variable_scope("conv3", reuse=self.reuse):
-                conv3 = tf.layers.conv2d(inputs=relu2, filters=4 * self.ngf, kernel_size=3,
+                conv3 = tf.layers.conv2d(inputs=relu2, filters=2 * self.ngf, kernel_size=3,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv3')
                 norm3 = ops._norm(conv3, self.is_training, self.norm)
                 relu3 = ops.relu(norm3)
@@ -56,7 +56,7 @@ class Encoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 * 4 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv4')
                 norm4 = ops._norm(conv4, self.is_training, self.norm)
                 relu4 = ops.relu(norm4)

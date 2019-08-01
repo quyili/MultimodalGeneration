@@ -1,12 +1,12 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 import ops as ops
-import logging
+
 
 class Decoder:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1,reuse=False):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
-        self.reuse = reuse
+        self.reuse = False
         self.ngf = ngf
         self.norm = norm
         self.is_training = is_training

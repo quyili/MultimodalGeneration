@@ -71,7 +71,7 @@ class GAN:
         l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
         return l_prob, l_f
 
-    def model(self, l, l_m, m, l_x, l_y, l_z, l_w, x, y, z, w):
+    def model(self, l, l_m, m, x, y, z, w):
         cx = 0.0
         cy = 1.0
         cz = 2.0
@@ -148,23 +148,6 @@ class GAN:
         y_g_t_by_w = self.DC_M(tf.concat([code_w_g, cy_code], axis=-1))
         z_g_t_by_w = self.DC_M(tf.concat([code_w_g, cz_code], axis=-1))
 
-        label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
-        label_expand_y = tf.reshape(tf.one_hot(tf.cast(l_y, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
-        label_expand_z = tf.reshape(tf.one_hot(tf.cast(l_z, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
-        label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
-        l_x = l_x * 0.25
-        l_y = l_y * 0.25
-        l_z = l_z * 0.25
-        l_w = l_w * 0.25
-
         mask_x = self.get_mask(x)
         mask_y = self.get_mask(y)
         mask_z = self.get_mask(z)
@@ -174,11 +157,6 @@ class GAN:
         code_y = self.EC_M(y)
         code_z = self.EC_M(z)
         code_w = self.EC_M(w)
-
-        l_f_prob_by_x, l_f_by_x = self.segmentation(x)
-        l_f_prob_by_y, l_f_by_y = self.segmentation(y)
-        l_f_prob_by_z, l_f_by_z = self.segmentation(z)
-        l_f_prob_by_w, l_f_by_w = self.segmentation(w)
 
         x_r = self.DC_M(tf.concat([code_x, cx_code], axis=-1))
         y_r = self.DC_M(tf.concat([code_y, cy_code], axis=-1))
@@ -259,7 +237,6 @@ class GAN:
 
         D_loss = 0.0
         G_loss = 0.0
-        S_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_x, 1.0) * 50
         D_loss += self.mse_loss(j_x_g, 0.0) * 35
@@ -401,55 +378,6 @@ class GAN:
                   + self.mse_loss(label_expand[:, :, :, 4],
                                   l_g_prob_by_w[:, :, :, 4]) * 25 * 10
         G_loss += self.mse_loss(l, l_g_by_w) * 25 * 10
-
-        # X模态图分割训练的有监督损失
-        S_loss += self.mse_loss(label_expand_x[:, :, :, 0],
-                                l_f_prob_by_x[:, :, :, 0]) * 0.5 * 10 \
-                  + self.mse_loss(label_expand_x[:, :, :, 1],
-                                  l_f_prob_by_x[:, :, :, 1]) * 5 * 10 \
-                  + self.mse_loss(label_expand_x[:, :, :, 2],
-                                  l_f_prob_by_x[:, :, :, 2]) * 25 * 10 \
-                  + self.mse_loss(label_expand_x[:, :, :, 3],
-                                  l_f_prob_by_x[:, :, :, 3]) * 25 * 10 \
-                  + self.mse_loss(label_expand_x[:, :, :, 4],
-                                  l_f_prob_by_x[:, :, :, 4]) * 25 * 10
-        S_loss += self.mse_loss(l_x, l_f_by_x) * 25 * 10
-
-        S_loss += self.mse_loss(label_expand_y[:, :, :, 0],
-                                l_f_prob_by_y[:, :, :, 0]) * 0.5 * 10 \
-                  + self.mse_loss(label_expand_y[:, :, :, 1],
-                                  l_f_prob_by_y[:, :, :, 1]) * 5 * 10 \
-                  + self.mse_loss(label_expand_y[:, :, :, 2],
-                                  l_f_prob_by_y[:, :, :, 2]) * 25 * 10 \
-                  + self.mse_loss(label_expand_y[:, :, :, 3],
-                                  l_f_prob_by_y[:, :, :, 3]) * 25 * 10 \
-                  + self.mse_loss(label_expand_y[:, :, :, 4],
-                                  l_f_prob_by_y[:, :, :, 4]) * 25 * 10
-        S_loss += self.mse_loss(l_y, l_f_by_y) * 25 * 10
-
-        S_loss += self.mse_loss(label_expand_z[:, :, :, 0],
-                                l_f_prob_by_z[:, :, :, 0]) * 0.5 * 10 \
-                  + self.mse_loss(label_expand_z[:, :, :, 1],
-                                  l_f_prob_by_z[:, :, :, 1]) * 5 * 10 \
-                  + self.mse_loss(label_expand_z[:, :, :, 2],
-                                  l_f_prob_by_z[:, :, :, 2]) * 25 * 10 \
-                  + self.mse_loss(label_expand_z[:, :, :, 3],
-                                  l_f_prob_by_z[:, :, :, 3]) * 25 * 10 \
-                  + self.mse_loss(label_expand_z[:, :, :, 4],
-                                  l_f_prob_by_z[:, :, :, 4]) * 25 * 10
-        S_loss += self.mse_loss(l_z, l_f_by_z) * 25 * 10
-
-        S_loss += self.mse_loss(label_expand_w[:, :, :, 0],
-                                l_f_prob_by_w[:, :, :, 0]) * 0.5 * 10 \
-                  + self.mse_loss(label_expand_w[:, :, :, 1],
-                                  l_f_prob_by_w[:, :, :, 1]) * 5 * 10 \
-                  + self.mse_loss(label_expand_w[:, :, :, 2],
-                                  l_f_prob_by_w[:, :, :, 2]) * 25 * 10 \
-                  + self.mse_loss(label_expand_w[:, :, :, 3],
-                                  l_f_prob_by_w[:, :, :, 3]) * 25 * 10 \
-                  + self.mse_loss(label_expand_w[:, :, :, 4],
-                                  l_f_prob_by_w[:, :, :, 4]) * 25 * 10
-        S_loss += self.mse_loss(l_w, l_f_by_w) * 25 * 10
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
@@ -611,10 +539,6 @@ class GAN:
         self.prob_list["label_expand"] = label_expand
         self.prob_list["f_rm_expand"] = f_rm_expand
         self.image_list["l"] = l
-        self.image_list["l_x"] = l_x
-        self.image_list["l_y"] = l_y
-        self.image_list["l_z"] = l_z
-        self.image_list["l_w"] = l_w
         self.image_list["x"] = x
         self.image_list["y"] = y
         self.image_list["z"] = z
@@ -662,11 +586,6 @@ class GAN:
         self.image_list["y_g_t_by_w"] = y_g_t_by_w
         self.image_list["z_g_t_by_w"] = z_g_t_by_w
 
-        self.prob_list["label_expand_x"] = label_expand_x
-        self.prob_list["label_expand_y"] = label_expand_y
-        self.prob_list["label_expand_z"] = label_expand_z
-        self.prob_list["label_expand_w"] = label_expand_w
-
         self.image_list["mask_x"] = mask_x
         self.image_list["mask_y"] = mask_y
         self.image_list["mask_z"] = mask_z
@@ -676,15 +595,6 @@ class GAN:
         self.code_list["code_y"] = code_y
         self.code_list["code_z"] = code_z
         self.code_list["code_w"] = code_w
-
-        self.prob_list["l_f_prob_by_x"] = l_f_prob_by_x
-        self.prob_list["l_f_prob_by_y"] = l_f_prob_by_y
-        self.prob_list["l_f_prob_by_z"] = l_f_prob_by_z
-        self.prob_list["l_f_prob_by_w"] = l_f_prob_by_w
-        self.image_list["l_f_by_x"] = l_f_by_x
-        self.image_list["l_f_by_y"] = l_f_by_y
-        self.image_list["l_f_by_z"] = l_f_by_z
-        self.image_list["l_f_by_w"] = l_f_by_w
 
         self.image_list["x_r"] = x_r
         self.image_list["y_r"] = y_r
@@ -763,7 +673,7 @@ class GAN:
         self.judge_list["j_code_w"] = j_code_w
         self.judge_list["j_code_rm"] = j_code_rm
 
-        loss_list = [G_loss+S_loss, D_loss, S_loss]
+        loss_list = [G_loss, D_loss]
 
         return loss_list
 
@@ -788,7 +698,6 @@ class GAN:
 
         G_optimizer = make_optimizer(name='Adam_G')
         D_optimizer = make_optimizer(name='Adam_D')
-        # S_optimizer = make_optimizer(name='Adam_S')
 
         return G_optimizer, D_optimizer
 
@@ -797,10 +706,9 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_loss, D_loss, S_loss = loss_list[0], loss_list[1], loss_list[2]
+        G_loss, D_loss = loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
-        tf.summary.scalar('loss/S_loss', S_loss)
 
     def evaluation_code(self, code_dirct):
         self.name_code_list_true = ["code_rm", "code_rm", "code_rm", "code_rm",
@@ -827,14 +735,12 @@ class GAN:
 
     def evaluation(self, image_dirct):
         self.name_list_true = ["l", "l", "l", "l",
-                               "l_x", "l_y", "l_z", "l_w",
                                "x", "y", "z", "w",
                                "x_g", "x_g", "x_g",
                                "y_g", "y_g", "y_g",
                                "z_g", "z_g", "z_g",
                                "w_g", "w_g", "w_g", ]
         self.name_list_false = ["l_g_by_x", "l_g_by_y", "l_g_by_z", "l_g_by_w",
-                                "l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w",
                                 "x_r", "y_r", "z_r", "w_r",
                                 "x_g_t_by_y", "x_g_t_by_z", "x_g_t_by_w",
                                 "y_g_t_by_x", "y_g_t_by_z", "y_g_t_by_w",
