@@ -26,11 +26,11 @@ tf.flags.DEFINE_string('Y_test', '../../mydata/BRATS2015/testT2', 'Y files for t
 tf.flags.DEFINE_string('Z_test', '../../mydata/BRATS2015/testT1c', 'X files for training')
 tf.flags.DEFINE_string('W_test', '../../mydata/BRATS2015/testFlair', 'Y files for training')
 tf.flags.DEFINE_string('L_test', '../../mydata/BRATS2015/testLabel', 'Y files for training')
-# tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/T1', 'X files for training')
-# tf.flags.DEFINE_string('Y_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/T2', 'Y files for training')
-# tf.flags.DEFINE_string('Z_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/T1c', 'X files for training')
-# tf.flags.DEFINE_string('W_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/Flair', 'Y files for training')
-# tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/new_f_to_mm_by_cGAN5/test_images/Label', 'Y files for training')
+# tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/G_MRI/new_f_to_mm_by_cGAN5/test_images/T1', 'X files for training')
+# tf.flags.DEFINE_string('Y_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/G_MRI/new_f_to_mm_by_cGAN5/test_images/T2', 'Y files for training')
+# tf.flags.DEFINE_string('Z_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/G_MRI/new_f_to_mm_by_cGAN5/test_images/T1c', 'X files for training')
+# tf.flags.DEFINE_string('W_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/G_MRI/new_f_to_mm_by_cGAN5/test_images/Flair', 'Y files for training')
+# tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/G_MRI/new_f_to_mm_by_cGAN5/test_images/Label', 'Y files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -441,10 +441,7 @@ def train():
                     try:
                         os.makedirs(checkpoints_dir + "/samples")
                         os.makedirs("./seg_res/Label_True")
-                        os.makedirs("./seg_res/Label_T1")
-                        os.makedirs("./seg_res/Label_T2")
-                        os.makedirs("./seg_res/Label_T1c")
-                        os.makedirs("./seg_res/Label_Flair")
+                        os.makedirs("./seg_res/Label_Fake")
                     except os.error:
                         pass
 
@@ -522,47 +519,23 @@ def train():
 
                         save_image(np.asarray(val_true_l)[0, :, :, 0], l_val_files[val_index - 4],
                                    dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
+                        save_image(np.asarray(val_image_list_0["l_f"])[0, :, :, 0], l_val_files[val_index - 4],
+                                   dir="./seg_res/Label_Fake", form=".tiff")
 
                         save_image(np.asarray(val_true_l)[1, :, :, 0], l_val_files[val_index - 3],
                                    dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
+                        save_image(np.asarray(val_image_list_1["l_f"])[0, :, :, 0], l_val_files[val_index - 3],
+                                   dir="./seg_res/Label_Fake", form=".tiff")
 
                         save_image(np.asarray(val_true_l)[2, :, :, 0], l_val_files[val_index - 2],
                                    dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
+                        save_image(np.asarray(val_image_list_2["l_f"])[0, :, :, 0], l_val_files[val_index - 2],
+                                   dir="./seg_res/Label_Fake", form=".tiff")
 
                         save_image(np.asarray(val_true_l)[3, :, :, 0], l_val_files[val_index - 1],
                                    dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
+                        save_image(np.asarray(val_image_list_3["l_f"])[0, :, :, 0], l_val_files[val_index - 1],
+                                   dir="./seg_res/Label_Fake", form=".tiff")
 
                     print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))

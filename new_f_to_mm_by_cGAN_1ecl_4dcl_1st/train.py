@@ -290,8 +290,7 @@ def train():
         saver = tf.train.Saver()
         variables_list = gan.get_variables()
 
-        seg_checkpoints_dir = "checkpoints/" + FLAGS.load_seg_model.lstrip("checkpoints/")
-        seg_latest_checkpoint = tf.train.latest_checkpoint(seg_checkpoints_dir)
+        seg_latest_checkpoint = tf.train.latest_checkpoint(FLAGS.load_seg_model)
         seg_saver = tf.train.Saver(variables_list[2])
 
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
