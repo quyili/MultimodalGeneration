@@ -21,7 +21,7 @@ tf.flags.DEFINE_string('Y', '../../mydata/BRATS2015/trainT2', 'Y files for train
 tf.flags.DEFINE_string('Z', '../../mydata/BRATS2015/trainT1c', 'X files for training')
 tf.flags.DEFINE_string('W', '../../mydata/BRATS2015/trainFlair', 'Y files for training')
 tf.flags.DEFINE_string('L', '../../mydata/BRATS2015/trainLabel', 'Y files for training')
-tf.flags.DEFINE_string('X_test', '../m../ydata/BRATS2015/testT1', 'X files for training')
+tf.flags.DEFINE_string('X_test', '../../mydata/BRATS2015/testT1', 'X files for training')
 tf.flags.DEFINE_string('Y_test', '../../mydata/BRATS2015/testT2', 'Y files for training')
 tf.flags.DEFINE_string('Z_test', '../../mydata/BRATS2015/testT1c', 'X files for training')
 tf.flags.DEFINE_string('W_test', '../../mydata/BRATS2015/testFlair', 'Y files for training')
