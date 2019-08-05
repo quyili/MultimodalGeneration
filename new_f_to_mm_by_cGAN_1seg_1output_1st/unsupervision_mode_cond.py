@@ -329,16 +329,16 @@ class GAN:
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob[:, :, :, 0]) * 0.5 * 10 * 5 \
+                                l_g_prob[:, :, :, 0]) * 0.5 * 5 \
                   + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob[:, :, :, 1]) * 5 * 10 * 5 \
+                                  l_g_prob[:, :, :, 1]) * 5 * 5 \
                   + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob[:, :, :, 2]) * 25 * 10 * 5 \
+                                  l_g_prob[:, :, :, 2]) * 25 * 5 \
                   + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob[:, :, :, 3]) * 25 * 10 * 5 \
+                                  l_g_prob[:, :, :, 3]) * 25 * 5 \
                   + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob[:, :, :, 4]) * 25 * 10 * 5
-        G_loss += self.mse_loss(l, l_g) * 25 * 10 * 5
+                                  l_g_prob[:, :, :, 4]) * 25 * 5
+        G_loss += self.mse_loss(l, l_g) * 25 * 5
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2  # + self.ssim_loss(x_g, x_g_t_by_y) * 2

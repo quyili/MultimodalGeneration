@@ -335,52 +335,52 @@ class GAN:
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_x[:, :, :, 0]) * 0.5 * 10 \
+                                l_g_prob_by_x[:, :, :, 0]) * 0.5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_x[:, :, :, 1]) * 5 * 10 \
+                                  l_g_prob_by_x[:, :, :, 1]) * 5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_x[:, :, :, 2]) * 25 * 10 \
+                                  l_g_prob_by_x[:, :, :, 2]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_x[:, :, :, 3]) * 25 * 10 \
+                                  l_g_prob_by_x[:, :, :, 3]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_x[:, :, :, 4]) * 25 * 10
-        G_loss += self.mse_loss(l, l_g_by_x) * 25 * 10
+                                  l_g_prob_by_x[:, :, :, 4]) * 25 * 2
+        G_loss += self.mse_loss(l, l_g_by_x) * 25 * 2
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_y[:, :, :, 0]) * 0.5 * 10 \
+                                l_g_prob_by_y[:, :, :, 0]) * 0.5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_y[:, :, :, 1]) * 5 * 10 \
+                                  l_g_prob_by_y[:, :, :, 1]) * 5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_y[:, :, :, 2]) * 25 * 10 \
+                                  l_g_prob_by_y[:, :, :, 2]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_y[:, :, :, 3]) * 25 * 10 \
+                                  l_g_prob_by_y[:, :, :, 3]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_y[:, :, :, 4]) * 25 * 10
-        G_loss += self.mse_loss(l, l_g_by_y) * 25 * 10
+                                  l_g_prob_by_y[:, :, :, 4]) * 25 * 2
+        G_loss += self.mse_loss(l, l_g_by_y) * 25 * 2
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_z[:, :, :, 0]) * 0.5 * 10 \
+                                l_g_prob_by_z[:, :, :, 0]) * 0.5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_z[:, :, :, 1]) * 5 * 10 \
+                                  l_g_prob_by_z[:, :, :, 1]) * 5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_z[:, :, :, 2]) * 25 * 10 \
+                                  l_g_prob_by_z[:, :, :, 2]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_z[:, :, :, 3]) * 25 * 10 \
+                                  l_g_prob_by_z[:, :, :, 3]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_z[:, :, :, 4]) * 25 * 10
-        G_loss += self.mse_loss(l, l_g_by_z) * 25 * 10
+                                  l_g_prob_by_z[:, :, :, 4]) * 25 * 2
+        G_loss += self.mse_loss(l, l_g_by_z) * 25 * 2
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_w[:, :, :, 0]) * 0.5 * 10 \
+                                l_g_prob_by_w[:, :, :, 0]) * 0.5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_w[:, :, :, 1]) * 5 * 10 \
+                                  l_g_prob_by_w[:, :, :, 1]) * 5 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_w[:, :, :, 2]) * 25 * 10 \
+                                  l_g_prob_by_w[:, :, :, 2]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_w[:, :, :, 3]) * 25 * 10 \
+                                  l_g_prob_by_w[:, :, :, 3]) * 25 * 2 \
                   + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_w[:, :, :, 4]) * 25 * 10
-        G_loss += self.mse_loss(l, l_g_by_w) * 25 * 10
+                                  l_g_prob_by_w[:, :, :, 4]) * 25 * 2
+        G_loss += self.mse_loss(l, l_g_by_w) * 25 * 2
 
         # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 2  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
