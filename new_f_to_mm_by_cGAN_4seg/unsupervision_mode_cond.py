@@ -181,10 +181,10 @@ class GAN:
         code_z = self.EC_M(z)
         code_w = self.EC_M(w)
 
-        l_f_prob_by_x, l_f_by_x = self.segmentation(x_g, self.EC_L_X, self.DC_L_X)
-        l_f_prob_by_y, l_f_by_y = self.segmentation(y_g, self.EC_L_Y, self.DC_L_Y)
-        l_f_prob_by_z, l_f_by_z = self.segmentation(z_g, self.EC_L_Z, self.DC_L_Z)
-        l_f_prob_by_w, l_f_by_w = self.segmentation(w_g, self.EC_L_W, self.DC_L_W)
+        l_f_prob_by_x, l_f_by_x = self.segmentation(x, self.EC_L_X, self.DC_L_X)
+        l_f_prob_by_y, l_f_by_y = self.segmentation(y, self.EC_L_Y, self.DC_L_Y)
+        l_f_prob_by_z, l_f_by_z = self.segmentation(z, self.EC_L_Z, self.DC_L_Z)
+        l_f_prob_by_w, l_f_by_w = self.segmentation(w, self.EC_L_W, self.DC_L_W)
 
         x_r = self.DC_M(tf.concat([code_x, cx_code], axis=-1))
         y_r = self.DC_M(tf.concat([code_y, cy_code], axis=-1))
