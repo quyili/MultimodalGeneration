@@ -511,6 +511,7 @@ class GAN:
         self.image_list["y_g"] = y_g
         self.image_list["z_g"] = z_g
         self.image_list["w_g"] = w_g
+        self.image_list["l_g"] = l_g
 
         self.code_list["code_x_g"] = code_x_g
         self.code_list["code_y_g"] = code_y_g
