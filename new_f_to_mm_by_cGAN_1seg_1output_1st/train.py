@@ -290,13 +290,12 @@ def train():
         saver = tf.train.Saver()
         variables_list = gan.get_variables()
 
-        seg_latest_checkpoint = tf.train.latest_checkpoint(FLAGS.load_seg_model)
-        seg_saver = tf.train.Saver(variables_list[2])
-
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 
             sess.run(tf.global_variables_initializer())
-            seg_saver.restore(sess, seg_latest_checkpoint)
+            print('variable_list[0]', variables_list[0])
+            print('variable_list[1]', variables_list[1])
+            print('variable_list[2]', variables_list[2])
 
             if FLAGS.load_model is not None:
                 logging.info("restore model:" + FLAGS.load_model)
@@ -318,6 +317,12 @@ def train():
             else:
                 sess.run(tf.global_variables_initializer())
                 step = 0
+
+            if FLAGS.load_seg_model is not None:
+                seg_latest_checkpoint = tf.train.latest_checkpoint(FLAGS.load_seg_model)
+                seg_saver = tf.train.Saver(variables_list[2])
+                seg_saver.restore(sess, seg_latest_checkpoint)
+
             sess.graph.finalize()
             logging.info("start step:" + str(step))
             coord = tf.train.Coordinator()
