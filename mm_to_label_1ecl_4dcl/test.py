@@ -41,6 +41,8 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
+tf.flags.DEFINE_string('select_num', 1600, 'default: 15070')
+
 
 def mean(list):
     return sum(list) / float(len(list))
@@ -510,6 +512,8 @@ def train():
                     val_evaluation_list = []
                     val_mse_list = []
                     val_index = 0
+                    count=0
+                    select_files=[]
 
                     l_val_files = read_filename(FLAGS.L_test,shuffle=False)
                     for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
@@ -580,15 +584,36 @@ def train():
                                 z_3: np.asarray(val_true_z)[3:4, :, :, :],
                                 w_3: np.asarray(val_true_w)[3:4, :, :, :],
                             })
-                        val_loss_list.append(val_losses_0)
-                        val_loss_list.append(val_losses_1)
-                        val_loss_list.append(val_losses_2)
-                        val_loss_list.append(val_losses_3)
-                        val_evaluation_list.append(val_evaluations_0)
-                        val_evaluation_list.append(val_evaluations_1)
-                        val_evaluation_list.append(val_evaluations_2)
-                        val_evaluation_list.append(val_evaluations_3)
-                        val_mse_list.append(val_mses_0)
+                        print("val_evaluations_0:", mean(val_evaluations_0))
+                        print("val_evaluations_1:", mean(val_evaluations_1))
+                        print("val_evaluations_2:", mean(val_evaluations_2))
+                        print("val_evaluations_3:", mean(val_evaluations_3))
+
+                        if mean(val_evaluations_0) >= 0.9  and count < FLAGS.select_num:
+                            val_loss_list.append(val_losses_0)
+                            val_evaluation_list.append(val_evaluations_0)
+                            val_mse_list.append(val_mses_0)
+                            select_files.append(l_val_files[j * 4 + 0])
+                            count += 1
+                        if mean(val_evaluations_1) >= 0.9 and count < FLAGS.select_num:
+                            val_loss_list.append(val_losses_1)
+                            val_evaluation_list.append(val_evaluations_1)
+                            val_mse_list.append(val_mses_1)
+                            select_files.append(l_val_files[j * 4 + 1])
+                            count += 1
+                        if mean(val_evaluations_2) >= 0.9 and count < FLAGS.select_num:
+                            val_loss_list.append(val_losses_2)
+                            val_evaluation_list.append(val_evaluations_2)
+                            val_mse_list.append(val_mses_2)
+                            select_files.append(l_val_files[j * 4 + 2])
+                            count += 1
+                        if mean(val_evaluations_3) >= 0.9 and count < FLAGS.select_num:
+                            val_loss_list.append(val_losses_3)
+                            val_evaluation_list.append(val_evaluations_3)
+                            val_mse_list.append(val_mses_3)
+                            select_files.append(l_val_files[j * 4 + 3])
+                            count += 1
+
 
                         save_image(np.asarray(val_true_l)[0, :, :, 0], l_val_files[val_index - 4],
                                    dir="./seg_res/Label_True", form=".tiff")
@@ -634,9 +659,13 @@ def train():
                         save_image(np.asarray(val_image_list_3["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 1],
                                    dir="./seg_res/Label_Flair", form=".tiff")
 
+                        if count >= FLAGS.select_num:
+                            break
+
                     print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))
                     print("MEAN Dice Score:",mean_list(val_evaluation_list),mean(mean_list(val_evaluation_list)))
+                    print("select_files:",select_files)
 
             except KeyboardInterrupt:
                 logging.info('Interrupted')
