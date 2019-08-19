@@ -41,7 +41,7 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "test", 'default: train')
 
-tf.flags.DEFINE_string('select_num', 1600, 'default: 15070')
+tf.flags.DEFINE_integer('select_num', 1600, 'default: 15070')
 
 
 def mean(list):

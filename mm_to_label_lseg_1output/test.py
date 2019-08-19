@@ -39,7 +39,7 @@ tf.flags.DEFINE_bool('step_clear', False,
 tf.flags.DEFINE_integer('epoch', 100, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
-tf.flags.DEFINE_string('stage', "train", 'default: train')
+tf.flags.DEFINE_integer('stage', "test", 'default: train')
 
 tf.flags.DEFINE_string('select_num', 1600, 'default: 15070')
 
