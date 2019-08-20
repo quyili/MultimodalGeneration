@@ -761,6 +761,7 @@ def train():
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))
                     print("MEAN Dice Score:",mean_list(val_evaluation_list),mean(mean_list(val_evaluation_list)))
                     print("select_files:",select_files)
+
             except KeyboardInterrupt:
                 logging.info('Interrupted')
                 coord.request_stop()
