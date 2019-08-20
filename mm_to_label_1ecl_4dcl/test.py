@@ -500,11 +500,17 @@ def train():
                 elif  FLAGS.stage == "test":
                     try:
                         os.makedirs(checkpoints_dir + "/samples")
-                        os.makedirs("./seg_res/Label_True")
-                        os.makedirs("./seg_res/Label_T1")
-                        os.makedirs("./seg_res/Label_T2")
-                        os.makedirs("./seg_res/Label_T1c")
-                        os.makedirs("./seg_res/Label_Flair")
+                        os.makedirs("./seg_res/selected/Label_True")
+                        os.makedirs("./seg_res/selected/Label_T1")
+                        os.makedirs("./seg_res/selected/Label_T2")
+                        os.makedirs("./seg_res/selected/Label_T1c")
+                        os.makedirs("./seg_res/selected/Label_Flair")
+
+                        os.makedirs("./seg_res/unselected/Label_True")
+                        os.makedirs("./seg_res/unselected/Label_T1")
+                        os.makedirs("./seg_res/unselected/Label_T2")
+                        os.makedirs("./seg_res/unselected/Label_T1c")
+                        os.makedirs("./seg_res/unselected/Label_Flair")
                     except os.error:
                         pass
 
@@ -589,75 +595,114 @@ def train():
                         print("val_evaluations_2:", mean(val_evaluations_2))
                         print("val_evaluations_3:", mean(val_evaluations_3))
 
-                        if mean(val_evaluations_0) >= 0.9  and count < FLAGS.select_num:
+                        if mean(val_evaluations_0) >= 0.95  and count < FLAGS.select_num:
                             val_loss_list.append(val_losses_0)
                             val_evaluation_list.append(val_evaluations_0)
                             val_mse_list.append(val_mses_0)
                             select_files.append(l_val_files[j * 4 + 0])
                             count += 1
+                            save_image(np.asarray(val_image_list_0["l_x"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/selected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/selected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/selected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/selected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/selected/Label_Flair", form=".tiff")
+                        else:
+                            save_image(np.asarray(val_image_list_0["l_x"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/unselected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/unselected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/unselected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/unselected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_0["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir="./seg_res/unselected/Label_Flair", form=".tiff")
                         if mean(val_evaluations_1) >= 0.9 and count < FLAGS.select_num:
                             val_loss_list.append(val_losses_1)
                             val_evaluation_list.append(val_evaluations_1)
                             val_mse_list.append(val_mses_1)
                             select_files.append(l_val_files[j * 4 + 1])
                             count += 1
+                            save_image(np.asarray(val_image_list_1["l_x"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/selected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/selected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/selected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/selected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/selected/Label_Flair", form=".tiff")
+                        else:
+                            save_image(np.asarray(val_image_list_1["l_x"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/unselected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/unselected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/unselected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/unselected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir="./seg_res/unselected/Label_Flair", form=".tiff")
                         if mean(val_evaluations_2) >= 0.9 and count < FLAGS.select_num:
                             val_loss_list.append(val_losses_2)
                             val_evaluation_list.append(val_evaluations_2)
                             val_mse_list.append(val_mses_2)
                             select_files.append(l_val_files[j * 4 + 2])
                             count += 1
+                            save_image(np.asarray(val_image_list_2["l_x"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/selected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/selected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/selected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/selected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/selected/Label_Flair", form=".tiff")
+                        else:
+                            save_image(np.asarray(val_image_list_2["l_x"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/unselected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/unselected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/unselected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/unselected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir="./seg_res/unselected/Label_Flair", form=".tiff")
                         if mean(val_evaluations_3) >= 0.9 and count < FLAGS.select_num:
                             val_loss_list.append(val_losses_3)
                             val_evaluation_list.append(val_evaluations_3)
                             val_mse_list.append(val_mses_3)
                             select_files.append(l_val_files[j * 4 + 3])
                             count += 1
-
-
-                        save_image(np.asarray(val_true_l)[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
-
-                        save_image(np.asarray(val_true_l)[1, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
-
-                        save_image(np.asarray(val_true_l)[2, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
-
-                        save_image(np.asarray(val_true_l)[3, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_T1", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_T2", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_T1c", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_Flair", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_x"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/selected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/selected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/selected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/selected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/selected/Label_Flair", form=".tiff")
+                        else:
+                            save_image(np.asarray(val_image_list_3["l_x"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/unselected/Label_True", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_x"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/unselected/Label_T1", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_y"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/unselected/Label_T2", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_z"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/unselected/Label_T1c", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["l_f_by_w"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir="./seg_res/unselected/Label_Flair", form=".tiff")
 
                         if count >= FLAGS.select_num:
                             break
