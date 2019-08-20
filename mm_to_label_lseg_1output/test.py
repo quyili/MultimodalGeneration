@@ -51,7 +51,9 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "test", 'default: train')
 
-tf.flags.DEFINE_integer('select_num', 1000, 'default: 15070')
+tf.flags.DEFINE_integer('select_num', 200, 'default: 15070')
+tf.flags.DEFINE_float('select_score', 0.95, 'default: 0.9')
+tf.flags.DEFINE_string('select_save_path', '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/', 'default: ./')
 
 
 def mean(list):
@@ -113,7 +115,7 @@ def save_images(image_dirct, checkpoints_dir, file_index=""):
                    dir=checkpoints_dir + "/samples", form=".tiff")
 
 
-def save_image(image, name, dir="./samples", form=".tiff"):
+def save_image(image, name, dir="./samples", form=""):
     try:
         os.makedirs(dir)
     except os.error:
@@ -550,6 +552,17 @@ def train():
                             save_image(np.asarray(val_image_list_0["l_f"])[0, :, :, 0],
                                        l_val_files[val_index - 4] + str(mean(val_evaluations_0)),
                                        dir="./seg_res/selected/Label_Fake", form=".tiff")
+
+                            save_image(np.asarray(val_image_list_0["x"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1")
+                            save_image(np.asarray(val_image_list_0["y"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T2")
+                            save_image(np.asarray(val_image_list_0["z"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1c")
+                            save_image(np.asarray(val_image_list_0["w"])[0, :, :, 0], l_val_files[val_index - 4],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Flair")
+                            save_image(np.asarray(val_image_list_0["l"])[0, :, :, 0] * 4, l_val_files[val_index - 4],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Label")
                         else:
                             save_image(np.asarray(val_image_list_0["l"])[0, :, :, 0],
                                        l_val_files[val_index - 4] + str(mean(val_evaluations_0)),
@@ -569,6 +582,17 @@ def train():
                             save_image(np.asarray(val_image_list_1["l_f"])[0, :, :, 0],
                                        l_val_files[val_index - 3] + str(mean(val_evaluations_1)),
                                        dir="./seg_res/selected/Label_Fake", form=".tiff")
+                            save_image(np.asarray(val_image_list_1["x"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1")
+                            save_image(np.asarray(val_image_list_1["y"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T2")
+                            save_image(np.asarray(val_image_list_1["z"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1c")
+                            save_image(np.asarray(val_image_list_1["w"])[0, :, :, 0], l_val_files[val_index - 3],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Flair")
+                            save_image(np.asarray(val_image_list_1["l"])[0, :, :, 0] * 4, l_val_files[val_index - 3],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Label")
+
                         else:
                             save_image(np.asarray(val_image_list_1["l"])[0, :, :, 0],
                                        l_val_files[val_index - 3] + str(mean(val_evaluations_1)),
@@ -588,6 +612,17 @@ def train():
                             save_image(np.asarray(val_image_list_2["l_f"])[0, :, :, 0],
                                        l_val_files[val_index - 2] + str(mean(val_evaluations_2)),
                                        dir="./seg_res/selected/Label_Fake", form=".tiff")
+                            save_image(np.asarray(val_image_list_2["x"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1")
+                            save_image(np.asarray(val_image_list_2["y"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T2")
+                            save_image(np.asarray(val_image_list_2["z"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1c")
+                            save_image(np.asarray(val_image_list_2["w"])[0, :, :, 0], l_val_files[val_index - 2],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Flair")
+                            save_image(np.asarray(val_image_list_2["l"])[0, :, :, 0] * 4, l_val_files[val_index - 2],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Label")
+
                         else:
                             save_image(np.asarray(val_image_list_2["l"])[0, :, :, 0],
                                        l_val_files[val_index - 2] + str(mean(val_evaluations_2)),
@@ -607,6 +642,17 @@ def train():
                             save_image(np.asarray(val_image_list_3["l_f"])[0, :, :, 0],
                                        l_val_files[val_index - 1] + str(mean(val_evaluations_3)),
                                        dir="./seg_res/selected/Label_Fake", form=".tiff")
+                            save_image(np.asarray(val_image_list_3["x"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1")
+                            save_image(np.asarray(val_image_list_3["y"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T2")
+                            save_image(np.asarray(val_image_list_3["z"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/T1c")
+                            save_image(np.asarray(val_image_list_3["w"])[0, :, :, 0], l_val_files[val_index - 1],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Flair")
+                            save_image(np.asarray(val_image_list_3["l"])[0, :, :, 0] * 4, l_val_files[val_index - 1],
+                                       dir=FLAGS.select_save_path + "selected_" + str(FLAGS.select_num) + "/Label")
+
                         else:
                             save_image(np.asarray(val_image_list_3["l"])[0, :, :, 0],
                                        l_val_files[val_index - 1] + str(mean(val_evaluations_3)),
