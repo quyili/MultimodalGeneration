@@ -357,18 +357,14 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 \subsection{病灶标签生成组件设计方案}
 我们设计了如下五组病灶标签生成组件。
 \begin{itemize}
-	\item \textbf{MRI编码器+单病灶解码器方案} 
-	每个模态由一个共同的病灶解码器从MRI编码器的合成MRI编码结果还原得到各自的病灶标签。
-	\item \textbf{MRI编码器+多病灶解码器方案} 
-	每个模态由一个独立的病灶解码器从从MRI编码器的合成MRI编码结果还原得到各自的病灶标签。
-	\item \textbf{单病灶编码器+多病灶解码器方案} 
-	每个模态由一个采用共同的病灶编码器与每个模态的独立的病灶解码器组合得到的分割器，从合成的MRI还原得到各自的病灶标签。
 	\item \textbf{单分割器方案} 
 	每个模态由一个共同的完整的分割器从合成的MRI还原得到各自的病灶标签。
+	\item \textbf{单病灶编码器+多病灶解码器方案} 
+	每个模态由一个采用共同的病灶编码器与每个模态的独立的病灶解码器组合得到的分割器，从合成的MRI还原得到各自的病灶标签。
 	\item \textbf{多分割器方案} 
 	每个模态由一个独立的完整的分割器从合成的MRI还原得到各自的病灶标签。
 \end{itemize}
-上述五种方案的损失函数与前文所述损失是一致的，仅是病灶还原组件的输入为合成的MRI或合成MRI的编码结果的区别。除了MRI编码器外，其他模块均只使用辅助的模态重建和模态转换训练中的病灶监督损失进行训练，多模态MRI生成中的与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失只用于MRI生成组件的训练。
+上述三种方案的损失函数与前文所述损失是一致的，各个模块均只使用辅助的模态重建和模态转换训练中的病灶监督损失进行训练，多模态MRI生成中的与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失只用于MRI生成组件的训练。
 
 \subsection{构建合成数据集}
 \label{make dataset}
@@ -452,12 +448,10 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\resizebox{.95\columnwidth}{!}{		
 		\smallskip\begin{tabular}{l|l|l|l}			
 			synthetic method&test data type &MSE   &Dice Score \\			
-			-&real 		   &0.033 &0.954 \\			
-			1DCL&synthetic 	   &0.208 &0.868 \\			
-			4DCL&synthetic     &      & \\		
-			1SEG&synthetic     &      & \\			
-			1ECL+4DCL&synthetic     &      & \\		
-			4SEG&synthetic     &      & \\			
+			-&real 		   				&0.014 &0.961 \\					
+			1SEG&synthetic     			&0.053 &0.741 \\			
+			1ECL+4DCL&synthetic     	&0.055 &0.808 \\		
+			4SEG&synthetic     			&0.043 &0.838 \\			
 		\end{tabular}
 		
 	}	
