@@ -100,9 +100,9 @@ class GAN:
 
         code_rm = self.EC_R(f_rm_expand)
 
-        l_g_prob = self.DC_L(code_rm)
-        l_g = tf.reshape(
-            tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
+        # l_g_prob = self.DC_L(code_rm)
+        # l_g = tf.reshape(
+        #     tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
         x_g = self.DC_M(tf.concat([code_rm, cx_code], axis=-1))
         y_g = self.DC_M(tf.concat([code_rm, cy_code], axis=-1))
         z_g = self.DC_M(tf.concat([code_rm, cz_code], axis=-1))
@@ -373,17 +373,17 @@ class GAN:
         G_loss += self.mse_loss(f_z_g_r, f_w_g_r) * 5
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob[:, :, :, 0]) * 0.2 * 10 \
-                  + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob[:, :, :, 1]) * 1 * 10 \
-                  + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob[:, :, :, 2]) * 10 * 10 \
-                  + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob[:, :, :, 3]) * 10 * 10 \
-                  + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob[:, :, :, 4]) * 10 * 10
-        G_loss += self.mse_loss(l, l_g) * 5 * 10
+        # G_loss += self.mse_loss(label_expand[:, :, :, 0],
+        #                         l_g_prob[:, :, :, 0]) * 0.2 * 10 \
+        #           + self.mse_loss(label_expand[:, :, :, 1],
+        #                           l_g_prob[:, :, :, 1]) * 1 * 10 \
+        #           + self.mse_loss(label_expand[:, :, :, 2],
+        #                           l_g_prob[:, :, :, 2]) * 10 * 10 \
+        #           + self.mse_loss(label_expand[:, :, :, 3],
+        #                           l_g_prob[:, :, :, 3]) * 10 * 10 \
+        #           + self.mse_loss(label_expand[:, :, :, 4],
+        #                           l_g_prob[:, :, :, 4]) * 10 * 10
+        # G_loss += self.mse_loss(l, l_g) * 5 * 10
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
                                 l_g_prob_by_x[:, :, :, 0]) * 0.5 * 10 \
@@ -653,8 +653,8 @@ class GAN:
 
         self.code_list["code_rm"] = code_rm
 
-        self.prob_list["l_g_prob"] = l_g_prob
-        self.image_list["l_g"] = l_g
+        # self.prob_list["l_g_prob"] = l_g_prob
+        # self.image_list["l_g"] = l_g
         self.image_list["x_g"] = x_g
         self.image_list["y_g"] = y_g
         self.image_list["z_g"] = z_g
