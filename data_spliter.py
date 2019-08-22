@@ -16,6 +16,14 @@ def split(
         SAVE_PATH= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_1F_MRI/",
         epoch = 1,
         epoch_steps = 15070):
+    try:
+        os.makedirs(SAVE_PATH + "T1")
+        os.makedirs(SAVE_PATH + "T2")
+        os.makedirs(SAVE_PATH + "T1c")
+        os.makedirs(SAVE_PATH + "Flair")
+        os.makedirs(SAVE_PATH + "Label")
+    except os.error:
+        pass
     l_val_files = read_filename(SRC_PATH+"Label")
     for i in range(epoch_steps*epoch):
         os.system("cp " + SRC_PATH + "T1/" + l_val_files[i] + " " + SAVE_PATH + "T1/" + l_val_files[i])
