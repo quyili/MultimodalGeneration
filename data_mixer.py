@@ -27,7 +27,7 @@ def mix(
     except os.error:
         pass
 
-    l_val_files_1 = read_filename(SRC_PATH_1+"Label", shuffle=True)
+    l_val_files_1 = read_filename(SRC_PATH_1+"trainLabel", shuffle=True)
     for i in range(int(epoch_steps*epoch_1)):
         os.system("cp " + SRC_PATH_1 + "trainT1/" + l_val_files_1[i] + " " + SAVE_PATH + "T1/real_" + l_val_files_1[i])
         os.system("cp " + SRC_PATH_1 + "trainT2/" + l_val_files_1[i] + " " + SAVE_PATH + "T2/real_" + l_val_files_1[i])
