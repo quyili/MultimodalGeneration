@@ -50,21 +50,21 @@ if __name__ == '__main__':
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_enhancement_1F_MRI/",
         epoch_1=1,
         epoch_2=1,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/enhancement_2F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_enhancement_2F_MRI/",
         epoch_1=1,
         epoch_2=2,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/enhancement_3F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_enhancement_3F_MRI/",
         epoch_1=1,
         epoch_2=3,
-        epoch_steps=15070)
+        epoch_steps=13420)
 
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
@@ -72,21 +72,21 @@ if __name__ == '__main__':
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_synthetic_1F_MRI/",
         epoch_1=1,
         epoch_2=1,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_2F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_synthetic_2F_MRI/",
         epoch_1=1,
         epoch_2=2,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_3F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_synthetic_3F_MRI/",
         epoch_1=1,
         epoch_2=3,
-        epoch_steps=15070)
+        epoch_steps=13420)
 
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
@@ -94,21 +94,21 @@ if __name__ == '__main__':
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_50_synthetic_50_MRI/",
         epoch_1=0.5,
         epoch_2=0.5,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_1F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_20_synthetic_80_MRI/",
         epoch_1=0.2,
         epoch_2=0.8,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_1F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_80_synthetic_20_MRI/",
         epoch_1=0.8,
         epoch_2=0.2,
-        epoch_steps=15070)
+        epoch_steps=13420)
 
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
@@ -116,18 +116,18 @@ if __name__ == '__main__':
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_10_synthetic_1F_MRI/",
         epoch_1=0.1,
         epoch_2=1,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_2F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_10_synthetic_2F_MRI/",
         epoch_1=0.1,
         epoch_2=2,
-        epoch_steps=15070)
+        epoch_steps=13420)
     mix(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_3F_MRI/",
         SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_10_synthetic_3F_MRI/",
         epoch_1=0.1,
         epoch_2=3,
-        epoch_steps=15070)
+        epoch_steps=13420)
