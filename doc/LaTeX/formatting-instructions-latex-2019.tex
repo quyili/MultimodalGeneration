@@ -406,7 +406,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\label{make_data}
 \end{figure}
 
-由于训练时去除肿瘤部分的结构的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图和其对应的掩膜，我们先对结构特征图进行高斯模糊[]，再采用OpenCV[]提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用通常的算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用通常的算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
+由于训练时去除肿瘤部分的结构的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图和其对应的掩膜，我们先对结构特征图进行高斯模糊\cite{92wink2004denoising}，再采用OpenCV[]提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用通常的算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用通常的算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
 \begin{algorithm}[t]
 	\caption{Structural feature map filtering}
 	\label{alg:3}
@@ -474,11 +474,11 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 \section{实验}
 \subsection{训练设置}
 
-每项实验训练50个epoch；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数[]和均方差（MSE）[]进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
+每项实验训练50个epoch；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
 
 \subsection{BRATS2015数据集}
 
-我们采用了公开的BRATS2015[]数据集进行实验，该数据集包含已配准的T1、T2、T1c、Flair四个模态，训练集每个模态有274张3D MRI，大小为155$\times$240$\times$240，同时配有274张相同尺寸的肿瘤分割标签。我们将样本按9:1划分训练集和测试集，取每张3D MRI第55-105间的50个slice构建2D的数据集。在数据预处理阶段，我们将每张图进行了标准化。
+我们采用了公开的BRATS2015\cite{91menze:hal-00935640}数据集进行实验，该数据集包含已配准的T1、T2、T1c、Flair四个模态，训练集每个模态有274张3D MRI，大小为155$\times$240$\times$240，同时配有274张相同尺寸的肿瘤分割标签。我们将样本按9:1划分训练集和测试集，取每张3D MRI第55-105间的50个slice构建2D的数据集。在数据预处理阶段，我们将每张图进行了标准化。
 
 \subsection{BRATS合成数据集}
 
@@ -516,7 +516,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\label{label_test}	
 \end{table}
 
-如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.033的MSE和0.954的SSIM[]。之后我们使用这个表现优秀的分割网络对我们的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上......
+如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.033的MSE和0.954的SSIM\cite{93wang2004image}。之后我们使用这个表现优秀的分割网络对我们的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上......
 
 \subsubsection{合成数据可用性验证实验结果}
 \begin{table}[t]
