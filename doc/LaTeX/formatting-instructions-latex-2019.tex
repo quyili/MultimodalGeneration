@@ -507,7 +507,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 	\label{label_test}	
 \end{table}
 
-如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.033的MSE和0.954的SSIM\cite{93wang2004image}。之后我们使用这个表现优秀的分割网络对我们的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上......
+如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.014的MSE和0.961的SSIM\cite{93wang2004image}。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中一个模态一个分割器的方案取得了最好的结果，Dice Score也达到了0.838。
 
 \subsubsection{合成数据可用性验证实验结果}
 \begin{table}[t]
