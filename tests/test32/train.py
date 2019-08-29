@@ -512,25 +512,25 @@ def train():
                         val_evaluation_list.append(val_evaluations_3)
                         val_mse_list.append(val_mses_0)
 
-                        save_image(np.asarray(val_true_l)[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_0["l_f"])[0, :, :, 0], l_val_files[val_index - 4],
-                                   dir="./seg_res/Label_Fake", form=".tiff")
-
-                        save_image(np.asarray(val_true_l)[1, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_1["l_f"])[0, :, :, 0], l_val_files[val_index - 3],
-                                   dir="./seg_res/Label_Fake", form=".tiff")
-
-                        save_image(np.asarray(val_true_l)[2, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_2["l_f"])[0, :, :, 0], l_val_files[val_index - 2],
-                                   dir="./seg_res/Label_Fake", form=".tiff")
-
-                        save_image(np.asarray(val_true_l)[3, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_True", form=".tiff")
-                        save_image(np.asarray(val_image_list_3["l_f"])[0, :, :, 0], l_val_files[val_index - 1],
-                                   dir="./seg_res/Label_Fake", form=".tiff")
+                        # save_image(np.asarray(val_true_l)[0, :, :, 0], l_val_files[val_index - 4],
+                        #            dir="./seg_res/Label_True", form=".tiff")
+                        # save_image(np.asarray(val_image_list_0["l_f"])[0, :, :, 0], l_val_files[val_index - 4],
+                        #            dir="./seg_res/Label_Fake", form=".tiff")
+                        #
+                        # save_image(np.asarray(val_true_l)[1, :, :, 0], l_val_files[val_index - 3],
+                        #            dir="./seg_res/Label_True", form=".tiff")
+                        # save_image(np.asarray(val_image_list_1["l_f"])[0, :, :, 0], l_val_files[val_index - 3],
+                        #            dir="./seg_res/Label_Fake", form=".tiff")
+                        #
+                        # save_image(np.asarray(val_true_l)[2, :, :, 0], l_val_files[val_index - 2],
+                        #            dir="./seg_res/Label_True", form=".tiff")
+                        # save_image(np.asarray(val_image_list_2["l_f"])[0, :, :, 0], l_val_files[val_index - 2],
+                        #            dir="./seg_res/Label_Fake", form=".tiff")
+                        #
+                        # save_image(np.asarray(val_true_l)[3, :, :, 0], l_val_files[val_index - 1],
+                        #            dir="./seg_res/Label_True", form=".tiff")
+                        # save_image(np.asarray(val_image_list_3["l_f"])[0, :, :, 0], l_val_files[val_index - 1],
+                        #            dir="./seg_res/Label_Fake", form=".tiff")
 
                     print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))

@@ -86,7 +86,7 @@
 %
 \setlength\titlebox{2.5in} % If your paper contains an overfull \vbox too high warning at the beginning of the document, use this
 % command to correct it. You may not alter the value below 2.5 in
-\title{基于条件生成对抗网络的配准多模态脑MRI合成}
+\title{基于条件生成对抗网络的配准多模态脑MRI合成Synthesis of Registered Multimodal MRI with Lesion Label}
 %Your title must be in mixed case, not sentence case. 
 % That means all verbs (including short verbs like be, is, using,and go), 
 % nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
@@ -104,7 +104,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 
 \begin{abstract}
 在基于大量数据驱动的医学影像智能处理任务中，医学影像数据的收集和采集是非常困难的，尤其是配准的多模态医学影像数据。合成的医学影像数据可以很好地缓解数据不足的问题。我们基于无监督的条件生成对抗网络模型实现了在已有单模态影像数据时可扩展出多模态影像数据并保留原模态的病灶信息，进一步实现了完全从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们验证了合成的医学影像可以在医学影像智能处理任务中与真实数据混合使用来提高模型的泛化能力。
-In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised CGAN model, we extend multimodal image data from existing unimodal image data and retain lesion information of the original modal, furthermore we achieve the generation of registered multimodal medical images from random noise and the freedom to add lesion information. We verify that synthetic medical images can be mixed with real data in medical image intelligent processing tasks to improve the generalization capabilities of the model.
+In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised CGAN model, we extend multimodal image data from existing unimodal image data and retain lesion information of the original modal, furthermore we achieve the generation of registered multimodal medical images from random noise and the freedom to add lesion information. We verify the synthetic medical images can be mixed with real data in medical image intelligent processing tasks to improve the generalization capabilities of the model.
 \end{abstract}
 \section{介绍Introduction}
  
@@ -237,7 +237,7 @@ At present, there are various problems in the research of medical image synthesi
 \end{center}
 
 	\item \textbf{结构特征编码的监督损失} 
-	这项损失使得结构特征图中间编码结果服从正态分布
+	这项损失使得结构特征图中间编码结果服从正态分布，其中，$mean()$函数为均值函数。
 
 \begin{center}
 	$loss_{normal}=\Vert{mean(code_{f,mean})}\Vert_{2}^{2}+ \Vert{mean(exp(0.5*code_{f,logvar}))-1}\Vert_{2}^{2}$
