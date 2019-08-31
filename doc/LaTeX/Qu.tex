@@ -94,14 +94,15 @@
 School of Data and Computer Science\\ Sun Yet-Sen University\\	
 quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace or sans serif
 }
- \begin{document}
+\begin{document}
 
 \maketitle
 
 \begin{abstract}
 在基于大量数据驱动的医学影像智能处理任务中，医学影像数据的收集和采集是非常困难的，尤其是配准的多模态医学影像数据。合成的医学影像数据可以很好地缓解数据不足的问题。我们基于无监督的条件生成对抗网络模型实现了完全从随机噪声生成配准的多模态医学影像，并且可以根据自由选定的病灶标签有效地生成对应的病灶信息。我们在BRATS2015上进行了多项验证实验，验证了我们的合成MRI可以在医学影像智能处理任务中作为预训练数据或增强数据使用，并能大幅度提高模型的泛化能力。
 In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised CGAN model, we achieve the generation of registered multimodal medical images from random noise and corresponding lesion information can be efficiently generated based on the freely selected lesion label. We conducted a number of validation experiments on BRATS2015 to verify that our synthetic MRI can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve the generalization ability of the model.
-
+\end{abstract}
+	
 \section{Introduction}
 核磁共振成像（MRI）是一种常见的医学影像，根据成像参数的不同可以有多种模态，例如T1、T2、T1c等。不同的模态对医生具有不同的参考价值，医生往往需要多个模态的影像互相对照才能做出准确的判断。在医学影像的智能处理任务的训练和学习中，我们往往也期望获得更多模态的影像，例如采用卷积神经网络（CNN）\cite{86krizhevsky2012imagenet}或生成对抗网络（GAN）\cite{25goodfellow2014generative}进行的医学图像处理任务。
 Magnetic resonance imaging (MRI) is a common medical image that can have multiple modalities depending on imaging parameters, such as T1, T2, T1c and so on. Different modalities have different reference values for doctors. To make accurate judgments, doctors often need multiple modal images to compare with each other. In the training and learning of medical image intelligent processing tasks, we often expect to obtain more modal images, such as medical image processing tasks based on Convolutional Neural Networks (CNN)\cite{86krizhevsky2012imagenet} or Generative Adversarial Networks (GAN)\cite{25goodfellow2014generative}. 
@@ -113,7 +114,7 @@ When obtaining different modalities from the same part of the same patient  thro
 
 Some studies explored cross-modal medical images translation prior to GAN by using graph dictionary mapping\cite{22burgos2015robust}, sparse coding\cite{33huang2017simultaneous},\cite{34vemulapalli2015unsupervised}, and CNN\cite{36vannguyen2015crossdomain}. Since then, many studies used GAN to generate higher quality translation results\cite{1zhao2018modular},\cite{5liang2018generative},\cite{6zhu2017unpaired},\cite{13choi2018stargan:}. Owe to the powerful capabilities of GAN, it has become the mainstream to achieve multimodal medical image translation\cite{2zhang2018translating},\cite{20nie2017medical},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}. The general translation is based on paired data, some studies have also learned from unpaired cross-modal data\cite{2zhang2018translating}. Recent studies have realized brain MRI to CT image translation with pixel-to-pixel GAN\cite{20nie2017medical},\cite{40kamnitsas2017unsupervised}, retinal vascular annotation to image translation\cite{41costa2017towards}, CycleGAN-based\cite{6zhu2017unpaired} cardiac MRI to CT image translation and segmentation\cite{20nie2017medical}. For multimodal synthesis, \cite{84chartsias2018multimodal} implements MRI synthesis of multiple inputs multiple outputs, but requires registration for input multimodal data. Based on this, \cite{85joyce2017robust} improves and implements a missing or unregistered multi-input synthesis model that can perform MRI image synthesis from any subset of its inputs, but limits the output to a single modality and the model is not scalable. \cite{66miao2018dilated} has conducted in-depth research on medical image registration. \cite{4shin2018medical} applys GAN to synthesize brain tumor images for data enhancement and data anonymization, but additional training of anatomical segmentation networks is required, and the dataset is required to have lesion segmentation labels, so the model generalization ability is weak. \cite{41costa2017towards} studies the random generation of vascular annotation maps based on the idea of Variational Auto-Encoder (VAE)\cite{87kingma2014auto-encoding, 88rezende2014stochastic}, and then synthesizes color retinal images. In these current studies of medical image synthesis, most are two-modal translation\cite{2zhang2018translating},\cite{20nie2017medical},\cite{22burgos2015robust},\cite{34vemulapalli2015unsupervised},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}, and the study of multimodal translation is very rare\cite{84chartsias2018multimodal},\cite{85joyce2017robust},\cite{4shin2018medical}. Outside the field of medical image processing, the development of many-to-many translation has recently made progress\cite{1zhao2018modular},\cite{5liang2018generative},\cite{13choi2018stargan:},\cite{27isola2017image-to-image}.
 
-目前针对医学影像合成的研究存在模态数量难以扩展、需要配准训练数据、依赖于复杂的大型网络、无法添加或保留病灶、无法从随机矩阵开始生成、需要额外的训练数据等各项问题，且大多数研究对合成数据的评价依赖于经验医师的人工视觉效果评估，没有进行客观的量化检验。因此，我们设计了一种基于条件生成对抗网络(CGAN)\cite{70mirza2014conditional}的配准多模态MRI生成的方法，采用无监督学习方法，训练数据无需配准，输入随机正态分布矩阵进而生成一组有病灶标签的多模态配准MRI。我们在BRATS2015数据集上进行了带肿瘤分割标签的脑多模态MRI生成实验，并验证了我们的合成数据中病灶信息的有效程度和合成数据在肿瘤病灶分割实验中的可用程度。具体来说，我们的工作主要体现在以下三个方面：
+目前针对医学影像合成的研究存在模态数量难以扩展、需要配准训练数据、依赖于复杂的大型网络、无法添加或保留病灶、无法从随机矩阵开始生成、需要额外的训练数据等各项问题，且大多数研究对合成数据的评价依赖于经验医师的人工视觉效果评估，没有进行客观的量化检验。因此，我们设计了一种基于条件生成对抗网络(CGAN)\cite{70mirza2014conditional}的配准多模态MRI生成的方法，采用无监督学习方法，训练数据无需配准，输入随机正态分布矩阵进而生成一组有病灶标签的多模态配准MRI。我们在BRATS2015数据集上进行了带肿瘤分割标签的脑多模态MRI生成实验，并验证了我们的合成数据中病灶信息的有效程度和合成数据在肿瘤病灶分割实验中的可用程度。我们将开源我们的代码。总的来说，我们的工作主要体现在以下三个方面：
 At present, there are various problems in the research of medical image synthesis, such as the difficulty of expanding the number of modalities, the need to registered training data, relying on complex large networks, the inability to add or retain lesions, the need to be extended from real data and cannot be generated from random matrices, and the need of additional training data, etc. Moreover, the evaluation of synthetic data in most studies relies on the evaluation of artificial visual effects by experienced physicians, without objective quantitative evaluation. Therefore, we design a multi-modal registration image generation scheme based on the Conditional Generative Adversarial Networks (CGAN)\cite{70mirza2014conditional}. With unsupervised learning method, training data do not need to be registered. Our solution can receive a random input that meets our design specifications to generate a set of labeled multimodal registration images. Specifically, our contribution is in the following three areas:
 
 \begin{itemize}
@@ -126,9 +127,9 @@ At present, there are various problems in the research of medical image synthesi
 \end{itemize}
 
 
-\section{方法Methods}
-
-我们在脑MRI数据的合成任务上进行了我们的方法的展示，其中的病灶为肿瘤，病灶标签为肿瘤分割标签，病灶处理任务为病灶分割。我们的方法对合成部位、病灶处理任务和模态数量等不做限制，通过下述的展示，我们能很容易的将该方法推广应用到其他的类似任务。
+\section{方法Method}
+\label{method}
+我们在多模态脑MRI的合成任务上展示我们的方法。在本文的实例中，我们合成的病灶为肿瘤，病灶标签为肿瘤分割标签，病灶处理任务为病灶分割。我们的方法对合成部位、病灶类型、病灶处理任务、具体的模态和模态数量等不做限制，通过下述实例的展示，我们能很容易的将该方法推广应用到其他的类似任务。
 We perform our scheme on brain MRI data synthesis task, in which the lesion is a tumor, the lesion label is a tumor segmentation label, and the lesion processing task is lesion segmentation. Our scheme does not limit the synthesis of human parts, lesion processing tasks, and the number of modalities. We can easily apply this method to other similar tasks by the following display.
 \subsection{整体架构Overall Architecture}
 \begin{figure}[t]
@@ -137,24 +138,24 @@ We perform our scheme on brain MRI data synthesis task, in which the lesion is a
 	\caption{整体架构图.Overall Architecture.}
 	\label{architecture}
 \end{figure}
-如图~\ref{architecture}所示，我们的方案包括结构特征图提取和生成、多模态MRI生成、构建合成数据集、合成数据分割检测四个主要阶段。
+如图~\ref{architecture}所示，我们的方案包括结构特征图提取和生成、多模态MRI生成、构建合成数据集、合成数据可用性验证四个主要阶段。
 As shown in Fig.~\ref{architecture}, our scheme includes four main stages: structural feature map extraction and random generation, multimodal MRI generation, construction of synthetic datasets, and synthetic data segmentation detection.
 
-结构特征图提取和生成阶段我们将获得一个结构特征图生成器，能从随机的正态分布矩阵生成结构特征图。该阶段我们训练的模型模包括一个结构特征图编码器、一个结构特征图解码器和一个结构特征图鉴别器。
+结构特征图提取和生成阶段我们将获得一个结构特征图生成器，能从随机的正态分布矩阵生成结构特征图。该阶段我们训练的模型模包括一个结构特征图编码器、一个结构特征图解码器、一个结构特征图鉴别器、一个编码分布鉴别器和一个结构特征图掩膜生成器。
 In the structural feature map extraction and random generation stage, we will obtain a structural feature map generator that can generate structural feature maps from the random normal distribution matrix. Models we train at this stage includes a structural feature map encoder, a structural feature map decoder, and a structural feature map discriminator.
 
-多模态MRI生成阶段我们产出一个条件生成器，其以结构特征图为输入，能根据不同的独热条件向量生成不同模态的MRI，并且可在结构特征图上添加病灶标签使得生成的MRI具有对应的病灶信息。该阶段我们训练的模型模块包括一个结构特征与病灶标签融合图编码器、四个MRI模态的病灶分割器、一个MRI编码器、一个MRI解码器、一个MRI鉴别器和一个MRI编码鉴别器。
+多模态MRI生成阶段我们产出一个条件生成器，其以结构特征图为输入，能根据不同的独热条件向量生成不同模态的MRI，并且可在结构特征图上添加病灶标签使得生成的MRI具有对应的病灶信息。该阶段我们训练的模型模块包括一个结构特征图与病灶标签的融合图编码器、不同模态的MRI的病灶分割器、一个MRI编码器、一个MRI解码器、一个MRI鉴别器和一个MRI编码鉴别器。
 In the multimodal MRI generation stage, we generate a conditional generator with input of structural feature maps, which can generate MRIs of different modalities according to different one-hot conditional vectors, and can add lesion labels on the structural feature maps to generate MRI has corresponding lesion information. At this stage, we train a structural feature and lesion label fusion encoder, a lesion segmentor for each modality, an MRI encoder, an MRI decoder, an MRI discriminator and an MRI code discriminator.
 
-在构建合成数据集阶段，我们使用前两个阶段产出的模型先从随机正态分布矩阵生成足量的结构特征图再随机添加病灶标签，最后生成配准的多模态MRI，构建出一个合成数据集。
+在构建合成数据集阶段，我们使用前两个阶段产出的模型先从随机正态分布矩阵生成足量的结构特征图，再与随机病灶标签进行信息融合，最后通过条件生成器生成配准的多模态MRI，从而构建出一个合成数据集。
 In the stage of constructing the synthetic datasets, we use the model produced in the first two stages to generate a sufficient number of structural feature maps from the random normal distribution matrix and then randomly fuse with real lesion labels, and finally generate the registered multimodal MRI to construct synthetic datasets.
 
-在合成数据分割检测阶段，我们根据真实的数据为每个MRI模态单独训练一个病灶分割器，并在真实数据集中进行分割能力测试。此外，我们使用由不同比重的合成数据和真实数据构建的数据集来对病灶分割网络进行训练，训练充分后再在真实测试数据集上进行分割能力测试，对比各项测试结果，以验证合成数据在模型训练中的可用性。该阶段我们训练的模型包括每个模态的MRI的基于不同数据比重的病灶分割器。
+在合成数据可用性验证阶段，我们首先根据真实的数据为每个MRI模态单独训练一个病灶分割器，并在真实数据集中进行分割能力测试，再用该分割器对采用不同的病灶生成组件来指导病灶生成的合成数据进行分割测试。然后，我们使用由不同数据量的合成数据和真实数据构建的数据集来对病灶分割网络进行训练，训练充分后再在真实测试数据集上进行分割测试，对比各项测试结果，以验证合成数据在肿瘤病灶分割训练中的可用性。
 In the synthetic data segmentation detection stage, we train a lesion segmentor for each MRI modality based on real data, and perform segmentation ability tests on real dataset. In addition, we use datasets constructed from synthetic data and real data of different proportions to train the lesion segmentor. After training, the segmentation ability test is performed on the real dataset, and the test results are compared to verify the availability of the synthetic data in model training. At this stage, each experiment trains a lesion segmentor for each modality.
 
 \subsection{结构特征图提取方法Structural Feature Map Extraction Method}
 
-直接从随机噪声通过生成对抗训练生成的医学影像通常训练困难且难以生成真实的结构信息。我们将医学影像中提供基本轮廓结构信息的图像称为其结构特征图，例如视网膜血管分布图可视为视网膜图像的结构特征图\cite{41costa2017towards}。结构特征图可以为医学影像的合成提供必要的指导信息，例如合成脑部MRI图像时一些研究从脑分割标签图获取基本的结构信息\cite{4shin2018medical}。然而，视网膜血管分布图和脑分割标签图等常用的结构特征图都需要额外的数据和训练才能实现从原图提取出结构特征图。为此，我们首先设计了一种直接从脑MRI提取结构特征图的方法，该方法具有运算快、无需训练、无需额外数据等优点。
+直接从随机噪声通过生成对抗训练生成的医学影像通常训练困难且难以生成真实的结构信息。我们将医学影像中提供基本轮廓和结构信息的图像称为其结构特征图，例如视网膜血管分布图可视为视网膜图像的结构特征图\cite{41costa2017towards}。结构特征图可以为医学影像的合成提供必要的基础指导信息，例如合成脑部MRI图像时一些研究从脑分割标签图获取基本的结构信息\cite{4shin2018medical}。然而，视网膜血管分布图和脑分割标签图等常用的结构特征图都需要额外的数据和训练才能实现从原图提取出结构特征图。为此，我们首先设计了下述直接从脑MRI提取结构特征图的方法，该方法具有运算快、无需训练、无需额外数据等优点。
 Medical images generated directly from random noise by GAN are often difficult to train and difficult to generate real structural information. We call image that provide anatomical structure information as structural feature map. For example, a retinal blood vessel distribution map can be regarded as a structural feature map of a retinal image\cite{41costa2017towards}. Structural feature maps can provide necessary guidance for the synthesis of medical images. For example, when synthesizing brain MRI, some studies obtain basic structural information from the brain segmentation label\cite{4shin2018medical}. However, common structural features such as retinal vascular maps and brain segmentation labels require additional data and training to extract structural features from the original image. To this end, we first design a method for extracting structural feature maps directly from brain MRI, which has the advantages of fast operation, no training, no additional data. 
 
 在传统的数字图像处理方法中，Roberts算子\cite{87Roberts}、Prewitt算子\cite{88prewitt}、Sobel算子\cite{89Sobel}等是十分优秀的边缘检测算子，其中Sobel算子常用于脑部医学图像的处理，其卷积核参数和计算公式如图所示。我们探索出了从Sobel算子生成的边缘检测图中进一步提取结构特征的方法，如算法~\ref{alg:1}所示。
@@ -175,12 +176,12 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 	\end{algorithmic}  
 \end{algorithm}
 
-简单来说，我们对一张真实图像用Sobel算子提取得到其横向和纵向的边缘检测图，对两张边缘检测图进行最大值规约和最小值规约得到两张新的边缘检测融合图，然后两张边缘检测融合图分别与各自的平均像素值求差，再对两张差值图根据设定像素阈值进行二值化处理，两张二值图求和后再进行完全的二值化，最后得到的就是我们需要的结构特征图。
+在算法~\ref{alg:1}中，我们对一张真实图像用Sobel算子提取得到其横向和纵向的边缘检测图，对两张边缘检测图进行最大值规约和最小值规约得到两张新的边缘检测融合图，然后两张边缘检测融合图分别与各自的平均像素值求差，再对两张差值图根据设定像素阈值进行二值化处理，两张二值图求和后再进行完全的二值化，最后得到的就是我们需要的结构特征图。
 We use Sobel operator to extract the horizontal and vertical edge detection maps from a real image, each perform reduce maximum and reduce minimum to obtain two edge detection fusion maps, each fusion map calculate the difference with average pixel value, the two difference maps are binarized according to the set pixel threshold, and the two binary images are summed and then completely binarized. The final result is the structural feature map we need.
 
 \subsection{随机结构特征图的生成训练Training of Random Structural Feature Map Generation}
 
-在生成结构特征图时，\cite{4shin2018medical}仍然需要真实的模态图作为输入来得到生成的结构特征图，这大大降低了生成数据的多样性，\cite{41costa2017towards}实现了一种从多维正态分布生成视网膜血管分布图的方法，在其基础上，我们设计了一种从随机噪声生成脑部结构特征图的方法，无需额外数据且具有更好的多样性。具体来说，我们结合了变分自编码器与生成对抗网络的特点设计了一种混合网络。首先，我们将从真实影像提取得到的结构特征图通过VAE的编码器编码为一个均值矩阵和一个方差矩阵，再与一个随机正态分布矩阵融合为一个潜在特征矩阵，并约束潜在特征矩阵服从多维正态分布，再用VAE的解码器实现从多维正态分布生成结构特征图。解码器通过特征图的自监督重建损失进行训练，对于潜在特征的约束方法，我们没有采用VAE的编码器损失，而是添加了一个鉴别器，鉴别器以正态分布矩阵为正样本、输入解码器的潜在特征矩阵为负样本进行学习，并为编码器提供对抗性损失，同时，我们通过$L2$正则损失指导均值矩阵的均值为0，标准差矩阵的均值为1。此外，我们用另一个鉴别器对真实的提取结构特征图与随机生成的结构特征图进行对抗学习，使生成的结构特征图越来越逼真。
+在生成结构特征图时，\cite{4shin2018medical}仍然需要真实的MRI作为输入来得到生成的结构特征图，这大大降低了生成数据的多样性，\cite{41costa2017towards}实现了一种从多维正态分布生成视网膜血管分布图的方法，在其基础上，我们设计了一种从随机噪声生成脑部结构特征图的方法，无需额外数据且具有更好的多样性。具体来说，我们结合了变分自编码器（）VAE【】打引用与生成对抗网络的特点设计了一种混合网络。首先，我们从真实影像提取得到结构特征图，再通过VAE的编码器将其编码为一个均值矩阵和一个方差矩阵，再与一个随机正态分布矩阵融合为一个近似正态分布矩阵，通过损失约束其逐渐逼近标准正态分布。然后，我们再用VAE的解码器实现从该近似正态分布重建生成结构特征图。解码器通过结构特征图的自监督重建损失进行训练。对于近似正态分布矩阵的损失约束，我们没有采用VAE原本的编码器损失，而是通过一个编码分布鉴别器为编码器提供对抗性损失，此编码分布鉴别器以正态分布矩阵为正样本、输入解码器的近似正态分布矩阵为负样本进行学习。此外，我们还通过$L2$正则损失指导均值矩阵的均值逼近0值，标准差矩阵的均值逼近1值。同时，我们用另一个鉴别器对从真实MRI提取的结构特征图和随机生成的结构特征图进行鉴别学习，并为解码器提供对抗性损失，使得从随机正态分布解码生成的结构特征图越来越逼真。
 When generating the structural feature map, \cite{4shin2018medical} still needs to input the real modal image to get the generated structural feature map, which greatly reduces the diversity of generated data, and \cite{41costa2017towards} implements a method for generating retinal blood vessel distribution maps from multidimensional normal distribution. On the basis of this, we design a method for generating brain structural feature maps from random noise, which has better diversity and no additional data. 
 Specifically, we design a hybrid network combining the characteristics of VAE and GAN. First, we encode the structural feature map extracted from real image into a mean matrix and a variance matrix through the VAE encoder, and then merge it into a latent feature matrix with a random normal distribution matrix, and constrain the latent feature matrix to obey the multidimensional normal distribution, finally, use VAE decoder to generate structural feature maps from multidimensional normal distribution. The decoder is trained by self-supervised reconstruction loss of structural feature maps. For the constraint of latent features, we do not use encoder loss of VAE, but add a discriminator. The discriminator learns normal distribution matrix as a positive sample and latent feature matrix as a negative sample, and provides adversarial loss for encoder. Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1. In addition, we use another discriminator to receive structural feature map extract from real image and randomly generated structural feature map for adversarial learning, so that the generated structural feature map becomes more and more realistic.
 \begin{figure}
@@ -189,28 +190,6 @@ Specifically, we design a hybrid network combining the characteristics of VAE an
 	\caption{随机结构特征图的生成训练.Training of Random Structural Feature Map Generation.}
 	\label{feature_train}
 \end{figure}
-如图~\ref{feature_train}所示，从标准正态分布解码得到随机结构特征图的具体处理过程如下：
-As shown in Fig.~\ref{feature_train}, the specific processing procedure for decoding the random structure feature map from standard normal distribution is as follows:
-\begin{itemize}
-	\item 每次随机选择一个模态，从这个模态中获取一张图$x$，用结构特征提取方法得到结构特征图$f$，用掩模提取算法(算法~\ref{alg:2})得到对应掩模$mask$；
-	Each time a modality is randomly selected, an image $x$ is obtained from the modality, and the structural feature map $f$ is obtained by the structural feature map extraction method, and the corresponding mask $mask$ is obtained by the mask extraction algorithm(Algorithm~\ref{alg:2});
-	\item 用编码器$EC_f$对结构特征图$f$进行编码获得$code_{f,mean}$及$code_{f,logvar}$，从正态分布$\mathcal{N}(0,1^2)$的获取随机噪声$code_n$，由三个编码求得$code_f=code_{f,mean}+exp(0.5*code_{f,logvar})*code_n$；
-	Encode $f$ with encoder $EC_f$ to get $code_{f,mean}$ and $code_{f,logvar}$, get a random noise $code_n$ from multidimensional normal distribution $\mathcal{N}(0,1^2)$ , from the three codes we get $code_f=code_{f,mean}+exp(0.5*code_{f,logvar})*code_n$ ;
-	\item 用解码器$DC_f$对$code_f$解码得到重建的结构特征图$f_r$；
-	Decode $code_f$ with decoder $DC_f$ to obtain the reconstructed structural feature map $f_r$;
-	\item 用掩模生成器$MASK$从$f$提取得到掩模$mask_r$；
-	Use mask generator $MASK$ to extract mask $mask_r$ from $f$;
-	\item 随机生成符合正态分布$\mathcal{N}(0,1^2)$的矩阵$code_{f,g}$；
-	Randomly generate a matrix $code_{f,g}$ that obeys normal distribution $\mathcal{N}(0,1^2)$;
-	\item 用解码器$DC_f$对$code_{f,g}$解码得到生成的随机结构特征图$f_g$；
-	Decode $code_{f,g}$ with decoder $DC_f$ to get the generated random structure feature map $f_g$;
-	\item 用掩模生成器$MASK$对$f_g$提取得到掩模$mask_g$；
-	Use mask generator $MASK$ to extract mask $mask_g$ from $f$;
-	\item 结构特征图鉴别器$D_f$分别对$f$和$f_g$进行鉴别，将前者鉴别为真，后者鉴别为假；
-	Structural feature discriminator $D_f$ identifies $f$ and $f_g$ respectively, identifying the former as true and the latter as false;
-	\item 结构特征鉴别器$FD_f$分别对$code_f$和$code_{f,g}$进行鉴别，将前者鉴别为假，后者鉴别为真。
-	structural feature discriminator $FD_f$ discriminates between $code_f$ and $code_{f,g}$, respectively, identifying the former as false and the latter as true.
-\end{itemize}
 
 为了防止通过结构特征图生成的脑MRI像素区域超出结构特征图的脑轮廓线之外，我们还训练了一个从脑结构特征图获取脑部区域掩膜的生成器$MASK$，该生成器与结构特征图的生成训练进行同步训练。训练时，将真实脑MRI$x$通过掩模提取算法提取得到的掩膜作为训练标签数据，掩膜的提取算法如算法2所示。
 In order to prevent the generated brain MRI pixel area from exceeding the brain outline of the structural feature map, we train a generator $MASK$ that acquires the brain area mask from the brain structure feature map. The generator is synchronized with the  training of structural feature map generation. During training, the mask extracted by the real brain MRI$x$ through the mask extraction algorithm (Algorithm~\ref{alg:2}) is used as label data.
@@ -226,48 +205,66 @@ In order to prevent the generated brain MRI pixel area from exceeding the brain 
 	\end{algorithmic}  
 \end{algorithm}
 
-在训练过程中，我们通过鉴别器$D_f$进行对抗训练以使解码器解码的结构特征图更逼真，此外，还通过特征鉴别器$FD_f$进行对抗训练，以此使得编码器$EC_f$能够将结构特征图f编码至标准正态分布。完整的损失函数如下，其中，$\omega_{i,j}$为各损失项的权重：
+如图~\ref{feature_train}所示，从标准正态分布解码得到随机结构特征图的具体处理过程如下：
+As shown in Fig.~\ref{feature_train}, the specific processing procedure for decoding the random structure feature map from standard normal distribution is as follows:
+\begin{itemize}
+	\item 从真实MRI$x$中用结构特征提取方法得到结构特征图$f$，用掩模提取算法(算法~\ref{alg:2})生成掩模$mask$；
+	Each time a modality is randomly selected, an image $x$ is obtained from the modality, and the structural feature map $f$ is obtained by the structural feature map extraction method, and the corresponding mask $mask$ is obtained by the mask extraction algorithm(Algorithm~\ref{alg:2});
+	\item 用编码器$EC_f$对结构特征图$f$进行编码获得$code_{f,mean}$及$code_{f,logvar}$，从正态分布$\mathcal{N}(0,1^2)$的获取随机噪声$code_n$，由三个编码求得近似正态分布矩阵$code_f=code_{f,mean}+exp(0.5*code_{f,logvar})*code_n$；
+	Encode $f$ with encoder $EC_f$ to get $code_{f,mean}$ and $code_{f,logvar}$, get a random noise $code_n$ from multidimensional normal distribution $\mathcal{N}(0,1^2)$ , from the three codes we get $code_f=code_{f,mean}+exp(0.5*code_{f,logvar})*code_n$ ;
+	\item 用解码器$DC_f$对$code_f$解码得到重建的结构特征图$f_r$；
+	Decode $code_f$ with decoder $DC_f$ to obtain the reconstructed structural feature map $f_r$;
+	\item 用掩模生成器$MASK$从$f$提取得到掩模$mask_r$；
+	Use mask generator $MASK$ to extract mask $mask_r$ from $f$;
+	\item 随机生成符合正态分布$\mathcal{N}(0,1^2)$的矩阵$code_{f,g}$；
+	Randomly generate a matrix $code_{f,g}$ that obeys normal distribution $\mathcal{N}(0,1^2)$;
+	\item 用解码器$DC_f$对$code_{f,g}$解码得到生成的随机结构特征图$f_g$；
+	Decode $code_{f,g}$ with decoder $DC_f$ to get the generated random structure feature map $f_g$;
+	\item 用掩模生成器$MASK$对$f_g$提取得到掩模$mask_g$；
+	Use mask generator $MASK$ to extract mask $mask_g$ from $f$;
+	\item 结构特征图鉴别器$D_f$分别对$f$和$f_g$进行鉴别，将前者鉴别为真，后者鉴别为假；
+	Structural feature discriminator $D_f$ identifies $f$ and $f_g$ respectively, identifying the former as true and the latter as false;
+	\item 编码分布鉴别器$FD_f$分别对$code_f$和$code_{f,g}$进行鉴别，将前者鉴别为假，后者鉴别为真。
+	structural feature discriminator $FD_f$ discriminates between $code_f$ and $code_{f,g}$, respectively, identifying the former as false and the latter as true.
+\end{itemize}
+
+训练过程中的各项损失函数如下，其中，$\omega_{i,j}$为各损失项的权重：
 In training, we perform adversarial training through discriminator $D_f$ to make the structural feature map decoded by decoder more realistic. In addition, the adversarial training is performed by the feature discriminator $FD_f$, so that encoder $EC_f$ can encode structural feature map $f$ to standard normal distribution. The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item: 
 \begin{itemize}
-	\item\textbf{结构特征对抗性损失Structural Feature Adversarial Loss} 
-	这部分损失包括：使得结构特征图编码服从正态分布的对抗性损失，以及使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-	This part of the loss includes: adversarial loss to constrain the structural feature map code obey normal distribution, and adversarial loss to constrain structural feature map decode by normal distribution matrix more realistic
+	\item \textbf{编码鉴别器损失} 
 	\begin{center}
 		$loss_{FD_f}=\Vert{FD_f(code_{f,g})-1}\Vert_{2}^{2}+\Vert{FD_f(code_f)}\Vert_{2}^{2}$
 	\end{center}
 	
+	\item \textbf{结构特征图鉴别器损失} 
 	\begin{center}
 		$loss_{D_f}=\Vert{D_f(f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g )}\Vert_{2}^{2}$
 	\end{center}
 	
+	\item \textbf{对抗性损失Adversarial Loss} 
 	\begin{center}
 		$loss_{G_f}=\Vert{FD_f(code_f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g)-1}\Vert_{2}^{2}$
 	\end{center}
 	
-	\item \textbf{结构特征编码的监督损失} 
-	这项损失使得结构特征图中间编码结果服从正态分布，其中，$mean()$函数为均值函数。
-	
+	\item \textbf{结构特征编码的分布监督损失} 
 	\begin{center}
 		$loss_{normal}=\Vert{mean(code_{f,mean})}\Vert_{2}^{2}+ \Vert{mean(exp(0.5*code_{f,logvar}))-1}\Vert_{2}^{2}$
 	\end{center}
+	其中，$mean()$函数为均值函数。
 	
 	\item \textbf{结构特征图及掩模的自监督损失} 
-	结构特征图和掩模两次重建融合后与原始结构特征图和掩模的两两自监督一致性损失
-	
 	\begin{center}
 		$loss_{sv}=\Vert{f-f_r}\Vert_{2}^{2}+\Vert{f_r*mask}\Vert_{2}^{2}$
 	\end{center}
 	
-	\item \textbf{Mask生成器损失}
-	从$f$生成对应$mask$的Mask生成器损失
+	\item \textbf{掩膜生成器损失}
 	\begin{center}
 		$loss_{mask}=\Vert{mask-mask_r }\Vert_{2}^{2}+\Vert{f*mask_r}\Vert_{2}^{2}+\Vert{f_r*mask_r}\Vert_{2}^{2}+\Vert{f_g*mask_g}\Vert_{2}^{2}$
 	\end{center}
 \end{itemize}
 
-\subsection{辅助的模态重建和模态转换训练}
-
-在辅助的模态重建和模态转换训练中，我们用到了一套模态编码器、模态解码器和鉴别器，以及一组病灶标签生成组件，我们在真实的MRI上对这三个部件进行了下面同步的模态重建和模态转换训练，以约束三个部件在多模态MRI生成的训练中完成我们指定的学习任务。此外我们还通过一个特征鉴别器来对两个训练过程进行一致性指导。
+\subsection{真实MRI重建和转换训练}
+我们在真实的MRI上进行MRI的重建和转换训练，用到了一套MRI编码器、MRI解码器和MRI鉴别器，以及一组病灶标签生成组件。这个训练过程中的全部组件会在后面的多模态MRI生成训练部分中介绍对它们进行的其他训练，并且本节的训练过程与多模态MRI生成训练是同步进行的。我们通过在真实数据上的同步MRI重建和转换训练来约束各个组件在多模态MRI生成的过程中完成我们指定的任务。此外我们还通过一个编码鉴别器来对两个训练过程进行一致性指导。
 
 \begin{figure}
 	\centering
@@ -276,64 +273,58 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 	\label{trans_train}
 \end{figure}
 
-如图所示，模态转换和重建时，编码器将模态$i$的真实MRI$x_i$编码得到语义特征图$code_{i}$，然后我们将其与不同的条件向量连接，通过解码器解码出全部的模态。循环重建时，我们对所得到的转换图采用编码器全部进行再编码，将全部再编码得到的语义特征图均与模态$i$的条件向量进行连接，最后再用解码器全部解码得到循环重建的$x_{rc,j,i}$。模态重建的循环重建都是自监督训练。在上述过程中，我们以原始输入模态$x_i$对应的病灶标签$l_i$作为病灶还原训练的监督标签，对$x_i$用病灶标签生成组件得到$l_{r,i}$。
+如图所示，MRI重建和转换时，编码器将模态$i$的真实MRI$x_i$编码得到语义特征图$code_{i}$，然后我们将其与不同的条件向量连接，通过解码器解码出全部的模态。循环重建时，我们对所得到的转换图采用编码器全部进行再编码，将全部再编码得到的语义特征图均与模态$i$的条件向量进行连接，最后再用解码器全部解码得到循环重建的$x_{rc,j,i}$。MRI重建的循环重建都是自监督训练。在上述过程中，我们以原始输入模态$x_i$对应的病灶标签$l_i$作为病灶生成训练的监督标签，对$x_i$用病灶标签生成组件得到$l_{r,i}$。
 
-我们的鉴别器模块独立更新，其他模块通过一个优化器更新训练，损失项包括鉴别器提供的对抗性损失、模态重建自监督损失、模态循环重建自监督损失、模态循环重建一致性损失、语义一致性损失、病灶监督损失。详细损失如下，其中$x_{r,i}$表示模态$i$重建得到的MRI，$x_{t,j,i}$指由模态$j$转换生成的模态$i$的MRI，$d_{t,j,i}$和$c_{t,j,i}$分别为鉴别器对$x_{t,i,j}$的真假鉴别和类别鉴别结果，$x_{cr,j,i}$表示模态$i$转换为模态$j$再转换回模态$i$的MRI；$code_i$表示编$x_i$编码器编码后得到的语义特征图，$code_{t,i,j}$表示$x_i$转换生成的模态$j$的MRI再经过编码器编码后得到的语义特征图；$l_i$表示$x_i$的真实病灶标签，$l_{r,i}$表示$x_i$经过病灶标签生成组件生成的病灶标签：
+我们的鉴别器组件独立更新，其他组件通过一个优化器更新训练，损失项包括鉴别器提供的对抗性损失、MRI重建自监督损失、MRI循环重建自监督损失、MRI循环重建一致性损失、语义一致性损失、病灶生成监督损失。详细损失如下，其中$x_{r,i}$表示模态$i$重建得到的MRI，$x_{t,j,i}$指由模态$j$转换生成的模态$i$的MRI，$d_{t,j,i}$和$c_{t,j,i}$分别为鉴别器对$x_{t,i,j}$的真假鉴别和类别鉴别结果，$x_{cr,j,i}$表示模态$i$转换为模态$j$再转换回模态$i$的MRI；$code_i$表示编$x_i$编码器编码后得到的语义特征图，$code_{t,i,j}$表示$x_i$转换生成的模态$j$的MRI再经过编码器编码后得到的语义特征图；$l_i$表示$x_i$的真实病灶标签，$l_{r,i}$表示$x_i$经过病灶标签生成组件生成的病灶标签：
 
 \begin{itemize}
-	\item 鉴别器损失
-	
+	\item \textbf{鉴别器损失}
 	\begin{center}
 		$loss_{D,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 对抗性损失和类别指导损失
-	
+	\item \textbf{对抗性损失和类别指导损失}
 	\begin{center}
 		$loss_{G,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 模态重建自监督损失
-	
+	\item \textbf{MRI重建自监督损失}
 	\begin{center}
 		$loss_{sv}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 模态循环重建自监督损失
+	\item \textbf{MRI循环重建自监督损失}
 	
 	\begin{center}
 		$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 模态循环重建一致性损失
-	
+	\item \textbf{MRI循环重建一致性损失}
 	\begin{center}
 		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,k\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 语义一致性损失
-	
+	\item \textbf{语义一致性损失}
 	\begin{center}
 		$loss_{code,consistency}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 病灶监督损失
-	
+	\item \textbf{病灶生成监督损失}
 	\begin{center}
 		$loss_{sv,l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 	\end{center}
 	
 \end{itemize}
 
-\subsection{结构特征图与分割标签图的融合}
+\subsection{结构特征图与病灶分割标签的融合}
 
-我们已经可以得到从标准正态分布随机生成的结构特征图$f_g$，然后我们随机选择分割标签图$label$，将包含$n$个类别的分割标签图转为$n$个通道的独热矩阵$onehot_l$，每个通道对应一个分割类别，每个通道内的像素值为0或1，与对应类别分割位置相同的区域像素值为1其余部分为0，这样各个1像素区域与分割标签图中的各个分割区域是配准的。接下来，我们将$onehot_l$的每个通道与$f_g$按位求取加权和，得到一个新的融合了$f_g$和$label$信息的矩阵。
+结构特征图与病灶分割标签融合时，我们先从随机标准正态分布矩阵生成结构特征图$f_g$，再随机选择合适的病灶分割标签$label$，然后再将包含$n$个类别的病灶分割标签转为$n$个通道的独热矩阵$onehot_l$，每个通道对应一个分割类别，每个通道内的像素值为0或1，与对应类别分割位置相同的区域像素值为1其余部分为0，这样各个1像素区域与分割标签图中的各个分割区域就是配准的。接下来，我们将$onehot_l$的每个通道与$f_g$按位求取加权和，就得到一个新的融合了$f_g$和$label$信息的矩阵。
 
-如果结构特征图$f'$是从随机MRI$x$中提取的，那么提取出的结构特征有可能包含肿瘤结构信息，会干扰与随机标签$l$中的肿瘤信息，影响融合后生成的图像，所以$f'$需要在与随机标签$label$融合前消除肿瘤信息，得到无肿瘤信息的结构特征图$f$，使生成图像的肿瘤信息只来源于标签$label$。我们对$x$的分割标签$label_x$通过算法~\ref{alg:2}生成无边界扩充的分割掩膜$mask_{l,x}$,则$f=mask_{l,x}\times f'$。
+如果结构特征图$f'$是从随机MRI$x$中提取的，那么提取出的结构特征有可能包含肿瘤结构信息，会对随机标签$l$中的肿瘤信息产生干扰而影响融合后生成的MRI，所以$f'$需要在与随机标签$label$融合前消除肿瘤信息，得到无肿瘤信息的结构特征图$f$，使生成图像的肿瘤信息只来源于标签$label$。我们对$x$的分割标签$label_x$通过算法~\ref{alg:2}生成无边界扩充的分割掩膜$mask_{l,x}$,则$f=mask_{l,x}\times f'$。
 
 由于随机选择的病灶的位置上可能出现在结构特征图的脑部轮廓之外，因此我们选取标签图时需要用算法~\ref{alg:2}获取结构特征图的脑部区域掩膜$mask$，若$mask$与选取的$label$求积后为0，则说明肿瘤标签像素在$mask$的脑轮廓内部，可以采用，否则需要重新选取$label$。
 
-\subsection{多模态MRI生成}
+\subsection{多模态MRI生成训练}
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/mm_mri_generate}
@@ -341,60 +332,56 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 	\label{mm_mri_generate}
 \end{figure}
 
-我们通过算法~\ref{alg:1}从真实MRI提取结构特征图$f$,并随机选择真实的病灶标签$label$，通过上一节的融合方法进行融合。结构特征图与分割标签图的信息融合图包含了目标部位的基本解剖结构信息和病灶信息，从该图生成多模态图比直接从随机噪声生成多模态图更易训练，生成的模态图更加合理和逼真。多模态MRI生成过程如图所示，首先，我们使用一个单独的编码器对信息融合图进行编码得到语义特征图，语义特征图与不同的条件向量堆叠后通过一个模态解码器解码，得到不同模态的合成图。我们通过一个模态鉴别器提供的对抗性损失和类别指导损失来使得生成的各个模态的合成图逼近于真实的MRI。各个模态的合成图再通过一个模态编码器得到模态语义特征图，然后这些语义特征图与不同的条件向量堆叠后通过模态解码器解码就实现了模态的转换，我们通过损失约束所有语义特征图的一致性，以及转换图的一致性，以此保证了生成的多模态影像互相配准。此外，我们使用一组病灶标签生成组件从各合成MRI中分割还原出肿瘤分割标签，确保生成的多模态影像根据输入病灶标签生成了对应的病灶内容。
+我们通过算法~\ref{alg:1}从真实MRI提取结构特征图$f$,并随机选择真实的病灶标签$label$，通过前述结构特征图与病灶分割标签的方法进行融合。结构特征图与分割标签图的信息融合图包含了目标部位的基本解剖结构信息和病灶信息，从该图生成多模态图比直接从随机噪声生成多模态MRI更易训练，生成的MRI更加合理和逼真。多模态MRI生成过程如图~\ref{mm_mri_generate}所示，首先，我们使用一个单独的融合图编码器对信息融合图进行编码得到语义特征图，语义特征图与不同的条件向量堆叠后通过一个MRI解码器解码，得到不同模态的合成图。我们通过一个MRI鉴别器提供的对抗性损失和类别指导损失来使得生成的各个模态的合成图逼近于真实的MRI。各个模态的合成图再通过一个MRI编码器得到语义特征图，然后这些语义特征图与不同的条件向量堆叠后通过MRI解码器解码就实现了模态的转换，我们通过损失对所有语义特征图和转换图进行一致性约束，以此保证了生成的多模态MRI的互相配准。此外，我们使用一组病灶标签生成组件从各合成MRI中分割还原出肿瘤病灶分割标签，确保生成的多模态影像根据输入病灶标签生成了对应的病灶内容。
 
-我们的鉴别器模块独立更新，除只用于病灶标签生成组件中的模块外其他模块通过一个优化器更新训练，只用于病灶标签生成组件中的模块仅在辅助的转换和重建训练中采用真实数据训练更新，合成训练过程仅用于为生成模块提供语义指导损失。多模态MRI生成过程的具体损失函数如下，其中$d_{i}$和$c_{i}$为鉴别器$D(x_i)$的真假鉴别输出和类别鉴别输出,$d_{g,i}$,$c_{g,i}$为$D(x_{g,i})$的输出；$x_{g,i}$为模态$i$的合成图，$x_{gt,j,i}$为模态$j$的合成图转换生成的模态$i$的转换图；$code_g$为输入信息编码后的语义特征图，$code_{g,i}$为$x_i$编码后的语义特征图；$l$为输入的标签图，$l_{g,i}$为$x_{g,i}$通过病灶标签生成组建得到的重建标签图；$f$为输入的结构特征图，$f_{g,i}$为从$x_{g,i}$通过算法~\ref{alg:1}提取得到的结构特征图：
+我们的鉴别器组件独立更新；病灶标签生成组件仅在前面章节中的真实MRI重建和转换训练中采用真实数据训练更新，在本节合成训练过程中病灶标签生成组件仅用于为MRI生成组件提供病灶生成指导损失；其他的组件通过一个优化器更新训练。多模态MRI生成过程的具体损失函数如下，其中$d_{i}$和$c_{i}$为鉴别器$D(x_i)$的真假鉴别输出和类别鉴别输出,$d_{g,i}$,$c_{g,i}$为$D(x_{g,i})$的输出；$x_{g,i}$为模态$i$的合成图，$x_{gt,j,i}$为模态$j$的合成图转换生成的模态$i$的转换图；$code_g$为输入信息编码后的语义特征图，$code_{g,i}$为$x_i$编码后的语义特征图；$l$为输入的标签图，$l_{g,i}$为$x_{g,i}$通过病灶标签生成组件得到的标签图；$f$为输入的结构特征图，$f_{g,i}$为从$x_{g,i}$通过算法~\ref{alg:1}提取得到的结构特征图：
 
 \begin{itemize}
-	\item 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-	
+	\item \textbf{鉴别器真假鉴别损失}
 	\begin{center}
 		$loss_{D}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2})$
 	\end{center}
-	
+
+	\item \textbf{鉴别器模态鉴别损失}
+	\begin{center}
+	$loss_{D,class}=\sum\limits_{i=0}(\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
+	\end{center}
+
+	\item \textbf{对抗性损失}
 	\begin{center}
 		$loss_{G}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 模态类别指导损失
-	
-	\begin{center}
-		$loss_{D,class}=\sum\limits_{i=0}(\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
-	\end{center}
-	
+	\item \textbf{模态类别指导损失}
 	\begin{center}
 		$loss_{G,class}=\sum\limits_{i=0}(\Vert{c_{g,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 输入的结构特征图的重建自监督损失
-	
+	\item \textbf{输入的结构特征图的重建自监督损失}
 	\begin{center}
 		$loss_{sv,f}=\sum\limits_{i=0}(\Vert{f-f_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-	
+	\item \textbf{病灶标签生成监督损失}
 	\begin{center}
 		$loss_{sv,l}=\sum\limits_{i=0}(\Vert{label-label_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 生成的模态图进行转换得到的转换图与生成图的自监督损失
-	
+	\item \textbf{MRI配准监督损失}
 	\begin{center}
 		$loss_{trans}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{g,i}-x_{gt,j,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item 自监督语义一致性损失
-	
+	\item \textbf{语义一致性损失}
 	\begin{center}
 		$loss_{trans,code}=\Vert{code_g-code_{g,i}}\Vert_{2}^{2}+\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})$
 	\end{center}
 	
 \end{itemize}
 
-\subsection{病灶标签生成组件设计方案}
+\subsection{病灶标签生成指导方案}
 \label{label gen methods}
-我们设计了如下五组病灶标签生成组件。
+我们设计了如下三种病灶标签生成组件来提供多模态MRI生成训练中病灶生成的指导损失：
 \begin{itemize}
 	\item \textbf{单分割器方案} 
 	每个模态由一个共同的完整的分割器从合成的MRI还原得到各自的病灶标签。
@@ -403,12 +390,11 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 	\item \textbf{多分割器方案} 
 	每个模态由一个独立的完整的分割器从合成的MRI还原得到各自的病灶标签。
 \end{itemize}
-上述三种方案的损失函数与前文所述损失是一致的，各个模块均只使用辅助的模态重建和模态转换训练中的病灶监督损失进行训练，多模态MRI生成中的与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失只用于MRI生成组件的训练。
+上述三种方案的损失函数与前文所述损失函数一致，三种方案中的各个组件均只使用真实MRI重建和转换训练中的病灶生成监督损失进行训练。
 
 \subsection{构建合成数据集}
 \label{make dataset}
-
-如图所示，我们通过训练好的结构特征图解码器即可从随机生成的正太分布矩阵生成任意数量的结构特征图。然后，我们对原始的标签集进行了随机的缩放、旋转、平移、翻转等改变得到随机病灶标签集。我们再将随机生成的结构特征图和从随机病灶标签集中随机选择的病灶信息标签融合，同样地，我们借助生成的与结构特征图匹配的掩膜，可以筛选得到合适的随机病灶标签。最后，我们通过多模态生成模型即可从融合信息图中生成配准的多模态影像，选取的病灶信息标签就是生成的多模态影像的病灶标签。由此，我们可以从随机矩阵构建带有病灶标签的多模态配准影像数据集。
+如图所示，我们通过训练好的结构特征图解码器即可从随机生成的正太分布矩阵生成任意数量的结构特征图。然后，我们对原始的标签集进行了随机的缩放、旋转、平移、翻转等改变得到随机病灶标签集。我们再将随机生成的结构特征图和从随机病灶标签集中随机选择的病灶标签融合，同样地，我们通过掩膜生成器$MASK$生成结构特征图的掩膜，可以筛选得到合适的随机病灶标签。最后，我们通过多模态MRI生成组件即可从融合信息图中生成配准的多模态MRI，选取的病灶标签就是生成的多模态MRI的病灶标签。由此，我们可以从随机正态分布矩阵构建带有病灶标签的多模态配准MRI数据集。
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/make_data}
@@ -416,7 +402,7 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 	\label{make_data}
 \end{figure}
 
-由于训练时去除肿瘤部分的结构的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图和其对应的掩膜，我们先对结构特征图进行高斯模糊\cite{92wink2004denoising}，再采用OpenCV[]提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用通常的算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用通常的算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
+由于训练时去除肿瘤信息操作的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图和其对应的掩膜，我们先对结构特征图进行高斯模糊\cite{92wink2004denoising}，再采用OpenCV【】提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用传统算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用传统算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
 \begin{algorithm}
 	\caption{Structural feature map filtering}
 	\label{alg:3}
@@ -435,11 +421,11 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 	\end{algorithmic}  
 \end{algorithm}
 
-从筛选出来的结构特征图和匹配的病灶标签得到的多模态MRI中，同样存在病灶信息生成情况较差的样本。此时，我们通过预先训练好的病灶分割网络对我们的合成MRI数据进行分割，然后将分割结果与输入的病灶标签进行骰子评分评估，只保留评分高于设定阈值（默认0.95）的样本。
+从筛选出来的结构特征图和匹配的病灶标签得到的多模态MRI中，同样存在病灶信息生成情况较差的样本。此时，我们通过预先训练好的病灶分割网络对我们的合成MRI数据进行分割，然后将分割结果与输入的病灶标签进行骰子评分评估，可以过滤得到评分高于设定阈值（默认0.95）的样本。
 
-经过多重筛选，我们得到最终的由随机结构特征图、配对掩膜、随机病灶分割标签、多模态MRI组成的合成数据集。我们要求该数据集使用在真实数据上训练得到的分割网络进行病灶分割时，得到的分割标签与数据集中的标签进行骰子分数评估，能取得0.99以上的分数。
+经过多重筛选，我们得到最终的由随机结构特征图、配对的掩膜、随机病灶分割标签、多模态MRI组成的合成数据集。我们要求经过分割过滤后的数据集使用在真实数据上训练得到的分割网络进行病灶分割时，得到的分割标签与数据集中的标签进行骰子分数评估能取得0.98以上的分数的数据集才能用于数据可用性验证实验。
 
-\subsection{病灶分割}
+\subsection{病灶分割训练}
 \begin{figure}
 	\centering
 	\includegraphics[width=0.6\columnwidth]{figures/segmentation}
@@ -447,20 +433,13 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 	\label{segmentation}
 \end{figure}
 
-我们的病灶分割训练过程如图所示，为了验证合成数据中是否生成了与随机输入的病灶标签一致的病灶信息，我们用真实的数据为每个模态单独训练一个病灶分割网络，并在真实数据集中进行分割能力测试。然后使用训练好的分割器对合成数据集中的影像进行分割，将分割结果与输入的病灶标签比对评估，以此检验合成的影像中包含了预期的病灶信息。
-
-此外，我们还采用由不同比重的合成数据和真实数据构建的数据集，来训练病灶分割网络，训练充分后再在真实测试数据集上进行分割能力测试，对比各项测试结果，以验证合成数据对分割训练的提升效果。
+我们的病灶分割训练过程如图所示，为了验证合成数据中是否生成了与随机输入的病灶标签一致的病灶信息，我们用真实的数据为每个模态单独训练一个独立的病灶分割网络，并在真实数据集中进行分割能力测试。然后使用训练好的分割器对合成数据集中的影像进行分割，将分割结果与输入的病灶标签比对评估，以此检验合成的影像中包含了预期的病灶信息。此外，我们还采用由不同数据量的合成数据和真实数据构建的数据集来训练病灶分割网络，训练充分后再在真实测试数据集上进行分割能力测试，以验证合成数据的可用性。
 
 分割训练的损失函数如下，其中$label_{r,i}$表示$x_i$经过病灶分割器生成的病灶标签：
-
-\begin{itemize}
-	\item 病灶监督损失
-	
-	\begin{center}
+\begin{center}
 		$loss_{l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
-	\end{center}
-	
-\end{itemize}
+\end{center}
+
 
 \section{实验}
 
@@ -600,4 +579,5 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 
 \bibliography{refer}
 \bibliographystyle{aaai}
+
 \end{document}
