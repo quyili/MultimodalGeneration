@@ -99,7 +99,7 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 \maketitle
 
 \begin{abstract}
-在基于大量数据驱动的医学影像智能处理任务中，医学影像数据的收集和采集是非常困难的，尤其是配准的多模态医学影像数据。合成的医学影像数据可以很好地缓解数据不足的问题。我们基于无监督的条件生成对抗网络模型实现了在已有单模态影像数据时可扩展出多模态影像数据并保留原模态的病灶信息，进一步实现了完全从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们验证了合成的医学影像可以在医学影像智能处理任务中与真实数据混合使用来提高模型的泛化能力。
+在基于大量数据驱动的医学影像智能处理任务中，医学影像数据的收集和采集是非常困难的，尤其是配准的多模态医学影像数据。合成的医学影像数据可以很好地缓解数据不足的问题。我们基于无监督的条件生成对抗网络模型实现了完全从随机噪声生成配准的多模态医学影像，并且可以根据自由选定的病灶标签有效地生成对应的病灶信息。我们在BRATS2015上进行了多项验证实验，验证了我们的合成MRI可以在医学影像智能处理任务中作为预训练数据或增强数据使用，并能大幅度提高模型的泛化能力。
 In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised CGAN model, we extend multimodal image data from existing unimodal image data and retain lesion information of the original modal, furthermore we achieve the generation of registered multimodal medical images from random noise and the freedom to add lesion information. We verify the synthetic medical images can be mixed with real data in medical image intelligent processing tasks to improve the generalization capabilities of the model.
 \end{abstract}
 \section{Introduction}
@@ -369,7 +369,7 @@ At present, there are various problems in the research of medical image synthesi
 \end{itemize}
 
 \subsection{病灶标签生成组件设计方案}
-
+\label{label gen methods}
 我们设计了如下五组病灶标签生成组件。
 \begin{itemize}
 	\item \textbf{单分割器方案} 
@@ -439,29 +439,25 @@ At present, there are various problems in the research of medical image synthesi
 \end{itemize}
 
 \section{实验}
-\subsection{训练设置}
-
-每项实验训练50个epoch；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
 
 \subsection{BRATS2015数据集}
-
 我们采用了公开的BRATS2015\cite{91menze:hal-00935640}数据集进行实验，该数据集包含已配准的T1、T2、T1c、Flair四个模态，训练集每个模态有274张3D MRI，大小为155$\times$240$\times$240，同时配有274张相同尺寸的肿瘤分割标签。我们将样本按9:1划分训练集和测试集，取每张3D MRI第55-105间的50个slice构建2D的数据集。在数据预处理阶段，我们将每张图进行了标准化。
 
 \subsection{BRATS合成数据集}
-
 我们采用~\ref{make dataset}中的方法构建了一个配准的包含T1、T2、T1c、Flair四个模态的具有肿瘤标签的合成数据集。合成数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的合成。
 
 \subsection{BRATS增强数据集}
-
 我们对原始的BRATS2015数据集进行了随机的缩放、旋转、平移、翻转等改变，得到增强数据。增强数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的生产。
 
-\subsection{病灶生成组件各方案对比实验}
+\subsection{训练设置}
+每项实验的迭代次数与BRATS2015训练数据集的100个epoch相等；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
 
-我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了100个epoch的充分训练，然后我们在BRATS2015数据集的测试集和采用不同病灶生成组件方案的未经分割器筛选的的BRATS合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。
+\subsection{病灶生成组件各方案对比实验}
+\label{label gen methods tests}
+我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了相同迭代步数的充分训练，然后我们在BRATS2015数据集的测试集和采用不同病灶生成组件方案的未经分割器筛选的的BRATS合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。其中，我们在真实数据上采用的分割方案为章节~\ref{label gen methods}中的多分割器方案，即每个模态各训练一个独立的分割器。
 
 \subsection{合成数据可用性验证实验}
-
-如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行训练100个epoch的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。
+如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行训练相同迭代步数的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。我们选用实验~\ref{label gen methods tests}中，在合成数据集上表现最好的分割方案来作为验证实验的分割方案。
 
 \section{结果}
 \subsection{实验量化结果}
@@ -480,13 +476,12 @@ At present, there are various problems in the research of medical image synthesi
 			1ECL+4DCL&synthetic     	&0.055 &0.808 \\		
 			4SEG&synthetic     			&0.043 &0.838 \\
 			\bottomrule			
-		\end{tabular}
-		
+		\end{tabular}	
 	}	
 	\label{label_test}	
 \end{table}
 
-如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.014的MSE和0.961的SSIM\cite{93wang2004image}。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中一个模态一个分割器的方案取得了最好的结果，Dice Score也达到了0.838。
+如表~\ref{label_test}所示，我们在BRATS2015训练数据经过相同的迭代步数的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中每个模态训练一个独立的分割器的方案取得了最好的结果，Dice Score也达到了0.838。
 
 \subsubsection{合成数据可用性验证实验结果}
 \begin{table}[t]
@@ -505,7 +500,7 @@ At present, there are various problems in the research of medical image synthesi
 			4& 0 & 15070$\times$ 3  &0 &随机混合 &0.205 &0.754 \\
 			
 			7& 15070$\times$ 0.1 & 15070  &0 &先假后真 &0.031 &0.908 \\
-			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &先假后真 0.028& &0.907 \\
+			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &先假后真 &0.028 &0.907 \\
 			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &先假后真 &0.030 &0.907 \\	
 			
 			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &随机混合 &0.041 &0.850 \\
@@ -515,45 +510,42 @@ At present, there are various problems in the research of medical image synthesi
 			32& 15070 & 15070$\times$ 0.2 &0  &随机混合 &0.025 &0.921 \\
 			33& 15070 & 15070$\times$ 0.5 &0  &随机混合 &0.023 &0.939 \\
 			34& 15070 & 15070$\times$ 0.8 &0  &随机混合 &0.026 &0.916 \\
-			
-			15& 15070 & 15070 &0  &随机混合 &0.027 &0.913 \\
-			16& 15070 & 15070 &0  &先真后假 &0.195 &0.795 \\
-			17& 15070 & 15070 &0  &先假后真 &0.021 &0.940 \\
-			
+			15& 15070 & 15070 &0            &随机混合 &0.027 &0.913 \\
 			18& 15070 & 15070$\times$ 2  &0 &随机混合 &0.033 &0.901 \\
 			19& 15070 & 15070$\times$ 3  &0 &随机混合 &0.034 &0.897 \\
-			
+	
 			35& 15070 &0 & 15070$\times$ 0.2   &随机混合 &0.027 &0.911 \\
 			36& 15070 &0 & 15070$\times$ 0.5   &随机混合 &0.025 &0.927 \\
 			37& 15070 &0 & 15070$\times$ 0.8   &随机混合 &0.026 &0.920 \\
-			22& 15070 &0 & 15070 &随机混合 &0.026 &0.915 \\
+			22& 15070 &0 & 15070           &随机混合 &0.026 &0.915 \\
 			23& 15070 &0 & 15070$\times$ 2 &随机混合 &0.032 &0.898 \\
 			24& 15070 &0 & 15070$\times$ 3 &随机混合 &0.036 &0.885 \\
-
+			
+			16& 15070 & 15070 &0  &先真后假 &0.195 &0.795 \\
+			17& 15070 & 15070 &0  &先假后真 &0.021 &0.940 \\
 			\bottomrule
 		\end{tabular}
 	}
 	\label{use_test}
 \end{table}
-如表~\ref{use_test}所示，我们在不同的成分和数量的数据集上都经过训练后再在真实测试集上评估，得到了表中的结果。实验1在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.033的MSE和0.954的SSIM。从表中实验2-4单独使用合成数据训练的结果看，与真实数据的训练结果有一定差距，说明我们的合成数据尚不能完全替代真实数据充当训练集。实验7-9结果表明使用大量合成数据进行预训练，再在少量真实数据上微调能达到和实验1全使用真实数据训练十分接近的结果。实验12-14一定比例的真实数据与合成数据随机混合，能达到和真实数据训练差不多的效果，比例相近时效果与实验1相差不大，合成数据比例偏高时，结果比实验1略低，合成数据比例偏低时，能提供模型的泛化能力，取得高于实验1的结果。实验15-17等比例混合真实数据与合成数据，随机混合时合成数据用作数据增强，效果比真实数据训练效果好，说明合成数据起到数据增强的作用，能有效提升训练效果；先训练真实数据再用合成数据进行补充训练，结果较差，与完全使用合成数据训练效果差不多；先使用合成数据进行与训练，再使用真实数据进行训练，能取得非常好的结果。实验15，32-34，18-19按多种比例混合真实数据与合成数据，开始时(实验33-34，15)随着合成数据的增加能提升训练效果，但随着合成数据比例继续增大，训练效果会下降。最后实验35-37，22-24是使用传统数据增强方法进行数据增强，实验结果表明合成数据比传统数据增强的训练效果更好。
+如表~\ref{use_test}所示，我们在不同的成分和数量的数据集上都经过训练后再在真实测试集上评估，得到了表中的结果。
+实验1在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。
+从表中实验2-4单独使用合成数据训练的结果看，合成数据与真实数据的训练结果仍然有一定差距，这说明合成数据不能完全替代真实数据充当训练集。
+实验7-9结果表明使用大量合成数据进行预训练，再在少量真实数据上微调能达到和实验1全使用真实数据训练十分接近的结果。这说明合成数据作为预训练数据集非常合适。
+实验12-14中一定比例的真实数据与合成数据随机混合，比例不同取得的结果差异很大，当两者比例相近时分割结果与实验1相差不大，合成数据比例偏高时，结果比实验1低，合成数据比例偏低时，能提供模型的泛化能力，取得高于实验1的结果。
+实验32-34，15,18-19中进一步尝试在全量的真实数据中添加不同数据量的合成数据，我们发现较少的合成数据能提高模型的泛化能力，起到数据增强的作用，合成数据越多增强效果越好，但当合成数据到达一定比例后再继续增加将取得反效果，此时合成数据越多越使得真实数据的影响力下降。
+实验35-37和实验22-24中，我们使用通常的数据增强方法产生的增强数据来与前述合成数据的增强效果进行对比，我们发现在增强数据量与增强效果的变化趋势上，两者是一致的，但两者在具体的增强效果随着增强数据量变化的变化曲线上是有一些差异的。整体来说，在模型对增强数据量的敏感程度上，增强数据更加鲁棒，但合成数据能取得的增强效果的上限比曾强数据要高很多。
+在实验16-17中，我们对比实验15，发现与真实数据相同数量的合成数据，作为预训练数据先于真实数据训练时表现最好，作为增强数据与真实数据混合训练时效果居中，作为补充训练数据集在真实数据集之后训练则表现很差。
 
-但在真实数据充当训练集的基础上，可以使用合成数据集作为增强数据来提高模型泛化能力，数据最好的组合使用方式是随机混合使用。我们也注意到，合成数据也并不是越多越好的，当合成数据所占比重过大时，为降低真实数据的影响力。在我们的实验中，采用【】倍的合成数据与真实数据进行随机混合取得了最好的提升效果，相比完全的真实数据，分割测试结果提升了【\%】的MSE和【\%】的SSIM，远远大于通常的数据增强的提升幅度。与\cite{4shin2018medical}的结论一致，我们的合成数据也可用于预训练，然后再使用少量真实数据微调，最后能得到和完全真实数据训练相竞争的结果。
+总的来说，我们发现当真实数据量较多时，可以使用少量的合成数据作为增强数据混合使用，也可以使用大量的合成数据先进行预训练，再在真实数据集上训练；当真实数据较少时，可以使用大量的合成数据进行预训练，再在少量真实数据上微调，最后能得到和完全真实数据训练相竞争的结果，这点我们与\cite{4shin2018medical}的结论一致；我们不建议完全使用合成数据进行训练，与\cite{4shin2018medical}的结论不同的是我们也不建议使用合成数据进行补充训练。
 
 \subsection{合成数据可视化}
-
-上述各项实验的一些生成结果如图~\ref{generated_f}-~\ref{label_from_diff_train}所示，从图中我们能更直观的取得结论。
+上述各项实验的一些生成结果如图~\ref{generated_f}-~\ref{label_from_diff_test}所示，从图中我们能更直观的取得结论。
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{合成的结构特征图机器掩膜.}
+	\caption{合成的结构特征图、掩膜和多模态MRI.}
 	\label{generated_f}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{合成的多模态MRI.}
-	\label{generated_mri}
 \end{figure}
 
 \begin{figure}
@@ -563,16 +555,9 @@ At present, there are various problems in the research of medical image synthesi
 	\label{label_from_diff_test}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{使用不同训练数据的分割模型在真实测试集上的分割示例.}
-	\label{label_from_diff_train}
-\end{figure}
-
 \section{结论与未来工作}
 
-我们基于条件生成对抗网络，通过无监督的训练，实现了能在已有单模态数据时可扩展出多模态影像数据并保留原模态的病灶信息，同时可从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们通过病灶分割实验验证了合成的医学影像可以用于医学影像智能处理任务的预训练或者补充训练来提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
+我们基于条件生成对抗网络，通过无监督的训练，实现了能在已有单模态数据时可扩展出多模态影像数据并保留原模态的病灶信息，同时可从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们通过病灶分割实验验证了合成的医学影像可以作为医学影像智能处理任务的预训练数据或增强数据来提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
 \begin{itemize}
 	\item 结构特征图提取方法。我们从医学影像直接提取解剖结构信息，无须训练，无需额外数据；
 	\item 随机结构特征图生成方法。我们实现了从多维正态分布采样生成结构特征图，使结构特征图能便捷地大量生成并使最后合成的影像具有良好的多样性；
