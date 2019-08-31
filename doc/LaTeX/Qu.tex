@@ -14,7 +14,7 @@
 \setlength{\pdfpagewidth}{8.5in}  % DO NOT CHANGE THIS
 \setlength{\pdfpageheight}{11in}  % DO NOT CHANGE THIS
 \usepackage[UTF8]{ctex}
-\usepackage{booktabs} %table hline
+\usepackage{booktabs} %table topline,midline,bottomline
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 %\nocopyright
@@ -117,44 +117,55 @@ Some studies explored cross-modal medical images translation prior to GAN by usi
 At present, there are various problems in the research of medical image synthesis, such as the difficulty of expanding the number of modalities, the need to registered training data, relying on complex large networks, the inability to add or retain lesions, the need to be extended from real data and cannot be generated from random matrices, and the need of additional training data, etc. Moreover, the evaluation of synthetic data in most studies relies on the evaluation of artificial visual effects by experienced physicians, without objective quantitative evaluation. Therefore, we design a multi-modal registration image generation scheme based on the Conditional Generative Adversarial Networks (CGAN)\cite{70mirza2014conditional}. With unsupervised learning method, training data do not need to be registered. Our solution can receive a random input that meets our design specifications to generate a set of labeled multimodal registration images. Specifically, our contribution is in the following three areas:
 
 \begin{itemize}
-	\item \textbf{结构特征图的提取与随机生成}
+	\item \textbf{结构特征图的提取与随机生成Extraction and Random Generation of Structural Feature Maps}
 	我们针对医学影像提出了一种解剖结构特征的提取方法，无需额外的解剖结构分割标签或标签提取训练，可直接从任意模态的真实影像提取得到结构特征，用以辅助GAN学习生成更合理的合成影像。我们训练了一个结构特征图生成器实现了从多维正态分布生成结构特征图。我们的提取方法可以直接获取真实影像的解剖结构特征，在提升合成影像质量同时不带来额外参数、计算开销小，而随机生成方法可以无限地生成丰富多样的结构特征图。
-	\item \textbf{带标签多模态配准影像的合成}
+	We propose an extraction method for anatomical features for medical images. Without additional anatomical segmentation labels or label extraction training, structural feature maps can be extracted directly from real images of arbitrary modalities ,and assist GAN to learn to generate more reasonable synthetic images. The extraction method can directly obtain the anatomical features of real images, and improve the quality of synthetic images without introducing additional parameters and computation overhead. We also train a structural feature map generator to generate structural feature maps from multidimensional normal distribution. The random generation method can generate rich and diverse structural feature maps indefinitely.
+	\item \textbf{带标签多模态配准影像的合成Synthesis of Registered Multimodal MRI with Lesion Label}
 	我们使用随机生成的结构特征图，融合随机选择的病灶信息标签，通过生成器合成配准的多模态MRI。我们探讨了多种病灶生成指导方法，并通过病灶生成指导方法实现了在多模态MRI的合成过程中根据输入病灶标签有效地生成对应的病灶信息。在训练时我们无需配准的数据，除病灶信息标签外无需额外的数据标签，而合成的数据是配准的，且输入的随机选择病灶信息标签即为合成数据的病灶信息标签。我们的方法能够便捷快速地构建带标签的配准多模态MRI数据集。
-	\item \textbf{合成数据可用性的客观验证方法}
+	We use randomly generated structural feature maps to fuse with randomly selected lesion labels and then synthesize the registered multimodal MRIs through the generator. We explore a variety of lesion generation guidence methods to achieve effective mapping of lesions based on input lesion labels during multimodal MRI synthesis. In training, no registration data is required, no additional data labels are required except for the lesion label, the synthetic data is registered, and the randomly selected lesion label is the lesion label of the synthetic data. Our approach enables fast and easy construction of registered multimodal MRI datasets with label.
+	\item \textbf{合成数据可用性的客观验证方法Objective Verification Method for Synthetic Data Availability}
 	我们使用不同比重的合成数据和真实数据构建的数据集来训练病灶分割网络，验证了合成数据可以在医学影像智能处理任务与真实数据混合使用来提高模型的泛化能力。对比传统合成影像质量的主观评价方法，我们的方法能客观真实地验证合成数据的可用性。
+	We construct datasets with different proportions of synthetic and real data to train the lesion segmentation network, and verify that the synthetic data can be mixed with the real data in medical image intelligent processing tasks to improve the generalization ability of the model. Compared with the traditional subjective evaluation method of synthetic image quality, our method can verify the availability of synthetic data objectively and truthfully.
 \end{itemize}
 
-\section{方法}
+\section{方法Methods}
 
 我们在脑MRI数据的合成任务上进行了我们的方法的展示，其中的病灶为肿瘤，病灶标签为肿瘤分割标签，病灶处理任务为病灶分割。我们的方法对合成部位、病灶处理任务和模态数量等不做限制，通过下述的展示，我们能很容易的将该方法推广应用到其他的类似任务。
-\subsection{整体架构}
+We perform our scheme on brain MRI data synthesis task, in which the lesion is a tumor, the lesion label is a tumor segmentation label, and the lesion processing task is lesion segmentation. Our scheme does not limit the synthesis of human parts, lesion processing tasks, and the number of modalities. We can easily apply this method to other similar tasks by the following display.
+\subsection{整体架构Overall Architecture}
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/architecture}
-	\caption{整体架构图.}
+	\caption{整体架构图.Overall Architecture.}
 	\label{architecture}
 \end{figure}
-如图\ref{architecture}所示，我们的方案包括结构特征图提取和生成、多模态MRI生成、构建合成数据集、合成数据分割检测四个主要阶段。
+如图~\ref{architecture}所示，我们的方案包括结构特征图提取和生成、多模态MRI生成、构建合成数据集、合成数据分割检测四个主要阶段。
+As shown in Fig~\ref{architecture}, our scheme includes four main stages: structural feature map extraction and random generation, multimodal MRI generation, construction of synthetic datasets, and synthetic data segmentation detection.
 
 结构特征图提取和生成阶段我们将获得一个结构特征图生成器，能从随机的正态分布矩阵生成结构特征图。该阶段我们训练的模型模包括一个结构特征图编码器、一个结构特征图解码器和一个结构特征图鉴别器。
+In the structural feature map extraction and random generation stage, we will obtain a structural feature map generator that can generate structural feature maps from the random normal distribution matrix. Models we train at this stage includes a structural feature map encoder, a structural feature map decoder, and a structural feature map discriminator.
 
-多模态MRI生成阶段我们产出一个条件生成器，其以结构特征图为输入，能根据不同的独热条件向量生成不同模态的MRI，并且可在结构特征图上添加病灶标签使得生成的MRI具有对应的病灶信息。该阶段我们训练的模型模块包括一个结构特征与病灶标签融合图编码器、一组病灶标签分割组件、一个MRI编码器、一个MRI解码器、一个MRI鉴别器和一个MRI编码鉴别器。
+多模态MRI生成阶段我们产出一个条件生成器，其以结构特征图为输入，能根据不同的独热条件向量生成不同模态的MRI，并且可在结构特征图上添加病灶标签使得生成的MRI具有对应的病灶信息。该阶段我们训练的模型模块包括一个结构特征与病灶标签融合图编码器、四个MRI模态的病灶分割器、一个MRI编码器、一个MRI解码器、一个MRI鉴别器和一个MRI编码鉴别器。
+In the multimodal MRI generation stage, we generate a conditional generator with input of structural feature maps, which can generate MRIs of different modalities according to different one-hot conditional vectors, and can add lesion labels on the structural feature maps to generate MRI has corresponding lesion information. At this stage, we train a structural feature and lesion label fusion encoder, a lesion segmentor for each modality, an MRI encoder, an MRI decoder, an MRI discriminator and an MRI code discriminator.
 
 在构建合成数据集阶段，我们使用前两个阶段产出的模型先从随机正态分布矩阵生成足量的结构特征图再随机添加病灶标签，最后生成配准的多模态MRI，构建出一个合成数据集。
+In the stage of constructing the synthetic datasets, we use the model produced in the first two stages to generate a sufficient number of structural feature maps from the random normal distribution matrix and then randomly fuse with real lesion labels, and finally generate the registered multimodal MRI to construct synthetic datasets.
 
-在合成数据分割检测阶段，我们根据真实的数据为每个模态的MRI单独训练一个病灶分割网络，并在真实数据集中进行分割能力测试。此外，我们使用由不同比重的合成数据和真实数据构建的数据集来对病灶信息检测阶段中的病灶分割网络进行训练，训练充分后再在真实测试数据集上进行分割能力测试，对比各项测试结果，以验证合成数据在模型训练中的可用性。该阶段我们训练的模型包括每个模态的MRI的基于不同数据比重的病灶分割器。
+在合成数据分割检测阶段，我们根据真实的数据为每个MRI模态单独训练一个病灶分割器，并在真实数据集中进行分割能力测试。此外，我们使用由不同比重的合成数据和真实数据构建的数据集来对病灶分割网络进行训练，训练充分后再在真实测试数据集上进行分割能力测试，对比各项测试结果，以验证合成数据在模型训练中的可用性。该阶段我们训练的模型包括每个模态的MRI的基于不同数据比重的病灶分割器。
+In the synthetic data segmentation detection stage, we train a lesion segmentor for each MRI modality based on real data, and perform segmentation ability tests on real dataset. In addition, we use datasets constructed from synthetic data and real data of different proportions to train the lesion segmentor. After training, the segmentation ability test is performed on the real dataset, and the test results are compared to verify the availability of the synthetic data in model training. At this stage, each experiment trains a lesion segmentor for each modality.
 
-\subsection{结构特征图提取方法}
+\subsection{结构特征图提取方法Structural Feature Map Extraction Method}
 
 直接从随机噪声通过生成对抗训练生成的医学影像通常训练困难且难以生成真实的结构信息。我们将医学影像中提供基本轮廓结构信息的图像称为其结构特征图，例如视网膜血管分布图可视为视网膜图像的结构特征图\cite{41costa2017towards}。结构特征图可以为医学影像的合成提供必要的指导信息，例如合成脑部MRI图像时一些研究从脑分割标签图获取基本的结构信息\cite{4shin2018medical}。然而，视网膜血管分布图和脑分割标签图等常用的结构特征图都需要额外的数据和训练才能实现从原图提取出结构特征图。为此，我们首先设计了一种直接从脑MRI提取结构特征图的方法，该方法具有运算快、无需训练、无需额外数据等优点。
+Medical images generated directly from random noise by GAN are often difficult to train and difficult to generate real structural information. We call image that provide anatomical structure information as structural feature map. For example, a retinal blood vessel distribution map can be regarded as a structural feature map of a retinal image\cite{41costa2017towards}. Structural feature maps can provide necessary guidance for the synthesis of medical images. For example, when synthesizing brain MRI, some studies obtain basic structural information from the brain segmentation label\cite{4shin2018medical}. However, common structural features such as retinal vascular maps and brain segmentation labels require additional data and training to extract structural features from the original image. To this end, we first design a method for extracting structural feature maps directly from brain MRI, which has the advantages of fast operation, no training, no additional data. 
 
 在传统的数字图像处理方法中，Roberts算子\cite{87Roberts}、Prewitt算子\cite{88prewitt}、Sobel算子\cite{89Sobel}等是十分优秀的边缘检测算子，其中Sobel算子常用于脑部医学图像的处理，其卷积核参数和计算公式如图所示。我们探索出了从Sobel算子生成的边缘检测图中进一步提取结构特征的方法，如算法~\ref{alg:1}所示。
+In the traditional digital image processing methods, Roberts operator, Prewitt operator, Sobel operator, etc. are excellent edge detection operators. Sobel operator is often used in processing of brain medical images, and their convolution kernel parameters and calculation formula are as shown. As shown in Algorithm~\ref{alg:1}, We explore a method for further extracting structural feature maps from the edge detection maps generated by Sobel operator.
 \begin{algorithm}
 	\caption{Structural Feature Extraction}
 	\label{alg:1}
 	\begin{algorithmic}[1]
-		\State 输入一张真实图像$x$，$beta$为元素阈值
+		\State Input a real image $x$,$beta$ is pixel threshold
 		\State $f1 = reduce\_min(sobel(x))$
 		\State $f2 = reduce\_max(sobel(x))$
 		\State $f1 = mean(f1) - f1$
@@ -500,33 +511,34 @@ At present, there are various problems in the research of medical image synthesi
 			1& 15070 & 0  &0 &无混合 &0.033 &0.954 \\
 			31& 15070$\times$ 0.5 & 0  &0 &无混合 &0.026 &0.916 \\
 			2& 0 & 15070  &0 &无混合 & & \\
-			
+			\hline
 			3& 0 & 15070$\times$ 2  &0 &随机混合 & & \\
 			4& 0 & 15070$\times$ 3  &0 &随机混合 & & \\
 			%5& 0 & 15070$\times$ 4  &0 &随机混合 & & \\
 			%6& 0 & 15070$\times$ 5  &0 &随机混合 & & \\
-			
+			\hline
 			7& 15070$\times$ 0.1 & 15070  &0 &先假后真 & & \\
 			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &先假后真 & & \\
 			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &先假后真 & & \\
 			%10& 15070$\times$ 0.1 & 15070$\times$ 4  &0 &先假后真 & & \\
 			%11& 15070$\times$ 0.1 & 15070$\times$ 5  &0 &先假后真 & & \\
-			
+			\hline
 			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &随机混合 & & \\
 			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &随机混合 & & \\
 			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &随机混合 & & \\
+			\hline
 			32& 15070 & 15070$\times$ 0.2 &0  &随机混合 &0.026 &0.921 \\
 			33& 15070 & 15070$\times$ 0.5 &0  &随机混合 &0.023 &0.939 \\
 			34& 15070 & 15070$\times$ 0.8 &0  &随机混合 &0.0269 &0.912 \\
 			15& 15070 & 15070 &0  &随机混合 & & \\
 			16& 15070 & 15070 &0  &先真后假 & & \\
 			17& 15070 & 15070 &0  &先假后真 & & \\
-			
+			\hline
 			18& 15070 & 15070$\times$ 2  &0 &随机混合 & & \\
 			19& 15070 & 15070$\times$ 3  &0 &随机混合 & & \\
 			%20& 15070 & 15070$\times$ 4  &0 &随机混合 & & \\
 			%21& 15070 & 15070$\times$ 5  &0 &随机混合 & & \\
-			
+			\hline
 			35& 15070 &0 & 15070$\times$ 0.2   &随机混合 &0.030 &0.911 \\
 			36& 15070 &0 & 15070$\times$ 0.5   &随机混合 &0.025 &0.927 \\
 			37& 15070 &0 & 15070$\times$ 0.8   &随机混合 &0.027 &0.916 \\
