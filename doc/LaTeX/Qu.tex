@@ -99,8 +99,9 @@ quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace
 \maketitle
 
 \begin{abstract}
-在基于大量数据驱动的医学影像智能处理任务中，医学影像数据的收集和采集是非常困难的，尤其是配准的多模态医学影像数据。合成的医学影像数据可以很好地缓解数据不足的问题。我们基于无监督的条件生成对抗网络模型实现了在已有单模态影像数据时可扩展出多模态影像数据并保留原模态的病灶信息，进一步实现了完全从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们验证了合成的医学影像可以在医学影像智能处理任务中与真实数据混合使用来提高模型的泛化能力。
-In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised CGAN model, we extend multimodal image data from existing unimodal image data and retain lesion information of the original modal, furthermore we achieve the generation of registered multimodal medical images from random noise and the freedom to add lesion information. We verify the synthetic medical images can be mixed with real data in medical image intelligent processing tasks to improve the generalization capabilities of the model.
+在基于大量数据驱动的医学影像智能处理任务中，医学影像数据的收集和采集是非常困难的，尤其是配准的多模态医学影像数据。合成的医学影像数据可以很好地缓解数据不足的问题。我们基于无监督的条件生成对抗网络模型实现了完全从随机噪声生成配准的多模态医学影像，并且可以根据自由选定的病灶标签有效地生成对应的病灶信息。我们在BRATS2015上进行了多项验证实验，验证了我们的合成MRI可以在医学影像智能处理任务中作为预训练数据或增强数据使用，并能大幅度提高模型的泛化能力。
+In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised CGAN model, we achieve the generation of registered multimodal medical images from random noise and corresponding lesion information can be efficiently generated based on the freely selected lesion label. We conducted a number of validation experiments on BRATS2015 to verify that our synthetic MRI can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve the generalization ability of the model.
+
 \end{abstract}
 \section{Introduction}
 核磁共振成像（MRI）是一种常见的医学影像，根据成像参数的不同可以有多种模态，例如T1、T2、T1c等。不同的模态对医生具有不同的参考价值，医生往往需要多个模态的影像互相对照才能做出准备的判断。在医学影像的智能处理任务的训练和学习中，我们往往也期望获得更多模态的影像，例如采用卷积神经网络（CNN）\cite{86krizhevsky2012imagenet}或生成对抗网络（GAN）\cite{25goodfellow2014generative}进行的医学图像处理任务。
@@ -140,7 +141,7 @@ We perform our scheme on brain MRI data synthesis task, in which the lesion is a
 	\label{architecture}
 \end{figure}
 如图~\ref{architecture}所示，我们的方案包括结构特征图提取和生成、多模态MRI生成、构建合成数据集、合成数据分割检测四个主要阶段。
-As shown in Fig~\ref{architecture}, our scheme includes four main stages: structural feature map extraction and random generation, multimodal MRI generation, construction of synthetic datasets, and synthetic data segmentation detection.
+As shown in Fig.~\ref{architecture}, our scheme includes four main stages: structural feature map extraction and random generation, multimodal MRI generation, construction of synthetic datasets, and synthetic data segmentation detection.
 
 结构特征图提取和生成阶段我们将获得一个结构特征图生成器，能从随机的正态分布矩阵生成结构特征图。该阶段我们训练的模型模包括一个结构特征图编码器、一个结构特征图解码器和一个结构特征图鉴别器。
 In the structural feature map extraction and random generation stage, we will obtain a structural feature map generator that can generate structural feature maps from the random normal distribution matrix. Models we train at this stage includes a structural feature map encoder, a structural feature map decoder, and a structural feature map discriminator.
@@ -178,35 +179,49 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 \end{algorithm}
 
 简单来说，我们对一张真实图像用Sobel算子提取得到其横向和纵向的边缘检测图，对两张边缘检测图进行最大值规约和最小值规约得到两张新的边缘检测融合图，然后两张边缘检测融合图分别与各自的平均像素值求差，再对两张差值图根据设定像素阈值进行二值化处理，两张二值图求和后再进行完全的二值化，最后得到的就是我们需要的结构特征图。
+We use Sobel operator to extract the horizontal and vertical edge detection maps from a real image, each perform reduce maximum and reduce minimum to obtain two edge detection fusion maps, each fusion map calculate the difference with average pixel value, the two difference maps are binarized according to the set pixel threshold, and the two binary images are summed and then completely binarized. The final result is the structural feature map we need.
 
-\subsection{随机结构特征图的生成训练}
+\subsection{随机结构特征图的生成训练Training of Random Structural Feature Map Generation}
 
 在生成结构特征图时，\cite{4shin2018medical}仍然需要真实的模态图作为输入来得到生成的结构特征图，这大大降低了生成数据的多样性，\cite{41costa2017towards}实现了一种从多维正态分布生成视网膜血管分布图的方法，在其基础上，我们设计了一种从随机噪声生成脑部结构特征图的方法，无需额外数据且具有更好的多样性。具体来说，我们结合了变分自编码器与生成对抗网络的特点设计了一种混合网络。首先，我们将从真实影像提取得到的结构特征图通过VAE的编码器编码为一个均值矩阵和一个方差矩阵，再与一个随机正态分布矩阵融合为一个潜在特征矩阵，并约束潜在特征矩阵服从多维正态分布，再用VAE的解码器实现从多维正态分布生成结构特征图。解码器通过特征图的自监督重建损失进行训练，对于潜在特征的约束方法，我们没有采用VAE的编码器损失，而是添加了一个鉴别器，鉴别器以正态分布矩阵为正样本、输入解码器的潜在特征矩阵为负样本进行学习，并为编码器提供对抗性损失，同时，我们通过$L2$正则损失指导均值矩阵的均值为0，标准差矩阵的均值为1。此外，我们用另一个鉴别器对真实的提取结构特征图与随机生成的结构特征图进行对抗学习，使生成的结构特征图越来越逼真。
+When generating the structural feature map, \cite{4shin2018medical} still needs to input the real modal image to get the generated structural feature map, which greatly reduces the diversity of generated data, and \cite{41costa2017towards} implements a method for generating retinal blood vessel distribution maps from multidimensional normal distribution. On the basis of this, we design a method for generating brain structural feature maps from random noise, which has better diversity and no additional data. 
+Specifically, we design a hybrid network combining the characteristics of VAE and GAN. First, we encode the structural feature map extracted from real image into a mean matrix and a variance matrix through the VAE encoder, and then merge it into a latent feature matrix with a random normal distribution matrix, and constrain the latent feature matrix to obey the multidimensional normal distribution, finally, use VAE decoder to generate structural feature maps from multidimensional normal distribution. The decoder is trained by self-supervised reconstruction loss of structural feature maps. For the constraint of latent features, we do not use encoder loss of VAE, but add a discriminator. The discriminator learns normal distribution matrix as a positive sample and latent feature matrix as a negative sample, and provides adversarial loss for encoder. Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1. In addition, we use another discriminator to receive structural feature map extract from real image and randomly generated structural feature map for adversarial learning, so that the generated structural feature map becomes more and more realistic.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/feature_train}
-	\caption{随机结构特征图的生成训练.}
+	\caption{随机结构特征图的生成训练.Training of Random Structural Feature Map Generation.}
 	\label{feature_train}
 \end{figure}
 如图~\ref{feature_train}所示，从标准正态分布解码得到随机结构特征图的具体处理过程如下：
+As shown in Fig.~\ref{feature_train}, the specific processing procedure for decoding the random structure feature map from standard normal distribution is as follows:
 \begin{itemize}
 	\item 每次随机选择一个模态，从这个模态中获取一张图$x$，用结构特征提取方法得到结构特征图$f$，用掩模提取算法(算法~\ref{alg:2})得到对应掩模$mask$；
+	Each time a modality is randomly selected, an image $x$ is obtained from the modality, and the structural feature map $f$ is obtained by the structural feature map extraction method, and the corresponding mask $mask$ is obtained by the mask extraction algorithm(Algorithm~\ref{alg:2});
 	\item 用编码器$EC_f$对结构特征图$f$进行编码获得$code_{f,mean}$及$code_{f,logvar}$，从正态分布$\mathcal{N}(0,1^2)$的获取随机噪声$code_n$，由三个编码求得$code_f=code_{f,mean}+exp(0.5*code_{f,logvar})*code_n$；
+	Encode $f$ with encoder $EC_f$ to get $code_{f,mean}$ and $code_{f,logvar}$, get a random noise $code_n$ from multidimensional normal distribution $\mathcal{N}(0,1^2)$ , from the three codes we get $code_f=code_{f,mean}+exp(0.5*code_{f,logvar})*code_n$ ;
 	\item 用解码器$DC_f$对$code_f$解码得到重建的结构特征图$f_r$；
+	Decode $code_f$ with decoder $DC_f$ to obtain the reconstructed structural feature map $f_r$;
 	\item 用掩模生成器$MASK$从$f$提取得到掩模$mask_r$；
+	Use mask generator $MASK$ to extract mask $mask_r$ from $f$;
 	\item 随机生成符合正态分布$\mathcal{N}(0,1^2)$的矩阵$code_{f,g}$；
+	Randomly generate a matrix $code_{f,g}$ that obeys normal distribution $\mathcal{N}(0,1^2)$;
 	\item 用解码器$DC_f$对$code_{f,g}$解码得到生成的随机结构特征图$f_g$；
+	Decode $code_{f,g}$ with decoder $DC_f$ to get the generated random structure feature map $f_g$;
 	\item 用掩模生成器$MASK$对$f_g$提取得到掩模$mask_g$；
+	Use mask generator $MASK$ to extract mask $mask_g$ from $f$;
 	\item 结构特征图鉴别器$D_f$分别对$f$和$f_g$进行鉴别，将前者鉴别为真，后者鉴别为假；
+	Structural feature discriminator $D_f$ identifies $f$ and $f_g$ respectively, identifying the former as true and the latter as false;
 	\item 结构特征鉴别器$FD_f$分别对$code_f$和$code_{f,g}$进行鉴别，将前者鉴别为假，后者鉴别为真。
+	structural feature discriminator $FD_f$ discriminates between $code_f$ and $code_{f,g}$, respectively, identifying the former as false and the latter as true.
 \end{itemize}
 
-为了防止通过结构特征图生成的脑MRI像素区域超出结构特征图中脑轮廓线之外，我们还训练了一个从脑结构特征图获取脑部区域掩膜的生成器$MASK$，该生成器与结构特征图的生成训练进行同步训练。训练时，将真实脑MRI$x$通过掩模提取算法提取得到的掩膜作为训练标签数据，掩膜的提取算法如算法2所示。
+为了防止通过结构特征图生成的脑MRI像素区域超出结构特征图的脑轮廓线之外，我们还训练了一个从脑结构特征图获取脑部区域掩膜的生成器$MASK$，该生成器与结构特征图的生成训练进行同步训练。训练时，将真实脑MRI$x$通过掩模提取算法提取得到的掩膜作为训练标签数据，掩膜的提取算法如算法2所示。
+In order to prevent the generated brain MRI pixel area from exceeding the brain outline of the structural feature map, we train a generator $MASK$ that acquires the brain area mask from the brain structure feature map. The generator is synchronized with the  training of structural feature map generation. During training, the mask extracted by the real brain MRI$x$ through the mask extraction algorithm (Algorithm~\ref{alg:2}) is used as label data.
 \begin{algorithm}
 	\caption{Mask Extraction}
 	\label{alg:2}
 	\begin{algorithmic}[1]
-		\State 输入一张真实图像$x$，$p$为扩充元素值
+		\State Input a real image $x$, $p$ is expanded pixel value
 		\State $mask = 1.0 - ones * (x > 0.)$
 		\State $shape = get\_shape(x)$
 		\State $mask = resize(mask, size=[shape[1] + p, shape[2] + p])$
@@ -214,11 +229,12 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 	\end{algorithmic}  
 \end{algorithm}
 
-在训练过程中，我们希望从随机正态分布矩阵解码出的结构特征图更逼真，所以通过鉴别器$D_f$对原图提取的结构特征与随机正态分布矩阵解码的结构特征进行对抗训练，此外，还通过特征鉴别器$FD_f$对真实结构特征图编码结果$code_f$与服从标准正态分布的矩阵$code_{f,g}$进行对抗训练，以此使得编码器$EC_f$能够将结构特征图F编码至标准正态分布。完整的损失函数如下，其中，$\omega_{i,j}$为各损失项的权重：
+在训练过程中，我们通过鉴别器$D_f$进行对抗训练以使解码器解码的结构特征图更逼真，此外，还通过特征鉴别器$FD_f$进行对抗训练，以此使得编码器$EC_f$能够将结构特征图f编码至标准正态分布。完整的损失函数如下，其中，$\omega_{i,j}$为各损失项的权重：
+In training, we perform adversarial training through discriminator $D_f$ to make the structural feature map decoded by decoder more realistic. In addition, the adversarial training is performed by the feature discriminator $FD_f$, so that encoder $EC_f$ can encode structural feature map $f$ to standard normal distribution. The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item: 
 \begin{itemize}
-	\item\textbf{结构特征对抗性损失} 
+	\item\textbf{结构特征对抗性损失Structural Feature Adversarial Loss} 
 	这部分损失包括：使得结构特征图编码服从正态分布的对抗性损失，以及使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-	
+	This part of the loss includes: adversarial loss to constrain the structural feature map code obey normal distribution, and adversarial loss to constrain structural feature map decode by normal distribution matrix more realistic
 	\begin{center}
 		$loss_{FD_f}=\Vert{FD_f(code_{f,g})-1}\Vert_{2}^{2}+\Vert{FD_f(code_f)}\Vert_{2}^{2}$
 	\end{center}
@@ -380,7 +396,7 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 \end{itemize}
 
 \subsection{病灶标签生成组件设计方案}
-
+\label{label gen methods}
 我们设计了如下五组病灶标签生成组件。
 \begin{itemize}
 	\item \textbf{单分割器方案} 
@@ -450,29 +466,25 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 \end{itemize}
 
 \section{实验}
-\subsection{训练设置}
-
-每项实验训练50个epoch；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
 
 \subsection{BRATS2015数据集}
-
 我们采用了公开的BRATS2015\cite{91menze:hal-00935640}数据集进行实验，该数据集包含已配准的T1、T2、T1c、Flair四个模态，训练集每个模态有274张3D MRI，大小为155$\times$240$\times$240，同时配有274张相同尺寸的肿瘤分割标签。我们将样本按9:1划分训练集和测试集，取每张3D MRI第55-105间的50个slice构建2D的数据集。在数据预处理阶段，我们将每张图进行了标准化。
 
 \subsection{BRATS合成数据集}
-
 我们采用~\ref{make dataset}中的方法构建了一个配准的包含T1、T2、T1c、Flair四个模态的具有肿瘤标签的合成数据集。合成数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的合成。
 
 \subsection{BRATS增强数据集}
-
 我们对原始的BRATS2015数据集进行了随机的缩放、旋转、平移、翻转等改变，得到增强数据。增强数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的生产。
 
-\subsection{病灶生成组件各方案对比实验}
+\subsection{训练设置}
+每项实验的迭代次数与BRATS2015训练数据集的100个epoch相等；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
 
-我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了100个epoch的充分训练，然后我们在BRATS2015数据集的测试集和采用不同病灶生成组件方案的未经分割器筛选的的BRATS合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。
+\subsection{病灶生成组件各方案对比实验}
+\label{label gen methods tests}
+我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了相同迭代步数的充分训练，然后我们在BRATS2015数据集的测试集和采用不同病灶生成组件方案的未经分割器筛选的的BRATS合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。其中，我们在真实数据上采用的分割方案为章节~\ref{label gen methods}中的多分割器方案，即每个模态各训练一个独立的分割器。
 
 \subsection{合成数据可用性验证实验}
-
-如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行训练100个epoch的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。
+如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行训练相同迭代步数的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。我们选用实验~\ref{label gen methods tests}中，在合成数据集上表现最好的分割方案来作为验证实验的分割方案。
 
 \section{结果}
 \subsection{实验量化结果}
@@ -486,18 +498,17 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 			\toprule	
 			synthetic method&test data type &MSE   &Dice Score \\	
 			\midrule		
-			-&real 		   				&0.014 &0.961 \\					
+			-&real 		   				&0.026 &0.915 \\					
 			1SEG&synthetic     			&0.053 &0.741 \\			
 			1ECL+4DCL&synthetic     	&0.055 &0.808 \\		
 			4SEG&synthetic     			&0.043 &0.838 \\
 			\bottomrule			
-		\end{tabular}
-		
+		\end{tabular}	
 	}	
 	\label{label_test}	
 \end{table}
 
-如表~\ref{label_test}所示，我们在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.014的MSE和0.961的SSIM\cite{93wang2004image}。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中一个模态一个分割器的方案取得了最好的结果，Dice Score也达到了0.838。
+如表~\ref{label_test}所示，我们在BRATS2015训练数据经过相同的迭代步数的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中每个模态训练一个独立的分割器的方案取得了最好的结果，Dice Score也达到了0.838。
 
 \subsubsection{合成数据可用性验证实验结果}
 \begin{table}[t]
@@ -508,69 +519,60 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 			\toprule
 			序号 & 真实量 & 合成量 & 增强量  & 混合方式  & MSE &Dice Score\\
 			\midrule
-			1& 15070 & 0  &0 &无混合 &0.033 &0.954 \\
-			31& 15070$\times$ 0.5 & 0  &0 &无混合 &0.026 &0.916 \\
-			2& 0 & 15070  &0 &无混合 & & \\
-			\hline
-			3& 0 & 15070$\times$ 2  &0 &随机混合 & & \\
-			4& 0 & 15070$\times$ 3  &0 &随机混合 & & \\
-			%5& 0 & 15070$\times$ 4  &0 &随机混合 & & \\
-			%6& 0 & 15070$\times$ 5  &0 &随机混合 & & \\
-			\hline
-			7& 15070$\times$ 0.1 & 15070  &0 &先假后真 & & \\
-			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &先假后真 & & \\
-			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &先假后真 & & \\
-			%10& 15070$\times$ 0.1 & 15070$\times$ 4  &0 &先假后真 & & \\
-			%11& 15070$\times$ 0.1 & 15070$\times$ 5  &0 &先假后真 & & \\
-			\hline
-			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &随机混合 & & \\
-			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &随机混合 & & \\
-			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &随机混合 & & \\
-			\hline
-			32& 15070 & 15070$\times$ 0.2 &0  &随机混合 &0.026 &0.921 \\
+			1& 15070 & 0  &0 &无混合 &0.026 &0.915 \\
+			31& 15070$\times$ 0.5 & 0  &0 &无混合 &0.032 &0.902 \\
+			
+			2& 0 & 15070  &0 &无混合 &0.205 &0.708 \\
+			3& 0 & 15070$\times$ 2  &0 &随机混合 &0.206 &0.736 \\
+			4& 0 & 15070$\times$ 3  &0 &随机混合 &0.205 &0.754 \\
+			
+			7& 15070$\times$ 0.1 & 15070  &0 &先假后真 &0.031 &0.908 \\
+			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &先假后真 &0.028 &0.907 \\
+			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &先假后真 &0.030 &0.907 \\	
+			
+			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &随机混合 &0.041 &0.850 \\
+			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &随机混合 &0.031 &0.904 \\
+			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &随机混合 &0.024 &0.935 \\
+			
+			32& 15070 & 15070$\times$ 0.2 &0  &随机混合 &0.025 &0.921 \\
 			33& 15070 & 15070$\times$ 0.5 &0  &随机混合 &0.023 &0.939 \\
-			34& 15070 & 15070$\times$ 0.8 &0  &随机混合 &0.0269 &0.912 \\
-			15& 15070 & 15070 &0  &随机混合 & & \\
-			16& 15070 & 15070 &0  &先真后假 & & \\
-			17& 15070 & 15070 &0  &先假后真 & & \\
-			\hline
-			18& 15070 & 15070$\times$ 2  &0 &随机混合 & & \\
-			19& 15070 & 15070$\times$ 3  &0 &随机混合 & & \\
-			%20& 15070 & 15070$\times$ 4  &0 &随机混合 & & \\
-			%21& 15070 & 15070$\times$ 5  &0 &随机混合 & & \\
-			\hline
-			35& 15070 &0 & 15070$\times$ 0.2   &随机混合 &0.030 &0.911 \\
+			34& 15070 & 15070$\times$ 0.8 &0  &随机混合 &0.026 &0.916 \\
+			15& 15070 & 15070 &0            &随机混合 &0.027 &0.913 \\
+			18& 15070 & 15070$\times$ 2  &0 &随机混合 &0.033 &0.901 \\
+			19& 15070 & 15070$\times$ 3  &0 &随机混合 &0.034 &0.897 \\
+			
+			35& 15070 &0 & 15070$\times$ 0.2   &随机混合 &0.027 &0.911 \\
 			36& 15070 &0 & 15070$\times$ 0.5   &随机混合 &0.025 &0.927 \\
-			37& 15070 &0 & 15070$\times$ 0.8   &随机混合 &0.027 &0.916 \\
-			22& 15070 &0 & 15070 &随机混合 & & \\
-			23& 15070 &0 & 15070$\times$ 2 &随机混合 & & \\
-			24& 15070 &0 & 15070$\times$ 3 &随机混合 & & \\
-			%25& 15070 &0 & 15070$\times$ 4 &随机混合 & & \\
-			%26& 15070 &0 & 15070$\times$ 5 &随机混合 & & \\
+			37& 15070 &0 & 15070$\times$ 0.8   &随机混合 &0.026 &0.920 \\
+			22& 15070 &0 & 15070           &随机混合 &0.026 &0.915 \\
+			23& 15070 &0 & 15070$\times$ 2 &随机混合 &0.032 &0.898 \\
+			24& 15070 &0 & 15070$\times$ 3 &随机混合 &0.036 &0.885 \\
+			
+			16& 15070 & 15070 &0  &先真后假 &0.195 &0.795 \\
+			17& 15070 & 15070 &0  &先假后真 &0.021 &0.940 \\
 			\bottomrule
 		\end{tabular}
 	}
 	\label{use_test}
 \end{table}
-如表~\ref{use_test}所示，我们在不同的成分和数量的数据集上都经过训练后再在真实测试集上评估，得到了表中的结果。实验1在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.033的MSE和0.954的SSIM。从表中实验2-4单独使用合成数据训练的结果看，与真实数据的训练结果有一定差距，说明我们的合成数据尚不能完全替代真实数据充当训练集。实验7-9结果表明使用大量合成数据进行预训练，再在少量真实数据上微调能达到和实验1全使用真实数据训练十分接近的结果。实验12-14一定比例的真实数据与合成数据随机混合，能达到和真实数据训练差不多的效果，比例相近时效果与实验1相差不大，合成数据比例偏高时，结果比实验1略低，合成数据比例偏低时，能提供模型的泛化能力，取得高于实验1的结果。实验15-17等比例混合真实数据与合成数据，随机混合时合成数据用作数据增强，效果比真实数据训练效果好，说明合成数据起到数据增强的作用，能有效提升训练效果；先训练真实数据再用合成数据进行补充训练，结果较差，与完全使用合成数据训练效果差不多；先使用合成数据进行与训练，再使用真实数据进行训练，能取得非常好的结果。实验15，32-34，18-19按多种比例混合真实数据与合成数据，开始时(实验33-34，15)随着合成数据的增加能提升训练效果，但随着合成数据比例继续增大，训练效果会下降。最后实验35-37，22-24是使用传统数据增强方法进行数据增强，实验结果表明合成数据比传统数据增强的训练效果更好。
+如表~\ref{use_test}所示，我们在不同的成分和数量的数据集上都经过训练后再在真实测试集上评估，得到了表中的结果。
+实验1在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。
+从表中实验2-4单独使用合成数据训练的结果看，合成数据与真实数据的训练结果仍然有一定差距，这说明合成数据不能完全替代真实数据充当训练集。
+实验7-9结果表明使用大量合成数据进行预训练，再在少量真实数据上微调能达到和实验1全使用真实数据训练十分接近的结果。这说明合成数据作为预训练数据集非常合适。
+实验12-14中一定比例的真实数据与合成数据随机混合，比例不同取得的结果差异很大，当两者比例相近时分割结果与实验1相差不大，合成数据比例偏高时，结果比实验1低，合成数据比例偏低时，能提供模型的泛化能力，取得高于实验1的结果。
+实验32-34，15,18-19中进一步尝试在全量的真实数据中添加不同数据量的合成数据，我们发现较少的合成数据能提高模型的泛化能力，起到数据增强的作用，合成数据越多增强效果越好，但当合成数据到达一定比例后再继续增加将取得反效果，此时合成数据越多越使得真实数据的影响力下降。
+实验35-37和实验22-24中，我们使用通常的数据增强方法产生的增强数据来与前述合成数据的增强效果进行对比，我们发现在增强数据量与增强效果的变化趋势上，两者是一致的，但两者在具体的增强效果随着增强数据量变化的变化曲线上是有一些差异的。整体来说，在模型对增强数据量的敏感程度上，增强数据更加鲁棒，但合成数据能取得的增强效果的上限比曾强数据要高很多。
+在实验16-17中，我们对比实验15，发现与真实数据相同数量的合成数据，作为预训练数据先于真实数据训练时表现最好，作为增强数据与真实数据混合训练时效果居中，作为补充训练数据集在真实数据集之后训练则表现很差。
 
-但在真实数据充当训练集的基础上，可以使用合成数据集作为增强数据来提高模型泛化能力，数据最好的组合使用方式是随机混合使用。我们也注意到，合成数据也并不是越多越好的，当合成数据所占比重过大时，为降低真实数据的影响力。在我们的实验中，采用【】倍的合成数据与真实数据进行随机混合取得了最好的提升效果，相比完全的真实数据，分割测试结果提升了【\%】的MSE和【\%】的SSIM，远远大于通常的数据增强的提升幅度。与\cite{4shin2018medical}的结论一致，我们的合成数据也可用于预训练，然后再使用少量真实数据微调，最后能得到和完全真实数据训练相竞争的结果。
+总的来说，我们发现当真实数据量较多时，可以使用少量的合成数据作为增强数据混合使用，也可以使用大量的合成数据先进行预训练，再在真实数据集上训练；当真实数据较少时，可以使用大量的合成数据进行预训练，再在少量真实数据上微调，最后能得到和完全真实数据训练相竞争的结果，这点我们与\cite{4shin2018medical}的结论一致；我们不建议完全使用合成数据进行训练，与\cite{4shin2018medical}的结论不同的是我们也不建议使用合成数据进行补充训练。
 
 \subsection{合成数据可视化}
-
-上述各项实验的一些生成结果如图~\ref{generated_f}-~\ref{label_from_diff_train}所示，从图中我们能更直观的取得结论。
+上述各项实验的一些生成结果如图~\ref{generated_f}-~\ref{label_from_diff_test}所示，从图中我们能更直观的取得结论。
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{合成的结构特征图机器掩膜.}
+	\caption{合成的结构特征图、掩膜和多模态MRI.}
 	\label{generated_f}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{合成的多模态MRI.}
-	\label{generated_mri}
 \end{figure}
 
 \begin{figure}
@@ -580,16 +582,9 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 	\label{label_from_diff_test}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{使用不同训练数据的分割模型在真实测试集上的分割示例.}
-	\label{label_from_diff_train}
-\end{figure}
-
 \section{结论与未来工作}
 
-我们基于条件生成对抗网络，通过无监督的训练，实现了能在已有单模态数据时可扩展出多模态影像数据并保留原模态的病灶信息，同时可从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们通过病灶分割实验验证了合成的医学影像可以用于医学影像智能处理任务的预训练或者补充训练来提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
+我们基于条件生成对抗网络，通过无监督的训练，实现了能在已有单模态数据时可扩展出多模态影像数据并保留原模态的病灶信息，同时可从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们通过病灶分割实验验证了合成的医学影像可以作为医学影像智能处理任务的预训练数据或增强数据来提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
 \begin{itemize}
 	\item 结构特征图提取方法。我们从医学影像直接提取解剖结构信息，无须训练，无需额外数据；
 	\item 随机结构特征图生成方法。我们实现了从多维正态分布采样生成结构特征图，使结构特征图能便捷地大量生成并使最后合成的影像具有良好的多样性；
@@ -600,6 +595,7 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 \end{itemize}
 
 未来，我们将进一步在CT、PET等不同模态和其他部位中对我们的方法进行改进，并将进一步简化训练过程和提升合成质量。	
+	
 
 \section{ Acknowledgments}
 
