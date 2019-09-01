@@ -542,18 +542,25 @@ In training, we perform adversarial training through discriminator $D_f$ to make
 
 总的来说，我们发现当真实数据量较多时，可以使用少量的合成数据作为增强数据混合使用，也可以使用大量的合成数据先进行预训练，再在真实数据集上训练；当真实数据较少时，可以使用大量的合成数据进行预训练，再在少量真实数据上微调，最后能得到和完全真实数据训练相竞争的结果，这点我们与\cite{4shin2018medical}的结论一致；我们不建议完全使用合成数据进行训练，与\cite{4shin2018medical}的结论不同的是我们也不建议使用合成数据进行补充训练。
 
-\subsection{合成数据可视化}
+\subsection{结果展示}
 上述各项实验的一些生成结果如图~\ref{generated_f}-~\ref{label_from_diff_test}所示，从图中我们能更直观的取得结论。
 \begin{figure}
 	\centering
-	\includegraphics[width=0.98\linewidth]{figures/make_data}
-	\caption{合成的结构特征图、掩膜和多模态MRI.}
+	\includegraphics[width=0.98\linewidth]{figures/Fs}
+	\caption{合成的结构特征图.}
 	\label{generated_f}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.98\linewidth]{figures/make_data}
+	\includegraphics[width=0.98\linewidth]{figures/F_to_MRI}
+	\caption{从随机结构特征图和病灶标签生成多模态MRI.}
+	\label{generated_mri}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/placeholder}
 	\caption{使用真实训练数据的分割模型在不同测试集上的分割示例.}
 	\label{label_from_diff_test}
 \end{figure}
