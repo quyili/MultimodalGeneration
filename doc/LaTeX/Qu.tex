@@ -423,7 +423,7 @@ The loss item of the above three schemes is consistent with the loss item descri
 \subsection{构建合成数据集construction of synthetic datasets}
 \label{make dataset}
 如图所示，我们通过训练好的结构特征图解码器即可从随机生成的正太分布矩阵生成任意数量的结构特征图。然后，我们对原始的标签集进行了随机的缩放、旋转、平移、翻转等改变得到随机病灶标签集。我们再将随机生成的结构特征图和从随机病灶标签集中随机选择的病灶标签融合，同样地，我们通过掩膜生成器$MASK$生成结构特征图的掩膜，可以筛选得到合适的随机病灶标签。最后，我们通过多模态MRI生成组件即可从融合信息图中生成配准的多模态MRI，选取的病灶标签就是生成的多模态MRI的病灶标签。由此，我们可以从随机正态分布矩阵构建带有病灶标签的多模态配准MRI数据集。
-As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly zoomed, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the randomly generated structural feature map with the randomly selected lesion label from the random lesion label set. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Finally, we synthesize registered multimodal MRI from the fusion map by multimodal MRI generation components. And the selected lesion label is the lesion label of the synthetic multimodal MRI. Thus, we can construct a multimodal registration MRI dataset with lesion labels from a random normal distribution matrix.
+As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the randomly generated structural feature map with the randomly selected lesion label from the random lesion label set. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Finally, we synthesize registered multimodal MRI from the fusion map by multimodal MRI generation components. And the selected lesion label is the lesion label of the synthetic multimodal MRI. Thus, we can construct a multimodal registration MRI dataset with lesion labels from a random normal distribution matrix.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/make_data}
@@ -483,27 +483,32 @@ We use the open dataset BRATS2015 for experiments, which has four registered mod
 
 \subsection{BRATS合成数据集BRATS synthetic dataset}
 我们采用~\ref{make dataset}中的方法构建了一个配准的包含T1、T2、T1c、Flair四个模态的具有肿瘤标签的合成数据集。合成数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的合成。
-We constructed a registered synthetic dataset with tumor labels containing four modalities of T1, T2, T1c, and Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number as needed for the experiment.
+We constructed a registered synthetic dataset with tumor labels containing four modalities of T1, T2, T1c, and Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{BRATS增强数据集BRATS Enhanced dataset}
 我们对原始的BRATS2015数据集进行了随机的缩放、旋转、平移、翻转等改变，得到增强数据。增强数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的生产。
+We performed random scaling, rotation, translation, flipping, etc. on the original BRATS2015 dataset to obtain enhanced data. The size of the enhanced dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{训练设置Training settings}
-每项实验的迭代次数与BRATS2015训练数据集的100个epoch相等；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们采用random normal initializer设定该层卷积核的$k\times k\times f$个参数均设置为$1/(k\times k\times f)$, 偏置量为 0；在鉴别器中我们使用0均值和标准差为0.2的random normal initializer，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
+每项实验的迭代次数与BRATS2015训练数据集的100个epoch相等；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们初始化该层的$k\times k\times f$个卷积核参数均为$1/(k\times k\times f)$, ，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
+The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. In generator components, the mean kernel filter parameter is used to initialize the convolution kernel parameter. Specifically, for a convolutional layer with a convolution kernel size of $[k,k,f]$, we initialize the $k\times k\times f$ convolution kernel parameters of this layer to $1/(k \times k\times f)$, and the bias is 0. In discriminator, we use a random normal initializer with mean of 0 and standard deviation of 0.2, and the bias is 0. We used Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the evaluation results of the 2D images, and each experiment is trained four times to retain the best results.
 
-\subsection{病灶生成组件各方案对比实验Contrast experiment of each method of lesion generating component}
+\subsection{病灶生成组件各方案对比实验Contrast experiment of each method of lesion generation component}
 \label{label gen methods tests}
-我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了相同迭代步数的充分训练，然后我们在BRATS2015数据集的测试集和采用不同病灶生成组件方案的未经分割器筛选的的BRATS合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。其中，我们在真实数据上采用的分割方案为章节~\ref{label gen methods}中的多分割器方案，即每个模态各训练一个独立的分割器。
+我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了相同迭代步数的充分训练，然后我们在BRATS2015测试数据集和通过不同病灶生成指导方案得到的未经分割器筛选的的合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。其中，我们在真实数据上采用的分割方案为章节~\ref{label gen methods}中的多分割器方案，即每个模态各训练一个独立的分割器。
+We used the training set of the processed BRATS2015 dataset to fully train the lesion segmentor for the same iteration step, and then we selected the test set of the BRATS2015 dataset and  the unfiltered synthetic dataset by segmentor from different lesion generation component methods. Except for the difference in the source of the test data, other conditions such as the sample size of the test data are identical. Among them, the segmentation method we adopt on the real data is the multiple segmentors method in the section~\ref{label gen methods}, that is, each modality trains a separate segmentor.
 
 \subsection{合成数据可用性验证实验 verification experiment of Synthetic data availability}
-如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行训练相同迭代步数的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。我们选用实验~\ref{label gen methods tests}中，在合成数据集上表现最好的分割方案来作为验证实验的分割方案。
+如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行相同迭代步数的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。我们选用实验~\ref{label gen methods tests}中，在合成数据集上表现最好的分割方案来作为验证实验的分割方案。
+As shown in the table, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then used the mixed data set for segmentation training, and finally evaluated the segmentation ability of the model on real BRATS2015 test data. All experiments were fully trained with the same number of iterations. Except for the difference in the source of the training data, other conditions such as the sample size of the test data are identical. At the same time, as a comparison, we also conduct a separate training of synthetic data, mixed training of real data and normal enhancement data. We set up three data mixing modes: random mixing, real first, and synthetic
+first.
 
-\section{结果}
-\subsection{实验量化结果}
+\section{结果Results}
+\subsection{实验量化结果Quantitative result}
 
-\subsubsection{病灶检测实验结果}
+\subsubsection{病灶检测实验结果Lesion segmentation result}
 \begin{table}[t]
-	\caption{病灶检测实验结果.}\smallskip
+	\caption{病灶检测实验结果.Lesion segmentation result}\smallskip
 	\centering
 	\resizebox{.95\columnwidth}{!}{		
 		\smallskip\begin{tabular}{llll}		
@@ -521,47 +526,52 @@ We constructed a registered synthetic dataset with tumor labels containing four 
 \end{table}
 
 如表~\ref{label_test}所示，我们在BRATS2015训练数据经过相同的迭代步数的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中每个模态训练一个独立的分割器的方案取得了最好的结果，Dice Score也达到了0.838。
+As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fully trained by the same iteration step, the segmentation test results reach the MSE of 0.026 and the Dice Score of 0.915 on the real test data set. Then we use this excellent segmentor to segment our unfiltered synthetic data. On the synthetic dataset with the same amount of data as the real test dataset, three different lesion label generation component methods have achieved good segmentation results. As a result, the method in which each modality trains a separate segmentor achieves the best results, and the Dice Score also reaches 0.838.
 
-\subsubsection{合成数据可用性验证实验结果}
+\subsubsection{合成数据可用性验证实验结果Verification experiment results for synthetic data availability}
 \begin{table}[t]
-	\caption{合成数据可用性验证实验结果.}\smallskip
+	\caption{合成数据可用性验证实验结果.Verification experiment results for synthetic data availability}\smallskip
 	\centering
 	\resizebox{.95\columnwidth}{!}{
 		\smallskip\begin{tabular}{lllllll}
 			\toprule
-			序号 & 真实量 & 合成量 & 增强量  & 混合方式  & MSE &Dice Score\\
+			Num &real data &synthetic data & Enhanced data  & mixing modes  & MSE &Dice Score\\
 			\midrule
-			1& 15070 & 0  &0 &无混合 &0.026 &0.915 \\
-			31& 15070$\times$ 0.5 & 0  &0 &无混合 &0.032 &0.902 \\
+			1& 15070 & 0  &0 &- &0.026 &0.915 \\
+			31& 15070$\times$ 0.5 & 0  &0 &- &0.032 &0.902 \\
 			
-			2& 0 & 15070  &0 &无混合 &0.205 &0.708 \\
-			3& 0 & 15070$\times$ 2  &0 &随机混合 &0.206 &0.736 \\
-			4& 0 & 15070$\times$ 3  &0 &随机混合 &0.205 &0.754 \\
+			2& 0 & 15070  &0 &- &0.205 &0.708 \\
+			3& 0 & 15070$\times$ 2  &0 &random mixing &0.206 &0.736 \\
+			4& 0 & 15070$\times$ 3  &0 &random mixing &0.205 &0.754 \\
 			
-			7& 15070$\times$ 0.1 & 15070  &0 &先假后真 &0.031 &0.908 \\
-			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &先假后真 &0.028 &0.907 \\
-			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &先假后真 &0.030 &0.907 \\	
+			7& 15070$\times$ 0.1 & 15070  &0 &synthetic
+			first &0.031 &0.908 \\
+			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &synthetic
+			first &0.028 &0.907 \\
+			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &synthetic
+			first &0.030 &0.907 \\	
 			
-			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &随机混合 &0.041 &0.850 \\
-			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &随机混合 &0.031 &0.904 \\
-			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &随机混合 &0.024 &0.935 \\
+			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &random mixing &0.041 &0.850 \\
+			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &random mixing &0.031 &0.904 \\
+			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &random mixing &0.024 &0.935 \\
 			
-			32& 15070 & 15070$\times$ 0.2 &0  &随机混合 &0.025 &0.921 \\
-			33& 15070 & 15070$\times$ 0.5 &0  &随机混合 &0.023 &0.939 \\
-			34& 15070 & 15070$\times$ 0.8 &0  &随机混合 &0.026 &0.916 \\
-			15& 15070 & 15070 &0            &随机混合 &0.027 &0.913 \\
-			18& 15070 & 15070$\times$ 2  &0 &随机混合 &0.033 &0.901 \\
-			19& 15070 & 15070$\times$ 3  &0 &随机混合 &0.034 &0.897 \\
+			32& 15070 & 15070$\times$ 0.2 &0  &random mixing &0.025 &0.921 \\
+			33& 15070 & 15070$\times$ 0.5 &0  &random mixing &0.023 &0.939 \\
+			34& 15070 & 15070$\times$ 0.8 &0  &random mixing &0.026 &0.916 \\
+			15& 15070 & 15070 &0            &random mixing &0.027 &0.913 \\
+			18& 15070 & 15070$\times$ 2  &0 &random mixing &0.033 &0.901 \\
+			19& 15070 & 15070$\times$ 3  &0 &random mixing &0.034 &0.897 \\
 			
-			35& 15070 &0 & 15070$\times$ 0.2   &随机混合 &0.027 &0.911 \\
-			36& 15070 &0 & 15070$\times$ 0.5   &随机混合 &0.025 &0.927 \\
-			37& 15070 &0 & 15070$\times$ 0.8   &随机混合 &0.026 &0.920 \\
-			22& 15070 &0 & 15070           &随机混合 &0.026 &0.915 \\
-			23& 15070 &0 & 15070$\times$ 2 &随机混合 &0.032 &0.898 \\
-			24& 15070 &0 & 15070$\times$ 3 &随机混合 &0.036 &0.885 \\
+			35& 15070 &0 & 15070$\times$ 0.2   &random mixing &0.027 &0.911 \\
+			36& 15070 &0 & 15070$\times$ 0.5   &random mixing &0.025 &0.927 \\
+			37& 15070 &0 & 15070$\times$ 0.8   &random mixing &0.026 &0.920 \\
+			22& 15070 &0 & 15070           &random mixing &0.026 &0.915 \\
+			23& 15070 &0 & 15070$\times$ 2 &random mixing &0.032 &0.898 \\
+			24& 15070 &0 & 15070$\times$ 3 &random mixing &0.036 &0.885 \\
 			
-			16& 15070 & 15070 &0  &先真后假 &0.195 &0.795 \\
-			17& 15070 & 15070 &0  &先假后真 &0.021 &0.940 \\
+			16& 15070 & 15070 &0  &real first &0.195 &0.795 \\
+			17& 15070 & 15070 &0  &synthetic
+			first &0.021 &0.940 \\
 			\bottomrule
 		\end{tabular}
 	}
