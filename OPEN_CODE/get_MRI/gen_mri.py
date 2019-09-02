@@ -14,19 +14,19 @@ tf.flags.DEFINE_string('load_model', "20190822-2137", "default: None")
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_string('F_test',
                        '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M_1650/F',
-                       'X files for training')
+                       'files path')
 tf.flags.DEFINE_string('L_test',
                        '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/trainLabelE',
-                       'Y files for training')
+                       'files path')
 tf.flags.DEFINE_string('M_test',
                        '/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M_1650/M',
-                       'Y files for training')
-tf.flags.DEFINE_string('x_g', "GPU_0/DC_M/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('y_g', "GPU_0/DC_M_1/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('z_g', "GPU_0/DC_M_2/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('w_g', "GPU_0/DC_M_3/lastconv/Sigmoid:0", "default: None")
-tf.flags.DEFINE_string('f_input', "GPU_0/mul_9:0", "default: None")
-tf.flags.DEFINE_string('l_input', "GPU_0/Placeholder:0", "default: None")
+                       'files path')
+tf.flags.DEFINE_string('x_g', "GPU_0/DC_M/lastconv/Sigmoid:0", "tensor name")
+tf.flags.DEFINE_string('y_g', "GPU_0/DC_M_1/lastconv/Sigmoid:0", "tensor name")
+tf.flags.DEFINE_string('z_g', "GPU_0/DC_M_2/lastconv/Sigmoid:0", "tensor name")
+tf.flags.DEFINE_string('w_g', "GPU_0/DC_M_3/lastconv/Sigmoid:0", "tensor name")
+tf.flags.DEFINE_string('f_input', "GPU_0/mul_9:0", "tensor name")
+tf.flags.DEFINE_string('l_input', "GPU_0/Placeholder:0", "tensor name")
 tf.flags.DEFINE_string('save_path', "./test_images_show/", "default: ./test_images/")
 
 

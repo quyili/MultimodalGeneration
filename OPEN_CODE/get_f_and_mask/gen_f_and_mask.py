@@ -13,15 +13,15 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_string('load_model', "20190715-1643",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: None")
-tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
-tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
-tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 160000, ' default: 15070')
-tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
-tf.flags.DEFINE_float('min_j_f', 0.85, 'default: 0.6')
-tf.flags.DEFINE_float('max_count', 50, 'default: 50')
-tf.flags.DEFINE_float('mae', 0.048, 'default: 0.05')
+tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "code tensor name")
+tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "f tensor name")
+tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "m tensor name")
+tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "j_f tensor name")
+tf.flags.DEFINE_integer('epoch_steps', 160000, '')
+tf.flags.DEFINE_integer('epochs', 1, '')
+tf.flags.DEFINE_float('min_j_f', 0.85, '')
+tf.flags.DEFINE_float('max_count', 50, '')
+tf.flags.DEFINE_float('mae', 0.048, '')
 
 
 def get_mask_from_f(imgfile):
