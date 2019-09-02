@@ -1,6 +1,6 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from GAN_test_model_mask_v3 import GAN
+from VAE_model import VAE
 from datetime import datetime
 import os
 import logging
@@ -152,9 +152,9 @@ def train():
 
         graph = tf.Graph()
         with graph.as_default():
-            gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
+            vae = VAE(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
             input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-            FG_optimizer, MG_optimizer, D_optimizer = gan.optimize()
+            FG_optimizer, MG_optimizer, D_optimizer = vae.optimize()
 
             FG_grad_list = []
             MG_grad_list = []
@@ -164,11 +164,11 @@ def train():
                     with tf.name_scope("GPU_0"):
                         m_0 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(l_m_0, m_0)
-                        tensor_name_dirct_0 = gan.tenaor_name
-                        evaluation_list_0 = gan.evaluation(image_list_0)
-                        evaluation_code_list_0 = gan.evaluation_code(code_list_0)
-                        variables_list_0 = gan.get_variables()
+                        image_list_0, code_list_0, j_list_0, loss_list_0 = vae.model(l_m_0, m_0)
+                        tensor_name_dirct_0 = vae.tenaor_name
+                        evaluation_list_0 = vae.evaluation(image_list_0)
+                        evaluation_code_list_0 = vae.evaluation_code(code_list_0)
+                        variables_list_0 = vae.get_variables()
                         FG_grad_0 = FG_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         MG_grad_0 = MG_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[2], var_list=variables_list_0[2])
@@ -179,11 +179,11 @@ def train():
                     with tf.name_scope("GPU_1"):
                         m_1 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(l_m_1, m_1)
-                        tensor_name_dirct_1 = gan.tenaor_name
-                        evaluation_list_1 = gan.evaluation(image_list_1)
-                        evaluation_code_list_1 = gan.evaluation_code(code_list_1)
-                        variables_list_1 = gan.get_variables()
+                        image_list_1, code_list_1, j_list_1, loss_list_1 = vae.model(l_m_1, m_1)
+                        tensor_name_dirct_1 = vae.tenaor_name
+                        evaluation_list_1 = vae.evaluation(image_list_1)
+                        evaluation_code_list_1 = vae.evaluation_code(code_list_1)
+                        variables_list_1 = vae.get_variables()
                         FG_grad_1 = FG_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         MG_grad_1 = MG_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
                         D_grad_1 = D_optimizer.compute_gradients(loss_list_1[2], var_list=variables_list_1[2])
@@ -194,11 +194,11 @@ def train():
                     with tf.name_scope("GPU_2"):
                         m_2 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(l_m_2, m_2)
-                        tensor_name_dirct_2 = gan.tenaor_name
-                        evaluation_list_2 = gan.evaluation(image_list_2)
-                        evaluation_code_list_2 = gan.evaluation_code(code_list_2)
-                        variables_list_2 = gan.get_variables()
+                        image_list_2, code_list_2, j_list_2, loss_list_2 = vae.model(l_m_2, m_2)
+                        tensor_name_dirct_2 = vae.tenaor_name
+                        evaluation_list_2 = vae.evaluation(image_list_2)
+                        evaluation_code_list_2 = vae.evaluation_code(code_list_2)
+                        variables_list_2 = vae.get_variables()
                         FG_grad_2 = FG_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                         MG_grad_2 = MG_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
                         D_grad_2 = D_optimizer.compute_gradients(loss_list_2[2], var_list=variables_list_2[2])
@@ -209,11 +209,11 @@ def train():
                     with tf.name_scope("GPU_3"):
                         m_3 = tf.placeholder(tf.float32, shape=input_shape)
                         l_m_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(l_m_3, m_3)
-                        tensor_name_dirct_3 = gan.tenaor_name
-                        evaluation_list_3 = gan.evaluation(image_list_3)
-                        evaluation_code_list_3 = gan.evaluation_code(code_list_3)
-                        variables_list_3 = gan.get_variables()
+                        image_list_3, code_list_3, j_list_3, loss_list_3 = vae.model(l_m_3, m_3)
+                        tensor_name_dirct_3 = vae.tenaor_name
+                        evaluation_list_3 = vae.evaluation(image_list_3)
+                        evaluation_code_list_3 = vae.evaluation_code(code_list_3)
+                        variables_list_3 = vae.get_variables()
                         FG_grad_3 = FG_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         MG_grad_3 = MG_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
                         D_grad_3 = D_optimizer.compute_gradients(loss_list_3[2], var_list=variables_list_3[2])
@@ -229,8 +229,8 @@ def train():
             D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
             optimizers = [FG_optimizer_op, MG_optimizer_op, D_optimizer_op]
 
-            gan.image_summary(image_list_0)
-            gan.histogram_summary(j_list_0)
+            vae.image_summary(image_list_0)
+            vae.histogram_summary(j_list_0)
             image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image'),
                                                  tf.get_collection(tf.GraphKeys.SUMMARIES, 'discriminator')])
 
@@ -238,9 +238,9 @@ def train():
             evaluation_list_summary = tf.placeholder(tf.float32)
             evaluation_code_list_summary = tf.placeholder(tf.float32)
 
-            gan.loss_summary(loss_list_summary)
-            gan.evaluation_summary(evaluation_list_summary)
-            gan.evaluation_code_summary(evaluation_code_list_summary)
+            vae.loss_summary(loss_list_summary)
+            vae.evaluation_summary(evaluation_list_summary)
+            vae.evaluation_code_summary(evaluation_code_list_summary)
 
             summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
                                            tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])

@@ -1,6 +1,5 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-# from GAN_test_model import GAN
 import os
 import logging
 import numpy as np

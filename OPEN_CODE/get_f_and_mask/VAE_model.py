@@ -1,9 +1,9 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from GAN_test_discriminator import Discriminator
-from GAN_test_feature_discriminator import FeatureDiscriminator
-from GAN_test_encoder import GEncoder
-from GAN_test_decoder import GDecoder
+from VAE_discriminator import Discriminator
+from VAE_feature_discriminator import FeatureDiscriminator
+from VAE_encoder import VEncoder
+from VAE_decoder import VDecoder
 from encoder import Encoder
 from decoder import Decoder
 
@@ -30,8 +30,8 @@ class GAN:
         self.EC_MASK = Encoder('EC_MASK', ngf=ngf)
         self.DC_MASK = Decoder('DC_MASK', ngf=ngf, output_channl=2)
 
-        self.EC_F = GEncoder('EC_F', ngf=ngf)
-        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2)
+        self.EC_F = VEncoder('EC_F', ngf=ngf)
+        self.DC_F = VDecoder('DC_F', ngf=ngf, output_channl=2)
 
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
