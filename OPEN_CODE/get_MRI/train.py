@@ -176,8 +176,6 @@ def train():
                         loss_list_0 = gan.model(l_0, l_m_0, m_0, l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_0 = gan.tenaor_name
-                        evaluation_list_0 = gan.evaluation(image_list_0)
-                        evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
@@ -201,8 +199,6 @@ def train():
                         loss_list_1 = gan.model(l_1, l_m_1, m_1, l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
                         image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_1 = gan.tenaor_name
-                        evaluation_list_1 = gan.evaluation(image_list_1)
-                        evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -226,8 +222,6 @@ def train():
                         loss_list_2 = gan.model(l_2, l_m_2, m_2, l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
                         image_list_2, code_list_2, j_list_2 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_2 = gan.tenaor_name
-                        evaluation_list_2 = gan.evaluation(image_list_2)
-                        evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                         variables_list_2 = gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                         D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
@@ -251,8 +245,6 @@ def train():
                         loss_list_3 = gan.model(l_3, l_m_3, m_3, l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
                         image_list_3, code_list_3, j_list_3 = gan.image_list, gan.code_list, gan.judge_list
                         tensor_name_dirct_3 = gan.tenaor_name
-                        evaluation_list_3 = gan.evaluation(image_list_3)
-                        evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -269,22 +261,6 @@ def train():
             S_optimizer_op = S_optimizer.apply_gradients(S_ave_grad)
             optimizers = [G_optimizer_op, D_optimizer_op, S_optimizer_op]
 
-            gan.image_summary(image_list_0)
-            gan.histogram_summary(j_list_0)
-            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image')])
-
-            loss_list_summary = tf.placeholder(tf.float32)
-            evaluation_list_summary = tf.placeholder(tf.float32)
-            evaluation_code_list_summary = tf.placeholder(tf.float32)
-
-            gan.loss_summary(loss_list_summary)
-            gan.evaluation_summary(evaluation_list_summary)
-            gan.evaluation_code_summary(evaluation_code_list_summary)
-
-            summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
-                                           tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
-            train_writer = tf.summary.FileWriter(checkpoints_dir + "/train", graph)
-            val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
             saver = tf.train.Saver()
 
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -376,8 +352,8 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
-                        [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
+                    _, train_losses, train_evaluations, train_evaluation_codes = sess.run(
+                        [optimizers, loss_list_0, evaluation_list_0, evaluation_code_list_0],
                         feed_dict={
                             l_0: np.asarray(train_true_l)[0:1, :, :, :],
                             l_m_0: np.asarray(train_true_l_m)[0:1, :, :, :],
@@ -433,171 +409,6 @@ def train():
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
-                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
-                            FLAGS.epoch_steps * FLAGS.epoch / 4):
-                        logging.info('-----------Train summary start-------------')
-                        train_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(train_loss_list),
-                                       evaluation_list_summary: mean_list(train_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(train_evaluation_code_list)})
-                        train_writer.add_summary(train_image_summary_op, step)
-                        train_writer.add_summary(train_summary_op, step)
-                        train_writer.flush()
-                        logging.info('-----------Train summary end-------------')
-
-                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                        logging.info("Model saved in file: %s" % save_path)
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        val_loss_list = []
-                        val_evaluation_list = []
-                        val_evaluation_code_list = []
-                        val_index = 0
-
-                        l_val_files = read_filename(FLAGS.L_test)
-                        l_x_val_files = read_filename(FLAGS.L_test)
-                        l_y_val_files = read_filename(FLAGS.L_test)
-                        l_z_val_files = read_filename(FLAGS.L_test)
-                        l_w_val_files = read_filename(FLAGS.L_test)
-                        for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
-                            val_true_l = []
-                            val_true_l_m = []
-                            val_true_m = []
-                            val_true_l_x = []
-                            val_true_l_y = []
-                            val_true_l_z = []
-                            val_true_l_w = []
-                            val_true_x = []
-                            val_true_y = []
-                            val_true_z = []
-                            val_true_w = []
-                            for b in range(FLAGS.batch_size):
-                                val_m_arr = read_file(
-                                    np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
-                                    l_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_m_arr = read_file(FLAGS.L, l_val_files, val_index).reshape(FLAGS.image_size)
-                                mask = 1.0 - np.ones(val_m_arr.shape, dtype="float32") * (val_m_arr > 0.1)
-                                while True:
-                                    val_l_arr = read_file(FLAGS.L, l_val_files,
-                                                          np.random.randint(len(l_val_files))).reshape(
-                                        FLAGS.image_size)
-                                    if np.sum(mask * val_l_arr) == 0.0: break
-                                    logging.info("mask and label not match !")
-
-                                val_l_x_arr = read_file(FLAGS.L, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                val_x_arr = read_file(FLAGS.X, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_y_arr = read_file(FLAGS.L, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                val_y_arr = read_file(FLAGS.Y, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_z_arr = read_file(FLAGS.L, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                val_z_arr = read_file(FLAGS.Z, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_w_arr = read_file(FLAGS.L, l_w_val_files, val_index).reshape(FLAGS.image_size)
-                                val_w_arr = read_file(FLAGS.W, l_w_val_files, val_index).reshape(FLAGS.image_size)
-
-                                val_true_l.append(val_l_arr)
-                                val_true_l_m.append(val_l_m_arr)
-                                val_true_m.append(val_m_arr)
-                                val_true_l_x.append(val_l_x_arr)
-                                val_true_l_y.append(val_l_y_arr)
-                                val_true_l_z.append(val_l_z_arr)
-                                val_true_l_w.append(val_l_w_arr)
-                                val_true_x.append(val_x_arr)
-                                val_true_y.append(val_y_arr)
-                                val_true_z.append(val_z_arr)
-                                val_true_w.append(val_w_arr)
-
-                                val_index += 1
-
-                            val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
-                            val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
-                            val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
-                            val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
-                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
-                                [loss_list_0, evaluation_list_0, evaluation_code_list_0,
-                                 loss_list_1, evaluation_list_1, evaluation_code_list_1,
-                                 loss_list_2, evaluation_list_2, evaluation_code_list_2,
-                                 loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
-                                feed_dict={
-                                    l_0: np.asarray(val_true_l)[0:1, :, :, :],
-                                    l_m_0: np.asarray(val_true_l_m)[0:1, :, :, :],
-                                    m_0: np.asarray(val_true_m)[0:1, :, :, :],
-                                    l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
-                                    l_y_0: np.asarray(val_true_l_y)[0:1, :, :, :],
-                                    l_z_0: np.asarray(val_true_l_z)[0:1, :, :, :],
-                                    l_w_0: np.asarray(val_true_l_w)[0:1, :, :, :],
-                                    x_0: np.asarray(val_true_x)[0:1, :, :, :],
-                                    y_0: np.asarray(val_true_y)[0:1, :, :, :],
-                                    z_0: np.asarray(val_true_z)[0:1, :, :, :],
-                                    w_0: np.asarray(val_true_w)[0:1, :, :, :],
-
-                                    l_1: np.asarray(val_true_l)[1:2, :, :, :],
-                                    l_m_1: np.asarray(val_true_l_m)[1:2, :, :, :],
-                                    m_1: np.asarray(val_true_m)[1:2, :, :, :],
-                                    l_x_1: np.asarray(val_true_l_x)[1:2, :, :, :],
-                                    l_y_1: np.asarray(val_true_l_y)[1:2, :, :, :],
-                                    l_z_1: np.asarray(val_true_l_z)[1:2, :, :, :],
-                                    l_w_1: np.asarray(val_true_l_w)[1:2, :, :, :],
-                                    x_1: np.asarray(val_true_x)[1:2, :, :, :],
-                                    y_1: np.asarray(val_true_y)[1:2, :, :, :],
-                                    z_1: np.asarray(val_true_z)[1:2, :, :, :],
-                                    w_1: np.asarray(val_true_w)[1:2, :, :, :],
-
-                                    l_2: np.asarray(val_true_l)[2:3, :, :, :],
-                                    l_m_2: np.asarray(val_true_l_m)[2:3, :, :, :],
-                                    m_2: np.asarray(val_true_m)[2:3, :, :, :],
-                                    l_x_2: np.asarray(val_true_l_x)[2:3, :, :, :],
-                                    l_y_2: np.asarray(val_true_l_y)[2:3, :, :, :],
-                                    l_z_2: np.asarray(val_true_l_z)[2:3, :, :, :],
-                                    l_w_2: np.asarray(val_true_l_w)[2:3, :, :, :],
-                                    x_2: np.asarray(val_true_x)[2:3, :, :, :],
-                                    y_2: np.asarray(val_true_y)[2:3, :, :, :],
-                                    z_2: np.asarray(val_true_z)[2:3, :, :, :],
-                                    w_2: np.asarray(val_true_w)[2:3, :, :, :],
-
-                                    l_3: np.asarray(val_true_l)[3:4, :, :, :],
-                                    l_m_3: np.asarray(val_true_l_m)[3:4, :, :, :],
-                                    m_3: np.asarray(val_true_m)[3:4, :, :, :],
-                                    l_x_3: np.asarray(val_true_l_x)[3:4, :, :, :],
-                                    l_y_3: np.asarray(val_true_l_y)[3:4, :, :, :],
-                                    l_z_3: np.asarray(val_true_l_z)[3:4, :, :, :],
-                                    l_w_3: np.asarray(val_true_l_w)[3:4, :, :, :],
-                                    x_3: np.asarray(val_true_x)[3:4, :, :, :],
-                                    y_3: np.asarray(val_true_y)[3:4, :, :, :],
-                                    z_3: np.asarray(val_true_z)[3:4, :, :, :],
-                                    w_3: np.asarray(val_true_w)[3:4, :, :, :],
-                                })
-                            val_loss_list.append(val_losses_0)
-                            val_loss_list.append(val_losses_1)
-                            val_loss_list.append(val_losses_2)
-                            val_loss_list.append(val_losses_3)
-                            val_evaluation_list.append(val_evaluations_0)
-                            val_evaluation_list.append(val_evaluations_1)
-                            val_evaluation_list.append(val_evaluations_2)
-                            val_evaluation_list.append(val_evaluations_3)
-                            val_evaluation_code_list.append(val_evaluation_codes_0)
-                            val_evaluation_code_list.append(val_evaluation_codes_1)
-                            val_evaluation_code_list.append(val_evaluation_codes_2)
-                            val_evaluation_code_list.append(val_evaluation_codes_3)
-
-                            if j == 0:
-                                save_images(val_image_list_0, checkpoints_dir, str(0))
-                                # save_images(val_image_list_1, checkpoints_dir, str(1))
-                                # save_images(val_image_list_2, checkpoints_dir, str(2))
-                                # save_images(val_image_list_3, checkpoints_dir, str(3))
-
-                        val_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(val_loss_list),
-                                       evaluation_list_summary: mean_list(val_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
-                        val_writer.add_summary(val_image_summary_op, step)
-                        val_writer.add_summary(val_summary_op, step)
-                        val_writer.flush()
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                     step += 1
             except KeyboardInterrupt:
                 logging.info('Interrupted')

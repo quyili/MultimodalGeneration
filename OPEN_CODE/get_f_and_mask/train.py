@@ -166,8 +166,6 @@ def train():
                         l_m_0 = tf.placeholder(tf.float32, shape=input_shape)
                         image_list_0, code_list_0, j_list_0, loss_list_0 = vae.model(l_m_0, m_0)
                         tensor_name_dirct_0 = vae.tenaor_name
-                        evaluation_list_0 = vae.evaluation(image_list_0)
-                        evaluation_code_list_0 = vae.evaluation_code(code_list_0)
                         variables_list_0 = vae.get_variables()
                         FG_grad_0 = FG_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         MG_grad_0 = MG_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
@@ -181,8 +179,6 @@ def train():
                         l_m_1 = tf.placeholder(tf.float32, shape=input_shape)
                         image_list_1, code_list_1, j_list_1, loss_list_1 = vae.model(l_m_1, m_1)
                         tensor_name_dirct_1 = vae.tenaor_name
-                        evaluation_list_1 = vae.evaluation(image_list_1)
-                        evaluation_code_list_1 = vae.evaluation_code(code_list_1)
                         variables_list_1 = vae.get_variables()
                         FG_grad_1 = FG_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         MG_grad_1 = MG_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -196,8 +192,6 @@ def train():
                         l_m_2 = tf.placeholder(tf.float32, shape=input_shape)
                         image_list_2, code_list_2, j_list_2, loss_list_2 = vae.model(l_m_2, m_2)
                         tensor_name_dirct_2 = vae.tenaor_name
-                        evaluation_list_2 = vae.evaluation(image_list_2)
-                        evaluation_code_list_2 = vae.evaluation_code(code_list_2)
                         variables_list_2 = vae.get_variables()
                         FG_grad_2 = FG_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                         MG_grad_2 = MG_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
@@ -211,8 +205,6 @@ def train():
                         l_m_3 = tf.placeholder(tf.float32, shape=input_shape)
                         image_list_3, code_list_3, j_list_3, loss_list_3 = vae.model(l_m_3, m_3)
                         tensor_name_dirct_3 = vae.tenaor_name
-                        evaluation_list_3 = vae.evaluation(image_list_3)
-                        evaluation_code_list_3 = vae.evaluation_code(code_list_3)
                         variables_list_3 = vae.get_variables()
                         FG_grad_3 = FG_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         MG_grad_3 = MG_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -229,23 +221,6 @@ def train():
             D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
             optimizers = [FG_optimizer_op, MG_optimizer_op, D_optimizer_op]
 
-            vae.image_summary(image_list_0)
-            vae.histogram_summary(j_list_0)
-            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image'),
-                                                 tf.get_collection(tf.GraphKeys.SUMMARIES, 'discriminator')])
-
-            loss_list_summary = tf.placeholder(tf.float32)
-            evaluation_list_summary = tf.placeholder(tf.float32)
-            evaluation_code_list_summary = tf.placeholder(tf.float32)
-
-            vae.loss_summary(loss_list_summary)
-            vae.evaluation_summary(evaluation_list_summary)
-            vae.evaluation_code_summary(evaluation_code_list_summary)
-
-            summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
-                                           tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
-            train_writer = tf.summary.FileWriter(checkpoints_dir + "/train", graph)
-            val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
             saver = tf.train.Saver()
 
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -297,8 +272,8 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
-                        [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
+                    _, train_losses, train_evaluations, train_evaluation_codes = sess.run(
+                        [optimizers, loss_list_0, evaluation_list_0, evaluation_code_list_0],
                         feed_dict={
                             m_0: np.asarray(train_true_m)[0:1, :, :, :],
                             m_1: np.asarray(train_true_m)[1:2, :, :, :],
@@ -317,96 +292,6 @@ def train():
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
-                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
-                            FLAGS.epoch_steps * FLAGS.epoch / 4):
-                        logging.info('-----------Train summary start-------------')
-                        train_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(train_loss_list),
-                                       evaluation_list_summary: mean_list(train_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(train_evaluation_code_list)})
-                        train_writer.add_summary(train_image_summary_op, step)
-                        train_writer.add_summary(train_summary_op, step)
-                        train_writer.flush()
-                        logging.info('-----------Train summary end-------------')
-
-                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                        logging.info("Model saved in file: %s" % save_path)
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        val_loss_list = []
-                        val_evaluation_list = []
-                        val_evaluation_code_list = []
-                        val_index = 0
-                        m_val_files = read_filename(FLAGS.L_test)
-                        for j in range(int(math.ceil(len(m_val_files) / FLAGS.batch_size))):
-
-                            val_true_m = []
-                            val_true_l_m = []
-                            for b in range(FLAGS.batch_size):
-                                val_m_arr = read_file(
-                                    np.asarray([FLAGS.X, FLAGS.Y, FLAGS.Z, FLAGS.W])[np.random.randint(4)],
-                                    m_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_m_arr = read_file(FLAGS.L, m_val_files, val_index).reshape(FLAGS.image_size)
-                                val_true_m.append(val_m_arr)
-                                val_true_l_m.append(val_l_m_arr)
-                                val_index += 1
-
-                            val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
-                            val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
-                            val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
-                            val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
-                            val_image_summary_op, \
-                            val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3, \
-                            val_code_list_0, val_code_list_1, val_code_list_2, val_code_list_3 = sess.run(
-                                [loss_list_0, evaluation_list_0, evaluation_code_list_0,
-                                 loss_list_1, evaluation_list_1, evaluation_code_list_1,
-                                 loss_list_2, evaluation_list_2, evaluation_code_list_2,
-                                 loss_list_3, evaluation_list_3, evaluation_code_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3,
-                                 code_list_0, code_list_1, code_list_2, code_list_3],
-                                feed_dict={
-                                    m_0: np.asarray(val_true_m)[0:1, :, :, :],
-                                    m_1: np.asarray(val_true_m)[1:2, :, :, :],
-                                    m_2: np.asarray(val_true_m)[2:3, :, :, :],
-                                    m_3: np.asarray(val_true_m)[3:4, :, :, :],
-
-                                    l_m_0: np.asarray(val_true_l_m)[0:1, :, :, :],
-                                    l_m_1: np.asarray(val_true_l_m)[1:2, :, :, :],
-                                    l_m_2: np.asarray(val_true_l_m)[2:3, :, :, :],
-                                    l_m_3: np.asarray(val_true_l_m)[3:4, :, :, :],
-                                })
-                            val_loss_list.append(val_losses_0)
-                            val_loss_list.append(val_losses_1)
-                            val_loss_list.append(val_losses_2)
-                            val_loss_list.append(val_losses_3)
-                            val_evaluation_list.append(val_evaluations_0)
-                            val_evaluation_list.append(val_evaluations_1)
-                            val_evaluation_list.append(val_evaluations_2)
-                            val_evaluation_list.append(val_evaluations_3)
-                            val_evaluation_code_list.append(val_evaluation_codes_0)
-                            val_evaluation_code_list.append(val_evaluation_codes_1)
-                            val_evaluation_code_list.append(val_evaluation_codes_2)
-                            val_evaluation_code_list.append(val_evaluation_codes_3)
-
-                            # if j == 0:
-                            # save_images(val_image_list_0, checkpoints_dir, str(0))
-                            # save_images(val_image_list_1, checkpoints_dir, str(1))
-                            # save_images(val_image_list_2, checkpoints_dir, str(2))
-                            # save_images(val_image_list_3, checkpoints_dir, str(3))
-
-                        val_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(val_loss_list),
-                                       evaluation_list_summary: mean_list(val_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
-                        val_writer.add_summary(val_image_summary_op, step)
-                        val_writer.add_summary(val_summary_op, step)
-                        val_writer.flush()
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                     step += 1
             except KeyboardInterrupt:
                 logging.info('Interrupted')

@@ -92,11 +92,6 @@ def train():
                                           "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
 
-                # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(m_arr_1),
-                #                      "./test_images/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
-                # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(m_arr_2),
-                #                      "./test_images/Temp/M2/m_2_" + str(index) + "_" + str(count) + ".tiff")
-
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
                 print(count, "mae: ", mae)
 
@@ -130,9 +125,6 @@ def train():
 
 def main(unused_argv):
     train()
-    os.system("rm -r " + "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp")
-    os.system("rm -r " + "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F_jpg")
-
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3"

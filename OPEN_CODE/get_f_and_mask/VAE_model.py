@@ -170,49 +170,6 @@ class GAN:
 
         return FG_optimizer, MG_optimizer, D_optimizer
 
-    def evaluation_code(self, code_list):
-        code_f, code_f_rm = \
-            code_list[0], code_list[1]
-        list = [self.PSNR(code_f, code_f_rm)]
-        return list
-
-    def evaluation_code_summary(self, evluation_list):
-        tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_rm', evluation_list[0])
-
-    def evaluation(self, image_list):
-        m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]
-        list = [self.PSNR(f, f_r),
-                self.SSIM(f, f_r)]
-        return list
-
-    def evaluation_summary(self, evluation_list):
-        tf.summary.scalar('evaluation/PSNR/f__VS__f_r', evluation_list[0])
-        tf.summary.scalar('evaluation/SSIM/f__VS__f_r', evluation_list[1])
-
-    def histogram_summary(self, j_list):
-        j_code_f, j_code_f_rm, j_f, j_f_rm = j_list[0], j_list[1], j_list[2], j_list[3]
-        tf.summary.histogram('discriminator/TRUE/j_code_f_rm', j_code_f_rm)
-        tf.summary.histogram('discriminator/FALSE/j_code_f', j_code_f)
-        tf.summary.histogram('discriminator/TRUE/j_f', j_f)
-        tf.summary.histogram('discriminator/FALSE/j_f_rm', j_f_rm)
-
-    def loss_summary(self, loss_list):
-        FG_loss, MG_loss, D_loss = loss_list[0], loss_list[1], loss_list[2]
-        tf.summary.scalar('loss/FG_loss', FG_loss)
-        tf.summary.scalar('loss/MG_loss', MG_loss)
-        tf.summary.scalar('loss/D_loss', D_loss)
-
-    def image_summary(self, image_list):
-        m, f, f_r, f_rm, mask, mask_r, mask_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[
-            4], image_list[5], image_list[6]
-        tf.summary.image('image/m', m)
-        tf.summary.image('image/f', f)
-        tf.summary.image('image/f_rm', f_rm)
-        tf.summary.image('image/f_r', f_r)
-        tf.summary.image('image/mask', mask)
-        tf.summary.image('image/mask_rm', mask_rm)
-        tf.summary.image('image/mask_r', mask_r)
-
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
         """
