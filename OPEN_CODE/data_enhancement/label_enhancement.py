@@ -12,7 +12,6 @@ change_times = 2
 epoch = 5
 
 
-# 旋转
 def rand_rotate(img_arr):
     expand = np.random.randint(0, 2)
     angle = np.random.randint(0, 360)
@@ -23,7 +22,6 @@ def rand_rotate(img_arr):
     return img_arr
 
 
-# 翻转
 def transpose(img_arr):
     img = Image.fromarray(img_arr)
     if np.random.randint(0, 2) == 0:
@@ -34,24 +32,22 @@ def transpose(img_arr):
     return img_arr
 
 
-# 平移
 def rand_translation(img_arr):
     pixl_len = np.random.randint(2, 6)
     direction = np.random.randint(0, 4)
     zeros_arr = np.zeros((img_arr.shape), dtype="int32")
-    if direction == 0:  # 向上
+    if direction == 0:
         zeros_arr[:-pixl_len, :] = img_arr[pixl_len:, :]
-    elif direction == 1:  # 向下
+    elif direction == 1:
         zeros_arr[pixl_len:, :] = img_arr[:-pixl_len, :]
-    elif direction == 2:  # 向左
+    elif direction == 2:
         zeros_arr[:, :-pixl_len] = img_arr[:, pixl_len:]
-    elif direction == 3:  # 向右
+    elif direction == 3:
         zeros_arr[:, pixl_len:] = img_arr[:, :-pixl_len]
     img_arr = zeros_arr
     return img_arr
 
 
-# 缩放
 def rand_resize(img_arr):
     x_pixl_len = np.random.randint(2, 8)
     y_pixl_len = np.random.randint(2, 8)

@@ -48,29 +48,6 @@ def read_file(l_path, Label_train_files, index):
     return L_arr_
 
 
-def expand(train_M_arr_, train_L_arr_):
-    L0 = np.asarray(train_M_arr_ == 0., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L1 = (np.asarray(train_L_arr_ == 0., "float32") * np.asarray(train_M_arr_).astype('float32')).reshape(
-        [train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L2 = np.asarray(train_L_arr_ == 1., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L3 = np.asarray(train_L_arr_ == 2., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L4 = np.asarray(train_L_arr_ == 3., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L5 = np.asarray(train_L_arr_ == 4., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L_arr = np.concatenate([L0, L1, L2, L3, L4, L5], axis=-1)
-    return L_arr
-
-
-def read_files(x_path, l_path, Label_train_files, index):
-    train_range = len(Label_train_files)
-    T1_img = SimpleITK.ReadImage(x_path + "/" + Label_train_files[index % train_range])
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    T1_arr_ = SimpleITK.GetArrayFromImage(T1_img)
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    T1_arr_ = T1_arr_.astype('float32')
-    L_arr_ = L_arr_.astype('float32')
-    return T1_arr_, L_arr_
-
-
 def train():
     if FLAGS.load_model is not None:
         if FLAGS.savefile is not None:
@@ -119,7 +96,7 @@ def train():
             for b in range(FLAGS.batch_size):
                 train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
                 train_Mask_arr_ = read_file(FLAGS.M_test, F_train_files, index).reshape(FLAGS.image_size)
-                while True:  # TODO 解决mask问题
+                while True:
                     count = 0
                     train_L_arr_ = read_file(FLAGS.L_test, L_train_files,
                                              np.random.randint(len(L_train_files))).reshape(FLAGS.image_size)

@@ -10,7 +10,6 @@ def norm(input):
     return output
 
 
-# 旋转
 def rand_rotate(arr_list):
     new_list = []
     expand = np.random.randint(0, 2)
@@ -25,7 +24,6 @@ def rand_rotate(arr_list):
     return new_list
 
 
-# 翻转
 def transpose(arr_list):
     new_list = []
     for j in range(len(arr_list)):
@@ -37,7 +35,6 @@ def transpose(arr_list):
     return new_list
 
 
-# 放大裁剪
 def rand_crop(arr_list):
     new_list = []
     x_pixl_len = np.random.randint(2, 8)
@@ -55,7 +52,6 @@ def rand_crop(arr_list):
     return new_list
 
 
-# 平移裁剪
 def rand_translation(arr_list):
     new_list = []
     pixl_len = np.random.randint(2, 8)
@@ -63,20 +59,19 @@ def rand_translation(arr_list):
     for j in range(len(arr_list)):
         img_arr = arr_list[j]
         zeros_arr = np.zeros((img_arr.shape))
-        if direction == 0:  # 向上
+        if direction == 0:
             zeros_arr[:-pixl_len, :] = img_arr[pixl_len:, :]
-        elif direction == 1:  # 向下
+        elif direction == 1:
             zeros_arr[pixl_len:, :] = img_arr[:-pixl_len, :]
-        elif direction == 2:  # 向左
+        elif direction == 2:
             zeros_arr[:, :-pixl_len] = img_arr[:, pixl_len:]
-        elif direction == 3:  # 向右
+        elif direction == 3:
             zeros_arr[:, pixl_len:] = img_arr[:, :-pixl_len]
         img_arr = zeros_arr
         new_list.append(img_arr)
     return new_list
 
 
-# 噪声
 def rand_add_noise(arr_list):
     new_list = []
     l = arr_list[-1]
@@ -87,7 +82,6 @@ def rand_add_noise(arr_list):
     return new_list
 
 
-# 缩放
 def rand_resize(arr_list):
     new_list = []
     x_pixl_len = np.random.randint(2, 8)

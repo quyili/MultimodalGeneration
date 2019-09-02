@@ -17,10 +17,10 @@ class GAN:
                  ):
         """
         Args:
-          input_size：list [H, W, C]
+          input_size：list [N, H, W, C]
           batch_size: integer, batch size
           learning_rate: float, initial learning rate for Adam
-          ngf: number of gen filters in first conv layer
+          ngf: number of base gen filters in conv layer
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
@@ -58,7 +58,7 @@ class GAN:
 
     def remove_l(self, l, f):
         l_mask = self.get_mask(l, p=0)
-        f = f * l_mask  # 去除肿瘤轮廓影响
+        f = f * l_mask
         return f
 
     def model(self, l_m, m):
@@ -107,7 +107,6 @@ class GAN:
         D_loss = 0.0
         FG_loss = 0.0
         MG_loss = 0.0
-        # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.1
         D_loss += self.mse_loss(j_code_f, 0.0) * 0.1
         FG_loss += self.mse_loss(j_code_f, 1.0) * 0.1
@@ -115,12 +114,10 @@ class GAN:
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
-        # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 0.001
         D_loss += self.mse_loss(j_f_rm, 0.0) * 0.001
         FG_loss += self.mse_loss(j_f_rm, 1.0) * 100
 
-        # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         FG_loss += self.mse_loss(f, f_r) * 50
         MG_loss += self.mse_loss(mask, mask_r) * 25
 
@@ -171,14 +168,10 @@ class GAN:
         return FG_optimizer, MG_optimizer, D_optimizer
 
     def mse_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
     def ssim_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = (1.0 - self.SSIM(x, y)) * 20
         return loss
 

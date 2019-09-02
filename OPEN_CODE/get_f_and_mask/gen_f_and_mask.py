@@ -24,15 +24,13 @@ tf.flags.DEFINE_float('max_count', 50, 'default: 50')
 tf.flags.DEFINE_float('mae', 0.048, 'default: 0.05')
 
 
-def get_mask_from_f(imgfile, savefile):
-    # imgfile = "full_x.jpg"
+def get_mask_from_f(imgfile):
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
     gray = cv2.GaussianBlur(img, (3, 3), 0)
     ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
     c_list = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours, hierarchy = c_list[-2], c_list[-1]
     cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
-    # savefile="mask.tiff"
     return np.asarray(1.0 - img / 255.0, dtype="float32")
 
 
@@ -47,12 +45,12 @@ def train():
         print("<load_model> is None.")
         return
     try:
-        os.makedirs("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F_jpg")
-        os.makedirs("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F")
-        os.makedirs("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/M1")
-        os.makedirs("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/M2")
-        os.makedirs("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F")
-        os.makedirs("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/M")
+        os.makedirs("./mydata/F_and_M/F_jpg")
+        os.makedirs("./mydata/F_and_M/Temp/F")
+        os.makedirs("./mydata/F_and_M/Temp/M1")
+        os.makedirs("./mydata/F_and_M/Temp/M2")
+        os.makedirs("./mydata/F_and_M/F")
+        os.makedirs("./mydata/F_and_M/M")
     except os.error:
         pass
     checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
@@ -81,25 +79,21 @@ def train():
                 j_f = np.mean(np.asarray(j_f))
                 print(count, "j_f: ", j_f)
 
-                # 根据置信度过滤
                 if j_f >= FLAGS.min_j_f: break
 
                 jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                         np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-                cv2.imwrite("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F/f_" + str(
+                cv2.imwrite("./mydata/F_and_M/Temp/F/f_" + str(
                     index) + "_" + str(count) + ".jpg", jpg_f)
 
                 m_arr_1 = get_mask_from_f(
-                    "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F/f_" + str(
-                        index) + "_" + str(count) + ".jpg",
-                    "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/M1/m_1_" + str(
-                        index) + "_" + str(count) + ".tiff")
+                    "./mydata/F_and_M/Temp/F/f_" + str(
+                        index) + "_" + str(count) + ".jpg")
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
 
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
                 print(count, "mae: ", mae)
 
-                # 根据结构完整度过滤
                 if mae <= FLAGS.mae: break
 
                 if j_f > best_j_f:
@@ -107,7 +101,6 @@ def train():
                     best_f = f
                     best_m = m
 
-                # 根据生成次数过滤
                 if count >= FLAGS.max_count:
                     f = best_f
                     m = best_m
@@ -117,13 +110,13 @@ def train():
 
             jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                     np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F_jpg/" + str(index) + ".jpg",
+            cv2.imwrite("./mydata/F_and_M/F_jpg/" + str(index) + ".jpg",
                         jpg_f)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
-                                 "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F/" + str(
+                                 "./mydata/F_and_M/F/" + str(
                                      index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
-                                 "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/M/" + str(
+                                 "./mydata/F_and_M/M/" + str(
                                      index) + ".tiff")
             print("image gen end:" + str(index))
 

@@ -14,11 +14,11 @@ class GAN:
                  ngf=64,
                  ):
         """
-        Args:
-          input_size：list [H, W, C]
-          batch_size: integer, batch size
-          learning_rate: float, initial learning rate for Adam
-          ngf: number of gen filters in first conv layer
+           Args:
+             input_size：list [N, H, W, C]
+             batch_size: integer, batch size
+             learning_rate: float, initial learning rate for Adam
+             ngf: number of base gen filters in conv layer
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
@@ -69,7 +69,7 @@ class GAN:
 
     def remove_l(self, l, f):
         l_mask = self.get_mask(l, p=0)
-        f = f * l_mask  # 去除肿瘤轮廓影响
+        f = f * l_mask
         return f
 
     def segmentation(self, x, EC_L, DC_L):
@@ -111,9 +111,6 @@ class GAN:
 
         code_rm = self.EC_R(f_rm_expand)
 
-        # l_g_prob = self.DC_L(code_rm)
-        # l_g = tf.reshape(
-        #     tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
         x_g = self.DC_M(tf.concat([code_rm, cx_code], axis=-1))
         y_g = self.DC_M(tf.concat([code_rm, cy_code], axis=-1))
         z_g = self.DC_M(tf.concat([code_rm, cz_code], axis=-1))
@@ -266,7 +263,6 @@ class GAN:
         D_loss = 0.0
         G_loss = 0.0
         S_loss = 0.0
-        # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_x, 1.0) * 50 * 2
         D_loss += self.mse_loss(j_x_g, 0.0) * 35 * 2
         G_loss += self.mse_loss(j_x_g, 1.0) * 35 * 2
@@ -333,8 +329,6 @@ class GAN:
         G_loss += self.mse_loss(j_w_t_c_by_y, cw) * 50 * 2
         G_loss += self.mse_loss(j_w_t_c_by_z, cw) * 50 * 2
 
-        # 使得对随机结构特征图编码结果更加趋近于真实模态图编码结果的【【双向对抗性损失】】，
-        # 以降低解码器解码难度，保证解码器能顺利解码出模态图
         D_loss += self.mse_loss(j_code_rm, 0.0) * 4
         D_loss += self.mse_loss(j_code_x, 1.0)
         D_loss += self.mse_loss(j_code_y, 1.0)
@@ -347,7 +341,6 @@ class GAN:
         G_loss += self.mse_loss(j_code_z, 0.0)
         G_loss += self.mse_loss(j_code_w, 0.0)
 
-        # 输入的结构特征图的重建自监督损失
         G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_x_g_r)) * 15
         G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_y_g_r)) * 15
         G_loss += self.mse_loss(self.remove_l(l, f), self.remove_l(l, f_z_g_r)) * 15
@@ -359,7 +352,6 @@ class GAN:
         G_loss += self.mse_loss(f_y_g_r, f_w_g_r) * 5
         G_loss += self.mse_loss(f_z_g_r, f_w_g_r) * 5
 
-        # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
                                 l_g_prob_by_x[:, :, :, 0]) * 0.5 * 5 \
                   + self.mse_loss(label_expand[:, :, :, 1],
@@ -408,7 +400,6 @@ class GAN:
                                   l_g_prob_by_w[:, :, :, 4]) * 25 * 5
         G_loss += self.mse_loss(l, l_g_by_w) * 25 * 5
 
-        # X模态图分割训练的有监督损失
         S_loss += self.mse_loss(label_expand_x[:, :, :, 0],
                                 l_f_prob_by_x[:, :, :, 0]) * 0.5 * 5 \
                   + self.mse_loss(label_expand_x[:, :, :, 1],
@@ -457,7 +448,6 @@ class GAN:
                                   l_f_prob_by_w[:, :, :, 4]) * 25 * 5
         S_loss += self.mse_loss(l_w, l_f_by_w) * 25 * 5
 
-        # 生成的X模态与Y模态图进行转换得到的转换图与生成图的自监督损失
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 20  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_z) * 20  # + self.ssim_loss(x_g, x_g_t_by_z) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_w) * 20  # + self.ssim_loss(x_g, x_g_t_by_w) * 2
@@ -486,7 +476,6 @@ class GAN:
         G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z) * 5  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
         G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z) * 5  # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
 
-        # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_g * mask) * 1.5
         G_loss += self.mse_loss(0.0, y_g * mask) * 1.5
         G_loss += self.mse_loss(0.0, z_g * mask) * 1.5
@@ -513,13 +502,11 @@ class GAN:
         G_loss += self.mse_loss(mask, self.get_mask(z_g)) * 5
         G_loss += self.mse_loss(mask, self.get_mask(w_g)) * 5
 
-        # X模态与Y模态图进行重建得到的重建图与原图的自监督损失
         G_loss += self.mse_loss(x, x_r) * 5
         G_loss += self.mse_loss(y, y_r) * 5
         G_loss += self.mse_loss(z, z_r) * 5
         G_loss += self.mse_loss(w, w_r) * 5
 
-        # X模态与Y模态图进行转换得到的转换图与原图的有监督损失
         G_loss += self.mse_loss(x, x_r_c_by_y) * 10
         G_loss += self.mse_loss(x, x_r_c_by_z) * 10
         G_loss += self.mse_loss(x, x_r_c_by_w) * 10
@@ -548,7 +535,6 @@ class GAN:
         G_loss += self.mse_loss(w_r_c_by_x, w_r_c_by_z) * 2
         G_loss += self.mse_loss(w_r_c_by_y, w_r_c_by_z) * 2
 
-        # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_t_by_y * mask_y)
         G_loss += self.mse_loss(0.0, x_t_by_z * mask_z)
         G_loss += self.mse_loss(0.0, x_t_by_w * mask_w)
@@ -570,7 +556,6 @@ class GAN:
         G_loss += self.mse_loss(0.0, z_r * mask_z) * 0.5
         G_loss += self.mse_loss(0.0, w_r * mask_w) * 0.5
 
-        # 通过解码器生成X模态与Y模态图的编码与X模态与Y模态图经过编码器得到的编码的自监督语义一致性损失
         G_loss += self.mse_loss(code_rm, code_x_g)
         G_loss += self.mse_loss(code_rm, code_y_g)
         G_loss += self.mse_loss(code_rm, code_z_g)
@@ -583,7 +568,6 @@ class GAN:
         G_loss += self.mse_loss(code_y_g, code_w_g) * 0.2
         G_loss += self.mse_loss(code_z_g, code_w_g) * 0.2
 
-        # X模态与Y模态图编码的有监督语义一致性损失
         G_loss += self.mse_loss(code_x, code_y_t_by_x) * 5
         G_loss += self.mse_loss(code_x, code_z_t_by_x) * 5
         G_loss += self.mse_loss(code_x, code_w_t_by_x) * 5
@@ -805,14 +789,10 @@ class GAN:
         return G_optimizer, D_optimizer, S_optimizer
 
     def mse_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
     def ssim_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = (1.0 - self.SSIM(x, y)) * 20
         return loss
 
