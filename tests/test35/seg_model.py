@@ -31,10 +31,10 @@ class GAN:
         self.EC_L = Encoder('EC_L', ngf=ngf)
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=5)
 
-    def segmentation(self,x, y, z, w):
-        l_prob=self.DC_L(self.EC_L(tf.concat([x, y, z, w], axis=-1)))
-        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25,shape=self.input_shape)
-        return l_prob,l_f
+    def segmentation(self, x, y, z, w):
+        l_prob = self.DC_L(self.EC_L(tf.concat([x, y, z, w], axis=-1)))
+        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
+        return l_prob, l_f
 
     def model(self, l, x, y, z, w):
         self.tensor_name["l"] = str(l)
@@ -43,8 +43,8 @@ class GAN:
         self.tensor_name["z"] = str(z)
         self.tensor_name["w"] = str(w)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=5),
-                                    shape=[self.input_shape[0], self.input_shape[1],
-                                           self.input_shape[2], 5])
+                                  shape=[self.input_shape[0], self.input_shape[1],
+                                         self.input_shape[2], 5])
         l = l * 0.25
         l_f_prob, l_f = self.segmentation(x, y, z, w)
         self.tensor_name["l_f"] = str(l_f)
@@ -93,7 +93,7 @@ class GAN:
         tf.summary.scalar('loss/G_loss', G_loss)
 
     def evaluation(self, image_dirct):
-        self.name_list_true = ["l",]
+        self.name_list_true = ["l", ]
         self.name_list_false = ["l_f"]
         dice_score_list = []
         mse_list = []

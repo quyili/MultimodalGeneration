@@ -95,7 +95,7 @@ def split_file(train_files, index, xp, yp, zp, wp, lp, lvp, mp):
 def read_filename(path, rate=0.0, shuffle=True):
     files = os.listdir(path)
     train_range = int(len(files) * rate)
-    files=np.asarray(files)
+    files = np.asarray(files)
     if shuffle == True:
         index_arr = np.arange(len(files))
         np.random.shuffle(index_arr)

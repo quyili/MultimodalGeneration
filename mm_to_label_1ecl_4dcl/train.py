@@ -170,7 +170,7 @@ def train():
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_0 = gan.model(l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0 = gan.image_list
-                        evaluation_list_0,mse_list_0 = gan.evaluation(image_list_0)
+                        evaluation_list_0, mse_list_0 = gan.evaluation(image_list_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(G_loss_0, var_list=variables_list_0[0])
                         G_grad_list.append(G_grad_0)
@@ -186,7 +186,7 @@ def train():
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_1 = gan.model(l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
                         image_list_1 = gan.image_list
-                        evaluation_list_1,mse_list_1 = gan.evaluation(image_list_1)
+                        evaluation_list_1, mse_list_1 = gan.evaluation(image_list_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(G_loss_1, var_list=variables_list_1[0])
                         G_grad_list.append(G_grad_1)
@@ -202,7 +202,7 @@ def train():
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_2 = gan.model(l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
                         image_list_2 = gan.image_list
-                        evaluation_list_2,mse_list_2 = gan.evaluation(image_list_2)
+                        evaluation_list_2, mse_list_2 = gan.evaluation(image_list_2)
                         variables_list_2 = gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(G_loss_2, var_list=variables_list_2[0])
                         G_grad_list.append(G_grad_2)
@@ -218,7 +218,7 @@ def train():
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_3 = gan.model(l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
                         image_list_3 = gan.image_list
-                        evaluation_list_3 ,mse_list_3= gan.evaluation(image_list_3)
+                        evaluation_list_3, mse_list_3 = gan.evaluation(image_list_3)
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(G_loss_3, var_list=variables_list_3[0])
                         G_grad_list.append(G_grad_3)
@@ -312,8 +312,8 @@ def train():
 
                         logging.info(
                             "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        _, train_image_summary_op, train_losses, train_evaluations,train_mses_0 = sess.run(
-                            [optimizers, image_summary_op, G_loss_0, evaluation_list_0,mse_list_0],
+                        _, train_image_summary_op, train_losses, train_evaluations, train_mses_0 = sess.run(
+                            [optimizers, image_summary_op, G_loss_0, evaluation_list_0, mse_list_0],
                             feed_dict={
                                 l_x_0: np.asarray(train_true_l_x)[0:1, :, :, :],
                                 l_y_0: np.asarray(train_true_l_y)[0:1, :, :, :],
@@ -393,14 +393,22 @@ def train():
                                 val_true_z = []
                                 val_true_w = []
                                 for b in range(FLAGS.batch_size):
-                                    val_l_x_arr = read_file(FLAGS.L_test, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_x_arr = read_file(FLAGS.X_test, l_x_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_l_y_arr = read_file(FLAGS.L_test, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_y_arr = read_file(FLAGS.Y_test, l_y_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_l_z_arr = read_file(FLAGS.L_test, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_z_arr = read_file(FLAGS.Z_test, l_z_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_l_w_arr = read_file(FLAGS.L_test, l_w_val_files, val_index).reshape(FLAGS.image_size)
-                                    val_w_arr = read_file(FLAGS.W_test, l_w_val_files, val_index).reshape(FLAGS.image_size)
+                                    val_l_x_arr = read_file(FLAGS.L_test, l_x_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_x_arr = read_file(FLAGS.X_test, l_x_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_l_y_arr = read_file(FLAGS.L_test, l_y_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_y_arr = read_file(FLAGS.Y_test, l_y_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_l_z_arr = read_file(FLAGS.L_test, l_z_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_z_arr = read_file(FLAGS.Z_test, l_z_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_l_w_arr = read_file(FLAGS.L_test, l_w_val_files, val_index).reshape(
+                                        FLAGS.image_size)
+                                    val_w_arr = read_file(FLAGS.W_test, l_w_val_files, val_index).reshape(
+                                        FLAGS.image_size)
 
                                     val_true_l_x.append(val_l_x_arr)
                                     val_true_l_y.append(val_l_y_arr)
@@ -413,15 +421,15 @@ def train():
 
                                     val_index += 1
 
-                                val_losses_0, val_evaluations_0,val_mses_0, \
-                                val_losses_1, val_evaluations_1,val_mses_1, \
-                                val_losses_2, val_evaluations_2,val_mses_2, \
-                                val_losses_3, val_evaluations_3,val_mses_3, \
+                                val_losses_0, val_evaluations_0, val_mses_0, \
+                                val_losses_1, val_evaluations_1, val_mses_1, \
+                                val_losses_2, val_evaluations_2, val_mses_2, \
+                                val_losses_3, val_evaluations_3, val_mses_3, \
                                 val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
-                                    [G_loss_0, evaluation_list_0,mse_list_0,
-                                     G_loss_1, evaluation_list_1,mse_list_1,
-                                     G_loss_2, evaluation_list_2,mse_list_2,
-                                     G_loss_3, evaluation_list_3,mse_list_3,
+                                    [G_loss_0, evaluation_list_0, mse_list_0,
+                                     G_loss_1, evaluation_list_1, mse_list_1,
+                                     G_loss_2, evaluation_list_2, mse_list_2,
+                                     G_loss_3, evaluation_list_3, mse_list_3,
                                      image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
                                     feed_dict={
                                         l_x_0: np.asarray(val_true_l_x)[0:1, :, :, :],
@@ -490,7 +498,7 @@ def train():
                             logging.info(
                                 "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                         step += 1
-                elif  FLAGS.stage == "test":
+                elif FLAGS.stage == "test":
                     try:
                         os.makedirs(checkpoints_dir + "/samples")
                         os.makedirs("./seg_res/Label_True")
@@ -506,7 +514,7 @@ def train():
                     val_mse_list = []
                     val_index = 0
 
-                    l_val_files = read_filename(FLAGS.L_test,shuffle=False)
+                    l_val_files = read_filename(FLAGS.L_test, shuffle=False)
                     for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
                         val_true_l = []
                         val_true_x = []
@@ -631,7 +639,7 @@ def train():
 
                     print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))
-                    print("MEAN Dice Score:",mean_list(val_evaluation_list),mean(mean_list(val_evaluation_list)))
+                    print("MEAN Dice Score:", mean_list(val_evaluation_list), mean(mean_list(val_evaluation_list)))
 
             except KeyboardInterrupt:
                 logging.info('Interrupted')

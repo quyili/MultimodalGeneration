@@ -31,10 +31,10 @@ class GAN:
         self.EC_L = Encoder('EC_L', ngf=ngf)
         self.DC_L = Decoder('DC_L', ngf=ngf, output_channl=5)
 
-    def segmentation(self,x):
-        l_prob=self.DC_L(self.EC_L(x))
-        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25,shape=self.input_shape)
-        return l_prob,l_f
+    def segmentation(self, x):
+        l_prob = self.DC_L(self.EC_L(x))
+        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
+        return l_prob, l_f
 
     def model(self, l_x, l_y, l_z, l_w, x, y, z, w):
         self.tensor_name["l_x"] = str(l_x)
