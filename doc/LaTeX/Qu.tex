@@ -606,22 +606,31 @@ As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fu
 
 \section{结论与未来工作}
 
-我们基于条件生成对抗网络，通过无监督的训练，实现了能在已有单模态数据时可扩展出多模态影像数据并保留原模态的病灶信息，同时可从随机噪声生成配准的多模态医学影像并可自由添加病灶信息。我们通过病灶分割实验验证了合成的医学影像可以作为医学影像智能处理任务的预训练数据或增强数据来提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
+我们基于条件生成对抗网络，通过无监督的训练，实现了从随机正态分布矩阵生成配准的多模态MRI并能自由添加病灶信息。我们通过病灶分割实验验证了合成的MRI可以作为智能医学影像处理任务的预训练数据或增强数据来使用并能显著提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
+
+Based on the conditional generation antagonism network, we realized the generation of registered multimodal MRI from the random normal distribution matrix through unsupervised training, and could add the lesion information freely. 
+We verified through lesion segmentation experiments that synthetic MRI can be used as pre-training data or enhanced data for intelligent medical image processing tasks and can significantly improve the generalization ability of the model.
+In this paper, our contributions include the following:
 \begin{itemize}
-	\item 结构特征图提取方法。我们从医学影像直接提取解剖结构信息，无须训练，无需额外数据；
-	\item 随机结构特征图生成方法。我们实现了从多维正态分布采样生成结构特征图，使结构特征图能便捷地大量生成并使最后合成的影像具有良好的多样性；
-	\item 模态转换方法。我们实现了多模态脑MRI之间的互转，使单模态数据可转换生成多模态影像数据并保留原模态的病灶信息；
-	\item 基于结构特征图生成多模态图方法。我们从真实影像提取的结构特征图及随机选择的标签生成带病灶标签的配准的多模态影像；
-	\item 构建带标签的多模态配准数据集方法。我们组合使用随机结构特征图生成方法和基于结构特征图生成多模态图方法，实现了从多维正态分布随机生成结构特征图，结合随机选择的标签生成带标签的配准的多模态MRI数据；
-	\item 合成数据可用性测试方法。我们将合成数据与真实数据数据集进行不同比重的混合，通过病灶分割网络验证了合成数据在分割训练中的提升效果。
+	\item 我们提出了一种从医学影像直接提取解剖结构信息的结构特征图提取方法，无须训练，无需额外数据；
+	We propose a structural feature map extraction method to extract anatomical structure information directly from medical images without training or additional label data;
+	\item 我们提出了一种从多维正态分布采样生成结构特征图的随机结构特征图生成方法，使结构特征图能便捷地大量生成并具有良好的多样性；
+	We propose a random structure feature map generation method to generate structural feature maps from multi-dimensional normal distribution sampling;
+	\item 我们实现了从结构特征图及随机选择的病灶标签生成具有对应病灶信息的配准的多模态MRI；
+	We realized the generation of registered multimodal MRI with corresponding lesion information from structural feature map and randomly selected lesion labels;
+	\item 我们通过多项在合成数据上进行的数据可用性测试，验证了合成数据可以作为智能医学影像处理任务的预训练数据或增强数据来使用。
+	We verified that synthetic data can be used as pre-training data or enhanced data for intelligent medical image processing tasks through a number of data usability tests on our synthetic dataset.
+	
 \end{itemize}
 
-未来，我们将进一步在CT、PET等不同模态和其他部位中对我们的方法进行改进，并将进一步简化训练过程和提升合成质量。	
-	
+未来，我们将进一步在CT、PET等不同模态，心脏、肺等其他部位，检测、分类等其他病灶处理任务中对我们的方法进行改进。我们将致力于进一步简化训练过程和合成更高质量的医学影像。
+In the future, we will further improve our method in CT, PET and other modes, in heart, lung and other parts, in detection, classification and other lesion processing tasks. We are committed to further simplifying the training process and synthesizing higher quality medical images.	
 
 \section{ Acknowledgments}
 
 感谢NSCCGZ提供的计算支持。
+Thanks for the computing support provided by NSCCGZ.
+
 
 \bibliography{refer}
 \bibliographystyle{aaai}
