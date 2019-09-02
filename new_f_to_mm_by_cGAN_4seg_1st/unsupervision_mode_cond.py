@@ -692,7 +692,7 @@ class GAN:
                 + self.EC_L_Y.variables
                 + self.EC_L_Z.variables
                 + self.EC_L_W.variables
-                +self.DC_L_X.variables
+                + self.DC_L_X.variables
                 + self.DC_L_Y.variables
                 + self.DC_L_Z.variables
                 + self.DC_L_W.variables
@@ -715,7 +715,7 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_loss, D_loss= loss_list[0], loss_list[1]
+        G_loss, D_loss = loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
 

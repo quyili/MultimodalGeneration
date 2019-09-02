@@ -2,6 +2,7 @@
 import os
 import numpy as np
 
+
 def read_filename(path, shuffle=False):
     files = os.listdir(path)
     files_ = np.asarray(files)
@@ -11,13 +12,14 @@ def read_filename(path, shuffle=False):
         files_ = files_[index_arr]
     return files_
 
+
 def mix(
-        SRC_PATH_1= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
-        SRC_PATH_2= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
-        SAVE_PATH= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_50_synthetic_50_MRI/",
-        epoch_1 = 0.5,
-        epoch_2 = 0.5,
-        epoch_steps = 15070):
+        SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
+        SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
+        SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_50_synthetic_50_MRI/",
+        epoch_1=0.5,
+        epoch_2=0.5,
+        epoch_steps=15070):
     try:
         os.makedirs(SAVE_PATH + "T1")
         os.makedirs(SAVE_PATH + "T2")
@@ -27,8 +29,8 @@ def mix(
     except os.error:
         pass
 
-    l_val_files_1 = read_filename(SRC_PATH_1+"Label", shuffle=True)
-    for i in range(int(epoch_steps*epoch_1)):
+    l_val_files_1 = read_filename(SRC_PATH_1 + "Label", shuffle=True)
+    for i in range(int(epoch_steps * epoch_1)):
         os.system("cp " + SRC_PATH_1 + "T1/" + l_val_files_1[i] + " " + SAVE_PATH + "T1/real_" + l_val_files_1[i])
         os.system("cp " + SRC_PATH_1 + "T2/" + l_val_files_1[i] + " " + SAVE_PATH + "T2/real_" + l_val_files_1[i])
         os.system("cp " + SRC_PATH_1 + "T1c/" + l_val_files_1[i] + " " + SAVE_PATH + "T1c/real_" + l_val_files_1[i])
@@ -40,18 +42,21 @@ def mix(
         os.system("cp " + SRC_PATH_2 + "T1/" + l_val_files_2[i] + " " + SAVE_PATH + "T1/notreal_" + l_val_files_2[i])
         os.system("cp " + SRC_PATH_2 + "T2/" + l_val_files_2[i] + " " + SAVE_PATH + "T2/notreal_" + l_val_files_2[i])
         os.system("cp " + SRC_PATH_2 + "T1c/" + l_val_files_2[i] + " " + SAVE_PATH + "T1c/notreal_" + l_val_files_2[i])
-        os.system("cp " + SRC_PATH_2 + "Flair/" + l_val_files_2[i] + " " + SAVE_PATH + "Flair/notreal_" + l_val_files_2[i])
-        os.system("cp " + SRC_PATH_2 + "Label/" + l_val_files_2[i] + " " + SAVE_PATH + "Label/notreal_" + l_val_files_2[i])
+        os.system(
+            "cp " + SRC_PATH_2 + "Flair/" + l_val_files_2[i] + " " + SAVE_PATH + "Flair/notreal_" + l_val_files_2[i])
+        os.system(
+            "cp " + SRC_PATH_2 + "Label/" + l_val_files_2[i] + " " + SAVE_PATH + "Label/notreal_" + l_val_files_2[i])
+
 
 def mix3(
-        SRC_PATH_1= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
-        SRC_PATH_2= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
+        SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
+        SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
         SRC_PATH_3="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
-        SAVE_PATH= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_50_synthetic_50_MRI/",
-        epoch_1 = 0.5,
-        epoch_2 = 0.5,
+        SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_50_synthetic_50_MRI/",
+        epoch_1=0.5,
+        epoch_2=0.5,
         epoch_3=0.5,
-        epoch_steps = 15070):
+        epoch_steps=15070):
     try:
         os.makedirs(SAVE_PATH + "T1")
         os.makedirs(SAVE_PATH + "T2")
@@ -61,8 +66,8 @@ def mix3(
     except os.error:
         pass
 
-    l_val_files_1 = read_filename(SRC_PATH_1+"Label", shuffle=True)
-    for i in range(int(epoch_steps*epoch_1)):
+    l_val_files_1 = read_filename(SRC_PATH_1 + "Label", shuffle=True)
+    for i in range(int(epoch_steps * epoch_1)):
         os.system("cp " + SRC_PATH_1 + "T1/" + l_val_files_1[i] + " " + SAVE_PATH + "T1/real_" + l_val_files_1[i])
         os.system("cp " + SRC_PATH_1 + "T2/" + l_val_files_1[i] + " " + SAVE_PATH + "T2/real_" + l_val_files_1[i])
         os.system("cp " + SRC_PATH_1 + "T1c/" + l_val_files_1[i] + " " + SAVE_PATH + "T1c/real_" + l_val_files_1[i])
@@ -73,20 +78,26 @@ def mix3(
     for i in range(int(epoch_steps * epoch_2)):
         os.system("cp " + SRC_PATH_2 + "T1/" + l_val_files_2[i] + " " + SAVE_PATH + "T1/notreal_1_" + l_val_files_2[i])
         os.system("cp " + SRC_PATH_2 + "T2/" + l_val_files_2[i] + " " + SAVE_PATH + "T2/notreal_1_" + l_val_files_2[i])
-        os.system("cp " + SRC_PATH_2 + "T1c/" + l_val_files_2[i] + " " + SAVE_PATH + "T1c/notreal_1_" + l_val_files_2[i])
-        os.system("cp " + SRC_PATH_2 + "Flair/" + l_val_files_2[i] + " " + SAVE_PATH + "Flair/notreal_1_" + l_val_files_2[i])
-        os.system("cp " + SRC_PATH_2 + "Label/" + l_val_files_2[i] + " " + SAVE_PATH + "Label/notreal_1_" + l_val_files_2[i])
+        os.system(
+            "cp " + SRC_PATH_2 + "T1c/" + l_val_files_2[i] + " " + SAVE_PATH + "T1c/notreal_1_" + l_val_files_2[i])
+        os.system(
+            "cp " + SRC_PATH_2 + "Flair/" + l_val_files_2[i] + " " + SAVE_PATH + "Flair/notreal_1_" + l_val_files_2[i])
+        os.system(
+            "cp " + SRC_PATH_2 + "Label/" + l_val_files_2[i] + " " + SAVE_PATH + "Label/notreal_1_" + l_val_files_2[i])
 
     l_val_files_3 = read_filename(SRC_PATH_3 + "Label", shuffle=True)
     for i in range(int(epoch_steps * epoch_3)):
         os.system("cp " + SRC_PATH_3 + "T1/" + l_val_files_3[i] + " " + SAVE_PATH + "T1/notreal_2_" + l_val_files_3[i])
         os.system("cp " + SRC_PATH_3 + "T2/" + l_val_files_3[i] + " " + SAVE_PATH + "T2/notreal_2_" + l_val_files_3[i])
-        os.system("cp " + SRC_PATH_3 + "T1c/" + l_val_files_3[i] + " " + SAVE_PATH + "T1c/notreal_2_" + l_val_files_3[i])
-        os.system("cp " + SRC_PATH_3 + "Flair/" + l_val_files_3[i] + " " + SAVE_PATH + "Flair/notreal_2_" + l_val_files_3[i])
-        os.system("cp " + SRC_PATH_3 + "Label/" + l_val_files_3[i] + " " + SAVE_PATH + "Label/notreal_2_" + l_val_files_3[i])
+        os.system(
+            "cp " + SRC_PATH_3 + "T1c/" + l_val_files_3[i] + " " + SAVE_PATH + "T1c/notreal_2_" + l_val_files_3[i])
+        os.system(
+            "cp " + SRC_PATH_3 + "Flair/" + l_val_files_3[i] + " " + SAVE_PATH + "Flair/notreal_2_" + l_val_files_3[i])
+        os.system(
+            "cp " + SRC_PATH_3 + "Label/" + l_val_files_3[i] + " " + SAVE_PATH + "Label/notreal_2_" + l_val_files_3[i])
+
 
 if __name__ == '__main__':
-
     mix3(
         SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/real_1F_MRI/",
         SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/new_synthetic_1F_MRI/",
@@ -106,7 +117,6 @@ if __name__ == '__main__':
         epoch_3=2,
         epoch_steps=11995)
 
-
     # mix(
     #     SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_95_21699/",
     #     SRC_PATH_2="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_11995/",
@@ -121,8 +131,6 @@ if __name__ == '__main__':
     #     epoch_1=2,
     #     epoch_2=1,
     #     epoch_steps=11995)
-
-
 
     # mix(
     #     SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",
@@ -180,7 +188,6 @@ if __name__ == '__main__':
     #     epoch_1=1,
     #     epoch_2=1,
     #     epoch_steps=11995)
-
 
     # mix(
     #     SRC_PATH_1="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/BRATS2015/",

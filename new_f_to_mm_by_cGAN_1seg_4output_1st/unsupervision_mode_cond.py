@@ -685,7 +685,7 @@ class GAN:
                 self.D_M.variables +
                 self.FD_R.variables
             ,
-                self.EC_L.variables+
+                self.EC_L.variables +
                 self.DC_L.variables
                 ]
 

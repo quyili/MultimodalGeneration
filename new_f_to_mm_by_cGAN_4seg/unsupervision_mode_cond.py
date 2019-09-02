@@ -769,7 +769,7 @@ class GAN:
         self.judge_list["j_code_w"] = j_code_w
         self.judge_list["j_code_rm"] = j_code_rm
 
-        loss_list = [G_loss+S_loss, D_loss, S_loss]
+        loss_list = [G_loss + S_loss, D_loss, S_loss]
 
         return loss_list
 
@@ -785,7 +785,7 @@ class GAN:
                 + self.EC_L_Y.variables
                 + self.EC_L_Z.variables
                 + self.EC_L_W.variables
-                +self.DC_L_X.variables
+                + self.DC_L_X.variables
                 + self.DC_L_Y.variables
                 + self.DC_L_Z.variables
                 + self.DC_L_W.variables

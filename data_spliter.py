@@ -2,6 +2,7 @@
 import os
 import numpy as np
 
+
 def read_filename(path, shuffle=False):
     files = os.listdir(path)
     files_ = np.asarray(files)
@@ -11,11 +12,12 @@ def read_filename(path, shuffle=False):
         files_ = files_[index_arr]
     return files_
 
+
 def split(
-        SRC_PATH= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
-        SAVE_PATH= "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_1F_MRI/",
-        epoch = 1,
-        epoch_steps = 15070):
+        SRC_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/selected_75350/",
+        SAVE_PATH="/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/synthetic_1F_MRI/",
+        epoch=1,
+        epoch_steps=15070):
     try:
         os.makedirs(SAVE_PATH + "T1")
         os.makedirs(SAVE_PATH + "T2")
@@ -24,13 +26,14 @@ def split(
         os.makedirs(SAVE_PATH + "Label")
     except os.error:
         pass
-    l_val_files = read_filename(SRC_PATH+"Label")
-    for i in range(int(epoch_steps*epoch)):
+    l_val_files = read_filename(SRC_PATH + "Label")
+    for i in range(int(epoch_steps * epoch)):
         os.system("cp " + SRC_PATH + "T1/" + l_val_files[i] + " " + SAVE_PATH + "T1/" + l_val_files[i])
         os.system("cp " + SRC_PATH + "T2/" + l_val_files[i] + " " + SAVE_PATH + "T2/" + l_val_files[i])
         os.system("cp " + SRC_PATH + "T1c/" + l_val_files[i] + " " + SAVE_PATH + "T1c/" + l_val_files[i])
         os.system("cp " + SRC_PATH + "Flair/" + l_val_files[i] + " " + SAVE_PATH + "Flair/" + l_val_files[i])
         os.system("cp " + SRC_PATH + "Label/" + l_val_files[i] + " " + SAVE_PATH + "Label/" + l_val_files[i])
+
 
 if __name__ == '__main__':
     # split(

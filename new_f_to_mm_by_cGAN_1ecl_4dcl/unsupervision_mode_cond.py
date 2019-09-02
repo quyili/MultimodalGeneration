@@ -779,7 +779,7 @@ class GAN:
                 self.FD_R.variables
             ,
                 self.EC_L.variables
-                +self.DC_L_X.variables
+                + self.DC_L_X.variables
                 + self.DC_L_Y.variables
                 + self.DC_L_Z.variables
                 + self.DC_L_W.variables

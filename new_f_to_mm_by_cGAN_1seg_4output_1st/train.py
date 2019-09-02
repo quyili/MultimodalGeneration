@@ -36,7 +36,8 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
-tf.flags.DEFINE_string('load_seg_model', "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/SEG/mm_to_label_1seg_1input/checkpoints/20190801-1443",
+tf.flags.DEFINE_string('load_seg_model',
+                       "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/SEG/mm_to_label_1seg_1input/checkpoints/20190801-1443",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 
 

@@ -12,11 +12,11 @@ class GAN:
                  ngf=64,
                  ):
         """
-        Args:
-          input_size：list [H, W, C]
-          batch_size: integer, batch size
-          learning_rate: float, initial learning rate for Adam
-          ngf: number of gen filters in first conv layer
+           Args:
+             input_size：list [N, H, W, C]
+             batch_size: integer, batch size
+             learning_rate: float, initial learning rate for Adam
+             ngf: number of base gen filters in conv layer
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
@@ -74,7 +74,6 @@ class GAN:
             shape=self.input_shape)
 
         G_loss = 0.0
-        # X模态图分割训练的有监督损失
         G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
                                 l_f_prob_by_x[:, :, :, 0]) \
                   + self.mse_loss(label_expand_x[:, :, :, 1],
@@ -171,9 +170,6 @@ class GAN:
 
         return G_optimizer
 
-    def loss_summary(self, G_loss):
-        tf.summary.scalar('loss/G_loss', G_loss)
-
     def evaluation(self, image_dirct):
         self.name_list_true = ["l_x", "l_y", "l_z", "l_w"]
         self.name_list_false = ["l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w"]
@@ -186,23 +182,11 @@ class GAN:
                 self.mse_loss(image_dirct[self.name_list_true[i]] * 4, image_dirct[self.name_list_false[i]] * 4))
         return dice_score_list, mse_list
 
-    def evaluation_summary(self, ssim_list):
-        for i in range(len(self.name_list_true)):
-            tf.summary.scalar("evaluation/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i], ssim_list[i])
-
-    def image_summary(self, image_dirct):
-        for key in image_dirct:
-            tf.summary.image('image/' + key, image_dirct[key])
-
     def mse_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
     def ssim_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = (1.0 - self.SSIM(x, y)) * 20
         return loss
 
