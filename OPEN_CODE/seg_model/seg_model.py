@@ -171,9 +171,6 @@ class GAN:
 
         return G_optimizer
 
-    def loss_summary(self, G_loss):
-        tf.summary.scalar('loss/G_loss', G_loss)
-
     def evaluation(self, image_dirct):
         self.name_list_true = ["l_x", "l_y", "l_z", "l_w"]
         self.name_list_false = ["l_f_by_x", "l_f_by_y", "l_f_by_z", "l_f_by_w"]
@@ -185,14 +182,6 @@ class GAN:
             mse_list.append(
                 self.mse_loss(image_dirct[self.name_list_true[i]] * 4, image_dirct[self.name_list_false[i]] * 4))
         return dice_score_list, mse_list
-
-    def evaluation_summary(self, ssim_list):
-        for i in range(len(self.name_list_true)):
-            tf.summary.scalar("evaluation/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i], ssim_list[i])
-
-    def image_summary(self, image_dirct):
-        for key in image_dirct:
-            tf.summary.image('image/' + key, image_dirct[key])
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
