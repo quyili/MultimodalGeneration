@@ -101,12 +101,12 @@ def train():
         try:
             os.makedirs(FLAGS.save_path + "F")
             os.makedirs(FLAGS.save_path + "M")
-            os.makedirs(FLAGS.save_path+"T1")
-            os.makedirs(FLAGS.save_path+"T2")
-            os.makedirs(FLAGS.save_path+"T1c")
-            os.makedirs(FLAGS.save_path+"Flair")
-            os.makedirs(FLAGS.save_path+"Label")
-            os.makedirs(FLAGS.save_path+"LabelV")
+            os.makedirs(FLAGS.save_path + "T1")
+            os.makedirs(FLAGS.save_path + "T2")
+            os.makedirs(FLAGS.save_path + "T1c")
+            os.makedirs(FLAGS.save_path + "Flair")
+            os.makedirs(FLAGS.save_path + "Label")
+            os.makedirs(FLAGS.save_path + "LabelV")
         except os.error:
             pass
 
@@ -147,17 +147,17 @@ def train():
                         .reshape(FLAGS.image_size)[:, :, 0]),
                     FLAGS.save_path + "M/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     FLAGS.save_path+"T1/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "T1/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(y_g_)[b, :, :, 0]),
-                                     FLAGS.save_path+"T2/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "T2/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(z_g_)[b, :, :, 0]),
-                                     FLAGS.save_path+"T1c/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "T1c/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(w_g_)[b, :, :, 0]),
-                                     FLAGS.save_path+"Flair/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "Flair/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0]),
-                                     FLAGS.save_path+"Label/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "Label/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0] * 0.25),
-                                     FLAGS.save_path+"LabelV/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "LabelV/" + F_train_files[index - b - 1])
 
             print("image gen end:" + str(index))
 

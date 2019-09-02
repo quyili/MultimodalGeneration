@@ -86,10 +86,14 @@ def train():
 
                 jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                         np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-                cv2.imwrite("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                cv2.imwrite("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F/f_" + str(
+                    index) + "_" + str(count) + ".jpg", jpg_f)
 
-                m_arr_1 = get_mask_from_f("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F/f_" + str(index) + "_" + str(count) + ".jpg",
-                                          "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/M1/m_1_" + str(index) + "_" + str(count) + ".tiff")
+                m_arr_1 = get_mask_from_f(
+                    "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/F/f_" + str(
+                        index) + "_" + str(count) + ".jpg",
+                    "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/Temp/M1/m_1_" + str(
+                        index) + "_" + str(count) + ".tiff")
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
 
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
@@ -113,11 +117,14 @@ def train():
 
             jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
                                     np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-            cv2.imwrite("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F_jpg/" + str(index) + ".jpg", jpg_f)
+            cv2.imwrite("/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F_jpg/" + str(index) + ".jpg",
+                        jpg_f)
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
-                                 "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F/" + str(index) + ".tiff")
+                                 "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/F/" + str(
+                                     index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
-                                 "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/M/" + str(index) + ".tiff")
+                                 "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/mydata/F_and_M/M/" + str(
+                                     index) + ".tiff")
             print("image gen end:" + str(index))
 
             index += 1
@@ -125,6 +132,7 @@ def train():
 
 def main(unused_argv):
     train()
+
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3"

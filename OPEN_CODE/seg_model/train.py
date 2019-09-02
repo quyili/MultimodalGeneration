@@ -173,7 +173,7 @@ def train():
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_0 = gan.model(l_x_0, l_y_0, l_z_0, l_w_0, x_0, y_0, z_0, w_0)
                         image_list_0 = gan.image_list
-                        evaluation_list_0,mse_list_0 = gan.evaluation(image_list_0)
+                        evaluation_list_0, mse_list_0 = gan.evaluation(image_list_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(G_loss_0, var_list=variables_list_0[0])
                         G_grad_list.append(G_grad_0)
@@ -189,7 +189,7 @@ def train():
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_1 = gan.model(l_x_1, l_y_1, l_z_1, l_w_1, x_1, y_1, z_1, w_1)
                         image_list_1 = gan.image_list
-                        evaluation_list_1,mse_list_1 = gan.evaluation(image_list_1)
+                        evaluation_list_1, mse_list_1 = gan.evaluation(image_list_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(G_loss_1, var_list=variables_list_1[0])
                         G_grad_list.append(G_grad_1)
@@ -205,7 +205,7 @@ def train():
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_2 = gan.model(l_x_2, l_y_2, l_z_2, l_w_2, x_2, y_2, z_2, w_2)
                         image_list_2 = gan.image_list
-                        evaluation_list_2,mse_list_2 = gan.evaluation(image_list_2)
+                        evaluation_list_2, mse_list_2 = gan.evaluation(image_list_2)
                         variables_list_2 = gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(G_loss_2, var_list=variables_list_2[0])
                         G_grad_list.append(G_grad_2)
@@ -221,7 +221,7 @@ def train():
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         G_loss_3 = gan.model(l_x_3, l_y_3, l_z_3, l_w_3, x_3, y_3, z_3, w_3)
                         image_list_3 = gan.image_list
-                        evaluation_list_3 ,mse_list_3= gan.evaluation(image_list_3)
+                        evaluation_list_3, mse_list_3 = gan.evaluation(image_list_3)
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(G_loss_3, var_list=variables_list_3[0])
                         G_grad_list.append(G_grad_3)
@@ -301,8 +301,8 @@ def train():
 
                         logging.info(
                             "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        _, train_losses, train_evaluations,train_mses_0 = sess.run(
-                            [optimizers, G_loss_0, evaluation_list_0,mse_list_0],
+                        _, train_losses, train_evaluations, train_mses_0 = sess.run(
+                            [optimizers, G_loss_0, evaluation_list_0, mse_list_0],
                             feed_dict={
                                 l_x_0: np.asarray(train_true_l_x)[0:1, :, :, :],
                                 l_y_0: np.asarray(train_true_l_y)[0:1, :, :, :],
@@ -347,7 +347,7 @@ def train():
                             "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                         step += 1
 
-                elif  FLAGS.stage == "test":
+                elif FLAGS.stage == "test":
                     val_loss_list = []
                     val_evaluation_list = []
                     val_mse_list = []
@@ -423,7 +423,7 @@ def train():
                                 w_3: np.asarray(val_true_w)[3:4, :, :, :],
                             })
 
-                        if  mean(val_evaluations_0) <= FLAGS.select_score2 \
+                        if mean(val_evaluations_0) <= FLAGS.select_score2 \
                                 and mean(val_evaluations_0) > FLAGS.select_score1 \
                                 and count < FLAGS.select_num:
                             val_loss_list.append(val_losses_0)

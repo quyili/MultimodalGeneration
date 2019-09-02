@@ -2,12 +2,13 @@
 import os
 import numpy as np
 import SimpleITK
-import csv
 from PIL import Image
+
 
 def norm(input):
     output = (input - np.min(input)) / (np.max(input) - np.min(input))
     return output
+
 
 # 旋转
 def rand_rotate(arr_list):
@@ -19,7 +20,7 @@ def rand_rotate(arr_list):
         img = Image.fromarray(img_arr)
         img = img.rotate(angle, resample=0, expand=expand)
         img = img.resize(img_arr.shape)
-        img_arr= np.asarray(img)
+        img_arr = np.asarray(img)
         new_list.append(img_arr)
     return new_list
 
@@ -54,7 +55,6 @@ def rand_crop(arr_list):
     return new_list
 
 
-
 # 平移裁剪
 def rand_translation(arr_list):
     new_list = []
@@ -79,8 +79,8 @@ def rand_translation(arr_list):
 # 噪声
 def rand_add_noise(arr_list):
     new_list = []
-    l=arr_list[-1]
-    for j in range(len(arr_list)-1):
+    l = arr_list[-1]
+    for j in range(len(arr_list) - 1):
         img_arr = arr_list[j]
         new_list.append(norm(img_arr + np.random.uniform(-0.03, 0.03, img_arr.shape)))
     new_list.append(l)
@@ -103,12 +103,14 @@ def rand_resize(arr_list):
         new_list.append(img_arr)
     return new_list
 
+
 def save_image(image, name, dir="./samples", form=""):
     try:
         os.makedirs(dir)
     except os.error:
         pass
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
+
 
 def read_filename(path, shuffle=False):
     files = os.listdir(path)
@@ -126,16 +128,17 @@ def read_file(l_path, Label_train_files, index):
     arr_ = SimpleITK.GetArrayFromImage(img)
     return np.asarray(arr_, dtype="float32")
 
+
 def extend(
-        image_size = [184, 144],
-        X=  '../mydata/BRATS2015/trainT1',
-        Y=  '../mydata/BRATS2015/trainT2',
-        Z=  '../mydata/BRATS2015/trainT1c',
-        W=  '../mydata/BRATS2015/trainFlair',
-        L= '../mydata/BRATS2015/trainLabel',
+        image_size=[184, 144],
+        X='../mydata/BRATS2015/trainT1',
+        Y='../mydata/BRATS2015/trainT2',
+        Z='../mydata/BRATS2015/trainT1c',
+        W='../mydata/BRATS2015/trainFlair',
+        L='../mydata/BRATS2015/trainLabel',
         save_path="../mydata/enhancement_1F_MRI",
-        epoch = 1
-        ):
+        epoch=1
+):
     try:
         os.makedirs(save_path + "/T1")
         os.makedirs(save_path + "/T2")
@@ -183,12 +186,18 @@ def extend(
                 extend_code += "_resize"
 
         print(str(val_index), extend_code)
-        save_image(arr_list[0].astype('float32'), str(val_index)+"_"+l_val_files[val_index%len(l_val_files)],  dir=save_path + "/T1" )
-        save_image(arr_list[1].astype('float32'), str(val_index)+"_"+l_val_files[val_index%len(l_val_files)],  dir=save_path +"/T2")
-        save_image(arr_list[2].astype('float32'), str(val_index)+"_"+l_val_files[val_index%len(l_val_files)],  dir=save_path +"/T1c")
-        save_image(arr_list[3].astype('float32'), str(val_index)+"_"+l_val_files[val_index%len(l_val_files)],  dir=save_path +"/Flair")
-        save_image(arr_list[4].astype('float32'), str(val_index)+"_"+l_val_files[val_index%len(l_val_files)],  dir=save_path + "/Label")
+        save_image(arr_list[0].astype('float32'), str(val_index) + "_" + l_val_files[val_index % len(l_val_files)],
+                   dir=save_path + "/T1")
+        save_image(arr_list[1].astype('float32'), str(val_index) + "_" + l_val_files[val_index % len(l_val_files)],
+                   dir=save_path + "/T2")
+        save_image(arr_list[2].astype('float32'), str(val_index) + "_" + l_val_files[val_index % len(l_val_files)],
+                   dir=save_path + "/T1c")
+        save_image(arr_list[3].astype('float32'), str(val_index) + "_" + l_val_files[val_index % len(l_val_files)],
+                   dir=save_path + "/Flair")
+        save_image(arr_list[4].astype('float32'), str(val_index) + "_" + l_val_files[val_index % len(l_val_files)],
+                   dir=save_path + "/Label")
         val_index = val_index + 1
+
 
 if __name__ == '__main__':
     extend(
@@ -220,24 +229,4 @@ if __name__ == '__main__':
         L='../mydata/BRATS2015/trainLabel',
         save_path="../mydata/enhancement_3F_MRI",
         epoch=3
-    )
-    extend(
-        image_size=[184, 144],
-        X='../mydata/BRATS2015/trainT1',
-        Y='../mydata/BRATS2015/trainT2',
-        Z='../mydata/BRATS2015/trainT1c',
-        W='../mydata/BRATS2015/trainFlair',
-        L='../mydata/BRATS2015/trainLabel',
-        save_path="../mydata/enhancement_4F_MRI",
-        epoch=4
-    )
-    extend(
-        image_size=[184, 144],
-        X='../mydata/BRATS2015/trainT1',
-        Y='../mydata/BRATS2015/trainT2',
-        Z='../mydata/BRATS2015/trainT1c',
-        W='../mydata/BRATS2015/trainFlair',
-        L='../mydata/BRATS2015/trainLabel',
-        save_path="../mydata/enhancement_5F_MRI",
-        epoch=5
     )
