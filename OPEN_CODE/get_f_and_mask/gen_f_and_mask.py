@@ -69,7 +69,6 @@ def train():
         saver.restore(sess, latest_checkpoint)
         index = 0
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
-            print("image gen start:" + str(index))
 
             count = 0
             best_j_f = -1000.0
@@ -77,7 +76,6 @@ def train():
                 code = sess.run(code_rm)
                 f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: code})
                 j_f = np.mean(np.asarray(j_f))
-                print(count, "j_f: ", j_f)
 
                 if j_f >= FLAGS.min_j_f: break
 
@@ -92,7 +90,6 @@ def train():
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
 
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
-                print(count, "mae: ", mae)
 
                 if mae <= FLAGS.mae: break
 
@@ -118,8 +115,6 @@ def train():
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
                                  "./mydata/F_and_M/M/" + str(
                                      index) + ".tiff")
-            print("image gen end:" + str(index))
-
             index += 1
 
 

@@ -56,7 +56,7 @@ def train():
             checkpoints_dir = "checkpoints/" + FLAGS.load_model.lstrip("checkpoints/")
 
     else:
-        print("<load_model> is None.")
+        logging.error("<load_model> is None.")
         return
     checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
     model_checkpoint_path = checkpoint.model_checkpoint_path
@@ -109,7 +109,6 @@ def train():
                 train_true_l.append(train_L_arr_)
                 index = index + 1
 
-            print("image gen start:" + str(index))
             x_g_, y_g_, z_g_, w_g_ = sess.run([x_g, y_g, z_g, w_g],
                                               feed_dict={f_input: np.asarray(train_true_f),
                                                          l_input: np.asarray(train_true_l)})
@@ -135,8 +134,6 @@ def train():
                                      FLAGS.save_path + "Label/" + F_train_files[index - b - 1])
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(train_true_l)[b, :, :, 0] * 0.25),
                                      FLAGS.save_path + "LabelV/" + F_train_files[index - b - 1])
-
-            print("image gen end:" + str(index))
 
 
 def main(unused_argv):
