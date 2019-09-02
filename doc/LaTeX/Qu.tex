@@ -186,7 +186,7 @@ In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and ver
 
 在生成结构特征图时，\cite{4shin2018medical}仍然需要真实的MRI作为输入来得到生成的结构特征图，这大大降低了生成数据的多样性，\cite{41costa2017towards}实现了一种从多维正态分布生成视网膜血管分布图的方法，在其基础上，我们设计了一种从随机噪声生成脑部结构特征图的方法，无需额外数据且具有更好的多样性。具体来说，我们结合了变分自编码器与生成对抗网络的特点设计了一种混合网络。首先，我们从真实影像提取得到结构特征图，再通过VAE的编码器将其编码为一个均值矩阵和一个方差矩阵，再与一个随机正态分布矩阵融合为一个近似正态分布矩阵，通过损失约束其逐渐逼近标准正态分布。然后，我们再用VAE的解码器实现从该近似正态分布重建生成结构特征图。解码器通过结构特征图的自监督重建损失进行训练。对于近似正态分布矩阵的损失约束，我们没有采用VAE原本的编码器损失，而是通过一个编码分布鉴别器为编码器提供对抗性损失，此编码分布鉴别器以正态分布矩阵为正样本、输入解码器的近似正态分布矩阵为负样本进行学习。此外，我们还通过$L2$正则损失指导均值矩阵的均值逼近0值，标准差矩阵的均值逼近1值。同时，我们用另一个鉴别器对从真实MRI提取的结构特征图和随机生成的结构特征图进行鉴别学习，并为解码器提供对抗性损失，使得从随机正态分布解码生成的结构特征图越来越逼真。
 When generating the structural feature map, \cite{4shin2018medical} still needs to input the real modal image to get the generated structural feature map, which greatly reduces the diversity of generated data, and \cite{41costa2017towards} implements a method for generating retinal blood vessel distribution maps from multidimensional normal distribution. On the basis of this, we design a method for generating brain structural feature maps from random noise, which has better diversity and no additional data. 
-Specifically, we design a hybrid network combining the characteristics of VAE and GAN. First, we encode the structural feature map extracted from real image into a mean matrix and a variance matrix through the VAE encoder, then merge with a random normal distribution matrix to form an approximate normal distribution matrix, and gradually approach the standard normal distribution through the loss constraint. Then, we use VAE decoder to reconstruct the structural feature map from the approximate normal distribution matrix. The decoder is trained by self-supervised reconstruction loss of structural feature maps. For the constraint of approximate normal distribution matrix, we do not use the VAE encoder loss, but add a code distribution discriminator. The code distribution discriminator learns normal distribution matrix as a positive sample and latent feature matrix as a negative sample, and provides adversarial loss for encoder. Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1. In addition, we use another discriminator to receive structural feature map extract from real MRI and randomly generated structural feature map for adversarial learning, so that the generated structural feature map becomes more and more realistic.
+Specifically, we design a hybrid network combining the characteristics of VAE and GAN. First, we encode the structural feature map extracted from real image into a mean matrix and a variance matrix through the VAE encoder, then fuse with a random normal distribution matrix to form an approximate normal distribution matrix, and gradually approach the standard normal distribution through the loss constraint. Then, we use VAE decoder to reconstruct the structural feature map from the approximate normal distribution matrix. The decoder is trained by self-supervised reconstruction loss of structural feature maps. For the constraint of approximate normal distribution matrix, we do not use the VAE encoder loss, but add a code distribution discriminator. The code distribution discriminator learns normal distribution matrix as a positive sample and latent feature matrix as a negative sample, and provides adversarial loss for encoder. Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1. In addition, we use another discriminator to receive structural feature map extract from real MRI and randomly generated structural feature map for adversarial learning, so that the generated structural feature map becomes more and more realistic.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/feature_train}
@@ -278,74 +278,82 @@ We perform MRI reconstruction and translation training on real MRI, using a set 
 	\label{trans_train}
 \end{figure}
 
-如图~\ref{trans_train}所示，MRI重建和转换时，编码器将模态$i$的真实MRI$x_i$编码得到语义特征图$code_{i}$，然后我们将其与不同的条件向量连接，通过解码器解码出全部的模态。循环重建时，我们对所得到的转换图采用编码器全部进行再编码，将全部再编码得到的语义特征图均与模态$i$的条件向量进行连接，最后再用解码器全部解码得到循环重建的$x_{rc,j,i}$。MRI重建的循环重建都是自监督训练。在上述过程中，我们以原始输入模态$x_i$对应的病灶标签$l_i$作为病灶生成训练的监督标签，对$x_i$用病灶标签生成组件得到$l_{r,i}$。
-As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder encodes the real MRI$x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, 
+如图~\ref{trans_train}所示，MRI重建和转换时，编码器将模态$i$的真实MRI$x_i$编码得到语义特征图$code_{i}$，然后我们将其与不同的条件向量堆叠，通过解码器解码出全部的模态。循环重建时，我们对所得到的转换图采用编码器全部进行再编码，将全部再编码得到的语义特征图均与模态$i$的条件向量进行连接，最后再用解码器全部解码得到循环重建的$x_{rc,j,i}$。MRI重建的循环重建都是自监督训练。在上述过程中，我们以原始输入模态$x_i$对应的病灶标签$l_i$作为病灶生成训练的监督标签，对$x_i$用病灶标签生成组件得到$l_{r,i}$。
+As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder encodes the real MRI $x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, then we connect it to different conditional vectors and decode all the modalities through the decoder. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, connect all the re-encoded semantic feature maps with the conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. 【】
+In the above process, we use the lesion label $l_i$ of the original input modality $x_i$ as supervised label for the lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
 
 我们的鉴别器组件独立更新，其他组件通过一个优化器更新训练，损失项包括鉴别器提供的对抗性损失、MRI重建自监督损失、MRI循环重建自监督损失、MRI循环重建一致性损失、语义一致性损失、病灶生成监督损失。详细损失如下，其中$x_{r,i}$表示模态$i$重建得到的MRI，$x_{t,j,i}$指由模态$j$转换生成的模态$i$的MRI，$d_{t,j,i}$和$c_{t,j,i}$分别为鉴别器对$x_{t,i,j}$的真假鉴别和类别鉴别结果，$x_{cr,j,i}$表示模态$i$转换为模态$j$再转换回模态$i$的MRI；$code_i$表示编$x_i$编码器编码后得到的语义特征图，$code_{t,i,j}$表示$x_i$转换生成的模态$j$的MRI再经过编码器编码后得到的语义特征图；$l_i$表示$x_i$的真实病灶标签，$l_{r,i}$表示$x_i$经过病灶标签生成组件生成的病灶标签：
+Our discriminator components are updated independently, and other components are updated through an optimizer. The loss items include the adversarial loss and category guidance loss provided by discriminator, self-supervised loss of MRI reconstruction, self-supervised loss of MRI cycle-reconstruction, consistency loss of MRI cycle-reconstruction, semantic consistency loss, and supervised loss of lesion generation. 
+
+The detailed losses are as follows, where $x_{r,i}$ represents the MRI reconstruct from modality $i$, and $x_{t,j,i}$ refers to MRI of modality $i$ translated by modality $j$. $d_{t, j, i}$ and $c_{t, j, i}$ are the true/false discrimination and category discrimination results of the discriminator for $x_{t, i, j}$, $x_{cr,j,i}$ represents MRI that translate from modality $i$ to modality $j$ then translate back to modality $i$; $code_i$ represents the semantic feature map obtained from $x_i$ by encoder, $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder; $l_i$ represents the real lesion label of $x_i$, $l_{r,i}$ represents the lesion label generated by lesion label generation components from $x_i$ :
 
 \begin{itemize}
-	\item \textbf{鉴别器损失}
+	\item \textbf{鉴别器损失discriminator loss}
 	\begin{center}
 		$loss_{D,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{对抗性损失和类别指导损失}
+	\item \textbf{对抗性损失和类别指导损失adversarial loss and category guidance loss}
 	\begin{center}
 		$loss_{G,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{MRI重建自监督损失}
+	\item \textbf{MRI重建自监督损失self-supervised loss of MRI reconstruction}
 	\begin{center}
 		$loss_{sv}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{MRI循环重建自监督损失}
+	\item \textbf{MRI循环重建自监督损失self-supervised loss of MRI cycle-reconstruction}
 	
 	\begin{center}
 		$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{MRI循环重建一致性损失}
+	\item \textbf{MRI循环重建一致性损失consistency loss of MRI cycle-reconstruction}
 	\begin{center}
 		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,k\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{语义一致性损失}
+	\item \textbf{语义一致性损失semantic consistency loss}
 	\begin{center}
 		$loss_{code,consistency}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{病灶生成监督损失}
+	\item \textbf{病灶生成监督损失supervised loss of lesion generation}
 	\begin{center}
 		$loss_{sv,l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 	\end{center}
 	
 \end{itemize}
 
-\subsection{结构特征图与病灶分割标签的融合}
+\subsection{结构特征图与病灶分割标签的融合Fusion of structural feature maps and lesion segmentation labels}
 
 结构特征图与病灶分割标签融合时，我们先从随机标准正态分布矩阵生成结构特征图$f_g$，再随机选择合适的病灶分割标签$label$，然后再将包含$n$个类别的病灶分割标签转为$n$个通道的独热矩阵$onehot_l$，每个通道对应一个分割类别，每个通道内的像素值为0或1，与对应类别分割位置相同的区域像素值为1其余部分为0，这样各个1像素区域与分割标签图中的各个分割区域就是配准的。接下来，我们将$onehot_l$的每个通道与$f_g$按位求取加权和，就得到一个新的融合了$f_g$和$label$信息的矩阵。
+When the structural feature map is fused with the lesion segmentation label, we first generate structural feature map $f_g$ from random standard normal distribution matrix, then randomly select the appropriate lesion segmentation label $label$, and then the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels, and each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. The pixel value of the same area as the corresponding category segmentation position is 1 and the rest is 0, so that each 1 pixel area is registered with each segmentation area in the segmentation label. Next, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses the information of $f_g$ and $label$.
 
 如果结构特征图$f'$是从随机MRI$x$中提取的，那么提取出的结构特征有可能包含肿瘤结构信息，会对随机标签$l$中的肿瘤信息产生干扰而影响融合后生成的MRI，所以$f'$需要在与随机标签$label$融合前消除肿瘤信息，得到无肿瘤信息的结构特征图$f$，使生成图像的肿瘤信息只来源于标签$label$。我们对$x$的分割标签$label_x$通过算法~\ref{alg:2}生成无边界扩充的分割掩膜$mask_{l,x}$,则$f=mask_{l,x}\times f'$。
+If the structural feature map $f'$ is extracted from the random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information in random label $l$ and affect the fusion generation MRI, so $f'$ needs to eliminate the tumor information before fusing with the random label $label$, and get the structural feature map $f$ without tumor information, so that the tumor information of the generated image is only derived from the label $label$. We generate a  mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by the Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
 
 由于随机选择的病灶的位置上可能出现在结构特征图的脑部轮廓之外，因此我们选取标签图时需要用算法~\ref{alg:2}获取结构特征图的脑部区域掩膜$mask$，若$mask$与选取的$label$求积后为0，则说明肿瘤标签像素在$mask$的脑轮廓内部，可以采用，否则需要重新选取$label$。
+Since the location of the randomly selected lesion may appear outside the brain contour of structural feature map, we need to use the Algorithm~\ref{alg:2} to obtain the brain region mask $mask$ of the structural feature map. If the product of $mask$ and the selected $label$ is 0, then the tumor label pixel is inside the brain contour of $mask$, which can be adopted, otherwise the $label$ needs to be re-selected.
 
-\subsection{多模态MRI生成训练}
+\subsection{多模态MRI生成训练Multimodal MRI generation training}
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/mm_mri_generate}
-	\caption{多模态MRI生成.}
+	\caption{多模态MRI生成.generation of Multimodal MRI.}
 	\label{mm_mri_generate}
 \end{figure}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\columnwidth]{figures/D}
-	\caption{真实MRI重建和转换训练和多模态MRI生成训练过程中的鉴别器训练.}
+	\caption{真实MRI重建和转换训练和多模态MRI生成训练过程中的鉴别器训练. reconstruction and translation training of real MRI and discriminator training during multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
 
 我们通过算法~\ref{alg:1}从真实MRI提取结构特征图$f$,并随机选择真实的病灶标签$label$，通过前述结构特征图与病灶分割标签的方法进行融合。结构特征图与分割标签图的信息融合图包含了目标部位的基本解剖结构信息和病灶信息，从该图生成多模态图比直接从随机噪声生成多模态MRI更易训练，生成的MRI更加合理和逼真。多模态MRI生成过程如图~\ref{mm_mri_generate}所示，首先，我们使用一个单独的融合图编码器对信息融合图进行编码得到语义特征图，语义特征图与不同的条件向量堆叠后通过一个MRI解码器解码，得到不同模态的合成图。我们通过一个MRI鉴别器提供的对抗性损失和类别指导损失来使得生成的各个模态的合成图逼近于真实的MRI。各个模态的合成图再通过一个MRI编码器得到语义特征图，然后这些语义特征图与不同的条件向量堆叠后通过MRI解码器解码就实现了模态的转换，我们通过损失对所有语义特征图和转换图进行一致性约束，以此保证了生成的多模态MRI的互相配准。此外，我们使用一组病灶标签生成组件从各合成MRI中分割还原出肿瘤病灶分割标签，确保生成的多模态影像根据输入病灶标签生成了对应的病灶内容。
+We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$, and merge with the lesion segmentation label by the above fusion method. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generated from the fusion map is easier to train than the multimodal MRI generated directly from random noise, and the generated MRI is more reasonable and realistic. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different conditional vectors and decodes by MRI decoder to obtains synthesis image of different modalities. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI. And images of each modalities are then encoded by MRI encoder to obtain semantic feature maps. These semantic feature maps are stacked with different conditional vectors and decoded by MRI decoder to realize the modal translation. We constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used a set of lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label.
 
 我们的鉴别器组件独立更新；病灶标签生成组件仅在前面章节中的真实MRI重建和转换训练中采用真实数据训练更新，在本节合成训练过程中病灶标签生成组件仅用于为MRI生成组件提供病灶生成指导损失；其他的组件通过一个优化器更新训练。多模态MRI生成过程的具体损失函数如下，其中$d_{i}$和$c_{i}$为鉴别器$D(x_i)$的真假鉴别输出和类别鉴别输出,$d_{g,i}$,$c_{g,i}$为$D(x_{g,i})$的输出；$x_{g,i}$为模态$i$的合成图，$x_{gt,j,i}$为模态$j$的合成图转换生成的模态$i$的转换图；$code_g$为输入信息编码后的语义特征图，$code_{g,i}$为$x_i$编码后的语义特征图；$l$为输入的标签图，$l_{g,i}$为$x_{g,i}$通过病灶标签生成组件得到的标签图；$f$为输入的结构特征图，$f_{g,i}$为从$x_{g,i}$通过算法~\ref{alg:1}提取得到的结构特征图：
 
