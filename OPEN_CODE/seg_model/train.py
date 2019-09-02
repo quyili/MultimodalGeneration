@@ -52,59 +52,12 @@ def mean_list(lists):
     return out
 
 
-def random(n, h, w, c):
-    return np.random.uniform(0., 1., size=[n, h, w, c])
-
-
 def read_file(l_path, Label_train_files, index):
     train_range = len(Label_train_files)
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     L_arr_ = L_arr_.astype('float32')
     return np.asarray(L_arr_)
-
-
-def read_files(x_path, l_path, Label_train_files, index):
-    train_range = len(Label_train_files)
-    T1_img = SimpleITK.ReadImage(x_path + "/" + Label_train_files[index % train_range])
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    T1_arr_ = SimpleITK.GetArrayFromImage(T1_img)
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    T1_arr_ = T1_arr_.astype('float32')
-    L_arr_ = L_arr_.astype('float32')
-    return T1_arr_, L_arr_
-
-
-def expand(train_M_arr_, train_L_arr_):
-    L0 = np.asarray(train_M_arr_ == 0., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L1 = (np.asarray(train_L_arr_ == 0., "float32") * np.asarray(train_M_arr_).astype('float32')).reshape(
-        [train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L2 = np.asarray(train_L_arr_ == 1., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L3 = np.asarray(train_L_arr_ == 2., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L4 = np.asarray(train_L_arr_ == 3., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L5 = np.asarray(train_L_arr_ == 4., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L_arr = np.concatenate([L0, L1, L2, L3, L4, L5], axis=-1)
-    return L_arr
-
-
-def norm(input):
-    output = (input - np.min(input, axis=[1, 2, 3])
-              ) / (np.max(input, axis=[1, 2, 3]) - np.min(input, axis=[1, 2, 3]))
-    return output
-
-
-def save_images(image_dirct, checkpoints_dir, file_index=""):
-    for key in image_dirct:
-        save_image(np.asarray(image_dirct[key])[0, :, :, 0], key + "_" + file_index,
-                   dir=checkpoints_dir + "/samples", form=".tiff")
-
-
-def save_image(image, name, dir="./samples", form=".tiff"):
-    try:
-        os.makedirs(dir)
-    except os.error:
-        pass
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
 
 def read_filename(path, shuffle=True):
@@ -264,9 +217,6 @@ def train():
                     l_w_train_files = read_filename(FLAGS.L)
                     index = 0
                     epoch = 0
-                    train_loss_list = []
-                    train_evaluation_list = []
-                    train_mse_list = []
                     while not coord.should_stop() and epoch <= FLAGS.epoch:
 
                         train_true_l_x = []
@@ -301,8 +251,8 @@ def train():
 
                         logging.info(
                             "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        _, train_losses, train_evaluations, train_mses_0 = sess.run(
-                            [optimizers, G_loss_0, evaluation_list_0, mse_list_0],
+                        sess.run(
+                            optimizers,
                             feed_dict={
                                 l_x_0: np.asarray(train_true_l_x)[0:1, :, :, :],
                                 l_y_0: np.asarray(train_true_l_y)[0:1, :, :, :],
@@ -340,15 +290,11 @@ def train():
                                 z_3: np.asarray(train_true_z)[3:4, :, :, :],
                                 w_3: np.asarray(train_true_w)[3:4, :, :, :],
                             })
-                        train_loss_list.append(train_losses)
-                        train_evaluation_list.append(train_evaluations)
-                        train_mse_list.append(train_mses_0)
                         logging.info(
                             "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                         step += 1
 
                 elif FLAGS.stage == "test":
-                    val_loss_list = []
                     val_evaluation_list = []
                     val_mse_list = []
                     val_index = 0
@@ -377,14 +323,14 @@ def train():
 
                             val_index += 1
 
-                        val_losses_0, val_evaluations_0, val_mses_0, \
-                        val_losses_1, val_evaluations_1, val_mses_1, \
-                        val_losses_2, val_evaluations_2, val_mses_2, \
-                        val_losses_3, val_evaluations_3, val_mses_3 = sess.run(
-                            [G_loss_0, evaluation_list_0, mse_list_0,
-                             G_loss_1, evaluation_list_1, mse_list_1,
-                             G_loss_2, evaluation_list_2, mse_list_2,
-                             G_loss_3, evaluation_list_3, mse_list_3],
+                        val_evaluations_0, val_mses_0, \
+                        val_evaluations_1, val_mses_1, \
+                        val_evaluations_2, val_mses_2, \
+                        val_evaluations_3, val_mses_3 = sess.run(
+                            [evaluation_list_0, mse_list_0,
+                             evaluation_list_1, mse_list_1,
+                             evaluation_list_2, mse_list_2,
+                             evaluation_list_3, mse_list_3],
                             feed_dict={
                                 l_x_0: np.asarray(val_true_l)[0:1, :, :, :],
                                 l_y_0: np.asarray(val_true_l)[0:1, :, :, :],
@@ -426,7 +372,6 @@ def train():
                         if mean(val_evaluations_0) <= FLAGS.select_score2 \
                                 and mean(val_evaluations_0) > FLAGS.select_score1 \
                                 and count < FLAGS.select_num:
-                            val_loss_list.append(val_losses_0)
                             val_evaluation_list.append(val_evaluations_0)
                             val_mse_list.append(val_mses_0)
                             select_files.append(l_val_files[j * 4 + 0])
@@ -435,7 +380,6 @@ def train():
                         if mean(val_evaluations_1) <= FLAGS.select_score2 \
                                 and mean(val_evaluations_1) > FLAGS.select_score1 \
                                 and count < FLAGS.select_num:
-                            val_loss_list.append(val_losses_1)
                             val_evaluation_list.append(val_evaluations_1)
                             val_mse_list.append(val_mses_1)
                             select_files.append(l_val_files[j * 4 + 1])
@@ -444,7 +388,6 @@ def train():
                         if mean(val_evaluations_2) < FLAGS.select_score2 \
                                 and mean(val_evaluations_2) >= FLAGS.select_score1 \
                                 and count < FLAGS.select_num:
-                            val_loss_list.append(val_losses_2)
                             val_evaluation_list.append(val_evaluations_2)
                             val_mse_list.append(val_mses_2)
                             select_files.append(l_val_files[j * 4 + 2])
@@ -453,7 +396,6 @@ def train():
                         if mean(val_evaluations_3) < FLAGS.select_score2 \
                                 and mean(val_evaluations_3) >= FLAGS.select_score1 \
                                 and count < FLAGS.select_num:
-                            val_loss_list.append(val_losses_3)
                             val_evaluation_list.append(val_evaluations_3)
                             val_mse_list.append(val_mses_3)
                             select_files.append(l_val_files[j * 4 + 3])
@@ -462,7 +404,6 @@ def train():
                         if count >= FLAGS.select_num:
                             break
 
-                    print("LOSS:", mean(val_loss_list))
                     print("MSE:", mean_list(val_mse_list), mean(mean_list(val_mse_list)))
                     print("MEAN Dice Score:", mean_list(val_evaluation_list), mean(mean_list(val_evaluation_list)))
                     print("select_files:", select_files)

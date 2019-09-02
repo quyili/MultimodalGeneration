@@ -34,23 +34,6 @@ tf.flags.DEFINE_bool('step_clear', False,
 tf.flags.DEFINE_integer('epoch', 100, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
-tf.flags.DEFINE_string('stage', "train", 'default: train')
-
-
-def mean(list):
-    return sum(list) / float(len(list))
-
-
-def mean_list(lists):
-    out = []
-    lists = np.asarray(lists).transpose([1, 0])
-    for list in lists:
-        out.append(mean(list))
-    return out
-
-
-def random(n, h, w, c):
-    return np.random.uniform(0., 1., size=[n, h, w, c])
 
 
 def read_file(l_path, Label_train_files, index):
@@ -59,49 +42,6 @@ def read_file(l_path, Label_train_files, index):
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     L_arr_ = L_arr_.astype('float32')
     return L_arr_
-
-
-def read_files(x_path, l_path, Label_train_files, index):
-    train_range = len(Label_train_files)
-    T1_img = SimpleITK.ReadImage(x_path + "/" + Label_train_files[index % train_range])
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    T1_arr_ = SimpleITK.GetArrayFromImage(T1_img)
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    T1_arr_ = T1_arr_.astype('float32')
-    L_arr_ = L_arr_.astype('float32')
-    return T1_arr_, L_arr_
-
-
-def expand(train_M_arr_, train_L_arr_):
-    L0 = np.asarray(train_M_arr_ == 0., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L1 = (np.asarray(train_L_arr_ == 0., "float32") * np.asarray(train_M_arr_).astype('float32')).reshape(
-        [train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L2 = np.asarray(train_L_arr_ == 1., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L3 = np.asarray(train_L_arr_ == 2., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L4 = np.asarray(train_L_arr_ == 3., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L5 = np.asarray(train_L_arr_ == 4., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L_arr = np.concatenate([L0, L1, L2, L3, L4, L5], axis=-1)
-    return L_arr
-
-
-def save_codes(code_f_rm, code_f, checkpoints_dir, file_index):
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(code_f)[0, :, :, :]),
-                         checkpoints_dir + "/samples/true_code_f_" + str(file_index) + ".mha")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(code_f_rm)[0, :, :, :]),
-                         checkpoints_dir + "/samples/true_code_f_rm_" + str(file_index) + ".mha")
-
-
-def save_images(image_list, checkpoints_dir, file_index):
-    val_true_m, val_f, val_f_r, val_f_rm = image_list
-
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_m)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_m_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_f_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_r)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_f_r_" + str(file_index) + ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_rm)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/fake_f_rm_" + str(file_index) + ".tiff")
 
 
 def read_filename(path, shuffle=True):
@@ -254,9 +194,6 @@ def train():
                 m_train_files = read_filename(FLAGS.L)
                 index = 0
                 epoch = 0
-                train_loss_list = []
-                train_evaluation_list = []
-                train_evaluation_code_list = []
                 while not coord.should_stop() and epoch <= FLAGS.epoch:
 
                     train_true_m = []
@@ -272,23 +209,19 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_losses, train_evaluations, train_evaluation_codes = sess.run(
-                        [optimizers, loss_list_0, evaluation_list_0, evaluation_code_list_0],
-                        feed_dict={
-                            m_0: np.asarray(train_true_m)[0:1, :, :, :],
-                            m_1: np.asarray(train_true_m)[1:2, :, :, :],
-                            m_2: np.asarray(train_true_m)[2:3, :, :, :],
-                            m_3: np.asarray(train_true_m)[3:4, :, :, :],
+                    sess.run(optimizers,
+                             feed_dict={
+                                 m_0: np.asarray(train_true_m)[0:1, :, :, :],
+                                 m_1: np.asarray(train_true_m)[1:2, :, :, :],
+                                 m_2: np.asarray(train_true_m)[2:3, :, :, :],
+                                 m_3: np.asarray(train_true_m)[3:4, :, :, :],
 
-                            l_m_0: np.asarray(train_true_l_m)[0:1, :, :, :],
-                            l_m_1: np.asarray(train_true_l_m)[1:2, :, :, :],
-                            l_m_2: np.asarray(train_true_l_m)[2:3, :, :, :],
-                            l_m_3: np.asarray(train_true_l_m)[3:4, :, :, :],
+                                 l_m_0: np.asarray(train_true_l_m)[0:1, :, :, :],
+                                 l_m_1: np.asarray(train_true_l_m)[1:2, :, :, :],
+                                 l_m_2: np.asarray(train_true_l_m)[2:3, :, :, :],
+                                 l_m_3: np.asarray(train_true_l_m)[3:4, :, :, :],
 
-                        })
-                    train_loss_list.append(train_losses)
-                    train_evaluation_list.append(train_evaluations)
-                    train_evaluation_code_list.append(train_evaluation_codes)
+                             })
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
