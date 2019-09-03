@@ -168,7 +168,7 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 
 In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and vertical edges detection maps from a real image, each performs maximum  reduce and minimum reduce to obtain two edge detection fusion maps, then each fusion map calculate the difference with average pixel value, the two difference maps are binarized according to the set pixel threshold, and the two binary images are summed and then completely binarized. The final result is the structural feature map we need.
 
-\subsection{Training of Structural Feature Map Generation}
+\subsection{Structural Feature Map Generation Training}
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/feature_train}
@@ -202,7 +202,7 @@ When generating the structural feature map, \cite{4shin2018medical} still needs 
 Where, for the constraint of approximate normal distribution matrix, we do not use the original VAE encoder loss, but add a code matrix distribution discriminator to provide adversarial loss for VAE encoder.Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1.
 The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item: 
 \begin{itemize}
-	\item \textbf{Code matrix discriminator loss} 
+	\item \textbf{Code matrix distribution discriminator loss} 
 	\begin{center}
 		$loss_{FD_f}=\Vert{FD_f(code_{f,g})-1}\Vert_{2}^{2}+\Vert{FD_f(code_f)}\Vert_{2}^{2}$
 	\end{center}
@@ -234,8 +234,8 @@ The complete loss items are as follows, where $\omega_{i,j}$ is the weight of ea
 	\end{center}
 \end{itemize}
 
-\subsection{Real MRI reconstruction and translation training}
-We perform MRI reconstruction and translation training on real MRI, using a set of MRI encoder, MRI decoder and MRI discriminator, as well as a set of lesion label generation components. All of the components of this training process will be described in the subsequent multimodal MRI generation training section, and the training process in this section is synchronized with the multimodal MRI generation training. We constrain each component to complete our assigned tasks during multimodal MRI generation by synchronous MRI reconstruction and translation training on real data. In addition, we also use a code discriminator to guide the consistency of the two training processes. The discriminator training process is shown in Fig.~\ref{train_D}
+\subsection{Reconstruction and translation training}
+We perform reconstruction and transformation training on real data and synchronize with the multi-modal MRI generation training in subsequent chapters to constrain each component to complete our specified tasks in the multimodal MRI generation process. In addition, we also use a code matrix distribution discriminator to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}
 
 \begin{figure}
 	\centering
@@ -244,57 +244,52 @@ We perform MRI reconstruction and translation training on real MRI, using a set 
 	\label{trans_train}
 \end{figure}
 
-As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder encodes the real MRI $x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, then we connect it to different conditional vectors and decode all the modalities through the decoder. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, connect all the re-encoded semantic feature maps with the conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. 【】
-In the above process, we use the lesion label $l_i$ of the original input modality $x_i$ as supervised label for the lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
+As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder encodes the real MRI $x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, then we connect it to different conditional matrixes and decode all the modalities through the decoder. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, connect all the re-encoded semantic feature maps with the conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. In the above process, we use the lesion label $l_i$ of the original input modality $x_i$ as supervised label for the lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
 
-Our discriminator components are updated independently, and other components are updated through an optimizer. The loss items include the adversarial loss and category guidance loss provided by discriminator, self-supervised loss of MRI reconstruction, self-supervised loss of MRI cycle-reconstruction, consistency loss of MRI cycle-reconstruction, semantic consistency loss, and supervised loss of lesion generation. 
-
-The detailed losses are as follows, where $x_{r,i}$ represents the MRI reconstruct from modality $i$, and $x_{t,j,i}$ refers to MRI of modality $i$ translated by modality $j$. $d_{t, j, i}$ and $c_{t, j, i}$ are the true/false discrimination and category discrimination results of the discriminator for $x_{t, i, j}$, $x_{cr,j,i}$ represents MRI that translate from modality $i$ to modality $j$ then translate back to modality $i$; $code_i$ represents the semantic feature map obtained from $x_i$ by encoder, $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder; $l_i$ represents the real lesion label of $x_i$, $l_{r,i}$ represents the lesion label generated by lesion label generation components from $x_i$ :
-
+The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of modality $i$ translated by modality $j$; $d_{t, j, i}$ and $c_{t, j, i}$ are the True/False discrimination and category discrimination results of the discriminator for $x_{t, i, j}$; $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder:
 \begin{itemize}
-	\item \textbf{discriminator loss}
+	\item \textbf{Reconstruction and translation discriminator loss}
 	\begin{center}
 		$loss_{D,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{adversarial loss and category guidance loss}
+	\item \textbf{Adversarial and category guidance loss}
 	\begin{center}
 		$loss_{G,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{self-supervised loss of MRI reconstruction}
+	\item \textbf{MRI reconstruction loss}
 	\begin{center}
 		$loss_{sv}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{self-supervised loss of MRI cycle-reconstruction}
-	
+	\item \textbf{MRI cycle-reconstruction loss}
 	\begin{center}
 		$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{consistency loss of MRI cycle-reconstruction}
+	\item \textbf{MRI cycle-reconstruction consistency loss}
 	\begin{center}
 		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,k\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{semantic consistency loss}
+	\item \textbf{Semantic consistency loss}
 	\begin{center}
 		$loss_{code,consistency}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{supervised loss of lesion generation}
+	\item \textbf{Lesion generation loss}
 	\begin{center}
 		$loss_{sv,l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 	\end{center}
 	
 \end{itemize}
 
-\subsection{Fusion of structural feature maps and lesion segmentation labels}
+\subsection{Structural feature map and lesion label fusion}
 
-When the structural feature map is fused with the lesion segmentation label, we first generate structural feature map $f_g$ from random standard normal distribution matrix, then randomly select the appropriate lesion segmentation label $label$, and then the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels, and each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. The pixel value of the same area as the corresponding category segmentation position is 1 and the rest is 0, so that each 1 pixel area is registered with each segmentation area in the segmentation label. Next, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses the information of $f_g$ and $label$.
+First we generate structural feature map $f_g$, then randomly select the appropriate lesion segmentation label $label$, and then the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels, and each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. Each 1 pixel area is registered with each segmentation area in the original segmentation label. At last, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses the information of $f_g$ and $label$.
 
-If the structural feature map $f'$ is extracted from the random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information in random label $l$ and affect the fusion generation MRI, so $f'$ needs to eliminate the tumor information before fusing with the random label $label$, and get the structural feature map $f$ without tumor information, so that the tumor information of the generated image is only derived from the label $label$. We generate a  mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by the Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
+If the structural feature map $f'$ is extracted from the random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information at random label $l$ and affect the fusion generation MRI, so $f'$ needs to eliminate the tumor information before fusing with the random label $label$, and get the structural feature map $f$ without tumor information, so that the tumor information of the generated image is only derived from the label $label$. We generate a mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by the Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
 
 Since the location of the randomly selected lesion may appear outside the brain contour of structural feature map, we need to use the Algorithm~\ref{alg:2} to obtain the brain region mask $mask$ of the structural feature map. If the product of $mask$ and the selected $label$ is 0, then the tumor label pixel is inside the brain contour of $mask$, which can be adopted, otherwise the $label$ needs to be re-selected.
 
@@ -302,14 +297,14 @@ Since the location of the randomly selected lesion may appear outside the brain 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/mm_mri_generate}
-	\caption{generation of Multimodal MRI.}
+	\caption{Generation of multimodal MRI.}
 	\label{mm_mri_generate}
 \end{figure}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\columnwidth]{figures/D}
-	\caption{reconstruction and translation training of real MRI and discriminator training during multimodal MRI generation training.}
+	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
 
@@ -319,42 +314,32 @@ Our discriminator components are updated independently. The lesion label generat
 
 The specific loss items of the multimodal MRI generation process are as follows, where $d_{i}$ and $c_{i}$ are the rue/false discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}
 \begin{itemize}
-	\item \textbf{true/false Discrimination loss of Discriminator}
+	\item \textbf{Generation Discriminator loss }
 	\begin{center}
-		$loss_{D}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2})$
+		$loss_{D}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2})+\sum\limits_{i=0}(\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
 	\end{center}
 
-	\item \textbf{modality Discrimination loss of Discriminator}
+	\item \textbf{Generation adversarial and category guidance loss}
 	\begin{center}
-	$loss_{D,class}=\sum\limits_{i=0}(\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
-	\end{center}
-
-	\item \textbf{adversarial loss}
-	\begin{center}
-		$loss_{G}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2})$
+		$loss_{G}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2})+\sum\limits_{i=0}(\Vert{c_{g,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{Modality category guidance loss}
-	\begin{center}
-		$loss_{G,class}=\sum\limits_{i=0}(\Vert{c_{g,i}-i}\Vert_{2}^{2})$
-	\end{center}
-	
-	\item \textbf{Reconstruction self-supervised loss of input structural feature map}
+	\item \textbf{Structural feature map consistency loss}
 	\begin{center}
 		$loss_{sv,f}=\sum\limits_{i=0}(\Vert{f-f_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{supervised loss of Lesion label generation }
+	\item \textbf{Lesion label generation loss}
 	\begin{center}
 		$loss_{sv,l}=\sum\limits_{i=0}(\Vert{label-label_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{supervision loss of MRI registration}
+	\item \textbf{MRI registration loss}
 	\begin{center}
 		$loss_{trans}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{g,i}-x_{gt,j,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{semantic consistency loss}
+	\item \textbf{Semantic consistency loss}
 	\begin{center}
 		$loss_{trans,code}=\Vert{code_g-code_{g,i}}\Vert_{2}^{2}+\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})$
 	\end{center}
