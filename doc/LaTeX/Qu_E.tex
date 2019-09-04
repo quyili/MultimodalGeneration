@@ -103,7 +103,7 @@ In a large number of data-driven medical image intelligent processing tasks, the
 \end{abstract}
 	
 \section{Introduction}
-Magnetic resonance imaging (MRI) is a common medical image that can have multiple modalities depending on imaging parameters, such as T1, T2, T1c and so on. Different modalities have different reference values for doctors. To make accurate judgments, doctors often need multiple modal images to compare with each other. In training and learning of medical image intelligent processing tasks, we often expect to obtain more modal images, such as medical image processing tasks based on Convolutional Neural Networks (CNN)\cite{86krizhevsky2012imagenet} or Generative Adversarial Networks (GAN)\cite{25goodfellow2014generative}. 
+MRI is a common medical image that can have multiple modalities depending on imaging parameters, such as T1, T2, T1c and so on. Different modalities have different reference values for doctors. To make accurate judgments, doctors often need multiple modal images to compare with each other. In training and learning of medical image intelligent processing tasks, we often expect to obtain more modal images, such as medical image processing tasks based on CNN\cite{86krizhevsky2012imagenet} or GAN\cite{25goodfellow2014generative}. 
 
 When obtaining different modalities from the same part of the same patient  through different imaging techniques, these modalities are considered to be registered if the imaging position and the viewing angle are identical.  Compared with unimodal data, the registered multimodal image data can provide more information, can support more complex application scenarios, meet the training data requirements of deep neural networks, and help to provide  intelligent diagnostic services more efficient and more reliable. For doctors, it takes longer to acquire images of different modalities and requires patient patience. For researchers of medical image intelligent processing tasks, multimodal MRI datasets are scarce, and the collection is very difficult, especially rare disease data, and the registered data is even rarer, which makes many training tasks impossible. Therefore, the application of image synthesis technology to extend datasets, translate existing unimodal images to registered multimodal images, or generate registered multimodal images from random noise matrix, has a wide range of uses and far-reaching significance.
 
@@ -117,11 +117,11 @@ But in the field of medical image synthesis, there still are many researches of 
 At present, there are various problems in the research of medical image synthesis, such as the difficulty of expanding the number of modalities, the need to registered training data, relying on complex large networks, the inability to add or retain lesions, the inability to generate from random matrices, and the need of additional training data, etc. Moreover, the evaluation of synthetic data in most studies relies on the evaluation of artificial visual effects by experienced physicians, without objective quantitative evaluation. Therefore, we design a registered multimodal MRI generation scheme based on the Conditional Generative Adversarial Networks (CGAN)\cite{70mirza2014conditional}. With unsupervised learning method, training data does not need to be registered. Our solution can receive a random normal distribution as input to generate a set of multimodal registration MRI with setted lesions. We perform multimodal brain MRI generation experiments with tumor segmentation labels on BRATS2015, and verify the effectiveness of lesion information and the availability of synthetic data in tumor lesion segmentation experiments. We will open all the code. In general, our contribution is in the following three areas:
 
 \begin{itemize}
-	\item \textbf{Extraction and Generation of Structural Feature Maps}
+	\item \textbf{Extraction \& Generation of Structural Feature Maps}
 	We propose an extraction method for anatomical features for medical images. Without additional anatomical segmentation labels or label extraction training, structural feature maps can be extracted directly from real images of arbitrary modalities . The extraction method can directly obtain the anatomical features of real images, and improve the quality of synthetic images without introducing additional parameters and computation overhead. We also train a structural feature map generator to generate structural feature maps from multidimensional normal distribution. The random generation method can generate rich and diverse structural feature maps indefinitely.
 	\item \textbf{Synthesis of Registered Multimodal MRI with Lesion}
 	We use randomly generated structural feature maps to fuse with random lesion labels and then synthesize the registered multimodal MRIs through the generator. We explore a variety of lesion generation guidance methods to achieve effective mapping of lesions based on input lesion labels during multimodal MRI synthesis. In training, no registration data is required except for the lesion label. The synthetic data is registered, and the input lesion label is the lesion label of the synthetic data. Our solution enables fast and easy construction of registered multimodal MRI datasets with lesions label.
-	\item \textbf{Objective Verification Method for Synthetic Data Availability}
+	\item \textbf{Objective Verification for Synthetic Data Availability}
 	We construct datasets with different amount of synthetic and real data to train the lesion segmentor, and verify that the synthetic data can be used as pre-training data and enhanced data in the medical image intelligent processing tasks to improve the generalization ability of the model and improve the segmentation precision. Compared with the traditional subjective evaluation method of synthetic image quality, we present the availability of synthetic data in intelligent lesion processing tasks more objectively.
 \end{itemize}
 
@@ -132,7 +132,7 @@ We perform our scheme on multimodal brain MRI synthesis task , in which the synt
 \subsection{Architecture}
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.98\columnwidth]{figures/architecture}
+	\includegraphics[width=0.95\columnwidth]{figures/architecture}
 	\caption{Architecture.}
 	\label{architecture}
 \end{figure}
@@ -171,7 +171,7 @@ In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and ver
 \subsection{Structural Feature Map Generation Training}
 \begin{figure}
 	\centering
-	\includegraphics[width=0.98\columnwidth]{figures/feature_train}
+	\includegraphics[width=0.95\columnwidth]{figures/feature_train}
 	\caption{Training of Random Structural Feature Map Generation.}
 	\label{feature_train}
 \end{figure}
@@ -239,7 +239,7 @@ We perform reconstruction and transformation training on real data and synchroni
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.98\columnwidth]{figures/trans_train}
+	\includegraphics[width=0.95\columnwidth]{figures/trans_train}
 	\caption{Auxiliary modality reconstruction and modality translation training.}
 	\label{trans_train}
 \end{figure}
@@ -303,7 +303,7 @@ Since the location of the randomly selected lesion may appear outside the brain 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\columnwidth]{figures/D}
+	\includegraphics[width=0.75\columnwidth]{figures/D}
 	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
@@ -358,8 +358,8 @@ The loss item of the above three schemes in reconstruction and translation train
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\columnwidth]{figures/segmentation}
-	\caption{lesion segmentation.}
+	\includegraphics[width=0.8\columnwidth]{figures/segmentation}
+	\caption{Lesion segmentation.}
 	\label{segmentation}
 \end{figure}
 Besides, we will also independently train the segmentor of these three schemes. In different experiments, we will train the segmentor in each scheme with different amounts of synthetic data or real data. The loss function of the training is as follows, where $label_i$ is the supervised label and $label_{r,i}$ is the segmentation result:
@@ -372,7 +372,7 @@ Besides, we will also independently train the segmentor of these three schemes. 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/make_data}
-	\caption{construction of synthetic datasets.}
+	\caption{Construction of synthetic datasets.}
 	\label{make_data}
 \end{figure}
 As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining mask from structural feature map through the mask generator $MASK$.
@@ -387,7 +387,6 @@ Due to the influence of the operation that removing tumor information during tra
 		\State \indent$contours = OpenCV.findContours(f)$
 		\State \indent$mask =OpenCV.drawContours(f,contours)$
 		\State \indent\textbf{return} $mask$
-		\State \textbf{end function}
 		\State \textbf{do} 
 		\State \indent$f = DC_f()$
 		\State \indent$m = MASK(f)$
@@ -412,15 +411,15 @@ We performed random scaling, rotation, translation, flipping, etc. on the origin
 \subsection{Training settings}
 The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. We used Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the 4 modals results on the 2D images, and each experiment is trained four times to retain the best results.
 
-\subsection{Contrast experiments of lesion generation guidance method}
+\subsection{Experiments of lesion generation methods}
 \label{label gen methods tests}
 As shown in the Table~\ref{label_test}, we trained 4 tumor lesion segmentors using the Multiple segmentors scheme on the BRATS2015 training dataset and test them on the BRATS2015 testing dataset. Then we used the trained segmentors to segment the unfiltered synthetic data from different lesion generation guidelines.
 
-\subsection{Verification experiments of synthetic data availability}
+\subsection{Experiments of synthetic data availability}
 As shown in the Table~\ref{availability_test}, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then used the mixed dataset for segmentation training using the Multiple segmentors scheme, and evaluated the segmentation ability of the model on real BRATS2015 testing dataset. All experiments were fully trained with the same number of iterations, which equal the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first. And in real first experiments and synthetic first experiments, the training iteration steps of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
 
 \section{Results}
-\subsection{Results of lesion generation guidance method contrast experiments}
+\subsection{Results of Lesion generation methods}
 \begin{table}[t]
 	\caption{Results of lesion generation guidance method contrast experiments}\smallskip
 	\centering
@@ -441,7 +440,7 @@ As shown in the Table~\ref{availability_test}, we mixed real BRATS2015 training 
 
 As shown in the Table~\ref{label_test}, the segmentation test results reach the MSE of 0.026 and the Dice Score of 0.915 of the segmentors trained on the real data. And these segmentators segment the unfiltered synthetic data from the Multiple segmentors scheme to get MSE 0.043 and Dice Score 0.838. From results, three different lesion label generation methods have achieved good segmentation results, where the Multiple segmentors scheme is best. 
 
-\subsection{Results of synthetic data availability verification experiments}
+\subsection{Results of synthetic data availability}
 \begin{table}[t]
 	\caption{Results of synthetic data availability verification experiments}\smallskip
 	\centering
@@ -494,14 +493,14 @@ Generally, when there is a large amount of real data, a small amount of syntheti
 As Figure~\ref{generated_f} shows the examples of the structural feature map we generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multimodal MRI.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/Fs}
+	\includegraphics[width=0.7\linewidth]{figures/Fs}
 	\caption{Synthetic structural feature maps.}
 	\label{generated_f}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\linewidth]{figures/F_to_MRI}
+	\includegraphics[width=0.8\linewidth]{figures/F_to_MRI}
 	\caption{Multimodal MRIs generated from the structural feature maps and lesion labels.}
 	\label{generated_mri}
 \end{figure}
