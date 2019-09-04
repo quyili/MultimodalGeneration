@@ -307,21 +307,18 @@ Since the location of the randomly selected lesion may appear outside the brain 
 	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
+We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ to fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different one-hot conditional matrixes and decodes by MRI decoder to obtains synthesis images of different modalities. These synthesis images are then perform modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in synchronous reconstruction and translation training. 
 
-We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$, and merge with the lesion segmentation label by the above fusion method. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generated from the fusion map is easier to train than the multimodal MRI generated directly from random noise, and the generated MRI is more reasonable and realistic. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different conditional vectors and decodes by MRI decoder to obtains synthesis image of different modalities. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI. And images of each modalities are then encoded by MRI encoder to obtain semantic feature maps. These semantic feature maps are stacked with different conditional vectors and decoded by MRI decoder to realize the modal translation. We constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used a set of lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label.
-
-Our discriminator components are updated independently. The lesion label generation component is only trained and updated using real data in reconstruction and translation training, and is used in this section only to provide lesion generation guidance loss for MRI generation components. Other components are updated through an optimizer.
-
-The specific loss items of the multimodal MRI generation process are as follows, where $d_{i}$ and $c_{i}$ are the rue/false discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}
+The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
 \begin{itemize}
 	\item \textbf{Generation Discriminator loss }
 	\begin{center}
-		$loss_{D}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2})+\sum\limits_{i=0}(\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
+		$loss_{D}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2}+\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
 	\end{center}
 
 	\item \textbf{Generation adversarial and category guidance loss}
 	\begin{center}
-		$loss_{G}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2})+\sum\limits_{i=0}(\Vert{c_{g,i}-i}\Vert_{2}^{2})$
+		$loss_{G}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{Structural feature map consistency loss}
@@ -341,7 +338,7 @@ The specific loss items of the multimodal MRI generation process are as follows,
 	
 	\item \textbf{Semantic consistency loss}
 	\begin{center}
-		$loss_{trans,code}=\Vert{code_g-code_{g,i}}\Vert_{2}^{2}+\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})$
+		$loss_{trans,code}=\sum\limits_{i=0}(\Vert{code_g-code_{g,i}}\Vert_{2}^{2})+\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})$
 	\end{center}
 	
 \end{itemize}
@@ -351,62 +348,56 @@ The specific loss items of the multimodal MRI generation process are as follows,
 We design the following three lesion label generation components to provide guidance loss for lesion generation in multimodal MRI generation training:
 \begin{itemize}
 	\item \textbf{Single segmentor} 
-	Each modality is segmented from synthetic MRI by a common complete segmentor to obtain the respective lesion label.
+	Each MRI modality  is segmented by a common complete segmentor.
 	\item \textbf{Single lesion encoder + multiple lesion decoders} 
-	Different modality segmentors are combined by a common lesion encoder and different lesion decoders. 
+	Each MRI modality  is segmented by a segmentors which is combined by a common lesion encoder and different lesion decoders. 
 	\item \textbf{multiple segmentors} 
-	Each modality is segmented from synthetic MRI by a separate complete segmentor to obtain the respective lesion label.
+	Each MRI modality  is segmented by a different complete segmentor.
 \end{itemize}
-The loss item of the above three schemes is consistent with the loss item described above, and each component of the three methods is only trained using supervised loss of lesion label generation in real MRI reconstruction and translation training.
+The loss item of the above three schemes in reconstruction and translation training is consistent with the loss item described above. And in the generation training, they only provide the same lesion label generation loss for MRI generation components, no learning.
 
-\subsection{construction of synthetic datasets}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\columnwidth]{figures/segmentation}
+	\caption{lesion segmentation.}
+	\label{segmentation}
+\end{figure}
+Besides, we will also independently train the segmentor of these three schemes. In different experiments, we will train the segmentor in each scheme with different amounts of synthetic data or real data. The loss function of the training is as follows, where $label_i$ is the supervised label and $label_{r,i}$ is the segmentation result:
+\begin{center}
+	$loss_{l,independent}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
+\end{center}
+
+\subsection{Constructing synthetic datasets}
 \label{make dataset}
-As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the randomly generated structural feature map with the randomly selected lesion label from the random lesion label set. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Finally, we synthesize registered multimodal MRI from the fusion map by multimodal MRI generation components. And the selected lesion label is the lesion label of the synthetic multimodal MRI. Thus, we can construct a multimodal registration MRI dataset with lesion labels from a random normal distribution matrix.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/make_data}
 	\caption{construction of synthetic datasets.}
 	\label{make_data}
 \end{figure}
+As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining mask from structural feature map through the mask generator $MASK$.
 
-Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator to generate a structural feature map and its corresponding mask. We perform Gaussian blur\cite{92wink2004denoising} on the structural feature map , and then use the contour search algorithm and filling algorithm provided by OpenCV to obtain all the closed contours of the Gaussian blur image and fill them. So we get a mask by the traditional algorithm, and finally we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, the main brain contour of the structural feature map is defective, the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as follows:
+Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MASK$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV[TODO] to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
 \begin{algorithm}
 	\caption{Structural feature map filtering}
 	\label{alg:3}
 	\begin{algorithmic}[1]
-		\State \textbf{function} $GetMaskFromF(img)$
-		\State \indent$contours = OpenCV.findContours(img)$
-		\State \indent$img =OpenCV.drawContours(img，contours)$
-		\State \indent\textbf{return} $img$
+		\State Input a MAE threshold $mae$
+		\State \textbf{function} $get\_mask(f)$
+		\State \indent$contours = OpenCV.findContours(f)$
+		\State \indent$mask =OpenCV.drawContours(f,contours)$
+		\State \indent\textbf{return} $mask$
 		\State \textbf{end function}
 		\State
-		\State $mae=0.05$
 		\State \textbf{do} 
-		\State \indent$f, m = Generator()$
-		\State \indent$m'= GetMaskFromF(f)$
+		\State \indent$f = DC_f()$
+		\State \indent$m = MASK(f)$
+		\State \indent$m'= get\_mask(f)$
 		\State \textbf{while} $MAE(m',m) <= mae$
 	\end{algorithmic}  
 \end{algorithm}
 
-In the multimodal MRI obtained from the selected structural feature map and matched lesion label, there are also samples with poor lesion generation. At this point, we segment our synthetic MRI data through a pre-trained lesion segmentor, the segmentation result is then evaluated with the input lesion label for the dice score, and the sample with the score above the set threshold (default 0.95) can be filtered.
-
-After multiple filtering, we obtain the final synthetic dataset consisting of random structural feature maps, paired masks, random lesion segmentation labels, and multimodal MRI. We require that the segmented and filtered dataset can achieve a score of 0.98 or more on the segmentor trained on real data before it can be used in the data availability verification experiment.
-
-\subsection{Training of lesion segmentation}
-\begin{figure}
-	\centering
-	\includegraphics[width=0.45\columnwidth]{figures/segmentation}
-	\caption{lesion segmentation.}
-	\label{segmentation}
-\end{figure}
-
-Our lesion segmentation training process is shown in Fig. In order to verify whether the lesion data in the synthetic data is consistent with the random input lesion label, we use real data to train an independent lesion segmentor for each modality, and perform segmentation ability test on real datasets. The trained segmenter is then used to segment the image in the synthetic dataset, and the segmentation result is compared with the input lesion label to verify that the synthetic image contains the expected lesion information. In addition, we also use a data set constructed from synthetic data and real data of different data volumes to train the lesion segmentor. After training, the segmentation ability test is performed on real test dataset to verify the availability of  synthetic data.
-
-The loss item of the segmentation training is as follows, where $label_{r,i}$ represents lesion label generated by the lesion segmentor from $x_i$
-\begin{center}
-		$loss_{l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
-\end{center}
-
+In the generated multimodal MRIs, there still are samples with poor lesion generation. At this point, we segment our synthetic MRI data through the lesion segmentor pre-trained on real data.We filter according to the segmentation evaluation score(default threshold is 0.95 on dice score). After multiple filtering, we obtain the final synthetic dataset consisting of structural feature maps, masks,  lesion segmentation labels, and multimodal MRI.
 
 \section{Experiments}
 
@@ -437,7 +428,7 @@ first.
 \begin{table}[t]
 	\caption{Lesion segmentation result}\smallskip
 	\centering
-	\resizebox{.8\columnwidth}{!}{		
+	\resizebox{.75\columnwidth}{!}{		
 		\smallskip\begin{tabular}{llll}		
 			\toprule	
 			synthetic method&test data type &MSE   &Dice Score \\	
@@ -518,7 +509,7 @@ As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fu
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.75\linewidth]{figures/F_to_MRI}
+	\includegraphics[width=0.9\linewidth]{figures/F_to_MRI}
 	\caption{Multimodal MRI generated from the random structural feature map and lesion label.}
 	\label{generated_mri}
 \end{figure}

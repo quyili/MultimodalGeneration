@@ -316,13 +316,11 @@ GAN逐渐被应用到各个部位的器官，诸如脑部MRI到CT图像的转换
 	\label{train_D}
 \end{figure}
 
-我们通过算法~\ref{alg:1}从真实MRI提取结构特征图$f$,并随机选择真实的病灶标签$label$，通过前述结构特征图与病灶分割标签的方法进行融合。结构特征图与分割标签图的信息融合图包含了目标部位的基本解剖结构信息和病灶信息，从该图生成多模态图比直接从随机噪声生成多模态MRI更易训练，生成的MRI更加合理和逼真。多模态MRI生成过程如图~\ref{mm_mri_generate}所示，首先，我们使用一个单独的融合图编码器对信息融合图进行编码得到语义特征图，语义特征图与不同的条件向量堆叠后通过一个MRI解码器解码，得到不同模态的合成图。我们通过一个MRI鉴别器提供的对抗性损失和类别指导损失来使得生成的各个模态的合成图逼近于真实的MRI。各个模态的合成图再通过一个MRI编码器得到语义特征图，然后这些语义特征图与不同的条件向量堆叠后通过MRI解码器解码就实现了模态的转换，我们通过损失对所有语义特征图和转换图进行一致性约束，以此保证了生成的多模态MRI的互相配准。此外，我们使用一组病灶标签生成组件从各合成MRI中分割还原出肿瘤病灶分割标签，确保生成的多模态影像根据输入病灶标签生成了对应的病灶内容。
-We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$, and merge with the lesion segmentation label by the above fusion method. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generated from the fusion map is easier to train than the multimodal MRI generated directly from random noise, and the generated MRI is more reasonable and realistic. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different conditional vectors and decodes by MRI decoder to obtains synthesis image of different modalities. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI. And images of each modalities are then encoded by MRI encoder to obtain semantic feature maps. These semantic feature maps are stacked with different conditional vectors and decoded by MRI decoder to realize the modal translation. We constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used a set of lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label.
+我们通过算法~\ref{alg:1}从真实MRI提取结构特征图$f$,并随机选择真实的病灶标签$label$与之融合。得到的融合图包含了目标部位的基本解剖结构信息和病灶信息。多模态MRI生成过程如图~\ref{mm_mri_generate}所示，首先，我们使用一个单独的融合图编码器对信息融合图进行编码得到语义特征图，语义特征图与不同的条件向量堆叠后通过一个MRI解码器解码，得到不同模态的合成图。
+这些合成图再通过MRI编码器和MRI解码器进行模态间的互相转换。
+我们通过一个MRI鉴别器提供的对抗性损失和类别指导损失来使得生成的各个模态的合成图逼近于真实的MRI。
+我们通过损失对所有语义特征图和转换图进行一致性约束，以此保证了生成的多模态MRI的互相配准。此外，我们使用一组病灶标签生成组件从各合成MRI中分割还原出肿瘤病灶分割标签，确保生成的多模态影像根据输入病灶标签生成了对应的病灶内容。
 
-我们的鉴别器组件独立更新；病灶标签生成组件仅在前面章节中的真实MRI重建和转换训练中采用真实数据训练更新，在本节合成训练过程中病灶标签生成组件仅用于为MRI生成组件提供病灶生成指导损失；其他的组件通过一个优化器更新训练。多模态MRI生成过程的具体损失函数如下，其中$d_{i}$和$c_{i}$为鉴别器$D(x_i)$的真假鉴别输出和类别鉴别输出,$d_{g,i}$,$c_{g,i}$为$D(x_{g,i})$的输出；$x_{g,i}$为模态$i$的合成图，$x_{gt,j,i}$为模态$j$的合成图转换生成的模态$i$的转换图；$code_g$为输入信息编码后的语义特征图，$code_{g,i}$为$x_i$编码后的语义特征图；$l$为输入的标签图，$l_{g,i}$为$x_{g,i}$通过病灶标签生成组件得到的标签图；$f$为输入的结构特征图，$f_{g,i}$为从$x_{g,i}$通过算法~\ref{alg:1}提取得到的结构特征图：
-Our discriminator components are updated independently. The lesion label generation component is only trained and updated using real data in reconstruction and translation training, and is used in this section only to provide lesion generation guidance loss for MRI generation components. Other components are updated through an optimizer.
-
-The specific loss items of the multimodal MRI generation process are as follows, where $d_{i}$ and $c_{i}$ are the rue/false discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}
 \begin{itemize}
 	\item \textbf{鉴别器真假鉴别损失 true/false Discrimination loss of Discriminator}
 	\begin{center}
@@ -369,34 +367,38 @@ The specific loss items of the multimodal MRI generation process are as follows,
 \subsection{病灶标签生成指导方案Lesion label generation guidance method}
 \label{label gen methods}
 我们设计了如下三种病灶标签生成组件来提供多模态MRI生成训练中病灶生成的指导损失：
-We design the following three lesion label generation components to provide guidance loss for lesion generation in multimodal MRI generation training:
 \begin{itemize}
 	\item \textbf{单分割器方案Single segmentor} 
 	每个模态由一个共同的完整的分割器从合成的MRI还原得到各自的病灶标签。
-	Each modality is segmented from synthetic MRI by a common complete segmentor to obtain the respective lesion label.
 	\item \textbf{单病灶编码器+多病灶解码器方案Single lesion encoder + multiple lesion decoders} 
 	不同模态的分割器由一个共同的病灶编码器与不同的病灶解码器组合得到.
-	Different modality segmentors are combined by a common lesion encoder and different lesion decoders. 
 	\item \textbf{多分割器方案multiple segmentors} 
 	每个模态由一个独立的完整的分割器从合成的MRI还原得到各自的病灶标签。
-	Each modality is segmented from synthetic MRI by a separate complete segmentor to obtain the respective lesion label.
 \end{itemize}
 上述三种方案的损失函数与前文所述损失函数一致，三种方案中的各个组件均只使用真实MRI重建和转换训练中的病灶生成监督损失进行训练。
-The loss item of the above three schemes is consistent with the loss item described above, and each component of the three methods is only trained using supervised loss of lesion label generation in real MRI reconstruction and translation training.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.45\columnwidth]{figures/segmentation}
+	\caption{病灶分割.lesion segmentation.}
+	\label{segmentation}
+\end{figure}
+另外，我们还将单独的对这三种方案进行独立的训练。在不同的实验中，我们将采用不同量的合成数据或真实数据对各个方案中的分割器进行训练。训练的损失函数如下，其中$label_i$是监督标签，$label_{r,i}$是分割结果：
+\begin{center}
+	$loss_{l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
+\end{center}
 
 \subsection{构建合成数据集construction of synthetic datasets}
-\label{make dataset}
-如图所示，我们通过训练好的结构特征图解码器即可从随机生成的正太分布矩阵生成任意数量的结构特征图。然后，我们对原始的标签集进行了随机的缩放、旋转、平移、翻转等改变得到随机病灶标签集。我们再将随机生成的结构特征图和从随机病灶标签集中随机选择的病灶标签融合，同样地，我们通过掩膜生成器$MASK$生成结构特征图的掩膜，可以筛选得到合适的随机病灶标签。最后，我们通过多模态MRI生成组件即可从融合信息图中生成配准的多模态MRI，选取的病灶标签就是生成的多模态MRI的病灶标签。由此，我们可以从随机正态分布矩阵构建带有病灶标签的多模态配准MRI数据集。
-As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the randomly generated structural feature map with the randomly selected lesion label from the random lesion label set. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Similarly, we can select suitable random lesion labels by obtaining mask from structural feature map through the mask generator $MASK$. Finally, we synthesize registered multimodal MRI from the fusion map by multimodal MRI generation components. And the selected lesion label is the lesion label of the synthetic multimodal MRI. Thus, we can construct a multimodal registration MRI dataset with lesion labels from a random normal distribution matrix.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/make_data}
 	\caption{构建合成数据集.construction of synthetic datasets.}
 	\label{make_data}
 \end{figure}
+\label{make dataset}
+如图所示，我们通过训练好的结构特征图解码器即可从随机生成的正太分布矩阵生成任意数量的结构特征图。然后，我们对原始的标签集进行了随机的缩放、旋转、平移、翻转等改变得到随机病灶标签集。我们再将随机生成的结构特征图和从随机病灶标签集中随机选择的病灶标签融合，同样地，我们通过掩膜生成器$MASK$生成结构特征图的掩膜，可以筛选得到合适的随机病灶标签。最后，我们通过多模态MRI生成组件即可从融合信息图中生成配准的多模态MRI，选取的病灶标签就是生成的多模态MRI的病灶标签。由此，我们可以从随机正态分布矩阵构建带有病灶标签的多模态配准MRI数据集。
 
-由于训练时去除肿瘤信息操作的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图和其对应的掩膜，我们先对结构特征图进行高斯模糊\cite{92wink2004denoising}，再采用OpenCV【】提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用传统算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用传统算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
-Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator to generate a structural feature map and its corresponding mask. We perform Gaussian blur\cite{92wink2004denoising} on the structural feature map , and then use the contour search algorithm and filling algorithm provided by OpenCV to obtain all the closed contours of the Gaussian blur image and fill them. So we get a mask by the traditional algorithm, and finally we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, the main brain contour of the structural feature map is defective, the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as follows:
+由于训练时去除肿瘤信息操作的影响，合成的结构特征图中，存在一些质量较差的脑轮廓未闭合结构特征图，我们对此设计了一个结构特征图过滤算法。首先，我们使用生成器生成一张结构特征图的掩膜，我们先对结构特征图进行高斯模糊\cite{92wink2004denoising}，再采用OpenCV【】提供的轮廓查找算法和填充算法获取高斯模糊图所有的闭合轮廓并进行填充，这样我们得到一个采用传统算法的得到的掩膜，最后我们计算两张掩膜的均差(MAE)。若MAE低于我们设定的阈值则说明该结构特征图主要的脑部轮廓较为完整，该特征图可以使用；否则则说明该结构特征图主要的脑部轮廓有残缺，采用传统算法得到的掩膜内部是空心的，与生成器生成的掩膜差异较大，因此，需要重新生成。算法表示如下：
+
 \begin{algorithm}
 	\caption{Structural feature map filtering}
 	\label{alg:3}
@@ -416,28 +418,8 @@ Due to the influence of the operation that removing tumor information during tra
 \end{algorithm}
 
 从筛选出来的结构特征图和匹配的病灶标签得到的多模态MRI中，同样存在病灶信息生成情况较差的样本。此时，我们通过预先训练好的病灶分割网络对我们的合成MRI数据进行分割，然后将分割结果与输入的病灶标签进行骰子评分评估，可以过滤得到评分高于设定阈值（默认0.95）的样本。
-In the multimodal MRI obtained from the selected structural feature map and matched lesion label, there are also samples with poor lesion generation. At this point, we segment our synthetic MRI data through a pre-trained lesion segmentor, the segmentation result is then evaluated with the input lesion label for the dice score, and the sample with the score above the set threshold (default 0.95) can be filtered.
 
 经过多重筛选，我们得到最终的由随机结构特征图、配对的掩膜、随机病灶分割标签、多模态MRI组成的合成数据集。我们要求经过分割过滤后的数据集在使用真实数据训练得到的分割器上能取得0.98以上的骰子分数，然后才能将其用于数据可用性验证实验。
-After multiple filtering, we obtain the final synthetic dataset consisting of random structural feature maps, paired masks, random lesion segmentation labels, and multimodal MRI. We require that the segmented and filtered dataset can achieve a score of 0.98 or more on the segmentor trained on real data before it can be used in the data availability verification experiment.
-
-\subsection{病灶分割训练}
-\begin{figure}
-	\centering
-	\includegraphics[width=0.45\columnwidth]{figures/segmentation}
-	\caption{病灶分割.lesion segmentation.}
-	\label{segmentation}
-\end{figure}
-
-我们的病灶分割训练过程如图所示，为了验证合成数据中是否生成了与随机输入的病灶标签一致的病灶信息，我们用真实的数据为每个模态单独训练一个独立的病灶分割网络，并在真实数据集中进行分割能力测试。然后使用训练好的分割器对合成数据集中的影像进行分割，将分割结果与输入的病灶标签比对评估，以此检验合成的影像中包含了预期的病灶信息。此外，我们还采用由不同数据量的合成数据和真实数据构建的数据集来训练病灶分割网络，训练充分后再在真实测试数据集上进行分割能力测试，以验证合成数据的可用性。
-Our lesion segmentation training process is shown in Fig. In order to verify whether the lesion data in the synthetic data is consistent with the random input lesion label, we use real data to train an independent lesion segmentor for each modality, and perform segmentation ability test on real datasets. The trained segmenter is then used to segment the image in the synthetic dataset, and the segmentation result is compared with the input lesion label to verify that the synthetic image contains the expected lesion information. In addition, we also use a data set constructed from synthetic data and real data of different data volumes to train the lesion segmentor. After training, the segmentation ability test is performed on real test dataset to verify the availability of  synthetic data.
-
-分割训练的损失函数如下，其中$label_{r,i}$表示$x_i$经过病灶分割器生成的病灶标签：
-The loss item of the segmentation training is as follows, where $label_{r,i}$ represents lesion label generated by the lesion segmentor from $x_i$
-\begin{center}
-		$loss_{l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
-\end{center}
-
 
 \section{实验Experiments}
 
