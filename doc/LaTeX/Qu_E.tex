@@ -195,42 +195,41 @@ When generating the structural feature map, \cite{4shin2018medical} still needs 
 \end{itemize}
 
 Where, for the constraint of approximate normal distribution matrix, we do not use the original VAE encoder loss, but add a code matrix distribution discriminator to provide adversarial loss for VAE encoder.Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1.
-The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item: 
+The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item,$mean()$ is the mean function: 
 \begin{itemize}
 	\item \textbf{Code matrix distribution discriminator loss} 
 	\begin{center}
-		$loss_{FD_f}=\Vert{FD_f(code_{f,g})-1}\Vert_{2}^{2}+\Vert{FD_f(code_f)}\Vert_{2}^{2}$
+		$loss_{code,d,f}=\Vert{FD_f(code_{f,g})-1}\Vert_{2}^{2}+\Vert{FD_f(code_f)}\Vert_{2}^{2}$
 	\end{center}
 	
 	\item \textbf{Structural feature map discriminator loss} 
 	\begin{center}
-		$loss_{D_f}=\Vert{D_f(f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g )}\Vert_{2}^{2}$
+		$loss_{d,f}=\Vert{D_f(f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g )}\Vert_{2}^{2}$
 	\end{center}
 	
 	\item \textbf{Adversarial loss} 
 	\begin{center}
-		$loss_{G_f}=\Vert{FD_f(code_f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g)-1}\Vert_{2}^{2}$
+		$loss_{g,f}=\Vert{FD_f(code_f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g)-1}\Vert_{2}^{2}$
 	\end{center}
 	
 	\item \textbf{Code matrix distribution loss } 
 	\begin{center}
 		$loss_{normal}=\Vert{mean(code_{f,mean})}\Vert_{2}^{2}+ \Vert{mean(exp(0.5\times code_{f,logvar}))-1}\Vert_{2}^{2}$
 	\end{center}
-	where $mean()$ is a mean function.
 	
 	\item \textbf{Structural feature map reconstruction loss} 
 	\begin{center}
-		$loss_{sv}=\Vert{f-f_r}\Vert_{2}^{2}+\Vert{f_r\times mask}\Vert_{2}^{2}$
+		$loss_{reconstruction,f}=\Vert{f-f_r}\Vert_{2}^{2}+\Vert{f_r\times mask}\Vert_{2}^{2}$
 	\end{center}
 	
 	\item \textbf{Mask reconstruction loss}
 	\begin{center}
-		$loss_{mask}=\Vert{mask-mask_r }\Vert_{2}^{2}+\Vert{f\times mask_r}\Vert_{2}^{2}+\Vert{f_r\times mask_r}\Vert_{2}^{2}+\Vert{f_g\times mask_g}\Vert_{2}^{2}$
+		$loss_{reconstruction,mask}=\Vert{mask-mask_r }\Vert_{2}^{2}+\Vert{f\times mask_r}\Vert_{2}^{2}+\Vert{f_r\times mask_r}\Vert_{2}^{2}+\Vert{f_g\times mask_g}\Vert_{2}^{2}$
 	\end{center}
 \end{itemize}
 
 \subsection{Reconstruction and translation training}
-We perform reconstruction and transformation training on real data and synchronize with the multimodal MRI generation training in subsequent chapters to constrain each component to complete our specified tasks in the multimodal MRI generation process. In addition, we also use a code matrix distribution discriminator to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}
+We perform reconstruction and transformation training on real data and synchronize with the multimodal MRI generation training in subsequent chapters to constrain each component to complete our specified tasks in the multimodal MRI generation process. In addition, we also use a code matrix distribution discriminator $FD$ to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}
 
 \begin{figure}
 	\centering
@@ -239,43 +238,39 @@ We perform reconstruction and transformation training on real data and synchroni
 	\label{trans_train}
 \end{figure}
 
-As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder encodes the real MRI $x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, then we connect it to different conditional matrixes and decode all the modalities through the decoder. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, connect all the re-encoded semantic feature maps with the conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. In the above process, we use the lesion label $l_i$ of the original input modality $x_i$ as supervised label for the lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
+As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder $EC$ encodes the real MRI $x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, then we connect it to different conditional matrixes and decode all the modalities through the decoder $DC$. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, connect all the re-encoded semantic feature maps with the conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. In the above process, we use the lesion label $l_i$ of the original input modality $x_i$ as supervised label for the lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
 
-The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of modality $i$ translated by modality $j$; $d_{t, j, i}$ and $c_{t, j, i}$ are the True/False discrimination and category discrimination results of the discriminator for $x_{t, i, j}$; $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder:
+The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of modality $i$ translated by modality $j$; $d_{t, j, i}$ and $c_{t, j, i}$ are the True/False discrimination and category discrimination results of the discriminator $D$ for $x_{t, i, j}$; $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder:
 \begin{itemize}
 	\item \textbf{Reconstruction and translation discriminator loss}
 	\begin{center}
-		$loss_{D,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
+		$loss_{d,1}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})+
+		\sum\limits_{i=0}(\Vert{FD(code_{i})-1}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{Adversarial and category guidance loss}
 	\begin{center}
-		$loss_{G,assist}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
+		$loss_{g,1}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{MRI reconstruction loss}
 	\begin{center}
-		$loss_{sv}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
+		$loss_{reconstruction}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{MRI cycle-reconstruction loss}
 	\begin{center}
-		$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})$
-	\end{center}
-	
-	\item \textbf{MRI cycle-reconstruction consistency loss}
-	\begin{center}
-		$loss_{cycle,consistency}=\sum\limits_{k=0,k\neq j,k\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
+		$loss_{cycle}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})+\sum\limits_{k=0,k\neq j,k\neq i}\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{Semantic consistency loss}
 	\begin{center}
-		$loss_{code,consistency}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})$
+		$loss_{code,1}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{Lesion generation loss}
 	\begin{center}
-		$loss_{sv,l}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
+		$loss_{lesion,1}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 	\end{center}
 	
 \end{itemize}
@@ -302,38 +297,38 @@ Since the location of the randomly selected lesion may appear outside the brain 
 	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
-We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ to fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different one-hot conditional matrixes and decodes by MRI decoder to obtains synthesis images of different modalities. These synthesis images are then perform modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in synchronous reconstruction and translation training. 
+We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ to fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder $EC_r$ to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different one-hot conditional matrixes and decodes by MRI decoder to obtains synthesis images of different modalities. These synthesis images are then perform modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in synchronous reconstruction and translation training. 
 
 The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
 \begin{itemize}
 	\item \textbf{Generation Discriminator loss }
 	\begin{center}
-		$loss_{D}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2}+\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
+		$loss_{d,2}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2}+\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})+\Vert{FD(code_{g})}\Vert_{2}^{2}$
 	\end{center}
 
-	\item \textbf{Generation adversarial and category guidance loss}
+	\item \textbf{Adversarial and category guidance loss}
 	\begin{center}
-		$loss_{G}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})$
+		$loss_{g,2}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})+\Vert{FD(code_{g})-1}\Vert_{2}^{2}$
 	\end{center}
 	
 	\item \textbf{Structural feature map consistency loss}
 	\begin{center}
-		$loss_{sv,f}=\sum\limits_{i=0}(\Vert{f-f_{g,i}}\Vert_{2}^{2})$
+		$loss_{f}=\sum\limits_{i=0}(\Vert{f-f_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{Lesion label generation loss}
 	\begin{center}
-		$loss_{sv,l}=\sum\limits_{i=0}(\Vert{label-label_{g,i}}\Vert_{2}^{2})$
+		$loss_{lesion,2}=\sum\limits_{i=0}(\Vert{label-label_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{MRI registration loss}
 	\begin{center}
-		$loss_{trans}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{g,i}-x_{gt,j,i}}\Vert_{2}^{2})$
+		$loss_{registration}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{x_{g,i}-x_{gt,j,i}}\Vert_{2}^{2})$
 	\end{center}
 	
 	\item \textbf{Semantic consistency loss}
 	\begin{center}
-		$loss_{trans,code}=\sum\limits_{i=0}(\Vert{code_g-code_{g,i}}\Vert_{2}^{2})+\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})$
+		$loss_{code,2}=\sum\limits_{i=0}(\Vert{code_g-code_{g,i}}\Vert_{2}^{2})+\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})$
 	\end{center}
 	
 \end{itemize}
@@ -343,11 +338,11 @@ The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/F
 As shown in Fig.~\ref{segmentation}, we design the following three lesion label generation components to provide guidance loss for lesion generation in multimodal MRI generation training:
 \begin{itemize}
 	\item \textbf{Single segmentor} 
-	Each MRI modality  is segmented by a common complete segmentor.
+	Each MRI modality  is segmented by a common complete segmentor $SEG$.
 	\item \textbf{Single lesion encoder + multiple lesion decoders} 
-	Each MRI modality  is segmented by a segmentors which is combined by a common lesion encoder and different lesion decoders. 
+	Each MRI modality  is segmented by a segmentors which is combined by a common lesion encoder $EC_{l}$ and different lesion decoders $EC_{l,i}$. 
 	\item \textbf{Multiple segmentors} 
-	Each MRI modality  is segmented by a different complete segmentor.
+	Each MRI modality  is segmented by a different complete segmentor $SEG_i$.
 \end{itemize}
 The loss item of the above three schemes in reconstruction and translation training is consistent with the loss item described above. And in the generation training, they only provide the same lesion label generation loss for MRI generation components, no learning.
 
@@ -357,9 +352,9 @@ The loss item of the above three schemes in reconstruction and translation train
 	\caption{Lesion segmentation.}
 	\label{segmentation}
 \end{figure}
-Besides, we will also independently train the segmentor of these three schemes. In different experiments, we will train the segmentor in each scheme with different amounts of synthetic data or real data. The loss function of the training is as follows, where $label_i$ is the supervised label and $label_{r,i}$ is the segmentation result:
+Besides, we will also independently train the segmentors of these three schemes. In different experiments, we will train the segmentor in each scheme with different amounts of synthetic data or real data. The loss function of the training is as follows, where $label_i$ is the supervised label and $label_{r,i}$ is the segmentation result:
 \begin{center}
-	$loss_{l,independent}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
+	$loss_{segmentation}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 \end{center}
 
 \subsection{Constructing synthetic datasets}
@@ -416,7 +411,7 @@ As shown in the Table~\ref{availability_test}, we mixed real BRATS2015 training 
 \section{Results}
 \subsection{Results of Lesion generation methods}
 \begin{table}[t]
-	\caption{Results of lesion generation guidance method contrast experiments}\smallskip
+	\caption{Lesion generation methods experiments}\smallskip
 	\centering
 	\resizebox{.75\columnwidth}{!}{		
 		\smallskip\begin{tabular}{llll}		
@@ -437,7 +432,7 @@ As shown in the Table~\ref{label_test}, the segmentation test results reach the 
 
 \subsection{Results of synthetic data availability}
 \begin{table}[t]
-	\caption{Results of synthetic data availability verification experiments}\smallskip
+	\caption{Synthetic data availability verification experiments}\smallskip
 	\centering
 	\resizebox{.95\columnwidth}{!}{
 		\smallskip\begin{tabular}{lllllll}
@@ -500,7 +495,7 @@ As Figure~\ref{generated_f} shows the examples of the structural feature map we 
 	\label{generated_mri}
 \end{figure}
 
-\section{Conclusion and future work}
+\section{Conclusion}
 Based on the conditional generation antagonism network, we realized the generation of registered multimodal MRI from the random normal distribution matrix through unsupervised training, and could add the lesion information freely. 
 We verified through lesion segmentation experiments that synthetic MRI can be used as pre-training data or enhanced data for intelligent medical image processing tasks and can significantly improve the generalization ability of the model.
 In this paper, our contributions include the following:
@@ -512,7 +507,7 @@ In this paper, our contributions include the following:
 	
 \end{itemize}
 
-In the future, we will further improve our method in CT, PET and other modes, in heart, lung and other parts, in detection, classification and other lesion processing tasks. We are committed to further simplifying the training process and synthesizing higher quality medical images.	
+%In the future, we will further improve our method in CT, PET and other modes, in heart, lung and other parts, in detection, classification and other lesion processing tasks. We are committed to further simplifying the training process and synthesizing higher quality medical images.	
 
 %\section{ Acknowledgments}
 
