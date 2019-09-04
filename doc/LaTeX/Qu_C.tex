@@ -425,34 +425,25 @@ GAN逐渐被应用到各个部位的器官，诸如脑部MRI到CT图像的转换
 
 \subsection{BRATS2015数据集BRATS2015 dataset}
 我们采用了公开的BRATS2015\cite{91menze:hal-00935640}数据集进行实验，该数据集包含已配准的T1、T2、T1c、Flair四个模态，训练集每个模态有274张3D MRI，大小为155$\times$240$\times$240，同时配有274张相同尺寸的肿瘤分割标签。我们将样本按9:1划分训练集和测试集，取每张3D MRI第55-105间的50个slice构建2D的数据集。在数据预处理阶段，我们将每张图进行了标准化。
-We use the open dataset BRATS2015 for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we standardized each image.
 
 \subsection{BRATS合成数据集BRATS synthetic dataset}
 我们采用~\ref{make dataset}中的方法构建了一个配准的包含T1、T2、T1c、Flair四个模态的具有肿瘤标签的合成数据集。合成数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的合成。
-We constructed a registered synthetic dataset with tumor labels containing four modalities of T1, T2, T1c, and Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{BRATS增强数据集BRATS Enhanced dataset}
 我们对原始的BRATS2015数据集进行了随机的缩放、旋转、平移、翻转等改变，得到增强数据。增强数据集样本的尺寸与BRATS2015数据集一致，但样本的多少可以根据实验需要进行任意数量的生产。
-We performed random scaling, rotation, translation, flipping, etc. on the original BRATS2015 dataset to obtain enhanced data. The size of the enhanced dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{训练设置Training settings}
 每项实验的迭代次数与BRATS2015训练数据集的100个epoch相等；基础学习率分别为1e-4，无权重衰减；采用优亚当优化器，beta1取0.5；在输入层进行0.1的Dropout；Batch size为1；在生成器中使用均值滤波器的参数进行参数初始化，具体来说，对于一个卷积核尺寸为$[k,k,f]$的卷积层，我们初始化该层的$k\times k\times f$个卷积核参数均为$1/(k\times k\times f)$, ，偏置量为0。我们采用骰子分数\cite{95dice1945measures}和均方差（MSE）\cite{94prasad1990the}进行分割结果的评估，评估结果为2D图像的评估结果的均值，每项实验训练四次保留最佳结果。
-The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. In generator components, the mean kernel filter parameter is used to initialize the convolution kernel parameter. Specifically, for a convolutional layer with a convolution kernel size of $[k,k,f]$, we initialize the $k\times k\times f$ convolution kernel parameters of this layer to $1/(k \times k\times f)$, and the bias is 0. In discriminator, we use a random normal initializer with mean of 0 and standard deviation of 0.2, and the bias is 0. We used Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the evaluation results of the 2D images, and each experiment is trained four times to retain the best results.
 
 \subsection{病灶生成组件各方案对比实验Contrast experiment of each method of lesion generation component}
 \label{label gen methods tests}
-我们使用在处理后的BRATS2015数据集的训练集对病灶分割网络进行了相同迭代步数的充分训练，然后我们在BRATS2015测试数据集和通过不同病灶生成指导方案得到的未经分割器筛选的的合成数据集上分别进行分割测试，除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。其中，我们在真实数据上采用的分割方案为章节~\ref{label gen methods}中的多分割器方案，即每个模态各训练一个独立的分割器。
-We used the training set of the processed BRATS2015 dataset to fully train the lesion segmentor for the same iteration step, and then we selected the test set of the BRATS2015 dataset and  the unfiltered synthetic dataset by segmentor from different lesion generation component methods. Except for the difference in the source of the test data, other conditions such as the sample size of the test data are identical. Among them, the segmentation method we adopt on the real data is the multiple segmentors method in the section~\ref{label gen methods}, that is, each modality trains a separate segmentor.
+我们在BRATS2015训练集上采用4SEG方案训练了肿瘤病灶的分割器，然后我们在BRATS2015测试数据集上使用该分割器对通过不同病灶生成指导方案得到的未经分割器筛选的的合成数据进行分割测试。除了测试数据来源的不同外，测试数据的样本量等其他条件完全相同。其中，我们在真实数据上采用的分割方案为章节~\ref{label gen methods}中的多分割器方案，即每个模态各训练一个独立的分割器。
 
 \subsection{合成数据可用性验证实验 verification experiment of Synthetic data availability}
 如表所示，我们将真实的BRATS2015训练数据与BRATS合成数据进行了不同数量的混合，再用构建的混合数据集进行分割训练，最后再在真实的BRATS2015测试数据上进行模型的分割能力评估，所有实验都进行相同迭代步数的充分训练，除了训练数据源的不同外其他条件完全相同。同时，我们还进行了单独的合成数据的训练、真实数据与通常的数据增强数据的混合训练作为对比。我们设定了随机混合、先真后假、先假后真三种数据混合方式。我们选用实验~\ref{label gen methods tests}中，在合成数据集上表现最好的分割方案来作为验证实验的分割方案。
-As shown in the table, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then used the mixed data set for segmentation training, and finally evaluated the segmentation ability of the model on real BRATS2015 test data. All experiments were fully trained with the same number of iterations. Except for the difference in the source of the training data, other conditions such as the sample size of the test data are identical. At the same time, as a comparison, we also conduct a separate training of synthetic data, mixed training of real data and normal enhancement data. We set up three data mixing modes: random mixing, real first, and synthetic
-first.
 
 \section{结果Results}
-\subsection{实验量化结果Quantitative result}
-
-\subsubsection{病灶检测实验结果Lesion segmentation result}
+\subsection{病灶检测实验结果Lesion segmentation result}
 \begin{table}[t]
 	\caption{病灶检测实验结果.Lesion segmentation result}\smallskip
 	\centering
@@ -461,7 +452,7 @@ first.
 			\toprule	
 			synthetic method&test data type &MSE   &Dice Score \\	
 			\midrule		
-			-&real 		   				&0.026 &0.915 \\					
+			4SEG&real 		   				&0.026 &0.915 \\					
 			1SEG&synthetic     			&0.053 &0.741 \\			
 			1ECL+4DCL&synthetic     	&0.055 &0.808 \\		
 			4SEG&synthetic     			&0.043 &0.838 \\
@@ -472,9 +463,8 @@ first.
 \end{table}
 
 如表~\ref{label_test}所示，我们在BRATS2015训练数据经过相同的迭代步数的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。之后我们使用这个表现优秀的分割网络对我们未经过滤的合成数据进行分割测试，在与真实测试数据集相同数据量的合成数据集上，不同病灶标签生成组件设计方案都取得了较好的分割结果，其中每个模态训练一个独立的分割器的方案取得了最好的结果，Dice Score也达到了0.838。
-As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fully trained by the same iteration step, the segmentation test results reach the MSE of 0.026 and the Dice Score of 0.915 on the real test data set. Then we use this excellent segmentor to segment our unfiltered synthetic data. On the synthetic dataset with the same amount of data as the real test dataset, three different lesion label generation component methods have achieved good segmentation results. As a result, the method in which each modality trains a separate segmentor achieves the best results, and the Dice Score also reaches 0.838.
 
-\subsubsection{合成数据可用性验证实验结果Verification experiment results for synthetic data availability}
+\subsection{合成数据可用性验证实验结果Verification experiment results for synthetic data availability}
 \begin{table}[t]
 	\caption{合成数据可用性验证实验结果.Verification experiment results for synthetic data availability}\smallskip
 	\centering
@@ -483,63 +473,57 @@ As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fu
 			\toprule
 			Num &real data &synthetic data & Enhanced data  & mixing modes  & MSE &Dice Score\\
 			\midrule
-			1& 15070 & 0  &0 &- &0.026 &0.915 \\
-			31& 15070$\times$ 0.5 & 0  &0 &- &0.032 &0.902 \\
+			1-1& 15070 & 0  &0 &- &0.026 &0.915 \\
+			2-31& 15070$\times$ 0.5 & 0  &0 &- &0.032 &0.902 \\
 			
-			2& 0 & 15070  &0 &- &0.205 &0.708 \\
-			3& 0 & 15070$\times$ 2  &0 &random mixing &0.206 &0.736 \\
-			4& 0 & 15070$\times$ 3  &0 &random mixing &0.205 &0.754 \\
+			3-2& 0 & 15070  &0 &- &0.205 &0.708 \\
+			4-3& 0 & 15070$\times$ 2  &0 &random mixing &0.206 &0.736 \\
+			5-4& 0 & 15070$\times$ 3  &0 &random mixing &0.205 &0.754 \\
 			
-			7& 15070$\times$ 0.1 & 15070  &0 &synthetic
+			6-7& 15070$\times$ 0.1 & 15070  &0 &synthetic
 			first &0.031 &0.908 \\
-			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &synthetic
+			7-8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &synthetic
 			first &0.028 &0.907 \\
-			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &synthetic
+			8-9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &synthetic
 			first &0.030 &0.907 \\	
 			
-			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &random mixing &0.041 &0.850 \\
-			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &random mixing &0.031 &0.904 \\
-			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &random mixing &0.024 &0.935 \\
+			9-13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &random mixing &0.041 &0.850 \\
+			10-12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &random mixing &0.031 &0.904 \\
+			11-14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &random mixing &0.024 &0.935 \\
 			
-			32& 15070 & 15070$\times$ 0.2 &0  &random mixing &0.025 &0.921 \\
-			33& 15070 & 15070$\times$ 0.5 &0  &random mixing &0.023 &0.939 \\
-			34& 15070 & 15070$\times$ 0.8 &0  &random mixing &0.026 &0.916 \\
-			15& 15070 & 15070 &0            &random mixing &0.027 &0.913 \\
-			18& 15070 & 15070$\times$ 2  &0 &random mixing &0.033 &0.901 \\
-			19& 15070 & 15070$\times$ 3  &0 &random mixing &0.034 &0.897 \\
+			12-32& 15070 & 15070$\times$ 0.2 &0  &random mixing &0.025 &0.921 \\
+			13-33& 15070 & 15070$\times$ 0.5 &0  &random mixing &0.023 &0.939 \\
+			14-34& 15070 & 15070$\times$ 0.8 &0  &random mixing &0.026 &0.916 \\
+			15-15& 15070 & 15070 &0            &random mixing &0.027 &0.913 \\
+			16-18& 15070 & 15070$\times$ 2  &0 &random mixing &0.033 &0.901 \\
+			17-19& 15070 & 15070$\times$ 3  &0 &random mixing &0.034 &0.897 \\
 			
-			35& 15070 &0 & 15070$\times$ 0.2   &random mixing &0.027 &0.911 \\
-			36& 15070 &0 & 15070$\times$ 0.5   &random mixing &0.025 &0.927 \\
-			37& 15070 &0 & 15070$\times$ 0.8   &random mixing &0.026 &0.920 \\
-			22& 15070 &0 & 15070           &random mixing &0.026 &0.915 \\
-			23& 15070 &0 & 15070$\times$ 2 &random mixing &0.032 &0.898 \\
-			24& 15070 &0 & 15070$\times$ 3 &random mixing &0.036 &0.885 \\
+			18-35& 15070 &0 & 15070$\times$ 0.2   &random mixing &0.027 &0.911 \\
+			19-36& 15070 &0 & 15070$\times$ 0.5   &random mixing &0.025 &0.927 \\
+			20-37& 15070 &0 & 15070$\times$ 0.8   &random mixing &0.026 &0.920 \\
+			21-22& 15070 &0 & 15070           &random mixing &0.026 &0.915 \\
+			22-23& 15070 &0 & 15070$\times$ 2 &random mixing &0.032 &0.898 \\
+			23-24& 15070 &0 & 15070$\times$ 3 &random mixing &0.036 &0.885 \\
 			
-			16& 15070 & 15070 &0  &real first &0.195 &0.795 \\
-			17& 15070 & 15070 &0  &synthetic
+			24-16& 15070 & 15070 &0  &real first &0.195 &0.795 \\
+			25-17& 15070 & 15070 &0  &synthetic
 			first &0.021 &0.940 \\
 			\bottomrule
 		\end{tabular}
 	}
 	\label{use_test}
 \end{table}
-如表~\ref{use_test}所示，我们在不同的成分和数量的数据集上都经过训练后再在真实测试集上评估，得到了表中的结果。
-实验1在BRATS2015训练数据经过100个epoch的充分训练后，在真实的测试数据集上，分割测试结果达到了0.026的MSE和0.915的Dice Score。
-从表中实验2-4单独使用合成数据训练的结果看，合成数据与真实数据的训练结果仍然有一定差距，这说明合成数据不能完全替代真实数据充当训练集。
-实验7-9结果表明使用大量合成数据进行预训练，再在少量真实数据上微调能达到和实验1全使用真实数据训练十分接近的结果。这说明合成数据作为预训练数据集非常合适。
-实验12-14中一定比例的真实数据与合成数据随机混合，比例不同取得的结果差异很大，当两者比例相近时分割结果与实验1相差不大，合成数据比例偏高时，结果比实验1低，合成数据比例偏低时，能提供模型的泛化能力，取得高于实验1的结果。
-实验32-34，15,18-19中进一步尝试在全量的真实数据中添加不同数据量的合成数据，我们发现较少的合成数据能提高模型的泛化能力，起到数据增强的作用，合成数据越多增强效果越好，但当合成数据到达一定比例后再继续增加将取得反效果，此时合成数据越多越使得真实数据的影响力下降。
-实验35-37和实验22-24中，我们使用通常的数据增强方法产生的增强数据来与前述合成数据的增强效果进行对比，我们发现在增强数据量与增强效果的变化趋势上，两者是一致的，但两者在具体的增强效果随着增强数据量变化的变化曲线上是有一些差异的。整体来说，在模型对增强数据量的敏感程度上，增强数据更加鲁棒，但合成数据能取得的增强效果的上限比曾强数据要高很多。
-在实验16-17中，我们对比实验15，发现与真实数据相同数量的合成数据，作为预训练数据先于真实数据训练时表现最好，作为增强数据与真实数据混合训练时效果居中，作为补充训练数据集在真实数据集之后训练则表现很差。
-【TO DO】As shown in table ~\ref{use_test}, we have been trained on data sets with different components and quantities and then evaluated on real test sets to get the results in the table.In experiment 1, after the full training of 100 epochs of BRATS2015 training data, the segmentation test results reached 0.026 MSE and 0.915 Dice Score on the real test data set.According to the training results of experiment 2-4 using synthetic data alone in the table, there is still a certain gap between the training results of the synthetic data and the real data, which indicates that the synthetic data cannot completely replace the real data as the training set.The results of experiment 7-9 show that pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data can achieve a result very close to that of training with real data in experiment 1. This indicates that the synthesized data is very suitable as a pre-training data set.Experiment 12-14 a percentage of the real data and synthetic data random mixing proportion of different result difference is very big, when both scale similar segmentation result with experiment 1 were similar, synthesis of high data rate, the result is lower than the experiment 1, synthetic data rate is low, can provide the generalization ability of the model, obtained is higher than the result of experiment 1.Experiment a further attempt to 32-34, 18th - 19 in the total amount of real data synthesis data of adding different amount of data, we found that fewer synthetic data can improve the generalization ability of the model, have the effect of data enhancement, synthetic data enhancement effect, the better, the more but when synthetic data to increase again after a certain proportion will have the opposite effect, the synthetic data, the more the influence of the real data.Experiment 35 to 37 and 22 to 24, we use the enhancement data generated by a data enhancement method to enhancement effect compared with the synthetic data, we found the data volume increased and enhanced effect on the change tendency of the two is consistent, but the difference in specific enhancement effect as the change of enhanced data volume change curve there are some differences. Overall, in terms of the sensitivity of the model to the amount of enhanced data, the enhanced data is more robust, but the upper limit of the enhancement effect that can be achieved by the composite data is much higher than that of the former strong data.In experiment 16-17, we compared experiment 15 and found that the synthesized data with the same amount of real data had the best performance as pre-training data before real data training, the mixed training effect as enhanced data and real data was in the middle, and the training performance after real data set as supplementary training data was very poor.
+如表~\ref{use_test}所示，实验NO.3-NO.5的结果表明，在训练中合成数据还不能完全替代真实数据。
+实验NO.6-NO.8结果表明使用大量合成数据进行预训练再在少量真实数据上微调能取得和完全使用真实数据训练十分接近的结果。
+实验NO.9-NO.11中，不同的混合比例取得的结果差异也很大。当两者比例相近时，分割结果与实验NO.1相差不大。合成数据比例偏高时，合成数据会干扰模型对真实数据的学习，结果比实验NO.1低。合成数据比例偏低时，合成数据能提高模型的泛化能力，取得高于实验NO.1的结果。
+实验NO.12-NO.17中我们进一步尝试在全量的真实数据中添加不同数据量的合成数据，我们发现添加少量的合成数据能起到数据增强的作用，并且合成数据越多增强效果越好，但当合成数据到达一定比例后再继续增加将取得反效果。
+实验NO.18-NO.23中，我们使用通常的数据增强方法产生的增强数据来与前述合成数据的增强效果进行对比，我们发现在增强数据量与增强效果的变化趋势上，两者是一致的，但两者在具体的增强效果随着增强数据量变化的变化曲线上是有一些差异的。整体来说，在模型对增强数据量的敏感程度上，增强数据更加鲁棒，但合成数据能取得的增强效果的上限比曾强数据要高很多。
+在实验NO.24-NO.25中，我们对比实验NO.15发现，合成数据作为预训练数据先于真实数据训练时表现最好，作为补充训练数据集在真实数据集之后训练则表现很差，作为增强数据与真实数据混合训练时可以取得一定的增强效果。
 
-总的来说，我们发现当真实数据量较多时，可以使用少量的合成数据作为增强数据混合使用，也可以使用大量的合成数据先进行预训练，再在真实数据集上训练；当真实数据较少时，可以使用大量的合成数据进行预训练，再在少量真实数据上微调，最后能得到和完全真实数据训练相竞争的结果，这点我们与\cite{4shin2018medical}的结论一致；我们不建议完全使用合成数据进行训练，与\cite{4shin2018medical}的结论不同的是我们也不建议使用合成数据进行补充训练。
-【TO DO】AsIn general, we find that when the amount of real data is large, a small amount of composite data can be used as mixed enhancement data, or a large amount of composite data can be used for pre-training before training on real data sets. When real data is scarce, large amounts of synthetic data can be used for pre-training, and then fine-tuned on a small amount of real data to obtain results that compete with the training of completely real data. This is consistent with the conclusion of \cite{4shin2018medical}. We do not recommend full use of synthetic data for training, and contrary to the conclusion of \cite{4shin2018medical}, we do not recommend supplementary training using synthetic data either.
+总的来说，当真实数据量较多时，可以使用少量的合成数据作为增强数据混合使用，也可以使用大量的合成数据先进行预训练，再在真实数据集上训练；当真实数据较少时，可以使用大量的合成数据进行预训练，再在少量真实数据上微调，最后能得到和完全真实数据训练相竞争的结果，这点我们与\cite{4shin2018medical}的结论一致；我们不建议完全使用合成数据进行训练，与\cite{4shin2018medical}的结论不同的是我们也不建议使用合成数据进行补充训练。
 
 \subsection{合成图像展示}
 图~\ref{generated_f}展示了我们从随即正态分布矩阵生成的结构特征图示例。图~\ref{generated_mri}中展示了我们从随即正态分布矩阵生成的结构特征图、从结构特征图生成的对应的掩膜、随机选择的病灶分割标签、从结构特征图生成和的病灶分割标签生成的多模态MRI的几个示例。
-
-【TO DO】AsFigure ~\ref{generated_f} shows an example of the structural feature graph we generated from the random normal distribution matrix. In figure ~\ref{generated_mri}, we show several examples of structural feature maps generated from random normal distribution matrices, corresponding masks generated from structural feature maps, randomly selected lesion segmentation labels, and multi-modal MRI generated from structural feature maps and lesion segmentation labels.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/Fs}
@@ -557,29 +541,18 @@ As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fu
 \section{结论与未来工作}
 
 我们基于条件生成对抗网络，通过无监督的训练，实现了从随机正态分布矩阵生成配准的多模态MRI并能自由添加病灶信息。我们通过病灶分割实验验证了合成的MRI可以作为智能医学影像处理任务的预训练数据或增强数据来使用并能显著提高模型的泛化能力。具体来说，我们的贡献包括以下几点：
-
-Based on the conditional generation antagonism network, we realized the generation of registered multimodal MRI from the random normal distribution matrix through unsupervised training, and could add the lesion information freely. 
-We verified through lesion segmentation experiments that synthetic MRI can be used as pre-training data or enhanced data for intelligent medical image processing tasks and can significantly improve the generalization ability of the model.
-In this paper, our contributions include the following:
 \begin{itemize}
 	\item 我们提出了一种从医学影像直接提取解剖结构信息的结构特征图提取方法，无须训练，无需额外数据；
-	We propose a structural feature map extraction method to extract anatomical structure information directly from medical images without training or additional label data;
 	\item 我们提出了一种从多维正态分布采样生成结构特征图的随机结构特征图生成方法，使结构特征图能便捷地大量生成并具有良好的多样性；
-	We propose a random structure feature map generation method to generate structural feature maps from multi-dimensional normal distribution sampling;
 	\item 我们实现了从结构特征图及随机选择的病灶标签生成具有对应病灶信息的配准的多模态MRI；
-	We realized the generation of registered multimodal MRI with corresponding lesion information from structural feature map and randomly selected lesion labels;
 	\item 我们通过多项在合成数据上进行的数据可用性测试，验证了合成数据可以作为智能医学影像处理任务的预训练数据或增强数据来使用。
-	We verified that synthetic data can be used as pre-training data or enhanced data for intelligent medical image processing tasks through a number of data usability tests on our synthetic dataset.
-	
 \end{itemize}
 
 未来，我们将进一步在CT、PET等不同模态，心脏、肺等其他部位，检测、分类等其他病灶处理任务中对我们的方法进行改进。我们将致力于进一步简化训练过程和合成更高质量的医学影像。
-In the future, we will further improve our method in CT, PET and other modes, in heart, lung and other parts, in detection, classification and other lesion processing tasks. We are committed to further simplifying the training process and synthesizing higher quality medical images.	
 
 \section{ Acknowledgments}
 
 感谢NSCCGZ提供的计算支持。
-Thanks for the computing support provided by NSCCGZ.
 
 
 \bibliography{refer}

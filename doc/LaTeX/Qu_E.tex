@@ -343,15 +343,15 @@ The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/F
 	
 \end{itemize}
 
-\subsection{Lesion label generation guidance method}
+\subsection{Lesion generation guidance method}
 \label{label gen methods}
-We design the following three lesion label generation components to provide guidance loss for lesion generation in multimodal MRI generation training:
+As shown in Fig.~\ref{segmentation}, we design the following three lesion label generation components to provide guidance loss for lesion generation in multimodal MRI generation training:
 \begin{itemize}
 	\item \textbf{Single segmentor} 
 	Each MRI modality  is segmented by a common complete segmentor.
 	\item \textbf{Single lesion encoder + multiple lesion decoders} 
 	Each MRI modality  is segmented by a segmentors which is combined by a common lesion encoder and different lesion decoders. 
-	\item \textbf{multiple segmentors} 
+	\item \textbf{Multiple segmentors} 
 	Each MRI modality  is segmented by a different complete segmentor.
 \end{itemize}
 The loss item of the above three schemes in reconstruction and translation training is consistent with the loss item described above. And in the generation training, they only provide the same lesion label generation loss for MRI generation components, no learning.
@@ -402,115 +402,108 @@ In the generated multimodal MRIs, there still are samples with poor lesion gener
 \section{Experiments}
 
 \subsection{BRATS2015 dataset}
-We use the open dataset BRATS2015 for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we standardized each image.
+We use the open dataset BRATS2015[TODO] for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we standardized each image.
 
 \subsection{BRATS synthetic dataset}
-We constructed a registered synthetic dataset with tumor labels containing four modalities of T1, T2, T1c, and Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
+We constructed a registered synthetic dataset with tumor labels containing four modalities of T1/T2/T1c/Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset samples is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
-\subsection{BRATS Enhanced dataset}
+\subsection{BRATS enhanced dataset}
 We performed random scaling, rotation, translation, flipping, etc. on the original BRATS2015 dataset to obtain enhanced data. The size of the enhanced dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{Training settings}
-The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. In generator components, the mean kernel filter parameter is used to initialize the convolution kernel parameter. Specifically, for a convolutional layer with a convolution kernel size of $[k,k,f]$, we initialize the $k\times k\times f$ convolution kernel parameters of this layer to $1/(k \times k\times f)$, and the bias is 0. In discriminator, we use a random normal initializer with mean of 0 and standard deviation of 0.2, and the bias is 0. We used Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the evaluation results of the 2D images, and each experiment is trained four times to retain the best results.
+The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. We used Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the 4 modals results on the 2D images, and each experiment is trained four times to retain the best results.
 
-\subsection{Contrast experiment of lesion generation method}
+\subsection{Contrast experiments of lesion generation guidance method}
 \label{label gen methods tests}
-We used the training set of the processed BRATS2015 dataset to fully train the lesion segmentor for the same iteration step, and then we selected the test set of the BRATS2015 dataset and  the unfiltered synthetic dataset by segmentor from different lesion generation component methods. Except for the difference in the source of the test data, other conditions such as the sample size of the test data are identical. Among them, the segmentation method we adopt on the real data is the multiple segmentors method in the section~\ref{label gen methods}, that is, each modality trains a separate segmentor.
+As shown in the Table~\ref{label_test}, we trained 4 tumor lesion segmentors using the Multiple segmentors scheme on the BRATS2015 training dataset and test them on the BRATS2015 testing dataset. Then we used the trained segmentors to segment the unfiltered synthetic data from different lesion generation guidelines.
 
-\subsection{verification experiment of Synthetic data availability}
-As shown in the table, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then used the mixed data set for segmentation training, and finally evaluated the segmentation ability of the model on real BRATS2015 test data. All experiments were fully trained with the same number of iterations. Except for the difference in the source of the training data, other conditions such as the sample size of the test data are identical. At the same time, as a comparison, we also conduct a separate training of synthetic data, mixed training of real data and normal enhancement data. We set up three data mixing modes: random mixing, real first, and synthetic
-first.
+\subsection{Verification experiments of synthetic data availability}
+As shown in the Table~\ref{availability_test}, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then used the mixed dataset for segmentation training using the Multiple segmentors scheme, and evaluated the segmentation ability of the model on real BRATS2015 testing dataset. All experiments were fully trained with the same number of iterations, which equal the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first. And in real first experiments and synthetic first experiments, the training iteration steps of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
 
 \section{Results}
-\subsection{Quantitative result}
-
-\subsubsection{Lesion segmentation result}
+\subsection{Results of lesion generation guidance method contrast experiments}
 \begin{table}[t]
-	\caption{Lesion segmentation result}\smallskip
+	\caption{Results of lesion generation guidance method contrast experiments}\smallskip
 	\centering
 	\resizebox{.75\columnwidth}{!}{		
 		\smallskip\begin{tabular}{llll}		
 			\toprule	
-			synthetic method&test data type &MSE   &Dice Score \\	
+			segmentation schemes&testing dataset &MSE   &Dice Score \\	
 			\midrule		
-			-&real 		   				&0.026 &0.915 \\					
-			1SEG&synthetic     			&0.053 &0.741 \\			
-			1ECL+4DCL&synthetic     	&0.055 &0.808 \\		
-			4SEG&synthetic     			&0.043 &0.838 \\
+			4 $SEG$&real 		   				&0.026 &0.915 \\					
+			1 $SEG$&synthetic     			&0.053 &0.741 \\			
+			1 $EC_{lesion}$ + 4 $DC_{lesion}$&synthetic     	&0.055 &0.808 \\		
+			4 $SEG$&synthetic     			&0.043 &0.838 \\
 			\bottomrule			
 		\end{tabular}	
 	}	
 	\label{label_test}	
 \end{table}
 
-As shown in the table ~\ref{label_test}, after the BRATS2015 training data is fully trained by the same iteration step, the segmentation test results reach the MSE of 0.026 and the Dice Score of 0.915 on the real test data set. Then we use this excellent segmentor to segment our unfiltered synthetic data. On the synthetic dataset with the same amount of data as the real test dataset, three different lesion label generation component methods have achieved good segmentation results. As a result, the method in which each modality trains a separate segmentor achieves the best results, and the Dice Score also reaches 0.838.
+As shown in the Table~\ref{label_test}, the segmentation test results reach the MSE of 0.026 and the Dice Score of 0.915 of the segmentors trained on the real data. And these segmentators segment the unfiltered synthetic data from the Multiple segmentors scheme to get MSE 0.043 and Dice Score 0.838. From results, three different lesion label generation methods have achieved good segmentation results, where the Multiple segmentors scheme is best. 
 
-\subsubsection{Verification experiment results for synthetic data availability}
+\subsection{Results of synthetic data availability verification experiments}
 \begin{table}[t]
-	\caption{Verification experiment results for synthetic data availability}\smallskip
+	\caption{Results of synthetic data availability verification experiments}\smallskip
 	\centering
 	\resizebox{.95\columnwidth}{!}{
 		\smallskip\begin{tabular}{lllllll}
 			\toprule
-			Num &real data &synthetic data & Enhanced data  & mixing modes  & MSE &Dice Score\\
+			NO. &real data &synthetic data & enhanced data  & mixing modes  & MSE &Dice Score\\
 			\midrule
-			1& 15070 & 0  &0 &- &0.026 &0.915 \\
-			31& 15070$\times$ 0.5 & 0  &0 &- &0.032 &0.902 \\
-			
-			2& 0 & 15070  &0 &- &0.205 &0.708 \\
-			3& 0 & 15070$\times$ 2  &0 &random mixing &0.206 &0.736 \\
-			4& 0 & 15070$\times$ 3  &0 &random mixing &0.205 &0.754 \\
-			
-			7& 15070$\times$ 0.1 & 15070  &0 &synthetic
-			first &0.031 &0.908 \\
-			8& 15070$\times$ 0.1 & 15070$\times$ 2  &0 &synthetic
-			first &0.028 &0.907 \\
-			9& 15070$\times$ 0.1 & 15070$\times$ 3  &0 &synthetic
-			first &0.030 &0.907 \\	
-			
-			13& 15070$\times$ 0.2 & 15070$\times$ 0.8 &0  &random mixing &0.041 &0.850 \\
-			12& 15070$\times$ 0.5 & 15070$\times$ 0.5 &0  &random mixing &0.031 &0.904 \\
-			14& 15070$\times$ 0.8 & 15070$\times$ 0.2 &0  &random mixing &0.024 &0.935 \\
-			
-			32& 15070 & 15070$\times$ 0.2 &0  &random mixing &0.025 &0.921 \\
-			33& 15070 & 15070$\times$ 0.5 &0  &random mixing &0.023 &0.939 \\
-			34& 15070 & 15070$\times$ 0.8 &0  &random mixing &0.026 &0.916 \\
-			15& 15070 & 15070 &0            &random mixing &0.027 &0.913 \\
-			18& 15070 & 15070$\times$ 2  &0 &random mixing &0.033 &0.901 \\
-			19& 15070 & 15070$\times$ 3  &0 &random mixing &0.034 &0.897 \\
-			
-			35& 15070 &0 & 15070$\times$ 0.2   &random mixing &0.027 &0.911 \\
-			36& 15070 &0 & 15070$\times$ 0.5   &random mixing &0.025 &0.927 \\
-			37& 15070 &0 & 15070$\times$ 0.8   &random mixing &0.026 &0.920 \\
-			22& 15070 &0 & 15070           &random mixing &0.026 &0.915 \\
-			23& 15070 &0 & 15070$\times$ 2 &random mixing &0.032 &0.898 \\
-			24& 15070 &0 & 15070$\times$ 3 &random mixing &0.036 &0.885 \\
-			
-			16& 15070 & 15070 &0  &real first &0.195 &0.795 \\
-			17& 15070 & 15070 &0  &synthetic
-			first &0.021 &0.940 \\
+			1 & 1Fold  	 & 0  		&0 			&- &0.026 &0.915 \\
+			2 & 0.5Folds & 0  		&0 			&- &0.032 &0.902 \\
+			3 & 0 	 	 & 1Fold  	&0 			&- &0.205 &0.708 \\
+			4 & 0 	 	 & 2Folds  	&0 			&random mixing &0.206 &0.736 \\
+			5 & 0 		 & 3Folds  	&0 			&random mixing &0.205 &0.754 \\
+			6 & 0.1Folds & 1Fold  	&0 			&synthetic first &0.031 &0.908 \\
+			7 & 0.1Folds & 2Folds   &0 			&synthetic first &0.028 &0.907 \\
+			8 & 0.1Folds & 3Folds   &0 			&synthetic first &0.030 &0.907 \\	
+			9 & 0.2Folds & 0.8Folds &0  		&random mixing &0.041 &0.850 \\
+			10& 0.5Folds & 0.5Folds &0  		&random mixing &0.031 &0.904 \\
+			11& 0.8Folds & 0.2Folds &0  		&random mixing &0.024 &0.935 \\
+			12& 1Fold 	 & 0.2Folds &0  		&random mixing &0.025 &0.921 \\
+			13& 1Fold 	 & 0.5Folds &0  		&random mixing &0.023 &0.939 \\
+			14& 1Fold 	 & 0.8Folds &0  		&random mixing &0.026 &0.916 \\
+			15& 1Fold 	 & 1Fold    &0   		&random mixing &0.027 &0.913 \\
+			16& 1Fold 	 & 2Folds   &0 			&random mixing &0.033 &0.901 \\
+			17& 1Fold 	 & 3Folds   &0 			&random mixing &0.034 &0.897 \\	
+			18& 1Fold 	 &0 		&  0.2Folds &random mixing &0.027 &0.911 \\
+			19& 1Fold 	 &0 		&  0.5Folds &random mixing &0.025 &0.927 \\
+			20& 1Fold    &0 		&  0.8Folds &random mixing &0.026 &0.920 \\
+			21& 1Fold 	 &0 		&  1Fold    &random mixing &0.026 &0.915 \\
+			22& 1Fold 	 &0 		&  2Folds   &random mixing &0.032 &0.898 \\
+			23& 1Fold 	 &0 		&  3Folds   &random mixing &0.036 &0.885 \\			
+			24& 1Fold 	 & 1Fold 	&0  		&real first &0.195 &0.795 \\
+			25& 1Fold 	 & 1Fold 	&0  		&synthetic first &0.021 &0.940 \\
 			\bottomrule
 		\end{tabular}
 	}
-	\label{use_test}
+	\label{availability_test}
 \end{table}
-【TO DO】As shown in table ~\ref{use_test}, we have been trained on data sets with different components and quantities and then evaluated on real test sets to get the results in the table.In experiment 1, after the full training of 100 epochs of BRATS2015 training data, the segmentation test results reached 0.026 MSE and 0.915 Dice Score on the real test data set.According to the training results of experiment 2-4 using synthetic data alone in the table, there is still a certain gap between the training results of the synthetic data and the real data, which indicates that the synthetic data cannot completely replace the real data as the training set.The results of experiment 7-9 show that pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data can achieve a result very close to that of training with real data in experiment 1. This indicates that the synthesized data is very suitable as a pre-training data set.Experiment 12-14 a percentage of the real data and synthetic data random mixing proportion of different result difference is very big, when both scale similar segmentation result with experiment 1 were similar, synthesis of high data rate, the result is lower than the experiment 1, synthetic data rate is low, can provide the generalization ability of the model, obtained is higher than the result of experiment 1.Experiment a further attempt to 32-34, 18th - 19 in the total amount of real data synthesis data of adding different amount of data, we found that fewer synthetic data can improve the generalization ability of the model, have the effect of data enhancement, synthetic data enhancement effect, the better, the more but when synthetic data to increase again after a certain proportion will have the opposite effect, the synthetic data, the more the influence of the real data.Experiment 35 to 37 and 22 to 24, we use the enhancement data generated by a data enhancement method to enhancement effect compared with the synthetic data, we found the data volume increased and enhanced effect on the change tendency of the two is consistent, but the difference in specific enhancement effect as the change of enhanced data volume change curve there are some differences. Overall, in terms of the sensitivity of the model to the amount of enhanced data, the enhanced data is more robust, but the upper limit of the enhancement effect that can be achieved by the composite data is much higher than that of the former strong data.In experiment 16-17, we compared experiment 15 and found that the synthesized data with the same amount of real data had the best performance as pre-training data before real data training, the mixed training effect as enhanced data and real data was in the middle, and the training performance after real data set as supplementary training data was very poor.
 
-【TO DO】AsIn general, we find that when the amount of real data is large, a small amount of composite data can be used as mixed enhancement data, or a large amount of composite data can be used for pre-training before training on real data sets. When real data is scarce, large amounts of synthetic data can be used for pre-training, and then fine-tuned on a small amount of real data to obtain results that compete with the training of completely real data. This is consistent with the conclusion of \cite{4shin2018medical}. We do not recommend full use of synthetic data for training, and contrary to the conclusion of \cite{4shin2018medical}, we do not recommend supplementary training using synthetic data either.
+As shown in Table~\ref{use_test}，the results of NO.3-NO.5 show that the synthetic data can not completely replace the real data in training.            
+The results of NO.6-NO.8 show that the results of pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data are very close to those of training with complete real data.   
+In the experiment NO.9-NO.11, the results of different mixing ratios are also quite different. When the ratio of the two is similar, the segmentation results are similar to experiment NO.1. When the proportion of synthetic data is high, the synthetic data will interfere with the learning of real data, and the result is lower than that of experiment NO.1. When the proportion of synthetic data is low, the generalization ability of the model can be improved by synthetic data, and the result is higher than experiment NO.1.            
+In the experiment NO.12-NO.17, we further tried to add synthetic data of different data quantities to the real data. We found that adding a small amount of synthetic data can enhance the learning, and the more synthetic data, the better the enhancement effect, but when the synthetic data reaches a certain percentage and then continue to increase, it will achieve the opposite effect.  
+In the experiment NO.18-NO.23, we use the enhanced data generated by the usual data enhancement methods to compare the enhancements of the synthesized data. We found that the two are consistent in the trend of increasing the amount of data and the enhancement effect, but there are some differences in  the change curve between  enhancement effect and the increase in data amount. Overall, the enhanced data is more robust in terms of the sensitivity of the model to the amount of enhanced data, but the upper limit of the enhanced effect of synthetic data is much higher than that enhanced data.   
+In experiment NO.24-NO.25, we compared experiment NO.15 and found that the performance of the synthesized data is the best when it is used as pre-training data, and the performance is poor when it is used as supplementary training data set. when using as enhanced data to mixed with real data, the synthesized data can also achieve certain enhancements.
+
+Generally, when there is a large amount of real data, a small amount of synthetic data can be used as enhanced data mixing, or a large amount of synthetic data can be used for pre-training and then training on real data. And when there is less real data, a large number of synthetic data can be used for pre-training, then fine-tuned on a small amount of real data, whose results can compete with the results on complete real data, and this conclusion is consistent with \cite{4shin2018medical}. We do not recommend using synthetic data completely for training, and also do not recommend using synthetic data for supplementary training.
 
 \subsection{Synthetic images}
-【TO DO】AsFigure ~\ref{generated_f} shows an example of the structural feature graph we generated from the random normal distribution matrix. In figure ~\ref{generated_mri}, we show several examples of structural feature maps generated from random normal distribution matrices, corresponding masks generated from structural feature maps, randomly selected lesion segmentation labels, and multi-modal MRI generated from structural feature maps and lesion segmentation labels.
+As Figure~\ref{generated_f} shows the examples of the structural feature map we generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multi-modal MRI.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/Fs}
-	\caption{Synthetic structural feature map.}
+	\caption{Synthetic structural feature maps.}
 	\label{generated_f}
 \end{figure}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\linewidth]{figures/F_to_MRI}
-	\caption{Multimodal MRI generated from the random structural feature map and lesion label.}
+	\caption{Multimodal MRIs generated from the structural feature maps and lesion labels.}
 	\label{generated_mri}
 \end{figure}
 
