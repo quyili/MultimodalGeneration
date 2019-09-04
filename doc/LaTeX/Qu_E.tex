@@ -82,24 +82,24 @@
 %
 \setlength\titlebox{2.5in} % If your paper contains an overfull \vbox too high warning at the beginning of the document, use this
 % command to correct it. You may not alter the value below 2.5 in
-\title{Synthesis of Registered Brain Multimodal MRI with Lesions}
+\title{Synthesis of Registered Multimodal Brain MRI with Lesions}
 %Your title must be in mixed case, not sentence case. 
 % That means all verbs (including short verbs like be, is, using,and go), 
 % nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
 % articles, conjunctions, and prepositions are lower case unless they
 % directly follow a colon or long dash
-\author{\Large \textbf{Yili Qu,Wanqi Su,Chufu Deng,}\\ \Large \textbf{Ying Wang,Yutong Lu,Nong Xiao,Zhiguang Chen}\\  % All authors must be in the same font size and format. Use \Large and \textbf to achieve this result when breaking a line
+%%%\author{\Large \textbf{Yili Qu,Wanqi Su,Chufu Deng,}\\ \Large \textbf{Ying Wang,Yutong Lu,Nong Xiao,Zhiguang Chen}\\  % All authors must be in the same font size and format. Use \Large and \textbf to achieve this result when breaking a line
  %If you have multiple authors and multiple affiliations
 % use superscripts in text and roman font to identify them. For example, Sunil Issar,\textsuperscript{\rm 2} J. Scott Penberthy\textsuperscript{\rm 3} George Ferguson,\textsuperscript{\rm 4} Hans Guesgen\textsuperscript{\rm 5}. Note that the comma should be placed BEFORE the superscript for optimum readability
-School of Data and Computer Science\\ Sun Yet-Sen University\\	
-quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace or sans serif
-}
+%%%School of Data and Computer Science\\ Sun Yet-Sen University\\	
+%%%quyli@mail2.sysu.edu.cn% email address must be in roman text type, not monospace or sans serif
+%%%}
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-In a large number of data-driven medical images intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical images data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised conditional GAN model, we achieve the generation of registered multimodal medical images from random normal distribution matrix and corresponding lesion information can be efficiently generated based on the freely selected lesion label. We conducted a number of validation experiments on BRATS2015 to verify that our synthetic MRI can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve the generalization ability of the model.
+In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical images data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised conditional GAN model, we achieve the generation of registered multimodal medical images from random normal distribution matrix and corresponding lesion information can be efficiently generated based on the freely selected lesion label. We conducted a number of validation experiments on BRATS2015 to verify that our synthetic MRI can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve the generalization ability of the model.
 \end{abstract}
 	
 \section{Introduction}
@@ -109,8 +109,8 @@ When obtaining different modalities from the same part of the same patient  thro
 
 Before the popularity of GAN, researchers focused on existed medical images modal translate to other modals\cite{22burgos2015robust},\cite{33huang2017simultaneous},\cite{34vemulapalli2015unsupervised},\cite{36vannguyen2015crossdomain}.After GAN has shown its powerful generating ability, there are many researches on medical image translation based on GAN\cite{2zhang2018translating},\cite{20nie2017medical},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}.Many studies use GAN to achieve higher quality translation results\cite{1zhao2018modular},\cite{5liang2018generative},\cite{6zhu2017unpaired},\cite{13choi2018stargan:}.Recent studies have implemented the translation on unregistered multimodal data\cite{2zhang2018translating},\cite{85joyce2017robust}.
 GAN has been gradually applied to various organs, such as brain MRI to CT translation\cite{20nie2017medical},\cite{40kamnitsas2017unsupervised}, retinal vascular annotation to image translation\cite{41costa2017towards}, cardiac MRI to CT translation and segmentation using unsupervised CycleGAN\cite{6zhu2017unpaired},\cite{20nie2017medical}.
-For multimodal image synthesis, \cite{84chartsias2018multimodal} implements multi-input and multi-output MRI synthesis, but registration is required for input multi-modal data; \cite{85Joyce2017robust} further implements an unregistered multi-input synthesis model, which can perform image synthesis from any subset of its input, but limits the output to single modal;\cite{66Miao2018dilated} studies for medical image registration in-depth;\cite{4shin2018medical} uses GAN to synthesize brain tumor images to enhance data and anonymize data, but requires additional training of anatomical structure segmentation network.
-Besides,\cite{41costa2017towards} implements the random generation of vascular annotation maps based on the idea of variational  auto-encoder (VAE)\cite{87kingma2014auto-encoding}, and then synthesizes color retinal images based on the academic annotation map.
+For multimodal image synthesis, \cite{84chartsias2018multimodal} implements multi-input and multi-output MRI synthesis, but registration is required for input multimodal data. \cite{85joyce2017robust} further implements an unregistered multi-input synthesis model, which can perform image synthesis from any subset of its input, but limits the output to single modal;\cite{66Miao2018dilated} studies for medical image registration in-depth;\cite{4shin2018medical} uses GAN to synthesize brain tumor images to enhance data and anonymize data, but requires additional training of anatomical structure segmentation network.
+Besides,\cite{41costa2017towards} implements the random generation of vascular annotation maps based on the idea of variational auto-encoder (VAE)\cite{87kingma2014auto-encoding}, and then synthesizes color retinal images based on the academic annotation map.
 Beyond the field of medical image processing, the research of multi-domain translation is very active\cite{1zhao2018modular},\cite{5liang2018generative},\cite{13choi2018stargan:},\cite{27isola2017image-to-image}.
 But in the field of medical image synthesis, there still are many researches of translation synthesis on two modalities\cite{2zhang2018translating},\cite{20nie2017medical},\cite{22burgos2015robust},\cite{34vemulapalli2015unsupervised},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}, and rare research on multimodal\cite{84chartsias2018multimodal},\cite{85joyce2017robust},\cite{4shin2018medical}.
 
@@ -235,7 +235,7 @@ The complete loss items are as follows, where $\omega_{i,j}$ is the weight of ea
 \end{itemize}
 
 \subsection{Reconstruction and translation training}
-We perform reconstruction and transformation training on real data and synchronize with the multi-modal MRI generation training in subsequent chapters to constrain each component to complete our specified tasks in the multimodal MRI generation process. In addition, we also use a code matrix distribution discriminator to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}
+We perform reconstruction and transformation training on real data and synchronize with the multimodal MRI generation training in subsequent chapters to constrain each component to complete our specified tasks in the multimodal MRI generation process. In addition, we also use a code matrix distribution discriminator to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}
 
 \begin{figure}
 	\centering
@@ -377,7 +377,7 @@ Besides, we will also independently train the segmentor of these three schemes. 
 \end{figure}
 As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining mask from structural feature map through the mask generator $MASK$.
 
-Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MASK$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV[TODO] to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
+Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MASK$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
 \begin{algorithm}
 	\caption{Structural feature map filtering}
 	\label{alg:3}
@@ -388,7 +388,6 @@ Due to the influence of the operation that removing tumor information during tra
 		\State \indent$mask =OpenCV.drawContours(f,contours)$
 		\State \indent\textbf{return} $mask$
 		\State \textbf{end function}
-		\State
 		\State \textbf{do} 
 		\State \indent$f = DC_f()$
 		\State \indent$m = MASK(f)$
@@ -402,7 +401,7 @@ In the generated multimodal MRIs, there still are samples with poor lesion gener
 \section{Experiments}
 
 \subsection{BRATS2015 dataset}
-We use the open dataset BRATS2015[TODO] for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we standardized each image.
+We use the open dataset BRATS2015\cite{91menze:hal-00935640} for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we standardized each image.
 
 \subsection{BRATS synthetic dataset}
 We constructed a registered synthetic dataset with tumor labels containing four modalities of T1/T2/T1c/Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset samples is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
@@ -452,25 +451,25 @@ As shown in the Table~\ref{label_test}, the segmentation test results reach the 
 			NO. &real data &synthetic data & enhanced data  & mixing modes  & MSE &Dice Score\\
 			\midrule
 			1 & 1Fold  	 & 0  		&0 			&- &0.026 &0.915 \\
-			2 & 0.5Folds & 0  		&0 			&- &0.032 &0.902 \\
+			2 & 50\% & 0  		&0 			&- &0.032 &0.902 \\
 			3 & 0 	 	 & 1Fold  	&0 			&- &0.205 &0.708 \\
 			4 & 0 	 	 & 2Folds  	&0 			&random mixing &0.206 &0.736 \\
 			5 & 0 		 & 3Folds  	&0 			&random mixing &0.205 &0.754 \\
-			6 & 0.1Folds & 1Fold  	&0 			&synthetic first &0.031 &0.908 \\
-			7 & 0.1Folds & 2Folds   &0 			&synthetic first &0.028 &0.907 \\
-			8 & 0.1Folds & 3Folds   &0 			&synthetic first &0.030 &0.907 \\	
-			9 & 0.2Folds & 0.8Folds &0  		&random mixing &0.041 &0.850 \\
-			10& 0.5Folds & 0.5Folds &0  		&random mixing &0.031 &0.904 \\
-			11& 0.8Folds & 0.2Folds &0  		&random mixing &0.024 &0.935 \\
+			6 & 10\% 	 & 1Fold  	&0 			&synthetic first &0.031 &0.908 \\
+			7 & 10\% 	 & 2Folds   &0 			&synthetic first &0.028 &0.907 \\
+			8 & 10\% 	 & 3Folds   &0 			&synthetic first &0.030 &0.907 \\	
+			9 & 20\% 	 & 80\% 	&0  		&random mixing &0.041 &0.850 \\
+			10& 50\% 	 & 50\% 	&0  		&random mixing &0.031 &0.904 \\
+			11& 80\% 	 & 20\% 	&0  		&random mixing &0.024 &0.935 \\
 			12& 1Fold 	 & 0.2Folds &0  		&random mixing &0.025 &0.921 \\
 			13& 1Fold 	 & 0.5Folds &0  		&random mixing &0.023 &0.939 \\
 			14& 1Fold 	 & 0.8Folds &0  		&random mixing &0.026 &0.916 \\
 			15& 1Fold 	 & 1Fold    &0   		&random mixing &0.027 &0.913 \\
 			16& 1Fold 	 & 2Folds   &0 			&random mixing &0.033 &0.901 \\
 			17& 1Fold 	 & 3Folds   &0 			&random mixing &0.034 &0.897 \\	
-			18& 1Fold 	 &0 		&  0.2Folds &random mixing &0.027 &0.911 \\
-			19& 1Fold 	 &0 		&  0.5Folds &random mixing &0.025 &0.927 \\
-			20& 1Fold    &0 		&  0.8Folds &random mixing &0.026 &0.920 \\
+			18& 1Fold 	 &0 		&  20\%	 	&random mixing &0.027 &0.911 \\
+			19& 1Fold 	 &0 		&  50\% 	&random mixing &0.025 &0.927 \\
+			20& 1Fold    &0 		&  80\% 	&random mixing &0.026 &0.920 \\
 			21& 1Fold 	 &0 		&  1Fold    &random mixing &0.026 &0.915 \\
 			22& 1Fold 	 &0 		&  2Folds   &random mixing &0.032 &0.898 \\
 			23& 1Fold 	 &0 		&  3Folds   &random mixing &0.036 &0.885 \\			
@@ -482,7 +481,7 @@ As shown in the Table~\ref{label_test}, the segmentation test results reach the 
 	\label{availability_test}
 \end{table}
 
-As shown in Table~\ref{use_test}，the results of NO.3-NO.5 show that the synthetic data can not completely replace the real data in training.            
+As shown in Table~\ref{availability_test}, the results of NO.3-NO.5 show that the synthetic data can not completely replace the real data in training.            
 The results of NO.6-NO.8 show that the results of pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data are very close to those of training with complete real data.   
 In the experiment NO.9-NO.11, the results of different mixing ratios are also quite different. When the ratio of the two is similar, the segmentation results are similar to experiment NO.1. When the proportion of synthetic data is high, the synthetic data will interfere with the learning of real data, and the result is lower than that of experiment NO.1. When the proportion of synthetic data is low, the generalization ability of the model can be improved by synthetic data, and the result is higher than experiment NO.1.            
 In the experiment NO.12-NO.17, we further tried to add synthetic data of different data quantities to the real data. We found that adding a small amount of synthetic data can enhance the learning, and the more synthetic data, the better the enhancement effect, but when the synthetic data reaches a certain percentage and then continue to increase, it will achieve the opposite effect.  
@@ -492,7 +491,7 @@ In experiment NO.24-NO.25, we compared experiment NO.15 and found that the perfo
 Generally, when there is a large amount of real data, a small amount of synthetic data can be used as enhanced data mixing, or a large amount of synthetic data can be used for pre-training and then training on real data. And when there is less real data, a large number of synthetic data can be used for pre-training, then fine-tuned on a small amount of real data, whose results can compete with the results on complete real data, and this conclusion is consistent with \cite{4shin2018medical}. We do not recommend using synthetic data completely for training, and also do not recommend using synthetic data for supplementary training.
 
 \subsection{Synthetic images}
-As Figure~\ref{generated_f} shows the examples of the structural feature map we generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multi-modal MRI.
+As Figure~\ref{generated_f} shows the examples of the structural feature map we generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multimodal MRI.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/Fs}
@@ -523,7 +522,7 @@ In the future, we will further improve our method in CT, PET and other modes, in
 
 \section{ Acknowledgments}
 
-Thanks for the computing support provided by NSCCGZ.
+%Thanks for the computing support provided by NSCCGZ.
 
 
 \bibliography{refer}
