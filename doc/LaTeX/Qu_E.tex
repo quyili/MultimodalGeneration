@@ -181,15 +181,15 @@ In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and ver
 		\State $mask = crop\_padding(mask,p)$
 	\end{algorithmic}  
 \end{algorithm}
-When generating the structural feature map, \cite{4shin2018medical} still needs to input the real modal image to get the generated structural feature map, which greatly reduces the diversity of generated data. \cite{41costa2017towards} implements a method based on VAE for generating retinal blood vessel distribution maps from multidimensional normal distribution. Drawing on this, we design a hybrid network combining the characteristics of VAE and GAN for generating brain structural feature maps from random normal distribution matrixes, which has better diversity and no additional training data. In addition,  we train a generator $MASK$ that acquires the brain area masks from the brain structure feature maps for later use to match lesion label. The generator is synchronized with the training of structural feature map generation. During the training of $MASK$, the mask extracted by the real brain MRI $x$ through the mask extraction algorithm (Algorithm~\ref{alg:2}) is used as label data. As shown in Fig.~\ref{feature_train}, the specific training processing is as follows:
+When generating the structural feature map, \cite{4shin2018medical} still needs to input the real modal image to get the generated structural feature map, which greatly reduces the diversity of generated data. \cite{41costa2017towards} implements a method based on VAE for generating retinal blood vessel distribution maps from multidimensional normal distribution. Drawing on this, we design a hybrid network combining the characteristics of VAE and GAN for generating brain structural feature maps from random normal distribution matrixes, which has better diversity and no additional training data. In addition,  we train a generator $MG$ that acquires the brain area masks from the brain structure feature maps for later use to match lesion label. The generator is synchronized with the training of structural feature map generation. During the training of $MG$, the mask extracted by the real brain MRI $x$ through the mask extraction algorithm (Algorithm~\ref{alg:2}) is used as label data. As shown in Fig.~\ref{feature_train}, the specific training processing is as follows:
 \begin{itemize}
 	\item The structural feature map $f$ is obtained from $x$ using Algorithm~\ref{alg:1}, and the mask $mask$ is obtained by the Algorithm~\ref{alg:2};
 	\item Encode $f$ with VAE encoder $EC_f$ to get $code_{f,mean}$ and $code_{f,logvar}$, then get a random noise $code_n$ from multidimensional normal distribution $\mathcal{N}(0,1^2)$, so the approximate normal distribution matrix  $code_f=code_{f,mean}+exp(0.5\times code_{f,logvar})\times code_n$;
 	\item Decode $code_f$ with VAE decoder $DC_f$ to obtain the reconstructed structural feature map $f_r$;
-	\item Use mask generator $MASK$ to extract mask $mask_r$ from $f$;
+	\item Use mask generator $MG$ to extract mask $mask_r$ from $f$;
 	\item Randomly generate a matrix $code_{f,g}$ that obeys normal distribution $\mathcal{N}(0,1^2)$;
 	\item Decode $code_{f,g}$ with VAE decoder $DC_f$ to get the generated random structure feature map $f_g$;
-	\item Use mask generator $MASK$ to extract mask $mask_g$ from $f$;
+	\item Use mask generator $MG$ to extract mask $mask_g$ from $f$;
 	\item Structural feature discriminator $D_f$ identifies $f$ and $f_g$ respectively, the former is a positive sample and the latter is a negative sample;
 	\item Code matrix distribution discriminator $FD_f$ discriminates between $code_{f,g}$ and $code_f$, the former is a positive sample and the latter is a negative sample.
 \end{itemize}
@@ -365,9 +365,9 @@ Besides, we will also independently train the segmentors of these three schemes.
 	\caption{Construction of synthetic datasets.}
 	\label{make_data}
 \end{figure}
-As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining mask from structural feature map through the mask generator $MASK$.
+As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining mask from structural feature map through the mask generator $MG$.
 
-Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MASK$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
+Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MG$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
 \begin{algorithm}
 	\caption{Structural feature map filtering}
 	\label{alg:3}
@@ -379,7 +379,7 @@ Due to the influence of the operation that removing tumor information during tra
 		\State \indent\textbf{return} $mask$
 		\State \textbf{do} 
 		\State \indent$f = DC_f()$
-		\State \indent$m = MASK(f)$
+		\State \indent$m = MG(f)$
 		\State \indent$m'= get\_mask(f)$
 		\State \textbf{while} $MAE(m',m) <= mae$
 	\end{algorithmic}  
