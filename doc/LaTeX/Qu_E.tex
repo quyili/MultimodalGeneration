@@ -167,7 +167,7 @@ In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and ver
 \begin{figure}
 	\centering
 	\includegraphics[width=0.95\columnwidth]{figures/feature_train}
-	\caption{Training of Random Structural Feature Map Generation.}
+	\caption{Structural Feature Map Generation Training.}
 	\label{feature_train}
 \end{figure}
 \begin{algorithm}
@@ -207,7 +207,7 @@ The complete loss items are as follows, where $\omega_{i,j}$ is the weight of ea
 		$loss_{d,f}=\Vert{D_f(f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g )}\Vert_{2}^{2}$
 	\end{center}
 	
-	\item \textbf{Adversarial loss} 
+	\item \textbf{Structural feature map adversarial loss} 
 	\begin{center}
 		$loss_{g,f}=\Vert{FD_f(code_f)-1}\Vert_{2}^{2}+\Vert{D_f(f_g)-1}\Vert_{2}^{2}$
 	\end{center}
@@ -234,7 +234,7 @@ We perform reconstruction and transformation training on real data and synchroni
 \begin{figure}
 	\centering
 	\includegraphics[width=0.95\columnwidth]{figures/trans_train}
-	\caption{Auxiliary modality reconstruction and modality translation training.}
+	\caption{Reconstruction and translation training.}
 	\label{trans_train}
 \end{figure}
 
@@ -242,7 +242,7 @@ As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated
 
 The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of modality $i$ translated by modality $j$; $d_{t, j, i}$ and $c_{t, j, i}$ are the True/False discrimination and category discrimination results of the discriminator $D$ for $x_{t, i, j}$; $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder:
 \begin{itemize}
-	\item \textbf{Reconstruction and translation discriminator loss}
+	\item \textbf{Discriminator loss}
 	\begin{center}
 		$loss_{d,1}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})+
 		\sum\limits_{i=0}(\Vert{FD(code_{i})-1}\Vert_{2}^{2})$
@@ -268,7 +268,7 @@ The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of mod
 		$loss_{code,1}=\sum\limits_{j=0,j\neq i}\sum\limits_{i=0}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{Lesion generation loss}
+	\item \textbf{Lesion segmentation loss}
 	\begin{center}
 		$loss_{lesion,1}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 	\end{center}
@@ -301,7 +301,7 @@ We extract the structural feature map $f$ from the real MRI by the Algorithm~\re
 
 The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
 \begin{itemize}
-	\item \textbf{Generation Discriminator loss }
+	\item \textbf{Discriminator loss }
 	\begin{center}
 		$loss_{d,2}=\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2}+\Vert{c_{i}-i}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})+\Vert{FD(code_{g})}\Vert_{2}^{2}$
 	\end{center}
@@ -316,7 +316,7 @@ The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/F
 		$loss_{f}=\sum\limits_{i=0}(\Vert{f-f_{g,i}}\Vert_{2}^{2})$
 	\end{center}
 	
-	\item \textbf{Lesion label generation loss}
+	\item \textbf{Lesion generation loss}
 	\begin{center}
 		$loss_{lesion,2}=\sum\limits_{i=0}(\Vert{label-label_{g,i}}\Vert_{2}^{2})$
 	\end{center}
@@ -439,36 +439,74 @@ As shown in the Table~\ref{label_test}, the segmentation test results reach the 
 			\toprule
 			NO. &real data &synthetic data & enhanced data  & mixing modes  & MSE &Dice Score\\
 			\midrule
-			1 & 1Fold  	 & 0  		&0 			&- &0.026 &0.915 \\
-			2 & 50\% & 0  		&0 			&- &0.032 &0.902 \\
-			3 & 0 	 	 & 1Fold  	&0 			&- &0.205 &0.708 \\
-			4 & 0 	 	 & 2Folds  	&0 			&random mixing &0.206 &0.736 \\
-			5 & 0 		 & 3Folds  	&0 			&random mixing &0.205 &0.754 \\
-			6 & 10\% 	 & 1Fold  	&0 			&synthetic first &0.031 &0.908 \\
-			7 & 10\% 	 & 2Folds   &0 			&synthetic first &0.028 &0.907 \\
-			8 & 10\% 	 & 3Folds   &0 			&synthetic first &0.030 &0.907 \\	
-			9 & 20\% 	 & 80\% 	&0  		&random mixing &0.041 &0.850 \\
-			10& 50\% 	 & 50\% 	&0  		&random mixing &0.031 &0.904 \\
-			11& 80\% 	 & 20\% 	&0  		&random mixing &0.024 &0.935 \\
-			12& 1Fold 	 & 0.2Folds &0  		&random mixing &0.025 &0.921 \\
-			13& 1Fold 	 & 0.5Folds &0  		&random mixing &0.023 &0.939 \\
-			14& 1Fold 	 & 0.8Folds &0  		&random mixing &0.026 &0.916 \\
-			15& 1Fold 	 & 1Fold    &0   		&random mixing &0.027 &0.913 \\
-			16& 1Fold 	 & 2Folds   &0 			&random mixing &0.033 &0.901 \\
-			17& 1Fold 	 & 3Folds   &0 			&random mixing &0.034 &0.897 \\	
-			18& 1Fold 	 &0 		&  20\%	 	&random mixing &0.027 &0.911 \\
-			19& 1Fold 	 &0 		&  50\% 	&random mixing &0.025 &0.927 \\
-			20& 1Fold    &0 		&  80\% 	&random mixing &0.026 &0.920 \\
-			21& 1Fold 	 &0 		&  1Fold    &random mixing &0.026 &0.915 \\
-			22& 1Fold 	 &0 		&  2Folds   &random mixing &0.032 &0.898 \\
-			23& 1Fold 	 &0 		&  3Folds   &random mixing &0.036 &0.885 \\			
-			24& 1Fold 	 & 1Fold 	&0  		&real first &0.195 &0.795 \\
-			25& 1Fold 	 & 1Fold 	&0  		&synthetic first &0.021 &0.940 \\
+			1 & $\times$1  	 	& 0 		&0 			&- &0.026 &0.915 \\
+			2 & $\times$50\% 	 & 0  		&0 			&- &0.032 &0.902 \\
+			3 &0 	 	 & $\times$1  	&0 			&- &0.205 &0.708 \\
+			4 &0 	 	 & $\times$2  	&0 			&random mixing &0.206 &0.736 \\
+			5 &0 		 & $\times$3  	&0 			&random mixing &0.205 &0.754 \\
+			6 & $\times$10\% 	 & $\times$1  	&0 			&synthetic first &0.031 &0.908 \\
+			7 & $\times$10\% 	 & $\times$2   &0 			&synthetic first &0.028 &0.907 \\
+			8 & $\times$10\% 	 & $\times$3   &0 			&synthetic first &0.030 &0.907 \\	
+			9 & $\times$20\% 	 & $\times$80\% 	&0  		&random mixing &0.041 &0.850 \\
+			10& $\times$50\% 	 & $\times$50\% 	&0  		&random mixing &0.031 &0.904 \\
+			11& $\times$80\% 	 & $\times$20\% 	&0  		&random mixing &0.024 &0.935 \\
+			12& $\times$1 	 	& $\times$20\% &0  		&random mixing &0.025 &0.921 \\
+			13& $\times$1 	 	& $\times$50\% &0  		&random mixing &0.023 &0.939 \\
+			14& $\times$1 	 	& $\times$80\% &0  		&random mixing &0.026 &0.916 \\
+			15& $\times$1 	 	& $\times$1    &0   		&random mixing &0.027 &0.913 \\
+			16& $\times$1 	 	& $\times$2   &0 			&random mixing &0.033 &0.901 \\
+			17& $\times$1 	 	& $\times$3   &0 			&random mixing &0.034 &0.897 \\	
+			18& $\times$1 	 	&0 		&  $\times$20\%	 	&random mixing &0.027 &0.911 \\
+			19& $\times$1 	 	&0 		&  $\times$50\% 	&random mixing &0.025 &0.927 \\
+			20& $\times$1    	&0 		&  $\times$80\% 	&random mixing &0.026 &0.920 \\
+			21& $\times$1 	 	&0 		&  $\times$1    &random mixing &0.026 &0.915 \\
+			22& $\times$1 	 	&0 		&  $\times$2   &random mixing &0.032 &0.898 \\
+			23& $\times$1 	 	&0 		&  $\times$3   &random mixing &0.036 &0.885 \\			
+			24& $\times$1 	 	& $\times$1 	&0  		&real first &0.195 &0.795 \\
+			25& $\times$1 	 	& $\times$1 	&0  		&synthetic first &0.021 &0.940 \\
 			\bottomrule
 		\end{tabular}
 	}
 	\label{availability_test}
 \end{table}
+%\begin{table}[t]
+%	\caption{Synthetic data availability verification experiments}\smallskip
+%	\centering
+%	\resizebox{.95\columnwidth}{!}{
+%		\smallskip\begin{tabular}{lllllll}
+%			\toprule
+%			NO. &real data &synthetic data & enhanced data  & mixing modes  & MSE &Dice Score\\
+%			\midrule
+%			1 & 1Fold  	 & 0  		&0 			&- &0.026 &0.915 \\
+%			2 & 50\% & 0  		&0 			&- &0.032 &0.902 \\
+%			3 & 0 	 	 & 1Fold  	&0 			&- &0.205 &0.708 \\
+%			4 & 0 	 	 & 2Folds  	&0 			&random mixing &0.206 &0.736 \\
+%			5 & 0 		 & 3Folds  	&0 			&random mixing &0.205 &0.754 \\
+%			6 & 10\% 	 & 1Fold  	&0 			&synthetic first &0.031 &0.908 \\
+%			7 & 10\% 	 & 2Folds   &0 			&synthetic first &0.028 &0.907 \\
+%			8 & 10\% 	 & 3Folds   &0 			&synthetic first &0.030 &0.907 \\	
+%			9 & 20\% 	 & 80\% 	&0  		&random mixing &0.041 &0.850 \\
+%			10& 50\% 	 & 50\% 	&0  		&random mixing &0.031 &0.904 \\
+%			11& 80\% 	 & 20\% 	&0  		&random mixing &0.024 &0.935 \\
+%			12& 1Fold 	 & 0.2Folds &0  		&random mixing &0.025 &0.921 \\
+%			13& 1Fold 	 & 0.5Folds &0  		&random mixing &0.023 &0.939 \\
+%			14& 1Fold 	 & 0.8Folds &0  		&random mixing &0.026 &0.916 \\
+%			15& 1Fold 	 & 1Fold    &0   		&random mixing &0.027 &0.913 \\
+%			16& 1Fold 	 & 2Folds   &0 			&random mixing &0.033 &0.901 \\
+%			17& 1Fold 	 & 3Folds   &0 			&random mixing &0.034 &0.897 \\	
+%			18& 1Fold 	 &0 		&  20\%	 	&random mixing &0.027 &0.911 \\
+%			19& 1Fold 	 &0 		&  50\% 	&random mixing &0.025 &0.927 \\
+%			20& 1Fold    &0 		&  80\% 	&random mixing &0.026 &0.920 \\
+%			21& 1Fold 	 &0 		&  1Fold    &random mixing &0.026 &0.915 \\
+%			22& 1Fold 	 &0 		&  2Folds   &random mixing &0.032 &0.898 \\
+%			23& 1Fold 	 &0 		&  3Folds   &random mixing &0.036 &0.885 \\			
+%			24& 1Fold 	 & 1Fold 	&0  		&real first &0.195 &0.795 \\
+%			25& 1Fold 	 & 1Fold 	&0  		&synthetic first &0.021 &0.940 \\
+%			\bottomrule
+%		\end{tabular}
+%	}
+%	\label{availability_test}
+%\end{table}
 
 As shown in Table~\ref{availability_test}, the results of NO.3-NO.5 show that the synthetic data can not completely replace the real data in training.            
 The results of NO.6-NO.8 show that the results of pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data are very close to those of training with complete real data.   
