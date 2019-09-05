@@ -518,17 +518,17 @@ In experiment NO.24-NO.25, we compared experiment NO.15 and found that the perfo
 Generally, when there are a large amount of real data, a small amount of synthetic data can be used as enhanced data mixing, or a large amount of synthetic data can be used for pre-training and then training on real data. And when there are less real data, a large number of synthetic data can be used for pre-training, then fine-tuned on a small amount of real data, whose results can compete with the results on complete real data, and this conclusion is consistent with \cite{4shin2018medical}. We do not recommend using synthetic data completely for training, and also do not recommend using synthetic data for supplementary training.
 
 \subsection{Synthetic images}
-Figure~\ref{generated_f} shows the examples of the structural feature map generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multimodal MRI.
+ Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multimodal MRI.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.7\linewidth]{figures/Fs}
+	\includegraphics[width=0.65\linewidth]{figures/Fs}
 	\caption{Synthetic structural feature maps.}
 	\label{generated_f}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/F_to_MRI}
+	\includegraphics[width=0.67\linewidth]{figures/F_to_MRI}
 	\caption{Multimodal MRIs generated from the structural feature maps and lesion labels.}
 	\label{generated_mri}
 \end{figure}
