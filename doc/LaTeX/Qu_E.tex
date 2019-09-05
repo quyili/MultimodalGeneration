@@ -99,30 +99,30 @@
 \maketitle
 
 \begin{abstract}
-In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can well alleviate the problem of insufficient data. In this paper, based on the unsupervised conditional GAN model, we achieve the generation of registered multimodal medical images from random normal distribution matrix and corresponding lesion information can be efficiently generated based on the freely selected lesion label. We conduct a number of validation experiments on BRATS2015 to verify that our synthetic MRI can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve generalization ability of the model.
+In a large number of data-driven medical image intelligent processing tasks, the collection and acquisition of medical image data is very difficult, especially the registered multimodal medical image data. Synthetic medical image data can alleviate the problem of insufficient data well. In this paper, based on the unsupervised conditional GAN model, we achieve the synthesis of registered multimodal medical images from random normal distribution matrix and the corresponding lesion information can be efficiently generated based on the freely selected lesion label. We conduct a number of validation experiments on BRATS2015 to verify that our synthetic MRI can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve generalization ability of the model.
 \end{abstract}
 	
 \section{Introduction}
-MRI is a common medical image that can have multiple modalities depending on imaging parameters, such as T1, T2, T1c and so on. Different modalities have different reference values for doctors. To make accurate judgments, doctors often need multiple modal images to compare with each other. In training and learning of medical image intelligent processing tasks, we often expect to obtain more modal images, such as medical image processing tasks based on CNN\cite{86krizhevsky2012imagenet} or GAN\cite{25goodfellow2014generative}. 
+MRI is a common medical image format that has multiple modalities depending on imaging parameters, such as T1, T2 and T1c. Different modalities have different reference values for doctors. To make accurate judgments, doctors often need multiple modal images as a comparison. In training and learning of medical image intelligent processing tasks, we often expect to obtain more modal images, such as medical image processing tasks based on CNN\cite{86krizhevsky2012imagenet} or GAN\cite{25goodfellow2014generative}. 
 
-When obtaining different modalities from the same part of the same patient through different imaging techniques, these modalities are considered to be registered if the imaging position and the viewing angle are identical. Compared with unimodal data, the registered multimodal image data can provide more information, support more complex application scenarios, meet the training data requirements of deep neural networks, and help to provide intelligent diagnostic services more efficient and more reliable. For doctors, it takes longer to acquire images of different modalities and requires patient patience. For researchers of medical image intelligent processing tasks, multimodal MRI datasets are scarce, and the collection is very difficult, especially rare disease data, and the registered data is even rarer, which makes many training tasks impossible. Therefore, the application of image synthesis technology to extend datasets, translate existing unimodal images to registered multimodal images, or generate registered multimodal images from random noise matrix, has a wide range of uses and far-reaching significance.
+When obtaining different modalities from the same part of the same patient through different imaging techniques, these modalities are considered to be registered if the imaging position and the viewing angle are identical. Compared with unimodal data, the registered multimodal image data can provide more information, support more complex application scenarios, meet the training data requirements of deep neural networks, and help to provide intelligent diagnostic services more efficient and more reliable. For doctors, it takes longer to acquire images of different modalities and requires patient patience. For researchers of medical image intelligent processing tasks, multimodal MRI datasets are scarce, and the collection is very difficult, especially rare disease data, and the registered data is even rarer, which makes many training tasks impossible. Therefore, the application of image synthesis technology to extend datasets, translate existing unimodal images to registered multimodal images, or synthesize registered multimodal images from random noise matrix, has a wide range of uses and far-reaching significance.
 
 Before the popularity of GAN, researchers focused on existed medical image modality translate to other modalities\cite{22burgos2015robust,33huang2017simultaneous,34vemulapalli2015unsupervised,36vannguyen2015crossdomain}. After GAN has shown its powerful generation ability, there are many researches on medical image translation based on GAN\cite{2zhang2018translating,20nie2017medical,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised}. Many studies use GAN to achieve higher translation quality\cite{1zhao2018modular,5liang2018generative,6zhu2017unpaired,13choi2018stargan:}. Recent studies have implemented the translation on unregistered multimodal data\cite{2zhang2018translating,85joyce2017robust}.
 GAN has been gradually applied to various organs, such as brain MRI to CT translation\cite{20nie2017medical,40kamnitsas2017unsupervised}, retinal vascular annotation to image translation\cite{41costa2017towards}, cardiac MRI to CT translation and segmentation using unsupervised CycleGAN\cite{6zhu2017unpaired,20nie2017medical}.
 For multimodal image synthesis, \cite{84chartsias2018multimodal} implements multi-input and multi-output MRI synthesis, but registration is required for input multimodal data. \cite{85joyce2017robust} further implements an unregistered multi-input synthesis model, which can perform image synthesis from any subset of its input, but limits the output to unimodal. \cite{66Miao2018dilated} studies for medical image registration in-depth. \cite{4shin2018medical} uses GAN to synthesize brain tumor images to enhance data and anonymize data, but requires additional training of anatomical structure segmentation network.
-Besides,\cite{41costa2017towards} implements the random generation of vascular annotation maps based on the idea of variational auto-encoder (VAE)\cite{87kingma2014auto-encoding}, and then synthesizes color retinal images based on the vascular annotation maps.
+Besides,\cite{41costa2017towards} implements the random generation of vascular annotation maps based on the idea of variational auto-encoder (VAE)\cite{87kingma2014auto-encoding}, and then generates color retinal images based on the vascular annotation maps.
 Beyond the field of medical image processing, the research of multi-domain translation is very active\cite{1zhao2018modular,5liang2018generative,13choi2018stargan:,27isola2017image-to-image}.
-But in the field of medical image synthesis, there still are many researches of translation synthesis on two-modal\cite{2zhang2018translating,20nie2017medical,22burgos2015robust,34vemulapalli2015unsupervised,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised}, and rare research on multimodal\cite{84chartsias2018multimodal,85joyce2017robust,4shin2018medical}.
+But in the field of medical image synthesis, there are still many researches of translation synthesis on two-modal\cite{2zhang2018translating,20nie2017medical,22burgos2015robust,34vemulapalli2015unsupervised,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised}, and rare research on multimodal\cite{84chartsias2018multimodal,85joyce2017robust,4shin2018medical}.
 
-At present, there are various problems in the research of medical image synthesis, such as the difficulty of expanding the number of modalities, the need to registered training data, relying on complex large networks, the inability to add or retain lesions, the inability to generate from random matrix, and the need of additional training data, etc. Moreover, the evaluation of synthetic data in most studies relies on the artificial visual effects assessment by experienced physicians, without objective quantitative evaluation. Therefore, we design a registered multimodal MRI generation scheme based on the Conditional Generative Adversarial Networks (CGAN)\cite{70mirza2014conditional}. With unsupervised learning method, training data does not need to be registered. Our solution can receive a random normal distribution matrix as input to generate a set of registered multimodal MRI with setted lesions. We perform multimodal brain MRI generation experiments with tumor segmentation labels on BRATS2015, and verify the effectiveness of lesion information and the availability of synthetic data in tumor lesion segmentation experiments. We will open the code. In general, our contribution is in the following three aspects:
+At present, there are various problems in the research of medical image synthesis, such as the difficulty of expanding the number of modalities, the need to registered training data, relying on complex large networks, the inability to add or retain lesions, the inability to synthesize from random matrix, and the need of additional training data, etc. Therefore, we design a registered multimodal MRI synthesis scheme based on the Conditional Generative Adversarial Networks (CGAN)\cite{70mirza2014conditional}. With unsupervised learning method, training data does not need to be registered. Our solution can receive a random normal distribution matrix as input to synthesize a set of registered multimodal MRI with setted lesions. We perform multimodal brain MRI synthesis experiments with tumor segmentation labels on BRATS2015, and verify the effectiveness of lesion information and the availability of synthetic data in tumor lesion segmentation experiments. We will open the code. In general, our main work includes the following three aspects:
 
 \begin{itemize}
 	\item \textbf{Extraction \& Generation of Structural Feature Map}
-	We propose an extraction method for anatomical structure features of medical images. Without additional anatomical segmentation labels or label extraction training, structural feature maps can be extracted directly from real images of arbitrary modalities. The extraction method can improve the quality of synthetic images without introducing additional parameters and computation overhead. We also train a structural feature map generator to generate structural feature maps from multidimensional normal distribution. The random generation method can generate rich and diverse structural feature maps indefinitely.
-	\item \textbf{Synthesis of Registered Multimodal MRI with Lesions}
-	We use randomly generated structural feature maps to fuse with random lesion labels and then synthesize the registered multimodal MRI through the generator. We explore a variety of lesion generation guidance methods to achieve effective mapping of lesions based on input lesion labels during multimodal MRI synthesis. In training, no registered data is required except for the lesion labels. The synthetic data is registered, and the input lesion label is the lesion label of the synthetic data. Our solution enables fast and easy construction of registered multimodal MRI datasets with lesions label.
+	We propose an extraction method for anatomical structure features of medical images. Without additional anatomical segmentation labels or label extraction training, structural feature maps can be extracted directly from real images of arbitrary modalities. We also train a structural feature map generator to generate structural feature maps from multidimensional normal distribution. Thus we can generate rich and diverse structural feature maps indefinitely.
+	\item \textbf{Synthesis of Registered Multimodal MRI with Lesions}	
+	We use randomly generated structural feature maps to fuse with random lesion labels and then synthesize the registered multimodal MRI through the generator. We explore a variety of lesion generation guidance methods to achieve effective mapping of lesions based on input lesion labels during multimodal MRI synthesis. In training, no registered data is required except for the lesion labels. 
 	\item \textbf{Objective Verification for Synthetic Data Availability}
-	We construct datasets with different amounts of synthetic and real data to train the lesion segmentor, and verify that the synthetic data can be used as pre-training data and enhanced data in medical image intelligent processing tasks to improve generalization ability of the model and improve segmentation precision. Compared with traditional subjective evaluation method of synthetic image quality, we present the availability of synthetic data in intelligent lesion processing tasks more objectively.
+	We construct datasets with different amounts of synthetic and real data to train the lesion segmentor, and verify that the synthetic data can be used as pre-training data and enhanced data in medical image intelligent processing tasks to improve generalization ability of the model and improve segmentation precision. So we can present the availability of synthetic data in intelligent lesion processing tasks objectively.
 \end{itemize}
 
 
@@ -138,16 +138,16 @@ We perform our scheme on multimodal brain MRI synthesis task , in which the synt
 \end{figure}
 As shown in Fig.~\ref{architecture}, our scheme includes four main stages. 
 In the structural feature map extraction and generation stage, we will obtain a structural feature map generator that can generate structural feature maps from random normal distribution matrix. 
-In the multimodal MRI generation stage, we train a conditional generator with input of structural feature maps and lesion labels, which can generate MRI of different modalities according to different one-hot conditional matrixes.
-In the synthetic datasets construction stage, we use the models produced in the first two stages to generate registered multimodal MRI from random normal distribution matrixes. 
+In the multimodal MRI synthesis stage, we train a conditional generator with input of structural feature maps and lesion labels, which can synthesize MRI of different modalities according to different one-hot conditional matrixes.
+In the synthetic datasets construction stage, we use the models produced in the first two stages to synthesize registered multimodal MRI from random normal distribution matrixes. 
 In the synthetic data availability verification stage, we train and test the lesion segmentors on different datasets constructed from different amounts of synthetic data and real data.
 
 \subsection{Structural Feature Map Extraction Method}
-Medical images generated directly from random noise by GAN are often difficult to train and difficult to generate real structural information. We call image that provids basic contour and structure information as structural feature map. For example, a retinal vascular distribution map can be regarded as a structural feature map of a retinal image\cite{41costa2017towards}. Structural feature maps can provide necessary basic guidance for the synthesis of medical images. When synthesizing brain MRI, some studies obtains basic structural information from the brain segmentation labels\cite{4shin2018medical}. However, general structural features such as retinal vascular maps and brain segmentation labels require additional data and training before extracting from the original image. To this end, we first design a method for extracting structural feature maps directly from brain MRI, which has the advantages of fast operation, no training, no additional data.
+Medical images generated directly from random noise by GAN are often difficult to train and difficult to generate real structural information. We call image that provides basic contour and structure information as structural feature map. For example, a retinal vascular distribution map can be regarded as a structural feature map of a retinal image\cite{41costa2017towards}. Structural feature maps can provide necessary basic guidance for the synthesis of medical images. When synthesizing brain MRI, some studies obtain basic structural information from the brain segmentation labels\cite{4shin2018medical}. However, general structural features such as retinal vascular maps and brain segmentation labels require additional data and training before extracting from the original image. To this end, we first design a method for extracting structural feature maps directly from brain MRI, which has the advantages of fast operation, no training, no additional data.
 
 In the traditional digital image processing methods, Roberts operator, Prewitt operator, Sobel operator, etc. are excellent edge detection operators. Sobel operator is often used in processing of brain medical images. As shown in Algorithm~\ref{alg:1}, we explore a method to further extract structural feature maps from the edge detection maps generated by Sobel operator.
 \begin{algorithm}
-	\caption{Structural Feature Extraction}
+	\caption{Structural Feature Map Extraction}
 	\label{alg:1}
 	\begin{algorithmic}[1]
 		\State Input a real image $x$ and pixel threshold $beta$
@@ -161,27 +161,27 @@ In the traditional digital image processing methods, Roberts operator, Prewitt o
 	\end{algorithmic}  
 \end{algorithm}
 
-In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and vertical edges detection maps from a real image, each performs maximum  reduce and minimum reduce to obtain two edge detection fusion maps, then each fusion map calculate the difference with average pixel value, the two difference maps are binarized according to the set pixel threshold, and the two binary images are summed and then completely binarized. The final result is the structural feature map we need.
+In Algorithm~\ref{alg:1} we use Sobel operator to extract the horizontal and vertical edge detection maps from a real image. Each edge detection map performs maximum reduce and minimum reduce to obtain two edge detection fusion maps, then each fusion map calculates the difference with average pixel value. The two difference maps are binarized according to the pixel threshold, and the two binary images are summed and then completely binarized. The final result is the structural feature map we need.
 
 \subsection{Structural Feature Map Generation Training}
 \begin{figure}
 	\centering
 	\includegraphics[width=0.95\columnwidth]{figures/feature_train}
-	\caption{Structural Feature Map Generation Training.}
+	\caption{Structural feature map generation training.}
 	\label{feature_train}
 \end{figure}
 \begin{algorithm}
 	\caption{Mask Extraction}
 	\label{alg:2}
 	\begin{algorithmic}[1]
-		\State Input a real image $x$ and expanded pixel value $p$
+		\State Input a real image $x$ and the expanded pixel value $p$
 		\State $mask = 1.0 - ones \times (x > 0.)$
 		\State $new\_size=[x.width() + p, x.length() + p]$
 		\State $mask = resize(mask, new\_size)$
 		\State $mask = crop\_padding(mask,p)$
 	\end{algorithmic}  
 \end{algorithm}
-When generating the structural feature map, \cite{4shin2018medical} still needs to input the real modal image to get the generated structural feature map, which greatly reduces the diversity of generated data. \cite{41costa2017towards} implements a method based on VAE for generating retinal blood vessel distribution maps from multidimensional normal distribution. Drawing on this, we design a hybrid network combining the characteristics of VAE and GAN for generating brain structural feature maps from random normal distribution matrixes, which has better diversity and no additional training data. In addition,  we train a generator $MG$ that acquires the brain area masks from the brain structure feature maps for later use to match lesion label. The generator is synchronized with the training of structural feature map generation. During the training of $MG$, the mask extracted by the real brain MRI $x$ through the mask extraction algorithm (Algorithm~\ref{alg:2}) is used as label data. As shown in Fig.~\ref{feature_train}, the specific training processing is as follows:
+When generating the structural feature map, \cite{4shin2018medical} still needs to input real image to get the generated structural feature map, which greatly reduces the diversity of synthetic data. \cite{41costa2017towards} implements a method based on VAE for generating retinal blood vessel distribution maps from multidimensional normal distribution. Drawing on this, we design a hybrid network combining the characteristics of VAE and GAN for generating brain structural feature maps from random normal distribution matrixes, which has better diversity and no additional training data. In addition,  we train a generator $MG$ that acquires the brain area masks from the brain structure feature maps for later use to match lesion label. The generator is synchronized with the training of structural feature map generation. During the training of $MG$, the mask extracted by Algorithm~\ref{alg:2} is used as label data. As shown in Fig.~\ref{feature_train}, the specific training processing is as follows:
 \begin{itemize}
 	\item The structural feature map $f$ is obtained from $x$ using Algorithm~\ref{alg:1}, and the mask $mask$ is obtained by the Algorithm~\ref{alg:2};
 	\item Encode $f$ with VAE encoder $EC_f$ to get $code_{f,mean}$ and $code_{f,logvar}$, then get a random noise $code_n$ from multidimensional normal distribution $\mathcal{N}(0,1^2)$, so the approximate normal distribution matrix  $code_f=code_{f,mean}+exp(0.5\times code_{f,logvar})\times code_n$;
@@ -191,11 +191,11 @@ When generating the structural feature map, \cite{4shin2018medical} still needs 
 	\item Decode $code_{f,g}$ with VAE decoder $DC_f$ to get the generated random structure feature map $f_g$;
 	\item Use mask generator $MG$ to extract mask $mask_g$ from $f$;
 	\item Structural feature discriminator $D_f$ identifies $f$ and $f_g$ respectively, the former is a positive sample and the latter is a negative sample;
-	\item Code matrix distribution discriminator $FD_f$ discriminates between $code_{f,g}$ and $code_f$, the former is a positive sample and the latter is a negative sample.
+	\item Code matrix distribution discriminator $FD_f$ identifies $code_{f,g}$ and $code_f$, the former is a positive sample and the latter is a negative sample.
 \end{itemize}
 
-Where, for the constraint of approximate normal distribution matrix, we do not use the original VAE encoder loss, but add a code matrix distribution discriminator to provide adversarial loss for VAE encoder.Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1.
-The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item,$mean()$ is the mean function: 
+For the constraint of approximate normal distribution matrix, we do not use the original VAE encoder loss, but add a code matrix distribution discriminator to provide adversarial loss for VAE encoder. Meanwhile, we use $L2$ regular loss to guide the mean matrix with a mean of 0 and the variance deviation matrix with a mean of 1.
+The complete loss items are as follows, where $\omega_{i,j}$ is the weight of each loss item, $mean()$ is the mean function: 
 \begin{itemize}
 	\item \textbf{Code matrix distribution discriminator loss} 
 	\begin{center}
@@ -228,8 +228,8 @@ The complete loss items are as follows, where $\omega_{i,j}$ is the weight of ea
 	\end{center}
 \end{itemize}
 
-\subsection{Reconstruction and translation training}
-We perform reconstruction and transformation training on real data and synchronize with the multimodal MRI generation training in subsequent chapters to constrain each component to complete our specified tasks in the multimodal MRI generation process. In addition, we also use a code matrix distribution discriminator $FD$ to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}
+\subsection{Reconstruction and Translation Training}
+We perform reconstruction and translation training on real data and synchronize with multimodal MRI synthesis training in subsequent sections. These trianings constrain each component to complete our specified tasks in multimodal MRI synthesis process. In addition, we also use a code matrix distribution discriminator $FD$ to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}.
 
 \begin{figure}
 	\centering
@@ -238,9 +238,9 @@ We perform reconstruction and transformation training on real data and synchroni
 	\label{trans_train}
 \end{figure}
 
-As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, the encoder $EC$ encodes the real MRI $x_i$ of modality $i$ to obtain the semantic feature map $code_{i}$, then we connect it to different conditional matrixes and decode all the modalities through the decoder $DC$. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, connect all the re-encoded semantic feature maps with the conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. In the above process, we use the lesion label $l_i$ of the original input modality $x_i$ as supervised label for the lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
+As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, encoder $EC$ encodes real MRI $x_i$ of modality $i$ to obtain semantic feature map $code_{i}$, then it is concatenated to different conditional matrixes and obtain all the modalities through decoder $DC$. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, concatenate all re-encoded semantic feature maps with conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. In the above process, we use the lesion label $l_i$ of original input modality $x_i$ as the supervised label for lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$.
 
-The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of modality $i$ translated by modality $j$; $d_{t, j, i}$ and $c_{t, j, i}$ are the True/False discrimination and category discrimination results of the discriminator $D$ for $x_{t, i, j}$; $code_{t,i,j}$ represents the semantic feature map obtained from $x_{t,i,j}$ by encoder:
+The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of modality $i$ translated by modality $j$; $d_{t, j, i}$ and $c_{t, j, i}$ are the True/False discrimination and category discrimination results of discriminator $D$ for $x_{t, i, j}$; $code_{t,i,j}$ represents semantic feature map obtained from $x_{t,i,j}$ by encoder:
 \begin{itemize}
 	\item \textbf{Discriminator loss}
 	\begin{center}
@@ -275,11 +275,11 @@ The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of mod
 	
 \end{itemize}
 
-\subsection{Structural feature map and lesion label fusion}
+\subsection{Fusion of Structural Feature Map and Label}
 
-First we generate structural feature map $f_g$, then randomly select the appropriate lesion segmentation label $label$, and then the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels, and each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. Each 1 pixel area is registered with each segmentation area in the original segmentation label. At last, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses the information of $f_g$ and $label$.
+After generating structural feature map $f_g$, we randomly select appropriate lesion segmentation label $label$, and the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels. Each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. Each 1 pixel area is registered with each original label segmentation area. At last, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses information of $f_g$ and $label$.
 
-If the structural feature map $f'$ is extracted from the random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information at random label $l$ and affect the fusion generation MRI, so $f'$ needs to eliminate the tumor information before fusing with the random label $label$, and get the structural feature map $f$ without tumor information, so that the tumor information of the generated image is only derived from the label $label$. We generate a mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by the Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
+If the structural feature map $f'$ is extracted from random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information at random label $l$ and affect the fusion generation MRI, so $f'$ needs to eliminate the tumor information before fusing with the random label $label$, and get the structural feature map $f$ without tumor information, so that the tumor information of the generated image is only derived from the label $label$. We generate a mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by the Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
 
 Since the location of the randomly selected lesion may appear outside the brain contour of structural feature map, we need to use the Algorithm~\ref{alg:2} to obtain the brain region mask $mask$ of the structural feature map. If the product of $mask$ and the selected $label$ is 0, then the tumor label pixel is inside the brain contour of $mask$, which can be adopted, otherwise the $label$ needs to be re-selected.
 
@@ -287,7 +287,7 @@ Since the location of the randomly selected lesion may appear outside the brain 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.98\columnwidth]{figures/mm_mri_generate}
-	\caption{Generation of multimodal MRI.}
+	\caption{Synthesis of multimodal MRI.}
 	\label{mm_mri_generate}
 \end{figure}
 
@@ -297,7 +297,7 @@ Since the location of the randomly selected lesion may appear outside the brain 
 	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
-We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ to fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder $EC_r$ to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different one-hot conditional matrixes and decodes by MRI decoder to obtains synthesis images of different modalities. These synthesis images are then perform modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we used the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in synchronous reconstruction and translation training. 
+We extract the structural feature map $f$ from the real MRI by the Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ to fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI generation process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder $EC_r$ to encode fusion map to obtain the semantic feature map. The semantic feature map is stacked with different one-hot conditional matrixes and decodes by MRI decoder to obtains synthesis images of different modalities. These synthesis images are then perform modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthesis image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of generated multimodal MRI. In addition, we use the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the generated multimodal images have generated corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in synchronous reconstruction and translation training. 
 
 The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the translation image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
 \begin{itemize}
@@ -340,11 +340,11 @@ As shown in Fig.~\ref{segmentation}, we design the following three lesion label 
 	\item \textbf{Single segmentor} 
 	Each MRI modality  is segmented by a common complete segmentor $SEG$.
 	\item \textbf{Single lesion encoder + multiple lesion decoders} 
-	Each MRI modality  is segmented by a segmentors which is combined by a common lesion encoder $EC_{l}$ and different lesion decoders $EC_{l,i}$. 
+	Each MRI modality  is segmented by a segmentor which is combined by a common lesion encoder $EC_{l}$ and different lesion decoders $EC_{l,i}$. 
 	\item \textbf{Multiple segmentors} 
 	Each MRI modality  is segmented by a different complete segmentor $SEG_i$.
 \end{itemize}
-The loss item of the above three schemes in reconstruction and translation training is consistent with the loss item described above. And in the generation training, they only provide the same lesion label generation loss for MRI generation components, no learning.
+The loss item of the above three methods in reconstruction and translation training is consistent with the loss item described above. And in the generation training, it only provide the same lesion label generation loss for MRI generation components, no learning.
 
 \begin{figure}
 	\centering
@@ -352,7 +352,7 @@ The loss item of the above three schemes in reconstruction and translation train
 	\caption{Lesion segmentation.}
 	\label{segmentation}
 \end{figure}
-Besides, we will also independently train the segmentors of these three schemes. In different experiments, we will train the segmentor in each scheme with different amounts of synthetic data or real data. The loss function of the training is as follows, where $label_i$ is the supervised label and $label_{r,i}$ is the segmentation result:
+Besides, we also train the segmentors of these three methods independently. In different experiments, we will train the segmentor in each scheme with different amounts of synthetic data or real data. The loss function of the training is as follows, where $label_i$ is the supervised label and $label_{r,i}$ is the segmentation result:
 \begin{center}
 	$loss_{segmentation}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}$
 \end{center}
@@ -365,7 +365,7 @@ Besides, we will also independently train the segmentors of these three schemes.
 	\caption{Construction of synthetic datasets.}
 	\label{make_data}
 \end{figure}
-As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining mask from structural feature map through the mask generator $MG$.
+As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from randomly generated normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped, etc. the original set of labels to get a random lesion label set. We then fuse the generated structural feature map with the randomly selected label from the random lesion label set. Like training, we can select suitable labels by obtaining masks from structural feature maps through the mask generator $MG$.
 
 Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MG$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by the traditional algorithm is hollow inside and quite different with the mask generated by the generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
 \begin{algorithm}
@@ -385,28 +385,28 @@ Due to the influence of the operation that removing tumor information during tra
 	\end{algorithmic}  
 \end{algorithm}
 
-In the generated multimodal MRIs, there still are samples with poor lesion generation. At this point, we segment our synthetic MRI data through the lesion segmentor pre-trained on real data.We filter according to the segmentation evaluation score(default threshold is 0.95 on dice score). After multiple filtering, we obtain the final synthetic dataset consisting of structural feature maps, masks,  lesion segmentation labels, and multimodal MRI.
+In the generated multimodal MRIs, there are still samples with poor lesion generation. At this point, we segment our synthetic MRI data through the lesion segmentor pre-trained on real data.We filter according to the segmentation evaluation score(default threshold is 0.95 on dice score). After multiple filtering, we obtain the final synthetic dataset consisting of structural feature maps, masks,  lesion segmentation labels, and multimodal MRI.
 
 \section{Experiments}
 
 \subsection{BRATS2015 dataset}
-We use the open dataset BRATS2015\cite{91menze:hal-00935640} for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we standardized each image.
+We use the open dataset BRATS2015\cite{91menze:hal-00935640} for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a testing set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we have standardized each image.
 
 \subsection{BRATS synthetic dataset}
-We constructed a registered synthetic dataset with tumor labels containing four modalities of T1/T2/T1c/Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset samples is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
+We construct a registered synthetic dataset with tumor labels containing four modalities of T1/T2/T1c/Flair using the method in ~\ref{make dataset}. The size of the synthetic dataset samples is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{BRATS enhanced dataset}
-We performed random scaling, rotation, translation, flipping, etc. on the original BRATS2015 dataset to obtain enhanced data. The size of the enhanced dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
+We perform random scaling, rotation, translation, flipping, etc. on the original BRATS2015 dataset to obtain enhanced data. The size of the enhanced dataset sample is consistent with the BRATS2015 dataset, but the number of samples can be any number according to the needs of the experiment.
 
 \subsection{Training settings}
-The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. We used Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the 4 modals results on the 2D images, and each experiment is trained four times to retain the best results.
+The number of iterations of each experiment is equal to 100 epochs of the BRATS2015 training dataset. The learning rate is 1e-4 without weight decay.  we use Adam optimizer with beta1 of 0.5 and perform a Dropout of 0.1 on the input layer, Batch size is 1. We use Dice Score \cite{95dice1945measures} and Mean Square Error (MSE)\cite{94prasad1990the} to evaluate the segmentation results. The evaluation results are the average of the 4 modals results on the 2D images, and each experiment is trained four times to retain the best results.
 
 \subsection{Experiments of lesion generation methods}
 \label{label gen methods tests}
-As shown in the Table~\ref{label_test}, we trained 4 tumor lesion segmentors using the Multiple segmentors scheme on the BRATS2015 training dataset and test them on the BRATS2015 testing dataset. Then we used the trained segmentors to segment the unfiltered synthetic data from different lesion generation guidelines.
+As shown in the Table~\ref{label_test}, we train 4 tumor lesion segmentors using the Multiple segmentors scheme on the BRATS2015 training dataset and test them on the BRATS2015 testing dataset. Then we used the trained segmentors to segment the unfiltered synthetic data from different lesion generation guidelines.
 
 \subsection{Experiments of synthetic data availability}
-As shown in the Table~\ref{availability_test}, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then used the mixed dataset for segmentation training using the Multiple segmentors scheme, and evaluated the segmentation ability of the model on real BRATS2015 testing dataset. All experiments were fully trained with the same number of iterations, which equal the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first. And in real first experiments and synthetic first experiments, the training iteration steps of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
+As shown in the Table~\ref{availability_test}, we mix real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training using the Multiple segmentors scheme, and evaluate the segmentation ability of the model on real BRATS2015 testing dataset. All experiments have been fully trained with the same number of iterations, which equal the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first. And in real first experiments and synthetic first experiments, the training iteration steps of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
 
 \section{Results}
 \subsection{Results of Lesion generation methods}
@@ -420,8 +420,8 @@ As shown in the Table~\ref{availability_test}, we mixed real BRATS2015 training 
 			\midrule		
 			4 $SEG$&real 		   				&0.026 &0.915 \\					
 			1 $SEG$&synthetic     			&0.053 &0.741 \\			
-			1 $EC_{lesion}$ + 4 $DC_{lesion}$&synthetic     	&0.055 &0.808 \\		
-			4 $SEG$&synthetic     			&0.043 &0.838 \\
+			1 $EC_{l}$ + 4 $DC_{l}$&synthetic     	&0.055 &0.808 \\		
+			4 $SEG$&synthetic     			&\textbf{0.043} &\textbf{0.838} \\
 			\bottomrule			
 		\end{tabular}	
 	}	
@@ -510,15 +510,15 @@ As shown in the Table~\ref{label_test}, the segmentation test results reach the 
 
 As shown in Table~\ref{availability_test}, the results of NO.3-NO.5 show that the synthetic data can not completely replace the real data in training.            
 The results of NO.6-NO.8 show that the results of pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data are very close to those of training with complete real data.   
-In the experiment NO.9-NO.11, the results of different mixing ratios are also quite different. When the ratio of the two is similar, the segmentation results are similar to experiment NO.1. When the proportion of synthetic data is high, the synthetic data will interfere with the learning of real data, and the result is lower than that of experiment NO.1. When the proportion of synthetic data is low, the generalization ability of the model can be improved by synthetic data, and the result is higher than experiment NO.1.            
-In the experiment NO.12-NO.17, we further tried to add synthetic data of different data quantities to the real data. We found that adding a small amount of synthetic data can enhance the learning, and the more synthetic data, the better the enhancement effect, but when the synthetic data reaches a certain percentage and then continue to increase, it will achieve the opposite effect.  
+In the experiment NO.9-NO.11, the results of different mixing ratios are also quite different. When the two ratio are close, the segmentation results are similar to experiment NO.1. When the proportion of synthetic data is high, the synthetic data will interfere with the learning of real data, and the result is lower than that of experiment NO.1. When the proportion of synthetic data is low, the generalization ability of the model can be improved by synthetic data, and the result is higher than experiment NO.1.            
+In the experiment NO.12-NO.17, we further tried to add synthetic data of different data quantities to the real data. We found that adding a small amount of synthetic data can enhance the learning, and the more synthetic data, the better the enhancement effect, but when the synthetic data reaches a certain percentage and then continue to increase, it achieves the opposite effect.  
 In the experiment NO.18-NO.23, we use the enhanced data generated by the usual data enhancement methods to compare the enhancements of the synthesized data. We found that the two are consistent in the trend of increasing the amount of data and the enhancement effect, but there are some differences in  the change curve between  enhancement effect and the increase in data amount. Overall, the enhanced data is more robust in terms of the sensitivity of the model to the amount of enhanced data, but the upper limit of the enhanced effect of synthetic data is much higher than that enhanced data.   
 In experiment NO.24-NO.25, we compared experiment NO.15 and found that the performance of the synthesized data is the best when it is used as pre-training data, and the performance is poor when it is used as supplementary training data set. when using as enhanced data to mixed with real data, the synthesized data can also achieve certain enhancements.
 
-Generally, when there is a large amount of real data, a small amount of synthetic data can be used as enhanced data mixing, or a large amount of synthetic data can be used for pre-training and then training on real data. And when there is less real data, a large number of synthetic data can be used for pre-training, then fine-tuned on a small amount of real data, whose results can compete with the results on complete real data, and this conclusion is consistent with \cite{4shin2018medical}. We do not recommend using synthetic data completely for training, and also do not recommend using synthetic data for supplementary training.
+Generally, when there are a large amount of real data, a small amount of synthetic data can be used as enhanced data mixing, or a large amount of synthetic data can be used for pre-training and then training on real data. And when there are less real data, a large number of synthetic data can be used for pre-training, then fine-tuned on a small amount of real data, whose results can compete with the results on complete real data, and this conclusion is consistent with \cite{4shin2018medical}. We do not recommend using synthetic data completely for training, and also do not recommend using synthetic data for supplementary training.
 
 \subsection{Synthetic images}
-As Figure~\ref{generated_f} shows the examples of the structural feature map we generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multimodal MRI.
+Figure~\ref{generated_f} shows the examples of the structural feature map generated from the random normal distribution matrix. Figure~\ref{generated_mri} shows the examples of generated structural feature maps, generated masks, selected lesion segmentation labels, and generated multimodal MRI.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.7\linewidth]{figures/Fs}
@@ -534,12 +534,12 @@ As Figure~\ref{generated_f} shows the examples of the structural feature map we 
 \end{figure}
 
 \section{Conclusion}
-Based on the conditional generation antagonism network, we realized the generation of registered multimodal MRI from the random normal distribution matrix through unsupervised training, and could add the lesion information freely. 
+Based on the conditional generation antagonism network, we realized the generation of registered multimodal MRI from the random normal distribution matrix through unsupervised training, which could add the lesion information freely. 
 We verified through lesion segmentation experiments that synthetic MRI can be used as pre-training data or enhanced data for intelligent medical image processing tasks and can significantly improve the generalization ability of the model.
 In this paper, our contributions include the following:
 \begin{itemize}
 	\item We propose a structural feature map extraction method to extract anatomical structure information directly from medical images without training or additional label data;
-	\item We propose a random structure feature map generation method to generate structural feature maps from multi-dimensional normal distribution sampling;
+	\item We propose a random structure feature maps generation method to generate structural feature maps from multi-dimensional normal distribution sampling;
 	\item We realized the generation of registered multimodal MRI with corresponding lesion information from structural feature map and randomly selected lesion labels;
 	\item We verified that synthetic data can be used as pre-training data or enhanced data for intelligent medical image processing tasks through a number of data usability tests on our synthetic dataset.
 	
