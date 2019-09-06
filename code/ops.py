@@ -14,19 +14,6 @@ def relu(x, alpha=0.2, max_value=100.0):
 
 
 def uk_resize(input, reuse=False, name=None, output_size=None):
-    """ A 3x3 fractional-strided-Convolution-BatchNorm-ReLU layer
-        with k filters, stride 1/2
-    Args:
-      input: 4D tensor
-      k: integer, number of filters (output depth)
-      norm: 'instance' or 'batch' or None
-      is_training: boolean or BoolTensor
-      reuse: boolean
-      name: string, e.g. 'c7sk-32'
-      output_size: integer, desired output size of layer
-    Returns:
-      4D tensor
-    """
     with tf.variable_scope(name, reuse=reuse):
         with tf.variable_scope('resize', reuse=reuse):
             input_shape = input.get_shape().as_list()
@@ -61,7 +48,6 @@ def _weights(name, shape, mean=0.0, stddev=0.02):
     Returns:
       A trainable variable
     """
-
     var = tf.get_variable(
         name, shape,
         initializer=tf.random_normal_initializer(
