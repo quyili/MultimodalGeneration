@@ -126,7 +126,7 @@ At present, there are various problems in the research of medical image synthesi
 \end{itemize}
 
 
-\section{Methods}
+\section{Method}
 \label{method}
 We perform our scheme on multimodal brain MRI synthesis task, in which the synthetic lesions are tumors, the lesion processing task is lesion segmentation, and the lesion label is a tumor segmentation label. Our scheme does not limit the body parts, lesion types, lesion processing tasks, specific modality and the number of modalities. We can easily apply this method to other similar tasks.
 
@@ -298,9 +298,9 @@ Since the location of randomly selected lesion may appear outside the brain cont
 	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
-We extract the structural feature map $f$ from real MRI by Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ for fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI synthesis process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder $EC_r$ to encode fusion map and obtain the semantic feature map. The semantic feature map is concatenated to different one-hot conditional matrixes and decodes by MRI decoder to obtains synthetic image of different modalities. These synthetic images are then perform modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthetic image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of synthetic multimodal MRI. In addition, we use the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the synthetic multimodal images have synthesized corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in reconstruction and translation training. 
+We extract the structural feature map $f$ from real MRI by Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ for fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI synthesis process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder $EC_r$ to encode fusion map and obtain the semantic feature map. The semantic feature map is concatenated to different one-hot conditional matrixes as input to MRI decoder, then obtains synthetic image of different modalities. These synthetic images are then performing modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthetic image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of synthetic multimodal MRI. In addition, we use the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the synthetic multimodal images have synthesized corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in reconstruction and translation training. 
 
-The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$; $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the synthetic image of the modality $i$ translated by synthetic image of modality $j$; $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$; $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$; $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
+The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$. $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the synthetic image of the modality $i$ translated by synthetic image of modality $j$. $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$. $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$. $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
 \begin{itemize}
 	\item \textbf{Discriminator loss }
 	\begin{center}
@@ -345,7 +345,7 @@ As shown in Fig.~\ref{segmentation}, we design the following three lesion label 
 	\item \textbf{Multiple segmentors} 
 	Each MRI modality  is segmented by a different complete segmentor $SEG_i$.
 \end{itemize}
-The loss item of the above three methods in reconstruction and translation training is consistent with the loss item described above. And in the generation training, it only provide the same lesion label generation loss for MRI synthesis components, no learning.
+The loss item of the above three methods in reconstruction and translation training is consistent with the loss item described above. And in the generation training, it only provides the same lesion label generation loss for MRI synthesis components, no learning.
 
 \begin{figure}
 	\centering
@@ -368,9 +368,9 @@ Besides, we also train the segmentors of these three methods independently. In d
 \end{figure}
 As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from random normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped the original label set to get a random lesion label set. We then fuse the generated structural feature map with randomly selected label from the random lesion label set. Like training stage, we can select suitable labels by obtaining masks from structural feature maps through the mask generator $MG$.
 
-Due to the influence of the operation that removing tumor information during training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MG$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by traditional algorithm is hollow inside and quite different with the mask generated by generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
+Due to the influence of the operation that removing tumor information in training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MG$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by traditional algorithm is hollow inside and quite different with the mask generated by generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
 \begin{algorithm}
-	\caption{Structural feature map filtering}
+	\caption{Structural Feature Map Filtering}
 	\label{alg:3}
 	\begin{algorithmic}[1]
 		\State Input a MAE threshold $mae$
@@ -407,7 +407,7 @@ The iteration number of each experiment is equal to 100 epochs of the BRATS2015 
 As shown in Table~\ref{label_test}, we train 4 tumor lesion segmentors using the multiple segmentors method on BRATS2015 training dataset and test them on BRATS2015 test dataset. Then we use the trained segmentors to segment the unfiltered synthetic data from different lesion generation guidance methods.
 
 \subsection{Experiments of Synthetic Data Availability}
-As shown in Table~\ref{availability_test}, we mix real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training using the multiple segmentors method, and evaluate the segmentation ability of the model on real BRATS2015 test dataset. All experiments have been fully trained with the same number of iterations, which equal to the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first.In real first experiments and synthetic first experiments, the training iteration steps of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
+As shown in Table~\ref{availability_test}, we mix real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training using the multiple segmentors method, and evaluate the segmentation ability of the model on real BRATS2015 test dataset. All experiments have been fully trained with the same number of iterations, which equal to the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first.In real first experiments and synthetic first experiments, the training iteration number of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
 
 \section{Results}
 \begin{figure}
@@ -425,7 +425,7 @@ Fig.~\ref{generated_f} shows the examples of the structural feature map generate
 \end{figure}
 \subsection{Results of Lesion Generation Methods}
 \begin{table}[t]
-	\caption{Lesion generation methods experiments}\smallskip
+	\caption{Lesion generation methods experiments.}\smallskip
 	\centering
 	\resizebox{.75\columnwidth}{!}{		
 		\smallskip\begin{tabular}{llll}		
@@ -446,7 +446,7 @@ As shown in Table~\ref{label_test}, segmentation test results of the segmentor t
 
 \subsection{Results of Synthetic Data Availability}
 \begin{table}[t]
-	\caption{Synthetic data availability verification experiments}\smallskip
+	\caption{Synthetic data availability verification experiments.}\smallskip
 	\centering
 	\resizebox{.95\columnwidth}{!}{
 		\smallskip\begin{tabular}{lllllll}
@@ -524,7 +524,7 @@ As shown in Table~\ref{label_test}, segmentation test results of the segmentor t
 
 As shown in Table~\ref{availability_test}, the results of experiment NO.3-NO.5 show that the synthetic data can not completely replace real data in training.           
 The results of NO.6-NO.8 show that the performances of pre-training with a large amount of synthetic data and fine-tuning on a small amount of real data are similar to those of training with complete real data.  
-In NO.9-NO.11, the results of different mixing ratios are also quite different. When the two ratio are close, the segmentation results are similar to NO.1. When the proportion of synthetic data is high, the synthetic data will interfere with the learning of real data, and the result is lower than that of NO.1. When the proportion of synthetic data is low, the generalization ability of the model can be improved by synthetic data, and the result is higher than NO.1.           
+In NO.9-NO.11, the results of different mixing ratios are also quite different. When the two ratios are close, the segmentation results are similar to NO.1. When the proportion of synthetic data is high, the synthetic data will interfere with the learning of real data, and the result is lower than that of NO.1. When the proportion of synthetic data is low, the generalization ability of the model can be improved by synthetic data, and the result is higher than NO.1.           
 In NO.12-NO.17, we further try to add synthetic data of different quantities to real data, which show that adding a small amount of synthetic data can enhance the learning, and the more synthetic data, the better the enhancement effect, but when the synthetic data reaches a certain percentage and then continue to increase, it achieves the opposite effect. 
 In NO.18-NO.23, we compare the enhancement effect of synthetic data and enhanced data generated by usual data enhancement methods. We found that the two are similar but not equal in the trend between  enhancement effect and the increase in data amount.Overall, the enhanced data is more robust in terms of the sensitivity of model to the amount of enhanced data, but the enhancement effect upper limit of synthetic data is much higher than that of enhanced data.  
 We compared NO.24-NO.25 with NO.15 and found that the performance of synthetic data is the best when it is used as pre-training data, and the performance is poor when it is used as supplementary training data. when using as enhanced data to mixed with real data, the synthetic data can also achieve certain enhancements.
