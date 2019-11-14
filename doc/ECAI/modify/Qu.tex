@@ -15,9 +15,9 @@
 \title{Synthesis of Registered Brain Multimodal\\
 	MRI with Lesions}
 
-\author{ Yili Qu \and Wanqi Su \and Chufu Deng \and Ying Wang \\
-	\and Yutong Lu \and Zhiguang Chen \and Nong Xiao \institute{Sun Yat-sen University,
-China, email: somename@university.edu} }
+\author{ Yili Qu \institute{Sun Yat-sen University,
+		China, email: quyli@mail2.sysu.edu.cn} \and Wanqi Su \and Chufu Deng \and Ying Wang \\
+	\and Yutong Lu \and Zhiguang Chen \and Nong Xia }
 
 \maketitle
 \bibliographystyle{ecai}
@@ -112,7 +112,7 @@ As shown in Algorithm~\ref{alg:1}, we use Sobel operator to extract the horizont
 \subsection{Structural feature map generation training}
 \begin{figure}
 	\centering
-	\includegraphics[width=0.95\columnwidth]{figures/feature_train}
+	\includegraphics[width=1.0\columnwidth]{figures/feature_train}
 	\caption{Structural feature map generation training.}
 	\label{feature_train}
 \end{figure}
@@ -179,6 +179,20 @@ The complete loss items are as follows, where $\omega_{i,j}$ is the weight of ea
 	\end{split}
 	\end{equation}
 \end{itemize}
+\subsection{Fusion of structural feature map and label}
+
+After generating structural feature map $f_g$, we randomly select appropriate lesion segmentation label $label$, and the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels. Each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. Each 1 pixel area is registered with each original label segmentation area. At last, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses information of $f_g$ and $label$.
+
+If the structural feature map $f'$ is extracted from random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information of random label $l$ and affect the syethetic MRI, so $f'$ needs to eliminate the tumor information before fusing with random label $label$, then get the structural feature map $f$ without tumor information, so that the tumor information of syethetic image is only derived from label $label$. We generate a mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
+
+Since the location of randomly selected lesion may appear outside the brain contour of structural feature map, we need to use Algorithm~\ref{alg:2} to obtain the brain region mask $mask$ of structural feature map. If the product of $mask$ and selected $label$ is 0, then the tumor label pixel is inside the brain contour of $mask$, which can be adopted, otherwise the $label$ needs to be re-selected.
+\begin{figure*}
+	\centering
+	\includegraphics[width=1.95\columnwidth]{figures/trans_train}
+	\caption{Reconstruction and translation training.}
+	\label{trans_train}
+\end{figure*}
+\iffalse
 \subsection{Reconstruction and translation training}
 We perform reconstruction and translation training on real data and synchronize with multimodal MRI synthesis training in subsequent sections. These trianings constrain each component to complete our specified tasks in multimodal MRI synthesis process. In addition, we also use a code matrix distribution discriminator $FD$ to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}.
 
@@ -196,48 +210,40 @@ The detailed losses are as follows, where $x_{t,j,i}$ refers to MRI $x_i$ of mod
 	\item{Discriminator loss}
 	\begin{equation}
 	\begin{split}
-		loss_{d,1}=&\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})\\
-		&+\sum\limits_{i=0}(\Vert{FD(code_{i})-1}\Vert_{2}^{2})
+	loss_{d,1}=&\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{d_{t,j,i}}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})\\
+	&+\sum\limits_{i=0}(\Vert{FD(code_{i})-1}\Vert_{2}^{2})
 	\end{split}
 	\end{equation}
-
+	
 	\item{Adversarial and category guidance loss}
 	\begin{equation}
-		loss_{g,1}=\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})
+	loss_{g,1}=\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{d_{t,j,i}-1}\Vert_{2}^{2}+\Vert{c_{t,j,i}-i}\Vert_{2}^{2})
 	\end{equation}
 	
 	\item{MRI reconstruction loss}
 	\begin{equation}
-		loss_{reconstruction}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})
+	loss_{reconstruction}=\sum\limits_{i=0}(\Vert{x_i-x_{r,i}}\Vert_{2}^{2})
 	\end{equation}
 	
 	\item{MRI cycle-reconstruction loss}
 	\begin{equation}
 	\begin{split}
-		loss_{cycle}=\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})+\\
-		\sum\limits_{k=0}\sum\limits_{j=0,j\neq k}\sum\limits_{i=0, i\neq j,i\neq k}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})
+	loss_{cycle}=\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{x_i-x_{cr,j,i}}\Vert_{2}^{2})+\\
+	\sum\limits_{k=0}\sum\limits_{j=0,j\neq k}\sum\limits_{i=0, i\neq j,i\neq k}(\Vert{x_{cr,j,i}-x_{cr,k,i}}\Vert_{2}^{2})
 	\end{split}
 	\end{equation}
 	
 	\item{Semantic consistency loss}
 	\begin{equation}
-		loss_{code,1}=\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})
+	loss_{code,1}=\sum\limits_{j=0}\sum\limits_{i=0, i\neq j}(\Vert{code_i-code_{t,i,j}}\Vert_{2}^{2})
 	\end{equation}
 	
 	\item{Lesion segmentation loss}
 	\begin{equation}
-		loss_{lesion,1}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}
+	loss_{lesion,1}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}
 	\end{equation}
-	
 \end{itemize}
-
-\subsection{Fusion of structural feature map and label}
-
-After generating structural feature map $f_g$, we randomly select appropriate lesion segmentation label $label$, and the lesion segmentation label containing $n$ categories is converted into a one-hot matrix $onehot_l$ of $n$ channels. Each channel corresponds to a segmentation category, the pixel value in each channel is 0 or 1. Each 1 pixel area is registered with each original label segmentation area. At last, we calculate the weighted sum of each channel of $onehot_l$ with $f_g$, and get a new matrix that fuses information of $f_g$ and $label$.
-
-If the structural feature map $f'$ is extracted from random MRI $x$, then the extracted structural features may contain tumor structure information, which may interfere with the tumor information of random label $l$ and affect the syethetic MRI, so $f'$ needs to eliminate the tumor information before fusing with random label $label$, then get the structural feature map $f$ without tumor information, so that the tumor information of syethetic image is only derived from label $label$. We generate a mask without boundary expansion $mask_{l,x}$ for segmentation label $label_x$ of $x$ by Algorithm~\ref{alg:2}, then we have $f=mask_{l,x}\times f'$.
-
-Since the location of randomly selected lesion may appear outside the brain contour of structural feature map, we need to use Algorithm~\ref{alg:2} to obtain the brain region mask $mask$ of structural feature map. If the product of $mask$ and selected $label$ is 0, then the tumor label pixel is inside the brain contour of $mask$, which can be adopted, otherwise the $label$ needs to be re-selected.
+\fi
 
 \subsection{Multimodal MRI synthesis training}
 \begin{figure*}
@@ -253,21 +259,41 @@ Since the location of randomly selected lesion may appear outside the brain cont
 	\caption{Discriminator training during reconstruction and translation training on real MRI and multimodal MRI generation training.}
 	\label{train_D}
 \end{figure}
-We extract the structural feature map $f$ from real MRI by Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ for fusion. The fusion map contains basic anatomical information and lesion information of the target site. The multimodal MRI synthesis process is shown in Fig.~\ref{mm_mri_generate}. First, we use a fusion map encoder $EC_r$ to encode fusion map and obtain the semantic feature map. The semantic feature map is concatenated to different one-hot conditional matrixes as input to MRI decoder, then obtains synthetic image of different modalities. These synthetic images are then performing modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthetic image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of synthetic multimodal MRI. In addition, we use the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the synthetic multimodal images have synthesized corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in reconstruction and translation training. 
+Before the multimodal MRI synthesis process, We perform reconstruction and translation training on real data. These trianings constrain each component to complete our specified tasks in multimodal MRI synthesis process. 
+As shown in Fig.~\ref{trans_train}, when the MRI is reconstructed and translated, encoder $EC$ encodes real MRI $x_i$ of modality $i$ to obtain semantic feature map $code_{i}$, then it is concatenated to different conditional matrixes and obtain all the modalities through decoder $DC$. In cycle-reconstruction, we use encoder to re-encode all the obtained translation images, concatenate all re-encoded semantic feature maps with conditional vector of modality $i$, and finally decode them by decoder to get cycle-reconstruction image $x_{rc,j,i}$. In the above process, we use the lesion label $l_i$ of original input modality $x_i$ as the supervised label for lesion generation training, and use lesion label generation components for $x_i$ to get $l_{r,i}$. 
 
-The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$. $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the synthetic image of the modality $i$ translated by synthetic image of modality $j$. $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$. $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$. $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
+What's more, we also use a code matrix distribution discriminator $FD$ to guide the consistency of code matrixes distribution between the two training processes. All discriminator components are updated independently, the discriminator training process is shown in Fig.~\ref{train_D}.
+
+In addition to the loss settings in CycleGAN, we also design the following losses for reconstruction and translation training:
+\begin{itemize}
+	\item{Feature Discriminator loss}
+	\begin{equation}
+	\begin{split}
+	loss_{fd}=\sum\limits_{i=0}(\Vert{FD(code_{i})-1}\Vert_{2}^{2})
+	\end{split}
+	\end{equation}
+	\item{Lesion segmentation loss}
+	\begin{equation}
+	loss_{lesion,1}=\sum\limits_{i=0}\Vert{label_i-label_{r,i}}\Vert_{2}^{2}
+	\end{equation}
+\end{itemize}
+
+The multimodal MRI synthesis process is shown in Fig.~\ref{mm_mri_generate}. First, we extract the structural feature map $f$ from real MRI by Algorithm~\ref{alg:1}, and randomly select the real lesion label $label$ for fusion. The fusion map contains basic anatomical information and lesion information of the target site. 
+We use a fusion map encoder $EC_r$ to encode fusion map and obtain the semantic feature map. The semantic feature map is concatenated to different one-hot conditional matrixes as input to MRI decoder, then obtains synthetic image of different modalities. These synthetic images are then performing modal translation process between each other by MRI encoder and MRI decoder. We use adversarial loss and category guidance loss provided by MRI discriminator to constrain synthetic image to approximate real MRI, and constrain the consistency of all semantic feature maps and translation images by loss, thus ensuring the mutual registration of synthetic multimodal MRI. In addition, we use the lesion label generation components to segment the tumor lesion segmentation labels from each synthetic MRI to ensure that the synthetic multimodal images have synthesized corresponding lesion content based on the input lesion label. The lesion label generation components are only trained by real data in reconstruction and translation training. 
+
+The specific loss items of the multimodal MRI synthesis process are as follows, where $d_{i}$ and $c_{i}$ are the True/False discrimination and category discrimination of the discriminator $D(x_i)$, $d_{g, i}$,$c_{g,i}$ is the output of $D(x_{g,i})$. $x_{g,i}$ is the synthetic image of modality $i$, $x_{gt,j,i}$ is the synthetic image of the modality $i$ translated by synthetic image of modality $j$. $code_g$ is the semantic feature map obtained by fusion map encoder$EC_R$, $code_{g,i}$ is the semantic feature map encoded from $x_i$. $l$ is the input label, $l_{g,i}$ is the label obtained by lesion label generation component from $x_{g,i}$. $f$ is the input structural feature map, $f_{g,i}$ is the structural feature map extracted from $x_{g,i}$ by Algorithm~\ref{alg:1}:
 \begin{itemize}
 	\item{Discriminator loss }
 	\begin{equation}
 	\begin{split}
-		loss_{d,2}=&\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2}+\Vert{c_{i}-i}\Vert_{2}^{2}+\\
+		loss_{d}=&\sum\limits_{i=0}(\Vert{d_{i}-1}\Vert_{2}^{2}+\Vert{d_{g,i}}\Vert_{2}^{2}+\Vert{c_{i}-i}\Vert_{2}^{2}+\\
 		&\Vert{c_{g,i}-i}\Vert_{2}^{2})+\Vert{FD(code_{g})}\Vert_{2}^{2}
 	\end{split}
 	\end{equation}
 	
 	\item{Adversarial and category guidance loss}
 	\begin{equation}
-		loss_{g,2}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})+\Vert{FD(code_{g})-1}\Vert_{2}^{2}
+		loss_{g}=\sum\limits_{i=0}(\Vert{d_{g,i}-1}\Vert_{2}^{2}+\Vert{c_{g,i}-i}\Vert_{2}^{2})+\Vert{FD(code_{g})-1}\Vert_{2}^{2}
 	\end{equation}
 	
 	\item{Structural feature map consistency loss}
@@ -288,7 +314,7 @@ The specific loss items are as follows, where $d_{i}$ and $c_{i}$ are the True/F
 	\item{Semantic consistency loss}
 	\begin{equation}
 	\begin{split}
-		loss_{code,2}=&\sum\limits_{i=0}(\Vert{code_g-code_{g,i}}\Vert_{2}^{2})+\\
+		loss_{code}=&\sum\limits_{i=0}(\Vert{code_g-code_{g,i}}\Vert_{2}^{2})+\\
 		&\sum\limits_{j=0}\sum\limits_{i=0, ,i\neq j}(\Vert{code_{g,i}-code_{g,j}}\Vert_{2}^{2})
 	\end{split}
 	\end{equation}
@@ -324,12 +350,12 @@ Besides, we also train the segmentors of these three methods independently. In d
 
 \subsection{Construction of synthetic datasets}
 \label{make dataset}
-\begin{figure}
+\begin{figure*}
 	\centering
-	\includegraphics[width=0.98\columnwidth]{figures/make_data}
+	\includegraphics[width=1.98\columnwidth]{figures/make_data}
 	\caption{Construction of synthetic datasets.}
 	\label{make_data}
-\end{figure}
+\end{figure*}
 As shown in Fig.~\ref{make_data}, we can generate any number of structural feature maps from random normal distribution matrix through the trained structural feature map decoder. Then, we randomly scaled, rotated, translated, flipped the original label set to get a random lesion label set. We then fuse the generated structural feature map with randomly selected label from the random lesion label set. Like training stage, we can select suitable labels by obtaining masks from structural feature maps through the mask generator $MG$.
 
 Due to the influence of the operation that removing tumor information in training, there are some structural feature maps with poor quality that brain contour is not closed, so we design a structural feature map filtering algorithm for this. First, we use the generator $MG$ to generate the mask of structural feature map. Then, we perform Gaussian blur\cite{92wink2004denoising} on the structural feature map, and use the contour search algorithm and filling algorithm provided by OpenCV\footnote{https://opencv.org/} to obtain all the closed contours of the Gaussian blur image and fill them. So we get another mask by the traditional algorithm. Finally, we calculate the Mean Absolute Error (MAE) of the two masks. If the MAE is lower than the threshold we set, that means the main brain contour of the structural feature map is relatively complete, and the feature map can be used; otherwise, it means that the mask obtained by traditional algorithm is hollow inside and quite different with the mask generated by generator, so it needs to be regenerated. The algorithm is expressed as Algorithm~\ref{alg:3}.
@@ -353,7 +379,6 @@ Due to the influence of the operation that removing tumor information in trainin
 In the systhetic multimodal MRI dataset, there are still samples with poor quality of lesion generation. At this point, we segment our synthetic MRI data through the lesion segmentor pre-trained on real data. We filter according to the segmentation evaluation score(default threshold is 0.95 on Dice Score). After multiple filtering, we obtain the final synthetic dataset consisting of structural feature maps, masks, lesion segmentation labels, and multimodal MRI.
 
 \section{EXPERIMENTS}
-
 \subsection{BRATS2015 dataset}
 We use the open dataset BRATS2015\cite{91menze:hal-00935640} for experiments, which has four registered modalities of T1/T2/T1c/Flair. The training dataset contains 274 3D MRIs per modality, with the size of 155$\times$240$\times$240, and 274 tumor segmentation labels of the same size. We divide the sample into a training set and a test set by 9:1, and construct a 2D data set from 50 slices of each 55-105 of the 3D MRI. In data preprocessing, we have standardized each image.
 
@@ -369,28 +394,6 @@ The iteration number of each experiment is equal to 100 epochs of the BRATS2015 
 \subsection{Experiments of lesion generation methods}
 \label{label gen methods tests}
 As shown in Table~\ref{label_test}, we train 4 tumor lesion segmentors using the multiple segmentors method on BRATS2015 training dataset and test them on BRATS2015 test dataset. Then we use the trained segmentors to segment the unfiltered synthetic data from different lesion generation guidance methods.
-
-\subsection{Experiments of synthetic data availability}
-As shown in Table~\ref{availability_test}, we mix real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training using the multiple segmentors method, and evaluate the segmentation ability of the model on real BRATS2015 test dataset. All experiments have been fully trained with the same number of iterations, which equal to the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first.In real first experiments and synthetic first experiments, the training iteration number of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
-
-\section{RESULTS}
-\iffalse
-\begin{figure}
-	\centering
-	\includegraphics[width=0.95\linewidth]{figures/Fs}
-	\caption{Synthetic structural feature maps.}
-	\label{generated_f}
-\end{figure}
-\fi
-%Fig.~\ref{generated_f} shows the examples of the structural feature map generated from random normal distribution matrix. 
-Fig.~\ref{generated_mri} shows the examples of images obtained from all stages.
-\begin{figure}
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/F_to_MRI}
-	\caption{Multimodal MRIs systhesized from structural feature maps and lesion labels.}
-	\label{generated_mri}
-\end{figure}
-\subsection{Results of lesion generation methods}
 \begin{table}
 	\begin{center}
 		{\caption{Lesion generation methods experiments.}\label{label_test}}
@@ -410,6 +413,26 @@ Fig.~\ref{generated_mri} shows the examples of images obtained from all stages.
 		\end{tabular}
 	\end{center}
 \end{table}
+\subsection{Experiments of synthetic data availability}
+As shown in Table~\ref{availability_test}, we mix real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training using the multiple segmentors method, and evaluate the segmentation ability of the model on real BRATS2015 test dataset. All experiments have been fully trained with the same number of iterations, which equal to the number of 100 epochs on BRATS2015 training dataset. At the same time, we set up three data mixing modes: random mixing, real data training first, and synthetic data training first.In real first experiments and synthetic first experiments, the training iteration number of data from different sources is proportional to the amount of data. Except the conditions in tabel, other conditions are identical.
+\section{RESULTS}
+\iffalse
+\begin{figure}
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/Fs}
+	\caption{Synthetic structural feature maps.}
+	\label{generated_f}
+\end{figure}
+\fi
+%Fig.~\ref{generated_f} shows the examples of the structural feature map generated from random normal distribution matrix. 
+Fig.~\ref{generated_mri} shows the examples of images obtained from all stages.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/F_to_MRI}
+	\caption{Multimodal MRIs systhesized from structural feature maps and lesion labels.}
+	\label{generated_mri}
+\end{figure}
+\subsection{Results of lesion generation methods}
 \begin{table*}[t]
 	\begin{center}
 		{\caption{Synthetic data availability verification experiments.}\label{availability_test}}
