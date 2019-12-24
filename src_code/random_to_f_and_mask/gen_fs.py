@@ -18,7 +18,7 @@ tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: 
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
 tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
+tf.flags.DEFINE_integer('epoch_steps', 10, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
@@ -47,8 +47,9 @@ def train():
         print("<load_model> is None.")
         return
     try:
-        os.makedirs("./N_F")
-        os.makedirs("./N_F/XY")
+        os.makedirs("./N_F/C0")
+        os.makedirs("./N_F/C1")
+        os.makedirs("./N_F/C2")
     except os.error:
         pass
     checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
@@ -70,26 +71,46 @@ def train():
             print("image gen start:" + str(index))
             n=10
 
-            code = np.random.normal(0,1,(1,5476))
-            figure = np.zeros((184 * n, 144 ))
-            for i in range(n):
-                    z_sample = code[:,i*128:i*128+4096]
+            code1 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
+            code2 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
+            figure = np.zeros((184 * 64, 144 * 64))
+            for i in range(64):
+                for j in range(64):
+                    z_sample = code1
+                    z_sample[:i, :] = code2[:i, :]
+                    z_sample[:, :j] = code2[:, :j]
+                    z_sample = z_sample.reshape((1, 4096))
                     f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
-                    figure[i * 184: (i + 1) * 184,:] = np.asarray(f)[0, :, :, 0]
+                    figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure.astype('float32')),
+                                 "./N_F/C1/" + str(index) + ".tiff")
 
-            code=code.reshape((74,74))
-            figure_xy = np.zeros((184 * n, 144 * n))
-            for i in range(n):
-                for j in range(n):
-                    z_sample = code[i:i+64, j:j + 64]
-                    z_sample=z_sample.reshape((1,4096))
+            code1 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
+            code2 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
+            figure = np.zeros((184 * 64, 144 * 64))
+            for i in range(64):
+                for j in range(64):
+                    z_sample = code1
+                    z_sample[i, :] = code2[i, :]
+                    z_sample[:, j] = code2[:, j]
+                    z_sample = z_sample.reshape((1, 4096))
                     f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
-                    figure_xy[i * 184: (i + 1) * 184, j * 184: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
+                    figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure.astype('float32')),
+                                 "./N_F/C2/" + str(index) + ".tiff")
 
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure),
-                                 "./N_F/" + str(index) + ".tiff")
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure_xy),
-                                 "./N_F/XY/" + str(index) + ".tiff")
+            code1 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
+            code2 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
+            figure = np.zeros((184 * 64, 144 * 64))
+            for i in range(64):
+                for j in range(64):
+                    z_sample = code1
+                    z_sample[:i, :j] = code2[:i, :j]
+                    z_sample = z_sample.reshape((1, 4096))
+                    f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
+                    figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure.astype('float32')),
+                                 "./N_F/C0/" + str(index) + ".tiff")
 
             print("image gen end:" + str(index))
             index += 1
