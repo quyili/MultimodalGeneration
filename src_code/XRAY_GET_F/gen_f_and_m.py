@@ -18,11 +18,12 @@ tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: 
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
 tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 10, ' default: 15070')
+tf.flags.DEFINE_integer('epoch_steps', 1650, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
 tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
+
 
 def get_mask_from_f(imgfile):
     # imgfile = "full_x.jpg"
@@ -47,9 +48,9 @@ def train():
         print("<load_model> is None.")
         return
     try:
-        os.makedirs("./N_F/C0")
-        os.makedirs("./N_F/C1")
-        os.makedirs("./N_F/C2")
+        os.makedirs("./test_images/Temp")
+        os.makedirs("./test_images/F")
+        os.makedirs("./test_images/M")
     except os.error:
         pass
     checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
@@ -69,50 +70,50 @@ def train():
         index = 0
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
-            n=10
 
-            code1 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
-            code2 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
-            figure = np.zeros((184 *8, 144 *8))
-            for i in range(8):
-                for j in range(8):
-                    z_sample = code1
-                    z_sample[:i*8, :] = code2[:i*8, :]
-                    z_sample[:, :j*8] = code2[:, :j*8]
-                    z_sample = z_sample.reshape((1, 4096))
-                    f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
-                    figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure.astype('float32')),
-                                 "./N_F/C1/" + str(index) + ".tiff")
+            count = 0
+            best_j_f = -1000.0
+            while True:
+                code = sess.run(code_rm)
+                f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: code})
+                j_f = np.mean(np.asarray(j_f))
+                print(count, "j_f: ", j_f)
 
-            code1 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
-            code2 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
-            figure = np.zeros((184 *8, 144 *8))
-            for i in range(8):
-                for j in range(8):
-                    z_sample = code1
-                    z_sample[i*8, :] = code2[i*8, :]
-                    z_sample[:, j*8] = code2[:, j*8]
-                    z_sample = z_sample.reshape((1, 4096))
-                    f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
-                    figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure.astype('float32')),
-                                 "./N_F/C2/" + str(index) + ".tiff")
+                # 根据置信度过滤
+                if j_f >= FLAGS.min_j_f: break
 
-            code1 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
-            code2 = np.random.normal(0.0, 1.0, (64, 64)).astype('float32')
-            figure = np.zeros((184 *8, 144 *8))
-            for i in range(8):
-                for j in range(8):
-                    z_sample = code1
-                    z_sample[:i*8, :j*8] = code2[:i*8, :j*8]
-                    z_sample = z_sample.reshape((1, 4096))
-                    f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
-                    figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(figure.astype('float32')),
-                                 "./N_F/C0/" + str(index) + ".tiff")
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
 
+                m_arr_1 = get_mask_from_f("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                print(count, "mae: ", mae)
+
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae: break
+
+                if j_f > best_j_f:
+                    best_j_f = j_f
+                    best_f = f
+                    best_m = m
+
+                # 根据生成次数过滤
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
+
+                count = count + 1
+
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
+                                 "./test_images/F/" + str(index) + ".tiff")
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
+                                 "./test_images/M/" + str(index) + ".tiff")
             print("image gen end:" + str(index))
+
             index += 1
 
 

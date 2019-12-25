@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import SimpleITK
 import cv2
+import scipy.signal as signal
 
 
 def norm(input):
@@ -38,7 +39,7 @@ graph = tf.Graph()
 with graph.as_default():
     x = tf.placeholder(tf.float32, shape=[1, 584, 565, 3])
 
-    fx = get_f(x, j=0.035)
+    fx = get_f(x, j=0.03)
     mask_x = get_mask(x, p=10, beta=0.3)
     out_x = (1.0-mask_x) * fx
 
@@ -48,6 +49,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     input_x = np.asarray(input_x).reshape([584, 565, 3])
     fx_,mask_x_,out_x_ = sess.run([fx, mask_x, out_x],
                                                            feed_dict={x: np.asarray([input_x]) })
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(fx_)[0, :, :, 0,]), "X0_.tiff")
+    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=1)
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(fx_), "X0_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(mask_x_)[0, :, :, 0]), "X1_.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_x_)[0, :, :, 0]), "X2_.tiff")
