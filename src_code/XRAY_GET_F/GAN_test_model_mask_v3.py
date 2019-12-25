@@ -62,7 +62,6 @@ class GAN:
         return f
 
     def model(self, f, mask):
-
         # F -> F_R VAE
         code_f_mean, code_f_logvar = self.EC_F(f)
         shape = code_f_logvar.get_shape().as_list()

@@ -43,23 +43,12 @@ def mean_list(lists):
     return out
 
 
-def random(n, h, w, c):
-    return np.random.uniform(0., 1., size=[n, h, w, c])
-
-
 def read_file(l_path, Label_train_files, index):
     train_range = len(Label_train_files)
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     L_arr_ = L_arr_.astype('float32')
     return L_arr_
-
-
-def save_codes(code_f_rm, code_f, checkpoints_dir, file_index):
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(code_f)[0, :, :, :]),
-                         checkpoints_dir + "/samples/true_code_f_" + str(file_index) + ".mha")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(code_f_rm)[0, :, :, :]),
-                         checkpoints_dir + "/samples/true_code_f_rm_" + str(file_index) + ".mha")
 
 
 def save_images(image_list, checkpoints_dir, file_index):
