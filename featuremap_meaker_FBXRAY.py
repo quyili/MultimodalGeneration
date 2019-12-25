@@ -38,16 +38,20 @@ def get_mask(m, p=5,beta=0.0):
 graph = tf.Graph()
 with graph.as_default():
     x = tf.placeholder(tf.float32, shape=[1, 1500, 1500, 1])
-    fx = get_f(x, j=0.043)
+    # fx = get_f(x, j=0.043)
+    fx = get_f(x, j=0.03)
     mask_x = get_mask(x, p=2, beta=0.0)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("D:/BaiduYunDownload/chest_xray/train/NORMAL/IM-0133-0001.jpeg")).astype(
+    SAVE_F="D:/BaiduYunDownload/chest_xray/val/NORMAL_F"
+    SAVE_M = "D:/BaiduYunDownload/chest_xray/val/NORMAL_M"
+    NUM="NORMAL2-IM-0373-0001"
+    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("D:/BaiduYunDownload/chest_xray/val/NORMAL/"+NUM+".jpeg")).astype(
         'float32')
     input_x = transform.resize(np.asarray(input_x), [1500, 1500]).reshape([1500,1500,1])
     fx_, mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x])})
-    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=15)
+    # fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=11)
+    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=9)
     mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(fx_), "X0_.tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), "X1_.tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), "X2_.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M+"/"+NUM+".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), SAVE_F+"/"+NUM+".tiff")

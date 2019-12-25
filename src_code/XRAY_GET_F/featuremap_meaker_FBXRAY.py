@@ -41,13 +41,13 @@ def get_mask(m, p=5,beta=0.0):
 graph = tf.Graph()
 with graph.as_default():
     x = tf.placeholder(tf.float32, shape=[1, 1500, 1500, 1])
-    fx = get_f(x, j=0.009)
+    fx = get_f(x, j=0.01)
     mask_x = get_mask(x, p=2, beta=0.0)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    PATH="D:/BaiduYunDownload/chest_xray/train/NORMAL"
-    SAVE_F="D:/BaiduYunDownload/chest_xray/train/NORMAL_F"
-    SAVE_M = "D:/BaiduYunDownload/chest_xray/train/NORMAL_M"
+    PATH="D:/BaiduYunDownload/chest_xray/val/NORMAL"
+    SAVE_F="D:/BaiduYunDownload/chest_xray/val/NORMAL_F"
+    SAVE_M = "D:/BaiduYunDownload/chest_xray/val/NORMAL_M"
     try:
         os.makedirs(SAVE_F)
         os.makedirs(SAVE_M)

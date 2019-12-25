@@ -16,10 +16,10 @@ tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [1500, 1500, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('M', 'D:/BaiduYunDownload/chest_xray/train/NORMAL', 'X files for training')
-tf.flags.DEFINE_string('F', 'D:/BaiduYunDownload/chest_xray/train/NORMAL', 'X files for training')
-tf.flags.DEFINE_string('M_test', 'D:/BaiduYunDownload/chest_xray/train/NORMAL', 'X files for training')
-tf.flags.DEFINE_string('F_test', 'D:/BaiduYunDownload/chest_xray/train/NORMAL', 'X files for training')
+tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NORMAL_M', 'X files for training')
+tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NORMAL_F', 'X files for training')
+tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/NORMAL_M', 'X files for training')
+tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/NORMAL_F', 'X files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -367,11 +367,11 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            # if j == 0:
-                            # save_images(val_image_list_0, checkpoints_dir, str(0))
-                            # save_images(val_image_list_1, checkpoints_dir, str(1))
-                            # save_images(val_image_list_2, checkpoints_dir, str(2))
-                            # save_images(val_image_list_3, checkpoints_dir, str(3))
+                            if j == 0:
+                                save_images(val_image_list_0, checkpoints_dir, str(0))
+                                save_images(val_image_list_1, checkpoints_dir, str(1))
+                                save_images(val_image_list_2, checkpoints_dir, str(2))
+                                save_images(val_image_list_3, checkpoints_dir, str(3))
 
                         val_summary_op = sess.run(
                             summary_op,
