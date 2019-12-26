@@ -19,7 +19,7 @@ tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: 
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
 tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 10, ' default: 15070')
+tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
@@ -70,18 +70,18 @@ def train():
             print("image gen start:" + str(index))
             n=10
 
-            code1 = np.random.normal(0.0, 1.0, (1, 4096)).astype('float32')
-            code2 = np.random.normal(0.0, 1.0, (1, 4096)).astype('float32')
-            code3 = np.random.normal(0.0, 1.0, (1, 4096)).astype('float32')
-            code4 = np.random.normal(0.0, 1.0, (1, 4096)).astype('float32')
-            code5 = np.random.normal(0.0, 1.0, (1, 4096)).astype('float32')
+            code1 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            code2 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            code3 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            code4 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            code5 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
 
             codes=np.zeros((9, 9, 4096))
-            codes[0, 0, :] = code1
-            codes[0, 8, :] = code2
-            codes[8, 0, :] = code3
-            codes[8, 8, :] = code4
-            codes[4, 4, :] = code5
+            codes[0, 0, :] = code1[:]
+            codes[0, 8, :] = code2[:]
+            codes[8, 0, :] = code3[:]
+            codes[8, 8, :] = code4[:]
+            codes[4, 4, :] = code5[:]
 
             code_lines12=code_line(code1, code2, 7)
             for i in range(7):
@@ -151,10 +151,9 @@ def train():
             for i in range(2):
                 codes[4 + (i + 2), 4 + (i + 1), :] = code_lines4_34_5[i]
             code_lines4_24_5 = code_line(codes[4, 5, :], codes[7, 8, :], 2)
-            codes[ 5,7, :] = code_line(codes[4,6,  :], codes[ 6,8, :], 1)[0]
+            codes[ 5,7, :] = code_line(codes[4,6, :], codes[ 6,8, :], 1)[0]
             for i in range(2):
                 codes[4 + (i + 1), 4 + (i + 2), :] = code_lines4_24_5[i]
-
 
 
             figure = np.zeros((184 * 9, 144 * 9))
@@ -170,17 +169,18 @@ def train():
             print("image gen end:" + str(index))
             index += 1
 
-def code_line(code1,code2,N):
-    L=len(code1)
+def code_line(code1,code2,N,L=4096):
     code_line=[]
-    code = code1
+    code=np.zeros((L))
+    code[:] = code1[:]
     for i in range(N):
         for j in range(L):
             if j % N == i:
-                code[0,j]=code2[0,j]
-        code_line.append(code)
+                code[j]=code2[j]
+        code_temp = np.zeros((L))
+        code_temp[:] = code[:]
+        code_line.append(code_temp)
     return code_line
-
 
 def main(unused_argv):
     train()

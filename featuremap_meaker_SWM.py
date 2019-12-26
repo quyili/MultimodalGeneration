@@ -4,6 +4,14 @@ import numpy as np
 import SimpleITK
 import cv2
 import scipy.signal as signal
+from skimage import transform
+
+PATH = "D:/BaiduYunDownload/drive/test/images"
+SAVE_F = "D:/BaiduYunDownload/drive/test/images_F"
+SAVE_M = "D:/BaiduYunDownload/drive/test/images_M"
+NUM = "02_test"
+alpha=0.008
+beta=3
 
 
 def norm(input):
@@ -37,19 +45,18 @@ def get_mask(m, p=5,beta=0.0):
 
 graph = tf.Graph()
 with graph.as_default():
-    x = tf.placeholder(tf.float32, shape=[1, 584, 565, 3])
+    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 3])
 
-    fx = get_f(x, j=0.03)
+    fx = get_f(x, j=alpha)
     mask_x = get_mask(x, p=10, beta=0.3)
-    out_x = (1.0-mask_x) * fx
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("D:/BaiduYunDownload/drive/training/images/28_training.tif")).astype(
+    input_x = SimpleITK.GetArrayFromImage(
+        SimpleITK.ReadImage(PATH+"/" + NUM + ".tif")).astype(
         'float32')
-    input_x = np.asarray(input_x).reshape([584, 565, 3])
-    fx_,mask_x_,out_x_ = sess.run([fx, mask_x, out_x],
-                                                           feed_dict={x: np.asarray([input_x]) })
-    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=1)
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(fx_), "X0_.tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(mask_x_)[0, :, :, 0]), "X1_.tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(out_x_)[0, :, :, 0]), "X2_.tiff")
+    input_x = transform.resize(np.asarray(input_x), [512, 512, 3])
+    fx_,mask_x_ = sess.run([fx, mask_x],feed_dict={x: np.asarray([input_x]) })
+    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=beta)
+    mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + NUM + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), SAVE_F + "/" + NUM + ".tiff")
