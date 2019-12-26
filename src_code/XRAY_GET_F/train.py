@@ -7,13 +7,14 @@ import logging
 import numpy as np
 import SimpleITK
 import math
+from skimage import transform
 
 FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
-tf.flags.DEFINE_list('image_size', [1500, 1500, 1], 'image size, default: [155,240,240]')
+tf.flags.DEFINE_list('image_size', [1024, 1024, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NORMAL_M', 'X files for training')
@@ -43,19 +44,20 @@ def mean_list(lists):
     return out
 
 
-def read_file(l_path, Label_train_files, index):
+def read_file(l_path, Label_train_files, index, out_size=None):
     train_range = len(Label_train_files)
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     L_arr_ = L_arr_.astype('float32')
+    if out_size== None:
+        L_arr_ = transform.resize(L_arr_, FLAGS.image_size)
+    else:
+        L_arr_ = transform.resize(L_arr_, out_size)
     return L_arr_
 
 
 def save_images(image_list, checkpoints_dir, file_index):
-    val_true_m, val_f, val_f_r, val_f_rm = image_list
-
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_true_m)[0, :, :, 0]),
-                         checkpoints_dir + "/samples/true_m_" + str(file_index) + ".tiff")
+    val_f, val_f_r, val_f_rm = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_f_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_r)[0, :, :, 0]),

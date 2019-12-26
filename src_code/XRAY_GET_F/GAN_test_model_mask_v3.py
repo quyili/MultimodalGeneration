@@ -176,7 +176,7 @@ class GAN:
         tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_rm', evluation_list[0])
 
     def evaluation(self, image_list):
-        m, f, f_r, f_rm = image_list[0], image_list[1], image_list[2], image_list[3]
+        f, f_r, f_rm =  image_list[0], image_list[1], image_list[2]
         list = [self.PSNR(f, f_r),
                 self.SSIM(f, f_r)]
         return list
@@ -199,9 +199,8 @@ class GAN:
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_list):
-        m, f, f_r, f_rm, mask, mask_r, mask_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[
-            4], image_list[5], image_list[6]
-        tf.summary.image('image/m', m)
+        f, f_r, f_rm, mask, mask_r, mask_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[
+            4], image_list[5]
         tf.summary.image('image/f', f)
         tf.summary.image('image/f_rm', f_rm)
         tf.summary.image('image/f_r', f_r)

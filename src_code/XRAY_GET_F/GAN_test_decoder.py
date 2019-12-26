@@ -43,7 +43,7 @@ class GDecoder:
                 relu0_1 = ops.relu(norm0_1)
             # 6,5
             with tf.variable_scope("deconv0_1_r", reuse=self.reuse):
-                resize0_1 = ops.uk_resize(relu0_1, reuse=self.reuse, output_size=[12, 9], name='resize')
+                resize0_1 = ops.uk_resize(relu0_1, reuse=self.reuse, name='resize')
                 deconv0_1_r = tf.layers.conv2d(inputs=resize0_1, filters=8 * self.ngf, kernel_size=3, strides=1,
                                                padding="SAME",
                                                activation=None,
@@ -67,7 +67,7 @@ class GDecoder:
                 relu0_2 = ops.relu(norm0_2)
             # 12,9
             with tf.variable_scope("deconv0_2_r", reuse=self.reuse):
-                resize0_2 = ops.uk_resize(relu0_2, reuse=self.reuse, output_size=[23, 18], name='resize')
+                resize0_2 = ops.uk_resize(relu0_2, reuse=self.reuse, name='resize')
                 deconv0_2_r = tf.layers.conv2d(inputs=resize0_2, filters=6 * self.ngf, kernel_size=3, strides=1,
                                                padding="SAME",
                                                activation=None,
