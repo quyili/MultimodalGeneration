@@ -10,20 +10,10 @@ import os
 PATH = "D:/BaiduYunDownload/finding-lungs-in-ct-data/2d_images"
 SAVE_F = "D:/BaiduYunDownload/finding-lungs-in-ct-data/2d_images_F"
 SAVE_M = "D:/BaiduYunDownload/finding-lungs-in-ct-data/2d_images_M"
-NUM = "ID_0264_Z_0080"
-alpha=0.02
+alpha=0.04
+beta=0.2
 k_size1=5
-# alpha=0.04
-# k_size1=7
-
-p=2
-beta=0.57
 k_size2=5
-# beta=0.22
-# k_size2=5
-
-IF_SAVE_F=True
-IF_SAVE_M=True
 
 
 def norm(input):
@@ -64,17 +54,24 @@ with graph.as_default():
     # mask_x = get_mask(x, p=2, beta=0.2)
 
     fx = get_f(x, j=alpha)
-    mask_x = get_mask(x, p=p, beta=beta)
+    mask_x = get_mask(x, p=2, beta=beta)
 
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + NUM + ".tif"))
-    input_x = transform.resize(np.asarray(input_x), [512, 512, 1])
-    fx_, mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x]).astype('float32')})
-    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=k_size1)
-    mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=k_size2)
-    if IF_SAVE_M==True:
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + NUM + ".tiff")
-    if IF_SAVE_F==True:
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), SAVE_F + "/" + NUM + ".tiff")
-        # SimpleITK.WriteImage(SimpleITK.GetImageFromArray(fx_), SAVE_F + "/" + NUM + ".tiff")
+    try:
+        os.makedirs(SAVE_F)
+        os.makedirs(SAVE_M)
+    except os.error:
+        pass
+
+    files = os.listdir(PATH)
+    for file in files:
+        input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file))
+        input_x = np.asarray(input_x).reshape([512, 512, 1])
+        fx_,mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x]).astype( 'float32') })
+        fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=k_size1)
+        mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=k_size2)
+        new_file = file.replace(".tif", ".tiff")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), SAVE_F + "/" + new_file)
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
+        print(file + "==>" + new_file)
