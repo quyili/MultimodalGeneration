@@ -19,9 +19,8 @@ tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: 
 tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
 tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 100, ' default: 15070')
+tf.flags.DEFINE_integer('epoch_steps', 20, ' default: 15070')
 tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
-tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
 tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
 
@@ -49,6 +48,7 @@ def train():
         return
     try:
         os.makedirs("./N_F")
+        os.makedirs("./N_F/Temp")
     except os.error:
         pass
     checkpoint = tf.train.get_checkpoint_state(checkpoints_dir)
@@ -68,13 +68,135 @@ def train():
         index = 0
         while index <= FLAGS.epoch_steps * FLAGS.epochs:
             print("image gen start:" + str(index))
-            n=10
 
-            code1 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
-            code2 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
-            code3 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
-            code4 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
-            code5 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            count = 0
+            best_mae = 1000.0
+            while True:
+                code1 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+                f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm: code1.reshape((1, 4096))})
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                m_arr_1 = get_mask_from_f("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae: break
+                elif mae < best_mae:
+                    best_mae = mae
+                    best_f = f
+                    best_m = m
+                # 根据生成次数过滤
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
+                count = count + 1
+
+            count = 0
+            best_mae = 1000.0
+            while True:
+                code2 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+                f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm: code2.reshape((1, 4096))})
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                m_arr_1 = get_mask_from_f("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae:
+                    break
+                elif mae < best_mae:
+                    best_mae = mae
+                    best_f = f
+                    best_m = m
+                # 根据生成次数过滤
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
+                count = count + 1
+
+            count = 0
+            best_mae = 1000.0
+            while True:
+                code3 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+                f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm: code3.reshape((1, 4096))})
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                m_arr_1 = get_mask_from_f("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae:
+                    break
+                elif mae < best_mae:
+                    best_mae = mae
+                    best_f = f
+                    best_m = m
+                # 根据生成次数过滤
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
+                count = count + 1
+
+            count = 0
+            best_mae = 1000.0
+            while True:
+                code4 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+                f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm: code4.reshape((1, 4096))})
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                m_arr_1 = get_mask_from_f("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae:
+                    break
+                elif mae < best_mae:
+                    best_mae = mae
+                    best_f = f
+                    best_m = m
+                # 根据生成次数过滤
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
+                count = count + 1
+
+            count = 0
+            best_mae = 1000.0
+            while True:
+                code5 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+                f, m = sess.run([f_rm, mask_rm], feed_dict={code_rm: code5.reshape((1, 4096))})
+                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
+                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
+                m_arr_1 = get_mask_from_f("./N_F/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
+                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
+                # 根据结构完整度过滤
+                if mae <= FLAGS.mae:
+                    break
+                elif mae < best_mae:
+                    best_mae = mae
+                    best_f = f
+                    best_m = m
+                # 根据生成次数过滤
+                if count >= FLAGS.max_count:
+                    f = best_f
+                    m = best_m
+                    break
+                count = count + 1
+
+            # code2 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            # code3 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            # code4 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
+            # code5 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
 
             codes=np.zeros((9, 9, 4096))
             codes[0, 0, :] = code1[:]
@@ -184,7 +306,7 @@ def code_line(code1,code2,N,L=4096):
 
 def main(unused_argv):
     train()
-    os.system("rm -r " + "./test_images/Temp")
+    os.system("rm -r " + "./N_F/Temp")
 
 
 if __name__ == '__main__':
