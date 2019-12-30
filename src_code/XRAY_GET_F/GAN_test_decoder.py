@@ -23,12 +23,12 @@ class GDecoder:
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
             with tf.variable_scope("dense1", reuse=self.reuse):
-                dense1 = tf.layers.conv2d(inputs=DC_input, filters=12 * self.ngf, kernel_size=1,
+                dense1 = tf.layers.conv2d(inputs=DC_input, filters=12 * self.ngf, kernel_size=16,
                                           strides=1,
                                           padding="SAME",
                                           activation=None,
                                           kernel_initializer=tf.random_normal_initializer(
-                                              mean=1.0 / (1.0 * 2 * self.ngf), stddev=0.000001, dtype=tf.float32),
+                                              mean=1.0 / (1.0 * 16 * 16), stddev=0.000001, dtype=tf.float32),
                                           bias_initializer=tf.constant_initializer(0.0), name='dense1')
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
