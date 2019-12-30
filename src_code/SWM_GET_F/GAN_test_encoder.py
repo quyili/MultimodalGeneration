@@ -143,7 +143,7 @@ class GEncoder:
                                         padding="SAME",
                                         activation=None,
                                         kernel_initializer=tf.random_normal_initializer(
-                                            mean=1.0 / (1.0 * 16* 16), stddev=0.000001, dtype=tf.float32),
+                                            mean=1.0 / (16.0 * 16.0 * 12 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                         bias_initializer=tf.constant_initializer(0.0), name='mean')
             with tf.variable_scope("log_var", reuse=self.reuse):
                 log_var = tf.layers.conv2d(inputs=relu10, filters=16, kernel_size=16,
@@ -151,7 +151,7 @@ class GEncoder:
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                               mean=1.0 / (1.0 * 16* 16), stddev=0.000001, dtype=tf.float32),
+                                               mean=1.0 / (16.0 * 16.0 * 12 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='log_var')
 
         self.reuse = True

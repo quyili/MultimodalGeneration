@@ -28,11 +28,13 @@ class GDecoder:
                                           padding="SAME",
                                           activation=None,
                                           kernel_initializer=tf.random_normal_initializer(
-                                              mean=1.0 / (1.0 * 16 * 16), stddev=0.000001, dtype=tf.float32),
+                                              mean=1.0 / (16.0 * 16.0 * 16), stddev=0.000001, dtype=tf.float32),
                                           bias_initializer=tf.constant_initializer(0.0), name='dense1')
+                norm0 = ops._norm(dense1, self.is_training, self.norm)
+                relu0 = tf.nn.relu(norm0)
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
-                conv0_1 = tf.layers.conv2d(inputs=dense1, filters=12 * self.ngf, kernel_size=3, strides=1,
+                conv0_1 = tf.layers.conv2d(inputs=relu0, filters=12 * self.ngf, kernel_size=3, strides=1,
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
