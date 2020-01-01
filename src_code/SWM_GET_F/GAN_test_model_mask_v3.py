@@ -64,24 +64,24 @@ class GAN:
         D_loss = 0.0
         FG_loss = 0.0
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.15
-        D_loss += self.mse_loss(j_code_f, 0.0) * 0.15
-        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.25
+        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.1
+        D_loss += self.mse_loss(j_code_f, 0.0) * 0.1
+        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.1
 
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.1
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.1
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 0.05
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.05
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 50
+        D_loss += self.mse_loss(j_f, 1.0) * 0.01
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.01
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 100
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f, f_r) * 150
+        FG_loss += self.mse_loss(f, f_r) * 200
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 100
+        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
         image_list = [f, f_r, f_rm]
 
         code_list = [code_f, code_f_rm]
