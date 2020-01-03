@@ -26,7 +26,7 @@ class GAN:
         self.tenaor_name = {}
 
         self.EC_F = GEncoder('EC_F', ngf=ngf)
-        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2)
+        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2*image_size[2])
 
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
@@ -40,13 +40,19 @@ class GAN:
         code_f = code_f_mean + tf.multiply(code_f_std, code_f_epsilon)
 
         f_r_prob = self.DC_F(code_f)
-        f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
+        f_r_1 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,0:2], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
+        f_r_2 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,2:4], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
+        f_r_3 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,4:6], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
+        f_r = tf.reshape(tf.concat([f_r_1 ,f_r_2 ,f_r_3 ],axis=-1), shape=self.input_shape)
 
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
 
         f_rm_prob = self.DC_F(code_f_rm)
-        f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
+        f_rm_1 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:,:,:,0:2], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
+        f_rm_2 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:,:,:,2:4], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
+        f_rm_3 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:,:,:,4:6], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
+        f_rm = tf.reshape(tf.concat([f_rm_1 ,f_rm_2 ,f_rm_3 ],axis=-1), shape=self.input_shape)
 
         self.tenaor_name["code_f_rm"] = str(code_f_rm)
         self.tenaor_name["f_rm"] = str(f_rm)
@@ -56,8 +62,8 @@ class GAN:
         j_f_rm = self.D_F(f_rm)
         self.tenaor_name["j_f_rm"] = str(j_f_rm)
 
-        code_f = code_f
-        code_f_rm = code_f_rm
+        code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
+        code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
@@ -74,14 +80,14 @@ class GAN:
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 0.01
         D_loss += self.mse_loss(j_f_rm, 0.0) * 0.01
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 100
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 1
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f, f_r) * 200
+        FG_loss += self.mse_loss(f, f_r) * 150
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
+        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 150
         image_list = [f, f_r, f_rm]
 
         code_list = [code_f, code_f_rm]

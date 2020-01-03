@@ -56,8 +56,8 @@ class GAN:
         j_f_rm = self.D_F(f_rm)
         self.tenaor_name["j_f_rm"] = str(j_f_rm)
 
-        code_f = code_f
-        code_f_rm = code_f_rm
+        code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
+        code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
@@ -74,14 +74,14 @@ class GAN:
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 0.01
         D_loss += self.mse_loss(j_f_rm, 0.0) * 0.01
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 100
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 50
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f, f_r) * 200
+        FG_loss += self.mse_loss(f, f_r) * 250
 
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
                                shape=f_r_prob.get_shape().as_list())
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
+        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 10
         image_list = [f, f_r, f_rm]
 
         code_list = [code_f, code_f_rm]

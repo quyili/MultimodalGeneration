@@ -24,7 +24,7 @@ class GEncoder:
         with tf.variable_scope(self.name):
             EC_input = tf.nn.dropout(EC_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0", reuse=self.reuse):
-                conv0 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=3, strides=1,
+                conv0 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=5, strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
@@ -127,7 +127,7 @@ class GEncoder:
                 relu9 = tf.nn.relu(norm9)
             # pool5
             with tf.variable_scope("conv10", reuse=self.reuse):
-                conv10 = tf.layers.conv2d(inputs=relu9, filters=12 * self.ngf, kernel_size=3,
+                conv10 = tf.layers.conv2d(inputs=relu9, filters= 8 * self.ngf, kernel_size=3,
                                           strides=self.slice_stride,
                                           padding="SAME",
                                           activation=None,
@@ -136,23 +136,12 @@ class GEncoder:
                                           bias_initializer=tf.constant_initializer(0.0), name='conv10')
                 norm10 = ops._norm(conv10, self.is_training, self.norm)
                 relu10 = tf.nn.relu(norm10)
+                conv_output = tf.layers.flatten(relu10)
             # 5 6
-            with tf.variable_scope("mean", reuse=self.reuse):
-                mean = tf.layers.conv2d(inputs=relu10, filters=16, kernel_size=16,
-                                        strides=1,
-                                        padding="SAME",
-                                        activation=None,
-                                        kernel_initializer=tf.random_normal_initializer(
-                                            mean=1.0 / (16.0 * 16.0 * 12 * self.ngf), stddev=0.000001, dtype=tf.float32),
-                                        bias_initializer=tf.constant_initializer(0.0), name='mean')
-            with tf.variable_scope("log_var", reuse=self.reuse):
-                log_var = tf.layers.conv2d(inputs=relu10, filters=16, kernel_size=16,
-                                           strides=1,
-                                           padding="SAME",
-                                           activation=None,
-                                           kernel_initializer=tf.random_normal_initializer(
-                                               mean=1.0 / (16.0 * 16.0 * 12 * self.ngf), stddev=0.000001, dtype=tf.float32),
-                                           bias_initializer=tf.constant_initializer(0.0), name='log_var')
+            with tf.variable_scope("dense1", reuse=self.reuse):
+                mean = tf.layers.dense(conv_output, units=4096, name="dense1")
+            with tf.variable_scope("dense2", reuse=self.reuse):
+                log_var = tf.layers.dense(conv_output, units=4096, name="dense2")
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)

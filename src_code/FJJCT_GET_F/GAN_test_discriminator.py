@@ -65,7 +65,7 @@ class Discriminator:
                 norm3 = ops._norm(conv3, self.is_training, self.norm)
                 relu3 = ops.relu(norm3)
             with tf.variable_scope("conv4", reuse=self.reuse):
-                conv4 = tf.layers.conv2d(inputs=relu3, filters=4 * self.ngf, kernel_size=3, strides=1,
+                conv4 = tf.layers.conv2d(inputs=relu3, filters=4 * self.ngf, kernel_size=3, strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
@@ -74,7 +74,7 @@ class Discriminator:
                 norm4 = ops._norm(conv4, self.is_training, self.norm)
                 relu4 = ops.relu(norm4)
             with tf.variable_scope("conv5", reuse=self.reuse):
-                output = tf.layers.conv2d(inputs=relu4, filters=1, kernel_size=3, strides=1,
+                output = tf.layers.conv2d(inputs=relu4, filters=1, kernel_size=3, strides=self.slice_stride,
                                           padding="SAME",
                                           activation=None,
                                           kernel_initializer=tf.random_normal_initializer(
