@@ -7,6 +7,7 @@ import logging
 import numpy as np
 import SimpleITK
 import math
+from skimage import transform
 
 FLAGS = tf.flags.FLAGS
 
@@ -15,23 +16,27 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
-tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '../../mydata/BRATS2015/trainT1', 'X files for training')
-tf.flags.DEFINE_string('L', '../../mydata/BRATS2015/trainLabel', 'Y files for training')
-tf.flags.DEFINE_string('L_test', '../../mydata/BRATS2015/testLabel', 'Y files for training')
+tf.flags.DEFINE_integer('ngf', 4, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', 'D:/BaiduYunDownload/chest_xray/train/X', 'X files for training')
+tf.flags.DEFINE_string('L', 'D:/BaiduYunDownload/chest_xray/train/labels', 'Y files for training')
+tf.flags.DEFINE_string('F', 'D:/BaiduYunDownload/chest_xray/train/NORMAL_F', 'Y files for training')
+tf.flags.DEFINE_string('M', 'D:/BaiduYunDownload/chest_xray/train/NORMAL_M', 'Y files for training')
+tf.flags.DEFINE_string('X_test', 'D:/BaiduYunDownload/chest_xray/test/X', 'X files for training')
+tf.flags.DEFINE_string('L_test', 'D:/BaiduYunDownload/chest_xray/test/labels', 'Y files for training')
+tf.flags.DEFINE_string('F_test', 'D:/BaiduYunDownload/chest_xray/test/NORMAL_F', 'Y files for training')
+tf.flags.DEFINE_string('M_test', 'D:/BaiduYunDownload/chest_xray/test/NORMAL_M', 'Y files for training')
+
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 40, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 50, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
-tf.flags.DEFINE_integer('epoch_steps', 15070, '463 or 5480, default: 5480')
+tf.flags.DEFINE_integer('epoch_steps', 1341, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
-tf.flags.DEFINE_string('load_lp_model',
-                       "/GPUFS/nsccgz_ywang_1/quyili/MultimodalGeneration/SEG/mm_to_label_4seg/checkpoints/20190801-1443",
-                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_string('load_lp_model',None,'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 
 
 def mean(list):
@@ -48,37 +53,6 @@ def mean_list(lists):
 
 def random(n, h, w, c):
     return np.random.uniform(0., 1., size=[n, h, w, c])
-
-
-def read_file(l_path, Label_train_files, index):
-    train_range = len(Label_train_files)
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    L_arr_ = L_arr_.astype('float32')
-    return np.asarray(L_arr_)
-
-
-def read_files(x_path, l_path, Label_train_files, index):
-    train_range = len(Label_train_files)
-    T1_img = SimpleITK.ReadImage(x_path + "/" + Label_train_files[index % train_range])
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    T1_arr_ = SimpleITK.GetArrayFromImage(T1_img)
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    T1_arr_ = T1_arr_.astype('float32')
-    L_arr_ = L_arr_.astype('float32')
-    return T1_arr_, L_arr_
-
-
-def expand(train_M_arr_, train_L_arr_):
-    L0 = np.asarray(train_M_arr_ == 0., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L1 = (np.asarray(train_L_arr_ == 0., "float32") * np.asarray(train_M_arr_).astype('float32')).reshape(
-        [train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L2 = np.asarray(train_L_arr_ == 1., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L3 = np.asarray(train_L_arr_ == 2., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L4 = np.asarray(train_L_arr_ == 3., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L5 = np.asarray(train_L_arr_ == 4., "float32").reshape([train_L_arr_.shape[0], train_L_arr_.shape[1], 1])
-    L_arr = np.concatenate([L0, L1, L2, L3, L4, L5], axis=-1)
-    return L_arr
 
 
 def norm(input):
@@ -100,6 +74,15 @@ def save_image(image, name, dir="./samples", form=".tiff"):
         pass
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
+def read_file(l_path, Label_train_files, index, out_size=None):
+    train_range = len(Label_train_files)
+    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
+    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
+    if out_size== None:
+        L_arr_ = transform.resize(L_arr_, FLAGS.image_size)
+    else:
+        L_arr_ = transform.resize(L_arr_, out_size)
+    return L_arr_.astype('float32')
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -162,10 +145,8 @@ def train():
                     m_0 = tf.placeholder(tf.float32, shape=input_shape)
                     x_0 = tf.placeholder(tf.float32, shape=input_shape)
                     loss_list_0 = gan.model(l_0, f_0, m_0, x_0)
-                    image_list_0, code_list_0, j_list_0 = gan.image_list, gan.code_list, gan.judge_list
+                    image_list_0, j_list_0 = gan.image_list, gan.judge_list
                     tensor_name_dirct_0 = gan.tenaor_name
-                    evaluation_list_0 = gan.evaluation(image_list_0)
-                    evaluation_code_list_0 = gan.evaluation_code(code_list_0)
                     variables_list_0 = gan.get_variables()
                     G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                     D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
@@ -178,10 +159,8 @@ def train():
                     m_1 = tf.placeholder(tf.float32, shape=input_shape)
                     x_1 = tf.placeholder(tf.float32, shape=input_shape)
                     loss_list_1 = gan.model(l_1, f_1, m_1, x_1)
-                    image_list_1, code_list_1, j_list_1 = gan.image_list, gan.code_list, gan.judge_list
+                    image_list_1,  j_list_1 = gan.image_list, gan.judge_list
                     tensor_name_dirct_1 = gan.tenaor_name
-                    evaluation_list_1 = gan.evaluation(image_list_1)
-                    evaluation_code_list_1 = gan.evaluation_code(code_list_1)
                     variables_list_1 = gan.get_variables()
                     G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                     D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -194,10 +173,8 @@ def train():
                     m_2 = tf.placeholder(tf.float32, shape=input_shape)
                     x_2 = tf.placeholder(tf.float32, shape=input_shape)
                     loss_list_2 = gan.model(l_2, f_2, m_2, x_2)
-                    image_list_2, code_list_2, j_list_2 = gan.image_list, gan.code_list, gan.judge_list
+                    image_list_2, j_list_2 = gan.image_list, gan.judge_list
                     tensor_name_dirct_2 = gan.tenaor_name
-                    evaluation_list_2 = gan.evaluation(image_list_2)
-                    evaluation_code_list_2 = gan.evaluation_code(code_list_2)
                     variables_list_2 = gan.get_variables()
                     G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                     D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
@@ -210,10 +187,8 @@ def train():
                     m_3 = tf.placeholder(tf.float32, shape=input_shape)
                     x_3 = tf.placeholder(tf.float32, shape=input_shape)
                     loss_list_3 = gan.model(l_3, f_3, m_3, x_3)
-                    image_list_3, code_list_3, j_list_3 = gan.image_list, gan.code_list, gan.judge_list
+                    image_list_3,j_list_3 = gan.image_list, gan.judge_list
                     tensor_name_dirct_3 = gan.tenaor_name
-                    evaluation_list_3 = gan.evaluation(image_list_3)
-                    evaluation_code_list_3 = gan.evaluation_code(code_list_3)
                     variables_list_3 = gan.get_variables()
                     G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                     D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -229,17 +204,9 @@ def train():
         gan.image_summary(image_list_0)
         gan.histogram_summary(j_list_0)
         image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image')])
-
         loss_list_summary = tf.placeholder(tf.float32)
-        evaluation_list_summary = tf.placeholder(tf.float32)
-        evaluation_code_list_summary = tf.placeholder(tf.float32)
-
         gan.loss_summary(loss_list_summary)
-        gan.evaluation_summary(evaluation_list_summary)
-        gan.evaluation_code_summary(evaluation_code_list_summary)
-
-        summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
-                                       tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
+        summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
         train_writer = tf.summary.FileWriter(checkpoints_dir + "/train", graph)
         val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
         saver = tf.train.Saver()
@@ -248,10 +215,6 @@ def train():
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 
             sess.run(tf.global_variables_initializer())
-            print('variable_list[0]', variables_list[0])
-            print('variable_list[1]', variables_list[1])
-            print('variable_list[2]', variables_list[2])
-
             if FLAGS.load_model is not None:
                 logging.info("restore model:" + FLAGS.load_model)
                 if FLAGS.checkpoint is not None:
@@ -285,13 +248,11 @@ def train():
 
             try:
                 logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
-                l_train_files = read_filename(FLAGS.L)
-                l_x_train_files = read_filename(FLAGS.L)
+                f_train_files = read_filename(FLAGS.F)
+                x_train_files = read_filename(FLAGS.X)
                 index = 0
                 epoch = 0
                 train_loss_list = []
-                train_evaluation_list = []
-                train_evaluation_code_list = []
                 while not coord.should_stop() and epoch <= FLAGS.epoch:
 
                     train_true_l = []
@@ -299,23 +260,23 @@ def train():
                     train_true_m = []
                     train_true_x = []
                     for b in range(FLAGS.batch_size):
-                        train_m_arr = read_file(np.asarray(FLAGS.X),l_train_files, index).reshape(FLAGS.image_size)
-                        train_f_arr = read_file(FLAGS.L, l_train_files, index).reshape(FLAGS.image_size)
-                        train_l_arr = read_file(FLAGS.L, l_train_files,np.random.randint(len(l_train_files))).reshape(FLAGS.image_size)
-                        train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
+                        train_m_arr = read_file(FLAGS.M, f_train_files, index)
+                        train_f_arr = read_file(FLAGS.F, f_train_files, index)
+                        train_l_arr = read_file(FLAGS.L, x_train_files, index)
+                        train_x_arr = read_file(FLAGS.X, x_train_files, index)
 
                         train_true_l.append(train_l_arr)
                         train_true_f.append(train_f_arr)
                         train_true_m.append(train_m_arr)
                         train_true_x.append(train_x_arr)
 
-                        epoch = int(index / len(l_train_files))
+                        epoch = int(index / len(f_train_files))
                         index = index + 1
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses, train_evaluations, train_evaluation_codes = sess.run(
-                        [optimizers, image_summary_op, loss_list_0, evaluation_list_0, evaluation_code_list_0],
+                    _, train_image_summary_op, train_losses = sess.run(
+                        [optimizers, image_summary_op, loss_list_0],
                         feed_dict={
                             l_0: np.asarray(train_true_l)[0:1, :, :, :],
                             f_0: np.asarray(train_true_f)[0:1, :, :, :],
@@ -338,8 +299,6 @@ def train():
                             x_3: np.asarray(train_true_x)[3:4, :, :, :],
                         })
                     train_loss_list.append(train_losses)
-                    train_evaluation_list.append(train_evaluations)
-                    train_evaluation_code_list.append(train_evaluation_codes)
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
@@ -348,9 +307,7 @@ def train():
                         logging.info('-----------Train summary start-------------')
                         train_summary_op = sess.run(
                             summary_op,
-                            feed_dict={loss_list_summary: mean_list(train_loss_list),
-                                       evaluation_list_summary: mean_list(train_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(train_evaluation_code_list)})
+                            feed_dict={loss_list_summary: mean_list(train_loss_list)})
                         train_writer.add_summary(train_image_summary_op, step)
                         train_writer.add_summary(train_summary_op, step)
                         train_writer.flush()
@@ -362,36 +319,36 @@ def train():
                         logging.info(
                             "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
                         val_loss_list = []
-                        val_evaluation_list = []
-                        val_evaluation_code_list = []
                         val_index = 0
 
-                        l_val_files = read_filename(FLAGS.L_test)
-                        for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
+                        f_val_files = read_filename(FLAGS.F_test)
+                        x_val_files = read_filename(FLAGS.X_test)
+                        for j in range(int(math.ceil(len(f_val_files) / FLAGS.batch_size))):
                             val_true_l = []
                             val_true_f = []
                             val_true_m = []
                             val_true_x = []
                             for b in range(FLAGS.batch_size):
-                                val_m_arr = read_file(np.asarray(FLAGS.X),l_val_files, val_index).reshape(FLAGS.image_size)
-                                val_f_arr = read_file(FLAGS.L, l_val_files, val_index).reshape(FLAGS.image_size)
-                                val_l_arr = read_file(FLAGS.L, l_val_files,np.random.randint(len(l_val_files))).reshape(FLAGS.image_size)
-                                val_x_arr = read_file(FLAGS.X, l_val_files, val_index).reshape(FLAGS.image_size)
+                                val_m_arr = read_file(FLAGS.M, f_val_files, index)
+                                val_f_arr = read_file(FLAGS.F, f_val_files, index)
+                                val_l_arr = read_file(FLAGS.L, x_val_files, index)
+                                val_x_arr = read_file(FLAGS.X, x_val_files, index)
+
                                 val_true_l.append(val_l_arr)
                                 val_true_f.append(val_f_arr)
                                 val_true_m.append(val_m_arr)
                                 val_true_x.append(val_x_arr)
                                 val_index += 1
 
-                            val_losses_0, val_evaluations_0, val_evaluation_codes_0, \
-                            val_losses_1, val_evaluations_1, val_evaluation_codes_1, \
-                            val_losses_2, val_evaluations_2, val_evaluation_codes_2, \
-                            val_losses_3, val_evaluations_3, val_evaluation_codes_3, \
+                            val_losses_0, \
+                            val_losses_1, \
+                            val_losses_2, \
+                            val_losses_3, \
                             val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
-                                [loss_list_0, evaluation_list_0, evaluation_code_list_0,
-                                 loss_list_1, evaluation_list_1, evaluation_code_list_1,
-                                 loss_list_2, evaluation_list_2, evaluation_code_list_2,
-                                 loss_list_3, evaluation_list_3, evaluation_code_list_3,
+                                [loss_list_0,
+                                 loss_list_1,
+                                 loss_list_2,
+                                 loss_list_3,
                                  image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
                                 feed_dict={
                                     l_0: np.asarray(val_true_l)[0:1, :, :, :],
@@ -418,14 +375,6 @@ def train():
                             val_loss_list.append(val_losses_1)
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
-                            val_evaluation_list.append(val_evaluations_0)
-                            val_evaluation_list.append(val_evaluations_1)
-                            val_evaluation_list.append(val_evaluations_2)
-                            val_evaluation_list.append(val_evaluations_3)
-                            val_evaluation_code_list.append(val_evaluation_codes_0)
-                            val_evaluation_code_list.append(val_evaluation_codes_1)
-                            val_evaluation_code_list.append(val_evaluation_codes_2)
-                            val_evaluation_code_list.append(val_evaluation_codes_3)
 
                             if j == 0:
                                 save_images(val_image_list_0, checkpoints_dir, str(0))
@@ -435,9 +384,7 @@ def train():
 
                         val_summary_op = sess.run(
                             summary_op,
-                            feed_dict={loss_list_summary: mean_list(val_loss_list),
-                                       evaluation_list_summary: mean_list(val_evaluation_list),
-                                       evaluation_code_list_summary: mean_list(val_evaluation_code_list)})
+                            feed_dict={loss_list_summary: mean_list(val_loss_list)})
                         val_writer.add_summary(val_image_summary_op, step)
                         val_writer.add_summary(val_summary_op, step)
                         val_writer.flush()
