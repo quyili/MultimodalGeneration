@@ -26,7 +26,7 @@ class GAN:
     def lesion_process(self, x, LESP):
         l_r_prob = LESP(x)
         l_r = tf.reshape(tf.cast(tf.argmax(tf.reduce_mean(l_r_prob,axis=[1,2]), axis=-1), dtype=tf.float32),shape=[self.input_shape[0], 1])
-        return l_r_prob, l_r
+        return  l_r
 
     def model(self, l,x):
         self.tenaor_name["l"] = str(l)
