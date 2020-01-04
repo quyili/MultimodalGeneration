@@ -53,19 +53,6 @@ def norm(input):
     return output
 
 
-def save_images(image_dirct, checkpoints_dir, file_index=""):
-    for key in image_dirct:
-        save_image(np.asarray(image_dirct[key])[0, :, :, 0], key + "_" + file_index,
-                   dir=checkpoints_dir + "/samples", form=".tiff")
-
-
-def save_image(image, name, dir="./samples", form=".tiff"):
-    try:
-        os.makedirs(dir)
-    except os.error:
-        pass
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
-
 def read_file(l_path, Label_train_files, index, out_size=None):
     train_range = len(Label_train_files)
     L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])

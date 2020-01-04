@@ -35,7 +35,7 @@ class GAN:
     def lesion_process(self, x, LESP):
         l_r_prob = LESP(x)
         l_r = tf.reshape(tf.cast(tf.argmax(tf.reduce_mean(l_r_prob,axis=[1,2]), axis=-1), dtype=tf.float32),shape=[self.input_shape[0], 1])
-        return l_r_prob, l_r
+        return  l_r
 
     def model(self, l,f,mask,x):
         self.tenaor_name["l"] = str(l)
@@ -51,7 +51,7 @@ class GAN:
         x_g = self.DC_M(code_rm)
         self.tenaor_name["x_g"] = str(x_g)
 
-        l_g_prob_by_x, l_g_by_x = self.lesion_process(x_g, self.LESP)
+        l_g_by_x = self.lesion_process(x_g, self.LESP)
         self.tenaor_name["l_g_by_x"] = str(l_g_by_x)
 
         j_x_g = self.D_M(x_g)
@@ -66,7 +66,6 @@ class GAN:
         G_loss += self.mse_loss(j_x_g, 1.0) * 35
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        G_loss += self.mse_loss(label_expand,l_g_prob_by_x) * 25 * 2
         L_loss += self.mse_loss(tf.reduce_mean(l,axis=[1,2]), l_g_by_x) * 25 * 2
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失

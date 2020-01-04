@@ -18,7 +18,7 @@ tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 4, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/X', 'X files for training')
-tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_zgchen_2/quyili/DATAchest_xray/train/labels', 'Y files for training')
+tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/labels', 'Y files for training')
 tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/NORMAL_F', 'Y files for training')
 tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/NORMAL_M', 'Y files for training')
 tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/test/X', 'X files for training')
