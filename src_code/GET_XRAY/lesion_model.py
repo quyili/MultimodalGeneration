@@ -21,7 +21,7 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('D_M', ngf=ngf, output_channl=3)
+        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
 
     def lesion_process(self, x, LESP):
         l_r_prob = LESP(x)

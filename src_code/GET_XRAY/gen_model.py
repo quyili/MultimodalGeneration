@@ -25,7 +25,7 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('D_M', ngf=ngf, output_channl=3)
+        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
 
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.DC_M = Decoder('DC_M', ngf=ngf)

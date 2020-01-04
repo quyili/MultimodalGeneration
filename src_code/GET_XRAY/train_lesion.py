@@ -125,7 +125,7 @@ def train():
         graph = tf.get_default_graph()
         gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
         input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-        G_optimizer, D_optimizer = gan.optimize()
+        D_optimizer = gan.optimize()
 
         D_grad_list = []
         with tf.variable_scope(tf.get_variable_scope()):
