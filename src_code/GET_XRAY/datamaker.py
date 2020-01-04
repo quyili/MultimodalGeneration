@@ -29,7 +29,7 @@ def mover(
 
 if __name__ == '__main__':
     mover(
-        SRC_PATH="D:\\BaiduYunDownload\\chest_xray\\test\\PNEUMONIA\\",
-        SAVE_X_PATH="D:\\BaiduYunDownload\\chest_xray\\test\\X\\",
-        SAVE_L_PATH="D:\\BaiduYunDownload\\chest_xray\\test/labels\\",
+        SRC_PATH="D:\\BaiduYunDownload\\chest_xray\\val\\PNEUMONIA\\",
+        SAVE_X_PATH="D:\\BaiduYunDownload\\chest_xray\\val\\X\\",
+        SAVE_L_PATH="D:\\BaiduYunDownload\\chest_xray\\val\\labels\\",
     )

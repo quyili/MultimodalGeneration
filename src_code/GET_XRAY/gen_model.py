@@ -41,6 +41,7 @@ class GAN:
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         self.tenaor_name["mask"] = str(mask)
+        self.tenaor_name["x"] = str(x)
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
         f_rm_expand = tf.concat([f ,label_expand],axis=-1)
@@ -51,6 +52,7 @@ class GAN:
         self.tenaor_name["x_g"] = str(x_g)
 
         l_g_prob_by_x, l_g_by_x = self.lesion_process(x_g, self.LESP)
+        self.tenaor_name["l_g_by_x"] = str(l_g_by_x)
 
         j_x_g = self.D_M(x_g)
         j_x = self.D_M(x)
