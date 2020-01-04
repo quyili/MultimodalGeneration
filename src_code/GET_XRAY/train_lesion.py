@@ -53,9 +53,9 @@ def norm(input):
     return output
 
 
-def read_file(l_path, Label_train_files, index, out_size=None):
+def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
     train_range = len(Label_train_files)
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
+    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form))
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
     if out_size== None:
         L_arr_ = transform.resize(L_arr_, FLAGS.image_size)
@@ -203,7 +203,7 @@ def train():
                     train_true_l = []
                     train_true_x = []
                     for b in range(FLAGS.batch_size):
-                        train_l_arr = read_file(FLAGS.L, x_train_files, index)
+                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff")
                         train_x_arr = read_file(FLAGS.X, x_train_files, index)
 
                         train_true_l.append(train_l_arr)
@@ -256,7 +256,7 @@ def train():
                             val_true_l = []
                             val_true_x = []
                             for b in range(FLAGS.batch_size):
-                                val_l_arr = read_file(FLAGS.L, x_val_files, index)
+                                val_l_arr = read_file(FLAGS.L, x_val_files, index,inpu_form=".jpeg",out_form=".tiff")
                                 val_x_arr = read_file(FLAGS.X, x_val_files, index)
 
                                 val_true_l.append(val_l_arr)
