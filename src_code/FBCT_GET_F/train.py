@@ -18,15 +18,15 @@ tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 # tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NORMAL_M', 'X files for training')
-tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/finding-lungs-in-ct-data/train/2d_images_F', 'X files for training')
+tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/F', 'X files for training')
 # tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/NORMAL_M', 'X files for training')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/finding-lungs-in-ct-data/test/2d_images_F', 'X files for training')
-tf.flags.DEFINE_string('load_model', None,
+tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/test/F', 'X files for training')
+tf.flags.DEFINE_string('load_model', '20200107-1512',
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 200, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 4000, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 259, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')

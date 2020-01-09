@@ -41,7 +41,7 @@ class GAN:
 
         L_acc=self.acc( l_r,l_g)
 
-        return [L_loss,L_acc, l_r,l_g]
+        return [L_loss,L_acc]
 
     def get_variables(self):
         return self.LESP.variables

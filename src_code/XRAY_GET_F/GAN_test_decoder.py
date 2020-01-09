@@ -23,19 +23,17 @@ class GDecoder:
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
             with tf.variable_scope("dense0", reuse=self.reuse):
-                dense0 = tf.layers.dense(DC_input, units=DC_input.get_shape().as_list()[0] * 4096,
-                                         name="dense0")
+                dense0 = tf.layers.dense(DC_input, units= 8192,name="dense0")
             with tf.variable_scope("dense1", reuse=self.reuse):
-                dense1 = tf.layers.dense(dense0, units=DC_input.get_shape().as_list()[0] * 4096,
-                                         name="dense0")
-                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 8, 8,  64])
+                dense1 = tf.layers.dense(dense0, units=8192, name="dense0")
+                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 8, 8,  2*64])
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
                 conv0_1 = tf.layers.conv2d(inputs=dense1, filters=8 * self.ngf, kernel_size=3, strides=1,
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0 , stddev=0.02, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_1')
                 norm0_1 = ops._norm(conv0_1, self.is_training, self.norm)
                 relu0_1 = ops.relu(norm0_1)
@@ -46,7 +44,7 @@ class GDecoder:
                                                padding="SAME",
                                                activation=None,
                                                kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_1_r')
                 deconv0_1_norm1_r = ops._norm(deconv0_1_r, self.is_training, self.norm)
@@ -57,7 +55,7 @@ class GDecoder:
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                            mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_2')
                 norm0_2 = ops._norm(conv0_2, self.is_training, self.norm)
                 relu0_2 = ops.relu(norm0_2)
@@ -68,7 +66,7 @@ class GDecoder:
                                                padding="SAME",
                                                activation=None,
                                                kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_2_r')
                 deconv0_2_norm1_r = ops._norm(deconv0_2_r, self.is_training, self.norm)
@@ -79,7 +77,7 @@ class GDecoder:
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                               mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                               mean=0.0 , stddev=0.02, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_3')
                 norm0_3 = ops._norm(conv0_3, self.is_training, self.norm)
                 relu0_3 = ops.relu(norm0_3)
@@ -90,7 +88,7 @@ class GDecoder:
                                                padding="SAME",
                                                activation=None,
                                                kernel_initializer=tf.random_normal_initializer(
-                                                mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                mean=0.0 , stddev=0.02, dtype=tf.float32),
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_3_r')
                 deconv0_3_norm1_r = ops._norm(deconv0_3_r, self.is_training, self.norm)
@@ -101,7 +99,7 @@ class GDecoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
@@ -111,7 +109,7 @@ class GDecoder:
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv1_r')
                 deconv1_norm1_r = ops._norm(deconv1_r, self.is_training, self.norm)
@@ -122,7 +120,7 @@ class GDecoder:
                                               padding="SAME",
                                               activation=None,
                                               kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
                                               bias_initializer=tf.constant_initializer(0.0),
                                               name='add1_conv1')
                 add1_norm1 = ops._norm(add1_conv1, self.is_training, self.norm)
@@ -133,7 +131,7 @@ class GDecoder:
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv2_r')
                 deconv2_norm1_r = ops._norm(deconv2_r, self.is_training, self.norm)
@@ -144,7 +142,7 @@ class GDecoder:
                                               padding="SAME",
                                               activation=None,
                                               kernel_initializer=tf.random_normal_initializer(
-                                                mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                mean=0.0 , stddev=0.02, dtype=tf.float32),
                                               bias_initializer=tf.constant_initializer(0.0),
                                               name='add2_conv1')
                 add2_norm1 = ops._norm(add2_conv1, self.is_training, self.norm)
@@ -155,7 +153,7 @@ class GDecoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0 , stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
@@ -165,7 +163,7 @@ class GDecoder:
                                               padding="SAME",
                                               activation=None,
                                               kernel_initializer=tf.random_normal_initializer(
-                                                  mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                                  mean=0.0 , stddev=0.02, dtype=tf.float32),
                                               bias_initializer=tf.constant_initializer(0.0),
                                               name='add3_conv1')
                 add3_norm1 = ops._norm(add3_conv1, self.is_training, self.norm)
@@ -175,7 +173,7 @@ class GDecoder:
                                             padding="SAME",
                                             activation=None,
                                             kernel_initializer=tf.random_normal_initializer(
-                                               mean=1.0 , stddev=0.02, dtype=tf.float32),
+                                               mean=0.0 , stddev=0.02, dtype=tf.float32),
                                             bias_initializer=tf.constant_initializer(0.0), name='lastconv')
                 lastnorm = ops._norm(lastconv, self.is_training, self.norm)
                 output = tf.nn.sigmoid(lastnorm)

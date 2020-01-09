@@ -25,23 +25,19 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
-
         self.EC_R = Encoder('EC_R', ngf=ngf)
         self.DC_M = Decoder('DC_M', ngf=ngf)
 
         self.D_M = Discriminator('D_M', ngf=ngf)
 
+    def model(self, f,mask,x):
+        self.tenaor_name["f"] = str(f)
+        self.tenaor_name["mask"] = str(mask)
+        self.tenaor_name["x"] = str(x)
 
-    def model(self, l,f,mask,x):
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
-                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        f_rm_expand = tf.concat([f ,label_expand],axis=-1)
-
-        code_rm = self.EC_R(f_rm_expand )
+        code_rm = self.EC_R(f)
         x_g = self.DC_M(code_rm)
-
-        l_g_prob = self.LESP(x_g)
+        self.tenaor_name["x_g"] = str(x_g)
 
         j_x_g = self.D_M(x_g)
         j_x = self.D_M(x)
@@ -57,22 +53,6 @@ class GAN:
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
         G_loss += self.mse_loss(0.0, x_g * mask) * 0.5
 
-        # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        L_loss += self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]), 
-                                         tf.reduce_mean(l_g_prob  ,axis=[1,2])) * 0.5
-       
-        l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
-
-        L_acc=self.acc( l_r,l_g)
-
-        self.tenaor_name["l"] = str(l)
-        self.tenaor_name["f"] = str(f)
-        self.tenaor_name["mask"] = str(mask)
-        self.tenaor_name["x"] = str(x)
-        self.tenaor_name["x_g"] = str(x_g)
-        self.tenaor_name["l_g"] = str(l_g)
-
         self.image_list["mask"] = mask
         self.image_list["f"] = f
         self.image_list["x"] = x
@@ -80,7 +60,7 @@ class GAN:
         self.judge_list["j_x_g"]= j_x_g
         self.judge_list["j_x"] = j_x
 
-        loss_list = [G_loss+L_loss, D_loss,L_loss, L_acc,l_r,l_g]
+        loss_list = [G_loss, D_loss]
 
         return loss_list
 
@@ -88,9 +68,7 @@ class GAN:
         return [self.EC_R.variables
                 + self.DC_M.variables
             ,
-                self.D_M.variables
-            ,
-                self.LESP.variables]
+                self.D_M.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -109,11 +87,9 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_loss, D_loss,L_loss,L_acc = loss_list[0], loss_list[1],loss_list[2],loss_list[3]
+        G_loss, D_loss= loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
-        tf.summary.scalar('loss/L_loss', L_loss)
-        tf.summary.scalar('loss/L_acc', L_acc)
 
     def image_summary(self, image_dirct):
         for key in image_dirct:

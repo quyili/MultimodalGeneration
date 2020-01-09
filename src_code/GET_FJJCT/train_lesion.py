@@ -26,7 +26,7 @@ tf.flags.DEFINE_string('load_model', None,
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 250, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 100, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 5224, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
@@ -58,6 +58,7 @@ def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_f
     file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
     L_img = SimpleITK.ReadImage(file_name )
     L_arr_ = SimpleITK.GetArrayFromImage(L_img)
+    print("input",file_name,"\nshape:",L_arr_.shape)
     if out_size== None:
         L_arr_ = transform.resize(L_arr_, FLAGS.image_size)
     else:
@@ -204,8 +205,8 @@ def train():
                     train_true_l = []
                     train_true_x = []
                     for b in range(FLAGS.batch_size):
-                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff")
-                        train_x_arr = read_file(FLAGS.X, x_train_files, index)
+                        train_l_arr = read_file(FLAGS.L, x_train_files, val_index,inpu_form=".jpeg",out_form=".tiff")
+                        train_x_arr = read_file(FLAGS.X, x_train_files, val_index)
 
                         train_true_l.append(train_l_arr)
                         train_true_x.append(train_x_arr)
@@ -218,17 +219,17 @@ def train():
                     _,  train_losses = sess.run(
                         [optimizers, loss_list_0],
                         feed_dict={
-                            l_0: np.asarray(train_true_l)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_0: np.asarray(train_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_0: np.asarray(train_true_l)[0:1, :, :, :],
+                            x_0: np.asarray(train_true_x)[0:1, :, :, :],
 
-                            l_1: np.asarray(train_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_1: np.asarray(train_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_1: np.asarray(train_true_l)[1:2, :, :, :],
+                            x_1: np.asarray(train_true_x)[1:2, :, :, :],
 
-                            l_2: np.asarray(train_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_2: np.asarray(train_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_2: np.asarray(train_true_l)[2:3, :, :, :],
+                            x_2: np.asarray(train_true_x)[2:3, :, :, :],
 
-                            l_3: np.asarray(train_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_3: np.asarray(train_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_3: np.asarray(train_true_l)[3:4, :, :, :],
+                            x_3: np.asarray(train_true_x)[3:4, :, :, :],
                         })
                     train_loss_list.append(train_losses)
                     logging.info(
@@ -242,7 +243,6 @@ def train():
                             feed_dict={loss_list_summary: mean_list(train_loss_list)})
                         train_writer.add_summary(train_summary_op, step)
                         train_writer.flush()
-                        train_loss_list = []
                         logging.info('-----------Train summary end-------------')
 
                         save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
@@ -258,9 +258,8 @@ def train():
                             val_true_l = []
                             val_true_x = []
                             for b in range(FLAGS.batch_size):
-                                val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index,inpu_form=".jpeg",out_form=".tiff")
-                                val_x_arr = read_file(FLAGS.X_test, x_val_files, val_index)
-                                logging.info(x_val_files[val_index%len(x_val_files)])
+                                val_l_arr = read_file(FLAGS.L_test, x_val_files, index,inpu_form=".jpeg",out_form=".tiff")
+                                val_x_arr = read_file(FLAGS.X_test, x_val_files, index)
 
                                 val_true_l.append(val_l_arr)
                                 val_true_x.append(val_x_arr)
@@ -275,27 +274,23 @@ def train():
                                  loss_list_2,
                                  loss_list_3,],
                                 feed_dict={
-                                    l_0: np.asarray(val_true_l)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_0: np.asarray(val_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_0: np.asarray(val_true_l)[0:1, :, :, :],
+                                    x_0: np.asarray(val_true_x)[0:1, :, :, :],
 
-                                    l_1: np.asarray(val_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_1: np.asarray(val_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_1: np.asarray(val_true_l)[1:2, :, :, :],
+                                    x_1: np.asarray(val_true_x)[1:2, :, :, :],
 
-                                    l_2: np.asarray(val_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_2: np.asarray(val_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_2: np.asarray(val_true_l)[2:3, :, :, :],
+                                    x_2: np.asarray(val_true_x)[2:3, :, :, :],
 
-                                    l_3: np.asarray(val_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_3: np.asarray(val_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_3: np.asarray(val_true_l)[3:4, :, :, :],
+                                    x_3: np.asarray(val_true_x)[3:4, :, :, :],
                                 })
                             val_loss_list.append(val_losses_0)
                             val_loss_list.append(val_losses_1)
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
-                            logging.info("TRUETH"+ str(val_losses_0[2]) +"PRED:"+ str(val_losses_0[3]))
-                            logging.info("TRUETH"+ str(val_losses_1[2]) +"PRED:"+ str(val_losses_1[3]))
-                            logging.info("TRUETH"+ str(val_losses_2[2]) +"PRED:"+ str(val_losses_2[3]))
-                            logging.info("TRUETH"+ str(val_losses_3[2]) +"PRED:"+ str(val_losses_3[3]))
-                            
+
                         val_summary_op = sess.run(
                             summary_op,
                             feed_dict={loss_list_summary: mean_list(val_loss_list)})
@@ -304,6 +299,7 @@ def train():
 
                         logging.info(
                             "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+	        print(val_loss_list)
                     step += 1
             except KeyboardInterrupt:
                 logging.info('Interrupted')

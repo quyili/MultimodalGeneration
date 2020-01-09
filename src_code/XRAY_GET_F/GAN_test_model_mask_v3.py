@@ -37,58 +37,51 @@ class GAN:
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
-        code_f = code_f_mean + tf.multiply(code_f_std, code_f_epsilon)
-
+        code_f = code_f_mean + code_f_std #*code_f_epsilon 
         f_r_prob = self.DC_F(code_f)
-        f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-
+       
         # CODE_F_RM
         code_f_rm = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
-
         f_rm_prob = self.DC_F(code_f_rm)
-        f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-
-        self.tenaor_name["code_f_rm"] = str(code_f_rm)
-        self.tenaor_name["f_rm"] = str(f_rm)
 
         # D,FD
-        j_f = self.D_F(f)
-        j_f_rm = self.D_F(f_rm)
-        self.tenaor_name["j_f_rm"] = str(j_f_rm)
-
-        code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
-        code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
+        f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),shape=f_r_prob.get_shape().as_list())
+        j_f = self.D_F(f_one_hot )
+        j_f_rm = self.D_F(f_rm_prob)
+ 
+        code_f = tf.reshape(code_f, shape=[-1, 64, 64, 2])
+        code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 2])
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
         D_loss = 0.0
         FG_loss = 0.0
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.01
-        D_loss += self.mse_loss(j_code_f, 0.0) * 0.01
-        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.01
+        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.5
+        D_loss += self.mse_loss(j_code_f, 0.0) * 0.5
+        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.0
 
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.01
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.01
+        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.00
+        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.00
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 0.001
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.001
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 0.05
+        D_loss += self.mse_loss(j_f, 1.0) * 0.1
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.1
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 0.0
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f, f_r) * 150
+        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 5
 
-        f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),
-                               shape=f_r_prob.get_shape().as_list())
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 150
+        f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
+        f_rm = tf.reshape(tf.cast(tf.argmax(f_rm_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
+
+        self.tenaor_name["code_f_rm"] = str(code_f_rm)
+        self.tenaor_name["f_rm"] = str(f_rm)
+        self.tenaor_name["j_f_rm"] = str(j_f_rm)
 
         image_list = [f, f_r, f_rm]
-
         code_list = [code_f, code_f_rm]
-
         j_list = [j_code_f, j_code_f_rm, j_f, j_f_rm]
-
         loss_list = [FG_loss, D_loss]
 
         return image_list, code_list, j_list, loss_list
