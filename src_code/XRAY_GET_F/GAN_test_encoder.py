@@ -4,7 +4,7 @@ import ops as ops
 
 
 class GEncoder:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, units=8192):
         self.name = name
         self.reuse = False
         self.ngf = ngf
@@ -12,6 +12,7 @@ class GEncoder:
         self.is_training = is_training
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
+        self.units=units
 
     def __call__(self, EC_input):
         """
@@ -86,7 +87,7 @@ class GEncoder:
                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv5')
                 norm5 = ops._norm(conv5, self.is_training, self.norm)
-                relu5 = tf.nn.relu(norm5)
+                relu5 = ops.relu(norm5)
             # pool3
             with tf.variable_scope("conv6", reuse=self.reuse):
                 conv6 = tf.layers.conv2d(inputs=relu5, filters=4 * self.ngf, kernel_size=3,
@@ -119,7 +120,7 @@ class GEncoder:
                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv8')
                 norm8 = ops._norm(conv8, self.is_training, self.norm)
-                relu8 = tf.nn.relu(norm8)
+                relu8 = ops.relu(norm8)
             # 9 12
             with tf.variable_scope("conv9", reuse=self.reuse):
                 conv9 = tf.layers.conv2d(inputs=relu8, filters=8 * self.ngf, kernel_size=3,
@@ -130,7 +131,7 @@ class GEncoder:
                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv9')
                 norm9 = ops._norm(conv9, self.is_training, self.norm)
-                relu9 = tf.nn.relu(norm9)
+                relu9 = ops.relu(norm9)
             # pool5
             with tf.variable_scope("conv10", reuse=self.reuse):
                 conv10 = tf.layers.conv2d(inputs=relu9, filters= 2 * self.ngf, kernel_size=3,
@@ -141,13 +142,13 @@ class GEncoder:
                                               mean=0.0 , stddev=0.02, dtype=tf.float32),
                                           bias_initializer=tf.constant_initializer(0.0), name='conv10')
                 norm10 = ops._norm(conv10, self.is_training, self.norm)
-                relu10 = tf.nn.relu(norm10)
+                relu10 = ops.relu(norm10)
                 conv_output = tf.layers.flatten(relu10)
             # 5 6
             with tf.variable_scope("dense1", reuse=self.reuse):
-                mean = tf.layers.dense(conv_output, units=8192, name="dense1")
+                mean = tf.layers.dense(conv_output, units=self.units, name="dense1")
             with tf.variable_scope("dense2", reuse=self.reuse):
-                log_var = tf.layers.dense(conv_output, units=8192, name="dense2")
+                log_var = tf.layers.dense(conv_output, units=self.units, name="dense2")
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)

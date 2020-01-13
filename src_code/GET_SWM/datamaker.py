@@ -2,7 +2,6 @@
 import os
 import numpy as np
 import SimpleITK
-from PIL import Image
 
 def norm(input):
     output = (input - np.min(input)
@@ -20,12 +19,12 @@ def mover(
 
     index_files =  os.listdir(SRC_PATH)
     for file in index_files:
-        print(file)
         arr = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH+ file))
-        Image.fromarray(arr).save(SAVE_X_PATH + file.replace( ".tif",".jpg"))
+        print(arr.shape)
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(arr.reshape([3,2912,2912])), SAVE_X_PATH + file.replace(".jpg", ".tif"))
 
 if __name__ == '__main__':
     mover(
-        SRC_PATH="D:\\BaiduYunDownload\\drive\\training\\images\\",
+        SRC_PATH="D:\\BaiduYunDownload\\FIRE\Images\\",
         SAVE_X_PATH="D:\\BaiduYunDownload\\SWM\\train\\X\\",
     )

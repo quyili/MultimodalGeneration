@@ -21,7 +21,7 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
+        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3,keep_prob=0.85)
 
     def model(self, l, x):
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),

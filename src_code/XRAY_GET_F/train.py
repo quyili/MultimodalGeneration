@@ -7,7 +7,7 @@ import logging
 import numpy as np
 import SimpleITK
 import math
-from skimage import transform
+import cv2
 
 FLAGS = tf.flags.FLAGS
 
@@ -17,10 +17,10 @@ tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 2e-4, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-# tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NORMAL_M', 'X files for training')
-tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NORMAL_F', 'X files for training')
-# tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/NORMAL_M', 'X files for training')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/NORMAL_F', 'X files for training')
+# tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/M', 'X files for training')
+tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/F', 'X files for training')
+# tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/M', 'X files for training')
+tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/F', 'X files for training')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -43,26 +43,38 @@ def mean_list(lists):
         out.append(mean(list))
     return out
 
-
-def read_file(l_path, Label_train_files, index, out_size=None):
+def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
     train_range = len(Label_train_files)
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    if out_size== None:
-        L_arr_ = transform.resize(L_arr_, FLAGS.image_size)
-    else:
-        L_arr_ = transform.resize(L_arr_, out_size)
-    return L_arr_.astype('float32')
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
+    L_img = SimpleITK.ReadImage(file_name )
+    L_arr= SimpleITK.GetArrayFromImage(L_img)
 
+    if  len(L_arr.shape)==2 :
+        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
+    elif  L_arr.shape[2]==1 :
+        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
+    elif  L_arr.shape[2]==3:
+        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
+    if out_size== None:
+        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]]
+    else:
+        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
+        img = np.asarray(img)[:,:,0:out_size[2]]
+    return img.astype('float32')
 
 def save_images(image_list, checkpoints_dir, file_index):
-    val_f, val_f_r, val_f_rm = image_list
+    val_f, val_f_r, val_f_rm, val_f_one_hot, val_f_r_prob = image_list
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_f_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_r)[0, :, :, 0]),
                          checkpoints_dir + "/samples/true_f_r_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_rm)[0, :, :, 0]),
                          checkpoints_dir + "/samples/fake_f_rm_" + str(file_index) + ".tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_one_hot)[0, :, :, :]),
+                         checkpoints_dir + "/samples/true_f_one_hot_" + str(file_index) + ".mha")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_r_prob )[0, :, :, :]),
+                         checkpoints_dir + "/samples/fake_f_r_prob_" + str(file_index) + ".mha")
 
 
 def read_filename(path, shuffle=True):

@@ -12,6 +12,7 @@ class GAN:
                  learning_rate=2e-5,
                  batch_size=1,
                  ngf=64,
+                 units=4096
                  ):
         """
         Args:
@@ -25,15 +26,20 @@ class GAN:
         self.ones = tf.ones(self.input_shape, name="ones")
         self.tenaor_name = {}
 
-        self.EC_F = GEncoder('EC_F', ngf=ngf)
-        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2*image_size[2])
+        self.EC_F = GEncoder('EC_F', ngf=ngf,units=units)
+        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2*image_size[2],units=units)
 
         self.D_F = Discriminator('D_F', ngf=ngf)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
     def model(self, f):
         # F -> F_R VAE
-        code_f_mean, code_f_logvar = self.EC_F(f)
+        f_one_hot_1 = tf.reshape(tf.one_hot(tf.cast(f[:,:,:,0:1], dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
+        f_one_hot_2 = tf.reshape(tf.one_hot(tf.cast(f[:,:,:,1:2], dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
+        f_one_hot_3 = tf.reshape(tf.one_hot(tf.cast(f[:,:,:,2:3], dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
+        f_one_hot = tf.reshape(tf.concat([f_one_hot_1 ,f_one_hot_2 ,f_one_hot_3 ],axis=-1), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
+
+        code_f_mean, code_f_logvar = self.EC_F(f_one_hot)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
@@ -45,10 +51,6 @@ class GAN:
         f_rm_prob = self.DC_F(code_f_rm)
 
         # D,FD
-        f_one_hot_1 = tf.reshape(tf.one_hot(tf.cast(f[:,:,:,0:1], dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
-        f_one_hot_2 = tf.reshape(tf.one_hot(tf.cast(f[:,:,:,1:2], dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
-        f_one_hot_3 = tf.reshape(tf.one_hot(tf.cast(f[:,:,:,2:3], dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
-        f_one_hot = tf.reshape(tf.concat([f_one_hot_1 ,f_one_hot_2 ,f_one_hot_3 ],axis=-1), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
         j_f = self.D_F(f_one_hot )
         j_f_rm = self.D_F(f_rm_prob)
         
@@ -68,12 +70,14 @@ class GAN:
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.001
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 0.1
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.1
+        D_loss += self.mse_loss(j_f, 1.0) * 0.5
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.5
         FG_loss += self.mse_loss(j_f_rm, 1.0) * 5
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 50
+        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 20
+
+        FG_loss += tf.reduce_mean(tf.abs(f_one_hot-f_r_prob)) * 10
 
         f_r_1 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,0:2], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
         f_r_2 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,2:4], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])

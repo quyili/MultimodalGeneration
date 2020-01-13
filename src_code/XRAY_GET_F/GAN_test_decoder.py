@@ -4,7 +4,7 @@ import ops as ops
 
 
 class GDecoder:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1, units=8192):
         self.name = name
         self.reuse = False
         self.ngf = ngf
@@ -13,6 +13,7 @@ class GDecoder:
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
         self.output_channl = output_channl
+        self.units=units
 
     def __call__(self, DC_input):
         """
@@ -23,10 +24,10 @@ class GDecoder:
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
             with tf.variable_scope("dense0", reuse=self.reuse):
-                dense0 = tf.layers.dense(DC_input, units= 8192,name="dense0")
+                dense0 = tf.layers.dense(DC_input, units=self.units,name="dense0")
             with tf.variable_scope("dense1", reuse=self.reuse):
-                dense1 = tf.layers.dense(dense0, units=8192, name="dense0")
-                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 8, 8,  2*64])
+                dense1 = tf.layers.dense(dense0, units=self.units, name="dense1")
+                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 8, 8,  -1])
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
                 conv0_1 = tf.layers.conv2d(inputs=dense1, filters=8 * self.ngf, kernel_size=3, strides=1,

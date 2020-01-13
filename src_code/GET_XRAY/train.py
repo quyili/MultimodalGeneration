@@ -7,7 +7,7 @@ import logging
 import numpy as np
 import SimpleITK
 import math
-from skimage import transform
+import cv2
 
 FLAGS = tf.flags.FLAGS
 
@@ -15,23 +15,23 @@ tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
+tf.flags.DEFINE_float('learning_rate', 2e-5, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/X', 'X files for training')
-tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/labels', 'Y files for training')
-tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/NORMAL_F', 'Y files for training')
-tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/train/NORMAL_M', 'Y files for training')
-tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/test/X', 'X files for training')
-tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/test/labels', 'Y files for training')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/test/NORMAL_F', 'Y files for training')
-tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_zgchen_2/quyili/DATA/chest_xray/test/NORMAL_M', 'Y files for training')
+tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/X', 'X files for training')
+tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/L', 'Y files for training')
+tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/F', 'Y files for training')
+tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/M', 'Y files for training')
+tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/X', 'X files for training')
+tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/L', 'Y files for training')
+tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/F', 'Y files for training')
+tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/M', 'Y files for training')
 
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 50, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 500, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 1341, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
@@ -74,15 +74,26 @@ def save_image(image, name, dir="./samples", form=".tiff"):
         pass
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
+
 def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
     train_range = len(Label_train_files)
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form))
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
+    L_img = SimpleITK.ReadImage(file_name )
+    L_arr= SimpleITK.GetArrayFromImage(L_img)
+
+    if  len(L_arr.shape)==2 :
+        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
+    elif  L_arr.shape[2]==1 :
+        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
+    elif  L_arr.shape[2]==3:
+        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
     if out_size== None:
-        L_arr_ = transform.resize(L_arr_, FLAGS.image_size)
+        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]]
     else:
-        L_arr_ = transform.resize(L_arr_, out_size)
-    return L_arr_.astype('float32')
+        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
+        img = np.asarray(img)[:,:,0:out_size[2]]
+    return img.astype('float32')
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)

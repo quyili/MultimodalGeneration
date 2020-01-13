@@ -25,10 +25,10 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.EC_R = Encoder('EC_R', ngf=ngf)
-        self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=3)
+        self.EC_R = Encoder('EC_R', ngf=ngf, keep_prob=0.95)
+        self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=3, keep_prob=0.9)
 
-        self.D_M = Discriminator('D_M', ngf=ngf)
+        self.D_M = Discriminator('D_M',ngf=ngf, keep_prob=0.8)
 
     def model(self, f,mask,x):
         self.tenaor_name["f"] = str(f)
@@ -39,9 +39,6 @@ class GAN:
         x_g = self.DC_M(code_rm)
         self.tenaor_name["x_g"] = str(x_g)
 
-        l_g_prob ,l_g  = self.lesion_process(x, self.LESP)
-        self.tenaor_name["l_g"] = str(l_g)
-
         j_x_g = self.D_M(x_g)
         j_x = self.D_M(x)
 
@@ -49,12 +46,12 @@ class GAN:
         G_loss = 0.0
         L_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_x, 1.0) * 50
-        D_loss += self.mse_loss(j_x_g, 0.0) * 50
-        G_loss += self.mse_loss(j_x_g, 1.0) * 50
+        D_loss += self.mse_loss(j_x, 1.0) * 2
+        D_loss += self.mse_loss(j_x_g, 0.0) * 2
+        G_loss += self.mse_loss(j_x_g, 1.0) * 10
 
         # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_g * mask) * 0.5
+        G_loss += self.mse_loss(0.0, x_g * mask) * 0.1
 
         self.image_list["mask"] = mask
         self.image_list["f"] = f
@@ -63,7 +60,7 @@ class GAN:
         self.judge_list["j_x_g"]= j_x_g
         self.judge_list["j_x"] = j_x
 
-        loss_list = [G_loss, D_loss
+        loss_list = [G_loss, D_loss]
 
         return loss_list
 
