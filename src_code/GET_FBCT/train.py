@@ -52,8 +52,8 @@ def random(n, h, w, c):
 
 
 def norm(input):
-    output = (input - np.min(input, axis=[1, 2, 3])
-              ) / (np.max(input, axis=[1, 2, 3]) - np.min(input, axis=[1, 2, 3]))
+    output = (input - np.min(input)
+              ) / (np.max(input) - np.min(input))
     return output
 
 
@@ -70,7 +70,7 @@ def save_image(image, name, dir="./samples", form=".tiff"):
         pass
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
+def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=False):
     train_range = len(Label_train_files)
     file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
     L_img = SimpleITK.ReadImage(file_name )
@@ -84,11 +84,13 @@ def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_f
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
     if out_size== None:
         img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]]
+        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
     else:
         img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]]
-    return img.astype('float32')
+        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32')
+    if norm==True:
+        img=norm(img)
+    return img
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)

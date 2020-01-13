@@ -36,7 +36,7 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 1341, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
-tf.flags.DEFINE_string('load_lp_model','20200105-1715','folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_string('load_lp_model','20200112-1859','folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 
 
 def mean(list):
@@ -55,9 +55,9 @@ def random(n, h, w, c):
     return np.random.uniform(0., 1., size=[n, h, w, c])
 
 
-def norm(input):
-    output = (input - np.min(input, axis=[1, 2, 3])
-              ) / (np.max(input, axis=[1, 2, 3]) - np.min(input, axis=[1, 2, 3]))
+def mynorm(input):
+    output = (input - np.min(input)
+              ) / (np.max(input) - np.min(input))
     return output
 
 
@@ -75,7 +75,7 @@ def save_image(image, name, dir="./samples", form=".tiff"):
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
+def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=True):
     train_range = len(Label_train_files)
     file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
     L_img = SimpleITK.ReadImage(file_name )
@@ -89,11 +89,15 @@ def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_f
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
     if out_size== None:
         img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]]
+        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
     else:
         img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]]
-    return img.astype('float32')
+        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32')
+    if norm==True:
+        img=mynorm(img)
+    return img
+   
+
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -277,7 +281,7 @@ def train():
                     for b in range(FLAGS.batch_size):
                         train_m_arr = read_file(FLAGS.M, f_train_files, index,inpu_form=".jpeg",out_form=".tiff")
                         train_f_arr = read_file(FLAGS.F, f_train_files, index,inpu_form=".jpeg",out_form=".tiff")
-                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff")
+                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff",norm=False)
                         train_x_arr = read_file(FLAGS.X, x_train_files, index)
 
                         train_true_l.append(train_l_arr)
@@ -347,7 +351,7 @@ def train():
                             for b in range(FLAGS.batch_size):
                                 val_m_arr = read_file(FLAGS.M_test, f_val_files,val_index,inpu_form=".jpeg",out_form=".tiff")
                                 val_f_arr = read_file(FLAGS.F_test, f_val_files, val_index,inpu_form=".jpeg",out_form=".tiff")
-                                val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index,inpu_form=".jpeg",out_form=".tiff")
+                                val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index,inpu_form=".jpeg",out_form=".tiff",norm=False)
                                 val_x_arr = read_file(FLAGS.X_test, x_val_files, val_index)
 
                                 val_true_l.append(val_l_arr)

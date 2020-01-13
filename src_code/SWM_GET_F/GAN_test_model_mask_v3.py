@@ -59,23 +59,24 @@ class GAN:
         D_loss = 0.0
         FG_loss = 0.0
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.01
-        D_loss += self.mse_loss(j_code_f, 0.0) * 0.01
-        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.01
+        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.03
+        D_loss += self.mse_loss(j_code_f, 0.0) * 0.03
+        FG_loss += self.mse_loss(j_code_f, 1.0) * 0.03
 
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.001
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.001
+        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.005
+        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.005
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 0.5
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.5
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 5
+        D_loss += self.mse_loss(j_f, 1.0) * 0.1
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.1
+        FG_loss += self.mse_loss(j_f_rm, 1.0) * 1
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 10
 
         FG_loss += tf.reduce_mean(tf.abs(f_one_hot-f_r_prob)) * 10
         FG_loss +=(tf.reduce_mean( f_r_prob[:,:,:,0])-tf.reduce_mean( f_r_prob[:,:,:,1]))*0.001
+        FG_loss +=(tf.reduce_mean( f_rm_prob[:,:,:,0])-tf.reduce_mean( f_rm_prob[:,:,:,1]))*0.002
 
         new_f = tf.reshape(tf.cast(tf.argmax(f_one_hot, axis=-1), dtype=tf.float32), shape=self.input_shape)
         f_r = tf.reshape(tf.cast(tf.argmax(f_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
@@ -85,7 +86,7 @@ class GAN:
         self.tenaor_name["f_rm"] = str(f_rm)
         self.tenaor_name["j_f_rm"] = str(j_f_rm)
 
-        image_list = [new_f , f_r, f_rm, f_one_hot, f_r_prob]
+        image_list = [new_f , f_r, f_rm, f_one_hot, f_r_prob,f_rm_prob]
         code_list = [code_f, code_f_rm]
         j_list = [j_code_f, j_code_f_rm, j_f, j_f_rm]
         loss_list = [FG_loss, D_loss]
@@ -150,10 +151,10 @@ class GAN:
         tf.summary.image('image/f', f)
         tf.summary.image('image/f_rm', f_rm)
         tf.summary.image('image/f_r', f_r)
-        tf.summary.image('image/f_one_hot1', f_one_hot[:,:,:,0:1])
-        tf.summary.image('image/f_one_hot2', f_one_hot[:,:,:,1:2])
-        tf.summary.image('image/f_r_prob1', f_r_prob[:,:,:,0:1])
-        tf.summary.image('image/f_r_prob2', f_r_prob[:,:,:,1:2])
+        #tf.summary.image('image/f_one_hot1', f_one_hot[:,:,:,0:1])
+        #tf.summary.image('image/f_one_hot2', f_one_hot[:,:,:,1:2])
+        #tf.summary.image('image/f_r_prob1', f_r_prob[:,:,:,0:1])
+        #tf.summary.image('image/f_r_prob2', f_r_prob[:,:,:,1:2])
         # tf.summary.image('image/mask', mask)
         # tf.summary.image('image/mask_rm', mask_rm)
         # tf.summary.image('image/mask_r', mask_r)

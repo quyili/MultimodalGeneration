@@ -14,7 +14,7 @@ FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
+tf.flags.DEFINE_integer('batch_size',4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 2e-5, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
@@ -52,9 +52,9 @@ def random(n, h, w, c):
     return np.random.uniform(0., 1., size=[n, h, w, c])
 
 
-def norm(input):
-    output = (input - np.min(input, axis=[1, 2, 3])
-              ) / (np.max(input, axis=[1, 2, 3]) - np.min(input, axis=[1, 2, 3]))
+def mynorm(input):
+    output = (input - np.min(input)
+              ) / (np.max(input) - np.min(input))
     return output
 
 
@@ -69,9 +69,12 @@ def save_image(image, name, dir="./samples", form=".tiff"):
         os.makedirs(dir)
     except os.error:
         pass
-    Image.fromarray((image*255).astype(np.uint8)).save(dir + "/" + name + form)
+    if image.shape[2]==1:
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image[:,:,0]), dir + "/" + name +".tiff")
+    else:
+        Image.fromarray((image*255).astype(np.uint8)).save(dir + "/" + name + form)
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
+def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=True):
     train_range = len(Label_train_files)
     file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
     L_img = SimpleITK.ReadImage(file_name )
@@ -85,11 +88,13 @@ def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_f
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
     if out_size== None:
         img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32'
+        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
     else:
         img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32'
-    return norm(img)
+        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32')
+    if norm==True:
+        img=mynorm(img)
+    return img
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
