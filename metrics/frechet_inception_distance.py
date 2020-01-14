@@ -200,17 +200,39 @@ def check_or_download_inception(inception_path):
     return str(model_file)
 
 
-def _handle_path(path, sess):
-    if path.endswith('.npz'):
-        f = np.load(path)
-        m, s = f['mu'][:], f['sigma'][:]
-        f.close()
-    else:
-        path = pathlib.Path(path)
-        files = list(path.glob('*.jpg')) + list(path.glob('*.png'))+list(path.glob('*.tif'))+list(path.glob('*.tiff'))+list(path.glob('*.mha'))
-        x = np.array([imageio.imread(str(fn)).astype(np.float32) for fn in files])
-        m, s = calculate_activation_statistics(x, sess)
-    return m, s
+# def _handle_path(path, sess):
+#     if path.endswith('.npz'):
+#         f = np.load(path)
+#         m, s = f['mu'][:], f['sigma'][:]
+#         f.close()
+#     else:
+#         path = pathlib.Path(path)
+#         files = list(path.glob('*.jpg')) + list(path.glob('*.png'))+list(path.glob('*.tif'))+list(path.glob('*.tiff'))+list(path.glob('*.mha'))
+#         x = np.array([imageio.imread(str(fn)).astype(np.float32) for fn in files])
+#         m, s = calculate_activation_statistics(x, sess)
+#     return m, s
+
+def mynorm(input):
+    output = (input - np.min(input)
+              ) / (np.max(input) - np.min(input))
+    return output
+
+def _handle_path(path,sess):
+    images=[]
+    for file in os.listdir(path):
+        x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(path + "/" + file)).astype('float32')
+        x = (mynorm(x)*255).astype(np.uint8)
+        h, w = x.shape[0], x.shape[1]
+        if len(x.shape) == 2:
+            x = np.tile(x.reshape([h,w,1]),(1,1,3))
+            assert list(x.shape)==[h,w,3]
+        elif x.shape[2] == 1:
+            x = np.tile(x, (1, 1, 3))
+            assert list(x.shape) == [h, w, 3]
+        elif x.shape[2] == 3:
+            assert list(x.shape) == [h, w, 3]
+        images.append(x)
+    return calculate_activation_statistics(np.array(images).astype(np.float32), sess)
 
 
 def calculate_fid_given_paths(paths, inception_path):
@@ -244,39 +266,4 @@ if __name__ == "__main__":
     fid_value = calculate_fid_given_paths(args.path, args.inception)
     print("FID: ", fid_value)
 
-#----------------------------------------------------------------------------
-# EDIT: added
 
-# class API:
-#     def __init__(self, num_images, image_shape, image_dtype, minibatch_size):
-#         import config
-#         self.network_dir = os.path.join(config.result_dir, '_inception_fid')
-#         self.network_file = check_or_download_inception(self.network_dir)
-#         self.sess = tf.get_default_session()
-#         create_inception_graph(self.network_file)
-#
-#     def get_metric_names(self):
-#         return ['FID']
-#
-#     def get_metric_formatting(self):
-#         return ['%-10.4f']
-#
-#     def begin(self, mode):
-#         assert mode in ['warmup', 'reals', 'fakes']
-#         self.activations = []
-#
-#     def feed(self, mode, minibatch):
-#         act = get_activations(minibatch.transpose(0,2,3,1), self.sess, batch_size=minibatch.shape[0])
-#         self.activations.append(act)
-#
-#     def end(self, mode):
-#         act = np.concatenate(self.activations)
-#         mu = np.mean(act, axis=0)
-#         sigma = np.cov(act, rowvar=False)
-#         if mode in ['warmup', 'reals']:
-#             self.mu_real = mu
-#             self.sigma_real = sigma
-#         fid = calculate_frechet_distance(mu, sigma, self.mu_real, self.sigma_real)
-#         return [fid]
-
-#----------------------------------------------------------------------------

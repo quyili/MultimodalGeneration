@@ -7,7 +7,9 @@
 
 import numpy as np
 import scipy.ndimage
-
+import imageio
+import os
+import SimpleITK
 #----------------------------------------------------------------------------
 
 def get_descriptors_for_minibatch(minibatch, nhood_size, nhoods_per_image):
@@ -93,43 +95,31 @@ def reconstruct_laplacian_pyramid(pyramid):
         minibatch = pyr_up(minibatch) + level
     return minibatch
 
+def mynorm(input):
+    output = (input - np.min(input)
+              ) / (np.max(input) - np.min(input))
+    return output
+
+def calculate_swd_given_paths(paths):
+    files0 = os.listdir(paths[0])
+    files1 = os.listdir(paths[1])
+    assert len(files0) == len(files1)
+    swds=[]
+    for i in range(len(files0)):
+        x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(paths[0] + "/" + files0[i])).astype('float32')
+        y = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(paths[1] + "/" + files1[i])).astype('float32')
+        x = mynorm(x)
+        y = mynorm(y)
+        if len(x.shape) == 2:
+            swd = sliced_wasserstein(x, y, 4, 128)
+            swds.append(swd)
+        elif x.shape[2] == 1:
+            swd = sliced_wasserstein(x.reshape([x.shape[0],x.shape[1]]), y.reshape([x.shape[0],x.shape[1]]), 4, 128)
+            swds.append(swd)
+        elif x.shape[2] == 3:
+            for i in range( x.shape[2]):
+                swd = sliced_wasserstein(x[:,:,i], y[:,:,i], 4, 128)
+                swds.append(swd)
+    return [np.mean(swds),np.std(swds)]
 #----------------------------------------------------------------------------
 
-class API:
-    def __init__(self, num_images, image_shape, image_dtype, minibatch_size):
-        self.nhood_size         = 7
-        self.nhoods_per_image   = 128
-        self.dir_repeats        = 4
-        self.dirs_per_repeat    = 128
-        self.resolutions = []
-        res = image_shape[1]
-        while res >= 16:
-            self.resolutions.append(res)
-            res //= 2
-
-    def get_metric_names(self):
-        return ['SWDx1e3_%d' % res for res in self.resolutions] + ['SWDx1e3_avg']
-
-    def get_metric_formatting(self):
-        return ['%-13.4f'] * len(self.get_metric_names())
-
-    def begin(self, mode):
-        assert mode in ['warmup', 'reals', 'fakes']
-        self.descriptors = [[] for res in self.resolutions]
-
-    def feed(self, mode, minibatch):
-        for lod, level in enumerate(generate_laplacian_pyramid(minibatch, len(self.resolutions))):
-            desc = get_descriptors_for_minibatch(level, self.nhood_size, self.nhoods_per_image)
-            self.descriptors[lod].append(desc)
-
-    def end(self, mode):
-        desc = [finalize_descriptors(d) for d in self.descriptors]
-        del self.descriptors
-        if mode in ['warmup', 'reals']:
-            self.desc_real = desc
-        dist = [sliced_wasserstein(dreal, dfake, self.dir_repeats, self.dirs_per_repeat) for dreal, dfake in zip(self.desc_real, desc)]
-        del desc
-        dist = [d * 1e3 for d in dist] # multiply by 10^3
-        return dist + [np.mean(dist)]
-
-#----------------------------------------------------------------------------

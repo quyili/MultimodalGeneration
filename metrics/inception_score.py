@@ -135,5 +135,6 @@ def handle(data_path,sess):
         mean, std = get_inception_score(x)
     return [mean, std]
 
+# out3_ = IS.inception_score("D:/BaiduYunDownload/SWM/test/X","D:\\project\\MultimodalGeneration\\metrics")
 
 #----------------------------------------------------------------------------
