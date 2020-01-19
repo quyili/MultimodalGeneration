@@ -1,6 +1,6 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from discriminator import Discriminator
+from detector import Detector
 
 
 class GAN:
@@ -21,27 +21,25 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3,keep_prob=0.85)
+        self.LESP = Detector('LESP', ngf=ngf, keep_prob=0.99)
 
-    def model(self, l, x):
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
-                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        
-        l_g_prob = self.LESP(x)
-        
-        L_loss = self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]), 
-                                         tf.reduce_mean(l_g_prob  ,axis=[1,2])) 
+    def model(self,input,groundtruth_class,groundtruth_location,groundtruth_positives,groundtruth_negatives):
+        feature_class,feature_location,all_default_boxs,all_default_boxs_len = self.LESP(input)
 
-        l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
+        # 损失函数
+        self.groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
+        self.softmax_cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=feature_class,
+                                                                                    labels=groundtruth_class)
+        self.loss_location = tf.div(tf.reduce_sum(tf.multiply(
+            tf.reduce_sum(self.smooth_L1(tf.subtract(groundtruth_location, feature_location)),
+                          reduction_indices=2), groundtruth_positives), reduction_indices=1),
+                                    tf.reduce_sum(groundtruth_positives, reduction_indices=1))
+        self.loss_class = tf.div(
+            tf.reduce_sum(tf.multiply(self.softmax_cross_entropy, self.groundtruth_count), reduction_indices=1),
+            tf.reduce_sum(self.groundtruth_count, reduction_indices=1))
+        self.loss_all = tf.reduce_sum(tf.add(self.loss_class, self.loss_location))
 
-        self.tenaor_name["l"] = str(l)
-        self.tenaor_name["x"] = str(x)
-        self.tenaor_name["l_g"] = str(l_g)
-
-        L_acc=self.acc( l_r,l_g)
-
-        return [L_loss,L_acc, l_r,l_g]
+        return  [self.loss_all],feature_class,feature_location
 
     def get_variables(self):
         return self.LESP.variables
@@ -58,7 +56,6 @@ class GAN:
 
     def loss_summary(self, L_loss):
         tf.summary.scalar('loss/L_loss', L_loss[0])
-        tf.summary.scalar('loss/L_acc', L_loss[1])
 
     def acc(self,x,y):
          correct_prediction = tf.equal(x, y)
@@ -89,3 +86,8 @@ class GAN:
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])
                   ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output
+
+   # smooth_L1 算法
+    def smooth_L1(self, x):
+        return tf.where(tf.less_equal(tf.abs(x), 1.0), tf.multiply(0.5, tf.pow(x, 2.0)),
+                        tf.subtract(tf.abs(x), 0.5))
