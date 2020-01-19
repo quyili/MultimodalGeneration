@@ -63,6 +63,7 @@ def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_f
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
     elif  L_arr.shape[2]==3:
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
+
     if out_size== None:
         img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
         img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')

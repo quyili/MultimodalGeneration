@@ -12,31 +12,8 @@ class Detector:
 
         # 是否训练
         self.isTraining = is_training
-        # 允许的图像大小
-        self.img_size = [300, 300]
         # 分类总数量
-        self.classes_size = 21
-        # 背景分类的值
-        self.background_classes_val = 0
-        # 每个特征图单元的default box数量
-        self.default_box_size = [4, 6, 6, 6, 4, 4]
-        # default box 尺寸长宽比例
-        self.box_aspect_ratio = [
-            [1.0, 1.25, 2.0, 3.0],
-            [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
-            [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
-            [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
-            [1.0, 1.25, 2.0, 3.0],
-            [1.0, 1.25, 2.0, 3.0]
-        ]
-        # 最小default box面积比例
-        self.min_box_scale = 0.05
-        # 最大default box面积比例
-        self.max_box_scale = 0.9
-        # 每个特征层的面积比例
-        # numpy生成等差数组，效果等同于论文中的s_k=s_min+(s_max-s_min)*(k-1)/(m-1)
-        self.default_box_scale = np.linspace(self.min_box_scale, self.max_box_scale, num=np.amax(self.default_box_size))
-        print('##   default_box_scale:' + str(self.default_box_scale))
+        self.classes_size = 5
         # 卷积步长
         self.conv_strides_1 = [1, 1, 1, 1]
         self.conv_strides_2 = [1, 2, 2, 1]
@@ -49,8 +26,8 @@ class Detector:
         self.conv_bn_decay = 0.99999
         # Batch Normalization 算法的 variance_epsilon 参数
         self.conv_bn_epsilon = 0.00001
-        # Jaccard相似度判断阀值
-        self.jaccard_value = 0.6
+        # 每个特征图单元的default box数量
+        self.default_box_size = [4, 6, 6, 6, 4, 4]
 
     # 卷积操作
     def convolution(self, input, shape, strides, name):
@@ -102,43 +79,6 @@ class Detector:
             gamma = tf.get_variable(name + '_gamma', bn_input_shape[-1:], initializer=tf.ones_initializer)
             return tf.nn.batch_normalization(input, mean, variance, beta, gamma, self.conv_bn_epsilon,
                                              name + '_bn_opt')
-
-    # 初始化、整理训练数据
-    def generate_all_default_boxs(self):
-        # 全部按照比例计算并生成一张图像产生的每个default box的坐标以及长宽
-        # 用于后续的jaccard匹配
-        all_default_boxes = []
-        for index, map_shape in zip(range(len(self.feature_maps_shape)), self.feature_maps_shape):
-            width = int(map_shape[1])
-            height = int(map_shape[2])
-            cell_scale = self.default_box_scale[index]
-            for x in range(width):
-                for y in range(height):
-                    for ratio in self.box_aspect_ratio[index]:
-                        center_x = (x / float(width)) + (0.5 / float(width))
-                        center_y = (y / float(height)) + (0.5 / float(height))
-                        box_width = np.sqrt(cell_scale * ratio)
-                        box_height = np.sqrt(cell_scale / ratio)
-                        all_default_boxes.append([center_x, center_y, box_width, box_height])
-        all_default_boxes = np.array(all_default_boxes)
-        # 检查数据是否正确
-        all_default_boxes = self.check_numerics(all_default_boxes, 'all_default_boxes')
-        return all_default_boxes
-
-    # 检测数据是否正常
-    def check_numerics(self, input_dataset, message):
-        if str(input_dataset).find('Tensor') == 0:
-            input_dataset = tf.check_numerics(input_dataset, message)
-        else:
-            dataset = np.array(input_dataset)
-            nan_count = np.count_nonzero(dataset != dataset)
-            inf_count = len(dataset[dataset == float("inf")])
-            n_inf_count = len(dataset[dataset == float("-inf")])
-            if nan_count > 0 or inf_count > 0 or n_inf_count > 0:
-                data_error = '【' + message + '】出现数据错误！【nan：' + str(nan_count) + '|inf：' + str(
-                    inf_count) + '|-inf：' + str(n_inf_count) + '】'
-                raise Exception(data_error)
-        return input_dataset
 
     def __call__(self, input):
         """
@@ -260,13 +200,8 @@ class Detector:
 
             print('##   feature_class shape : ' + str(self.feature_class.get_shape().as_list()))
             print('##   feature_location shape : ' + str(self.feature_location.get_shape().as_list()))
-            # 生成所有default boxs
-            self.all_default_boxs = self.generate_all_default_boxs()
-            self.all_default_boxs_len = len(self.all_default_boxs)
-            print('##   all default boxs : ' + str(self.all_default_boxs_len))
-
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
 
-        return self.feature_class,self.feature_location,self.all_default_boxs,self.all_default_boxs_len
+        return self.feature_class,self.feature_location,self.feature_maps_shape

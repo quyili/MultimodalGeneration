@@ -8,8 +8,6 @@ import numpy as np
 import SimpleITK
 import math
 import cv2
-import xml.etree.ElementTree as etxml
-import skimage
 
 FLAGS = tf.flags.FLAGS
 
@@ -33,6 +31,33 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 5224, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
+# 每个特征图单元的default box数量
+default_box_size = [4, 6, 6, 6, 4, 4]
+# 最小default box面积比例
+min_box_scale = 0.05
+# 最大default box面积比例
+max_box_scale = 0.9
+# 每个特征层的面积比例
+# numpy生成等差数组，效果等同于论文中的s_k=s_min+(s_max-s_min)*(k-1)/(m-1)
+default_box_scale = np.linspace(min_box_scale, max_box_scale, num = np.amax(default_box_size))
+print('##   default_box_scale:'+str(default_box_scale))
+# default box 尺寸长宽比例
+box_aspect_ratio = [
+    [1.0, 1.25, 2.0, 3.0],
+    [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
+    [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
+    [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
+    [1.0, 1.25, 2.0, 3.0],
+    [1.0, 1.25, 2.0, 3.0]
+]
+classes_size=5
+feature_maps_shape = [[ 64,64,],[32,32],[16,16],[8,8],[4,4],[2,2]]
+# Jaccard相似度判断阀值
+jaccard_value = 0.6
+# 背景分类的值
+background_classes_val = 0
+
+
 def mean(list):
     return sum(list) / float(len(list))
 
@@ -54,26 +79,28 @@ def mynorm(input):
               ) / (np.max(input) - np.min(input))
     return output
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=True):
-    train_range = len(Label_train_files)
-    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
-    L_img = SimpleITK.ReadImage(file_name )
-    L_arr= SimpleITK.GetArrayFromImage(L_img)
 
-    if  len(L_arr.shape)==2 :
-        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
-    elif  L_arr.shape[2]==1 :
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
-    elif  L_arr.shape[2]==3:
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
-    if out_size== None:
-        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
+def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form="", norm=False):
+    train_range = len(Label_train_files)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, out_form)
+    L_img = SimpleITK.ReadImage(file_name)
+    L_arr = SimpleITK.GetArrayFromImage(L_img)
+
+    if len(L_arr.shape) == 2:
+        img = cv2.merge([L_arr[:, :], L_arr[:, :], L_arr[:, :]])
+    elif L_arr.shape[2] == 1:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 0], L_arr[:, :, 0]])
+    elif L_arr.shape[2] == 3:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 1], L_arr[:, :, 2]])
+
+    if out_size == None:
+        img = cv2.resize(img, (FLAGS.image_size[0], FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:FLAGS.image_size[2]].astype('float32')
     else:
-        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32')
-    if norm==True:
-        img=mynorm(img)
+        img = cv2.resize(img, (out_size[0], out_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:out_size[2]].astype('float32')
+    if norm == True:
+        img = mynorm(img)
     return img
 
 def read_filename(path, shuffle=True):
@@ -84,7 +111,6 @@ def read_filename(path, shuffle=True):
         np.random.shuffle(index_arr)
         files_ = files_[index_arr]
     return files_
-
 
 def average_gradients(grads_list):
     average_grads = []
@@ -114,34 +140,14 @@ def check_numerics(input_dataset, message):
             raise Exception(data_error)
     return  input_dataset
 
-
-# 每个特征图单元的default box数量
-default_box_size = [4, 6, 6, 6, 4, 4]
-# 最小default box面积比例
-min_box_scale = 0.05
-# 最大default box面积比例
-max_box_scale = 0.9
-# 每个特征层的面积比例
-# numpy生成等差数组，效果等同于论文中的s_k=s_min+(s_max-s_min)*(k-1)/(m-1)
-default_box_scale = np.linspace(min_box_scale, max_box_scale, num = np.amax(default_box_size))
-print('##   default_box_scale:'+str(default_box_scale))
-# default box 尺寸长宽比例
-box_aspect_ratio = [
-    [1.0, 1.25, 2.0, 3.0],
-    [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
-    [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
-    [1.0, 1.25, 2.0, 3.0, 1.0 / 2.0, 1.0 / 3.0],
-    [1.0, 1.25, 2.0, 3.0],
-    [1.0, 1.25, 2.0, 3.0]
-]
 # 初始化、整理训练数据
-def generate_all_default_boxs(feature_maps_shape):
+def generate_all_default_boxs():
         # 全部按照比例计算并生成一张图像产生的每个default box的坐标以及长宽
         # 用于后续的jaccard匹配
         all_default_boxes = []
         for index, map_shape in zip(range(len(feature_maps_shape)), feature_maps_shape):
-            width = int(map_shape[1])
-            height = int(map_shape[2])
+            width = int(map_shape[0])
+            height = int(map_shape[1])
             cell_scale = default_box_scale[index]
             for x in range(width):
                 for y in range(height):
@@ -156,15 +162,10 @@ def generate_all_default_boxs(feature_maps_shape):
         all_default_boxes = check_numerics(all_default_boxes,'all_default_boxes')
         return all_default_boxes
 
-feature_maps_shape=[]#TODO
-all_default_boxs = generate_all_default_boxs(feature_maps_shape)
-all_default_boxs_len =len(all_default_boxs)
-# Jaccard相似度判断阀值
-jaccard_value = 0.6
-# 背景分类的值
-background_classes_val = 0
  # 整理生成groundtruth数据
 def generate_groundtruth_data(input_actual_data):
+    all_default_boxs = generate_all_default_boxs()
+    all_default_boxs_len = len(all_default_boxs)
     # 生成空数组，用于保存groundtruth
     input_actual_data_len = len(input_actual_data)
     gt_class = np.zeros((input_actual_data_len, all_default_boxs_len))
@@ -235,60 +236,15 @@ def jaccard(rect1, rect2):
     else :
         return
 
-
-'''
-获取voc2007训练图片数据
-train_data：训练批次图像，格式[None,width,height,3]
-actual_data：图像标注数据，格式[None,[None,center_x,center_y,width,height,lable]]
-'''
-file_name_list = os.listdir('./train_datasets/voc2007/JPEGImages/')
-lable_arr = ['background','aeroplane','bicycle','bird','boat','bottle','bus','car','cat','chair','cow','diningtable','dog','horse','motorbike','person','pottedplant','sheep','sofa','train','tvmonitor']
-# 图像白化，格式:[R,G,B]
-whitened_RGB_mean = [123.68, 116.78, 103.94]
-def get_traindata(batch_size):
-    def get_actual_data_from_xml(xml_path):
-        actual_item = []
-        try:
-            annotation_node = etxml.parse(xml_path).getroot()
-            img_width = float(annotation_node.find('size').find('width').text.strip())
-            img_height = float(annotation_node.find('size').find('height').text.strip())
-            object_node_list = annotation_node.findall('object')
-            for obj_node in object_node_list:
-                lable = lable_arr.index(obj_node.find('name').text.strip())
-                bndbox = obj_node.find('bndbox')
-                x_min = float(bndbox.find('xmin').text.strip())
-                y_min = float(bndbox.find('ymin').text.strip())
-                x_max = float(bndbox.find('xmax').text.strip())
-                y_max = float(bndbox.find('ymax').text.strip())
-                # 位置数据用比例来表示，格式[center_x,center_y,width,height,lable]
-                actual_item.append([((x_min + x_max) / 2 / img_width), ((y_min + y_max) / 2 / img_height),
-                                    ((x_max - x_min) / img_width), ((y_max - y_min) / img_height), lable])
-            return actual_item
-        except:
-            return None
-
-    train_data = []
-    actual_data = []
-
-    file_list = random.sample(file_name_list, batch_size)
-
-    for f_name in file_list:
-        img_path = './train_datasets/voc2007/JPEGImages/' + f_name
-        xml_path = './train_datasets/voc2007/Annotations/' + f_name.replace('.jpg', '.xml')
-        if os.path.splitext(img_path)[1].lower() == '.jpg':
-            actual_item = get_actual_data_from_xml(xml_path)
-            if actual_item != None:
-                actual_data.append(actual_item)
-            else:
-                print('Error : ' + xml_path)
-                continue
-            img = skimage.io.imread(img_path)
-            img = skimage.transform.resize(img, (300, 300))
-            # 图像白化预处理
-            img = img - whitened_RGB_mean
-            train_data.append(img)
-
-    return train_data, actual_data, file_list
+def read_txt_file(l_path, Label_train_files, index, inpu_form=".mha"):
+    actual_item = []
+    train_range = len(Label_train_files)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, ".txt")
+    with open(file_name) as f:
+        for line in f.readlines():
+            line=list(line)
+            actual_item.append([float(line[1]),float(line[2]),float(line[3]),float(line[4]),int(line[0])])
+    return actual_item
 
 def train():
     with tf.device("/cpu:0"):
@@ -333,7 +289,7 @@ def train():
                     GT_negatives_0 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                                 dtype=tf.float32,
                                                                 name='groundtruth_negatives')
-                    loss_list_0,feature_class_0,feature_location_0 = gan.model(X_0, GT_class_0, GT_location_0, GT_positives_0, GT_negatives_0)
+                    loss_list_0 = gan.model(X_0, GT_class_0, GT_location_0, GT_positives_0, GT_negatives_0)
                     tensor_name_dirct_0 = gan.tenaor_name
                     variables_list_0 = gan.get_variables()
                     D_grad_0 = D_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0)
@@ -353,7 +309,7 @@ def train():
                     GT_negatives_1 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                     dtype=tf.float32,
                                                     name='groundtruth_negatives')
-                    loss_list_1 ,feature_class_1,feature_location_1 = gan.model(X_1, GT_class_1, GT_location_1, GT_positives_1, GT_negatives_1)
+                    loss_list_1 = gan.model(X_1, GT_class_1, GT_location_1, GT_positives_1, GT_negatives_1)
                     tensor_name_dirct_1 = gan.tenaor_name
                     variables_list_1 = gan.get_variables()
                     D_grad_1 = D_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1)
@@ -373,7 +329,7 @@ def train():
                     GT_negatives_2 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                     dtype=tf.float32,
                                                     name='groundtruth_negatives')
-                    loss_list_2,feature_class_2,feature_location_2  = gan.model(X_2, GT_class_2, GT_location_2, GT_positives_2, GT_negatives_2)
+                    loss_list_2  = gan.model(X_2, GT_class_2, GT_location_2, GT_positives_2, GT_negatives_2)
                     tensor_name_dirct_2 = gan.tenaor_name
                     variables_list_2 = gan.get_variables()
                     D_grad_2 = D_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2)
@@ -393,7 +349,7 @@ def train():
                     GT_negatives_3 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                     dtype=tf.float32,
                                                     name='groundtruth_negatives')
-                    loss_list_3,feature_class_3,feature_location_3  = gan.model(X_3, GT_class_3, GT_location_3, GT_positives_3, GT_negatives_3)
+                    loss_list_3  = gan.model(X_3, GT_class_3, GT_location_3, GT_positives_3, GT_negatives_3)
                     tensor_name_dirct_3 = gan.tenaor_name
                     variables_list_3 = gan.get_variables()
                     D_grad_3 = D_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3)
@@ -449,7 +405,7 @@ def train():
                     train_true_l = []
                     train_true_x = []
                     for b in range(FLAGS.batch_size):
-                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff")
+                        train_l_arr = read_txt_file(FLAGS.L, x_train_files, index)
                         train_x_arr = read_file(FLAGS.X, x_train_files, index)
 
                         train_true_l.append(train_l_arr)
@@ -460,28 +416,28 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(train_true_l[0])
-                    gt_class_1, gt_location_1, gt_positives_1, gt_negatives_1 = generate_groundtruth_data(train_true_l[1])
-                    gt_class_2, gt_location_2, gt_positives_2, gt_negatives_2 = generate_groundtruth_data(train_true_l[2])
-                    gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(train_true_l[3])
+                    gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(train_true_l[0*int(FLAGS.batch_size/4):1*int(FLAGS.batch_size/4)])
+                    gt_class_1, gt_location_1, gt_positives_1, gt_negatives_1 = generate_groundtruth_data(train_true_l[1*int(FLAGS.batch_size/4):2*int(FLAGS.batch_size/4)])
+                    gt_class_2, gt_location_2, gt_positives_2, gt_negatives_2 = generate_groundtruth_data(train_true_l[2*int(FLAGS.batch_size/4):3*int(FLAGS.batch_size/4)])
+                    gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(train_true_l[3*int(FLAGS.batch_size/4):4*int(FLAGS.batch_size/4)])
 
                     _,  train_losses = sess.run( [optimizers, loss_list_0], feed_dict={
-                        X_0: train_true_x[0],
+                        X_0: train_true_x[0*int(FLAGS.batch_size/4):1*int(FLAGS.batch_size/4)],
                         GT_class_0: gt_class_0,
                         GT_location_0: gt_location_0,
                         GT_positives_0: gt_positives_0,
                         GT_negatives_0: gt_negatives_0,
-                        X_1: train_true_x[1],
+                        X_1: train_true_x[1*int(FLAGS.batch_size/4):2*int(FLAGS.batch_size/4)],
                         GT_class_1: gt_class_1,
                         GT_location_1: gt_location_1,
                         GT_positives_1: gt_positives_1,
                         GT_negatives_1: gt_negatives_1,
-                        X_2: train_true_x[2],
+                        X_2: train_true_x[2*int(FLAGS.batch_size/4):3*int(FLAGS.batch_size/4)],
                         GT_class_2: gt_class_2,
                         GT_location_2: gt_location_2,
                         GT_positives_2: gt_positives_2,
                         GT_negatives_2: gt_negatives_2,
-                        X_3: train_true_x[3],
+                        X_3: train_true_x[3*int(FLAGS.batch_size/4):4*int(FLAGS.batch_size/4)],
                         GT_class_3: gt_class_3,
                         GT_location_3: gt_location_3,
                         GT_positives_3: gt_positives_3,
@@ -493,76 +449,86 @@ def train():
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
-                    # if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
-                    #         FLAGS.epoch_steps * FLAGS.epoch / 4):
-                    #     logging.info('-----------Train summary start-------------')
-                    #     train_summary_op = sess.run(
-                    #         summary_op,
-                    #         feed_dict={loss_list_summary: mean_list(train_loss_list)})
-                    #     train_writer.add_summary(train_summary_op, step)
-                    #     train_writer.flush()
-                    #     train_loss_list = []
-                    #     logging.info('-----------Train summary end-------------')
-                    #
-                    #     save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                    #     logging.info("Model saved in file: %s" % save_path)
-                    #
-                    #     logging.info(
-                    #         "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    #     val_loss_list = []
-                    #     val_index = 0
-                    #
-                    #     x_val_files = read_filename(FLAGS.X_test)
-                    #     for j in range(int(math.ceil(len(x_val_files) / FLAGS.batch_size))):
-                    #         val_true_l = []
-                    #         val_true_x = []
-                    #         for b in range(FLAGS.batch_size):
-                    #             val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index,inpu_form=".jpeg",out_form=".tiff")
-                    #             val_x_arr = read_file(FLAGS.X_test, x_val_files, val_index)
-                    #             logging.info(x_val_files[val_index%len(x_val_files)])
-                    #
-                    #             val_true_l.append(val_l_arr)
-                    #             val_true_x.append(val_x_arr)
-                    #             val_index += 1
-                    #
-                    #         val_losses_0, \
-                    #         val_losses_1, \
-                    #         val_losses_2, \
-                    #         val_losses_3 = sess.run(
-                    #             [loss_list_0,
-                    #              loss_list_1,
-                    #              loss_list_2,
-                    #              loss_list_3,],
-                    #             feed_dict={
-                    #                 l_0: np.asarray(val_true_l)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                    #                 x_0: np.asarray(val_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                    #
-                    #                 l_1: np.asarray(val_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                    #                 x_1: np.asarray(val_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                    #
-                    #                 l_2: np.asarray(val_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                    #                 x_2: np.asarray(val_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                    #
-                    #                 l_3: np.asarray(val_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                    #                 x_3: np.asarray(val_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                    #             })
-                    #         val_loss_list.append(val_losses_0)
-                    #         val_loss_list.append(val_losses_1)
-                    #         val_loss_list.append(val_losses_2)
-                    #         val_loss_list.append(val_losses_3)
-                    #         logging.info("TRUETH"+ str(val_losses_0[2]) +"PRED:"+ str(val_losses_0[3]))
-                    #         logging.info("TRUETH"+ str(val_losses_1[2]) +"PRED:"+ str(val_losses_1[3]))
-                    #         logging.info("TRUETH"+ str(val_losses_2[2]) +"PRED:"+ str(val_losses_2[3]))
-                    #         logging.info("TRUETH"+ str(val_losses_3[2]) +"PRED:"+ str(val_losses_3[3]))
-                    #
-                    #     val_summary_op = sess.run(
-                    #         summary_op,
-                    #         feed_dict={loss_list_summary: mean_list(val_loss_list)})
-                    #     val_writer.add_summary(val_summary_op, step)
-                    #     val_writer.flush()
-                    #
-                    #     logging.info(
-                    #         "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
+                            FLAGS.epoch_steps * FLAGS.epoch / 4):
+                        logging.info('-----------Train summary start-------------')
+                        train_summary_op = sess.run(
+                            summary_op,
+                            feed_dict={loss_list_summary: mean_list(train_loss_list)})
+                        train_writer.add_summary(train_summary_op, step)
+                        train_writer.flush()
+                        train_loss_list = []
+                        logging.info('-----------Train summary end-------------')
+
+                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+                        logging.info("Model saved in file: %s" % save_path)
+
+                        logging.info(
+                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
+                        val_loss_list = []
+                        val_index = 0
+
+                        x_val_files = read_filename(FLAGS.X_test)
+                        for j in range(int(math.ceil(len(x_val_files) / FLAGS.batch_size))):
+                            val_true_l = []
+                            val_true_x = []
+                            for b in range(FLAGS.batch_size):
+                                val_l_arr = read_txt_file(FLAGS.L_test, x_val_files, val_index)
+                                val_x_arr = read_file(FLAGS.X_test, x_val_files, val_index)
+                                logging.info(x_val_files[val_index%len(x_val_files)])
+
+                                val_true_l.append(val_l_arr)
+                                val_true_x.append(val_x_arr)
+                                val_index += 1
+
+                            gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(
+                                val_true_l[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)])
+                            gt_class_1, gt_location_1, gt_positives_1, gt_negatives_1 = generate_groundtruth_data(
+                                val_true_l[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4)])
+                            gt_class_2, gt_location_2, gt_positives_2, gt_negatives_2 = generate_groundtruth_data(
+                                val_true_l[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4)])
+                            gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(
+                                val_true_l[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)])
+
+                            val_losses_0, \
+                            val_losses_1, \
+                            val_losses_2, \
+                            val_losses_3 = sess.run([loss_list_0,loss_list_1,loss_list_2,loss_list_3], feed_dict={
+                                X_0: val_true_x[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)],
+                                GT_class_0: gt_class_0,
+                                GT_location_0: gt_location_0,
+                                GT_positives_0: gt_positives_0,
+                                GT_negatives_0: gt_negatives_0,
+                                X_1: val_true_x[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4)],
+                                GT_class_1: gt_class_1,
+                                GT_location_1: gt_location_1,
+                                GT_positives_1: gt_positives_1,
+                                GT_negatives_1: gt_negatives_1,
+                                X_2: val_true_x[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4)],
+                                GT_class_2: gt_class_2,
+                                GT_location_2: gt_location_2,
+                                GT_positives_2: gt_positives_2,
+                                GT_negatives_2: gt_negatives_2,
+                                X_3: val_true_x[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)],
+                                GT_class_3: gt_class_3,
+                                GT_location_3: gt_location_3,
+                                GT_positives_3: gt_positives_3,
+                                GT_negatives_3: gt_negatives_3
+                            })
+
+                            val_loss_list.append(val_losses_0)
+                            val_loss_list.append(val_losses_1)
+                            val_loss_list.append(val_losses_2)
+                            val_loss_list.append(val_losses_3)
+
+                        val_summary_op = sess.run(
+                            summary_op,
+                            feed_dict={loss_list_summary: mean_list(val_loss_list)})
+                        val_writer.add_summary(val_summary_op, step)
+                        val_writer.flush()
+
+                        logging.info(
+                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                     step += 1
             except KeyboardInterrupt:
                 logging.info('Interrupted')

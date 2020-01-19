@@ -24,7 +24,7 @@ class GAN:
         self.LESP = Detector('LESP', ngf=ngf, keep_prob=0.99)
 
     def model(self,input,groundtruth_class,groundtruth_location,groundtruth_positives,groundtruth_negatives):
-        feature_class,feature_location,all_default_boxs,all_default_boxs_len = self.LESP(input)
+        feature_class,feature_location,feature_maps_shape = self.LESP(input)
 
         # 损失函数
         self.groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
@@ -39,7 +39,7 @@ class GAN:
             tf.reduce_sum(self.groundtruth_count, reduction_indices=1))
         self.loss_all = tf.reduce_sum(tf.add(self.loss_class, self.loss_location))
 
-        return  [self.loss_all],feature_class,feature_location
+        return  [self.loss_all]
 
     def get_variables(self):
         return self.LESP.variables
