@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 from detector import Detector
-
+import numpy as np
 
 class GAN:
     def __init__(self,
@@ -23,8 +23,25 @@ class GAN:
 
         self.LESP = Detector('LESP', ngf=ngf, keep_prob=0.99)
 
+    def pred(self,classes_size,feature_class,background_classes_val,all_default_boxs_len):
+        # softmax归一化预测结果
+        feature_class_softmax = tf.nn.softmax(logits=feature_class, dim=-1)
+        # 过滤background的预测值
+        background_filter = np.ones(classes_size, dtype=np.float32)
+        background_filter[background_classes_val] = 0
+        background_filter = tf.constant(background_filter)
+        feature_class_softmax = tf.multiply(feature_class_softmax, background_filter)
+        # 计算每个box的最大预测值
+        feature_class_softmax = tf.reduce_max(feature_class_softmax, 2)
+        # 过滤冗余的预测结果
+        box_top_set = tf.nn.top_k(feature_class_softmax, int(all_default_boxs_len / 20))
+        box_top_index = box_top_set.indices
+        box_top_value = box_top_set.values
+        return feature_class_softmax, box_top_index, box_top_value
+
+
     def model(self,input,groundtruth_class,groundtruth_location,groundtruth_positives,groundtruth_negatives):
-        feature_class,feature_location,feature_maps_shape = self.LESP(input)
+        feature_class,feature_location = self.LESP(input)
 
         # 损失函数
         self.groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
@@ -39,7 +56,7 @@ class GAN:
             tf.reduce_sum(self.groundtruth_count, reduction_indices=1))
         self.loss_all = tf.reduce_sum(tf.add(self.loss_class, self.loss_location))
 
-        return  [self.loss_all]
+        return  [self.loss_all],feature_class,feature_location
 
     def get_variables(self):
         return self.LESP.variables

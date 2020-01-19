@@ -163,9 +163,9 @@ def generate_all_default_boxs():
         return all_default_boxes
 
  # 整理生成groundtruth数据
+all_default_boxs = generate_all_default_boxs()
+all_default_boxs_len = len(all_default_boxs)
 def generate_groundtruth_data(input_actual_data):
-    all_default_boxs = generate_all_default_boxs()
-    all_default_boxs_len = len(all_default_boxs)
     # 生成空数组，用于保存groundtruth
     input_actual_data_len = len(input_actual_data)
     gt_class = np.zeros((input_actual_data_len, all_default_boxs_len))
@@ -289,7 +289,11 @@ def train():
                     GT_negatives_0 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                                 dtype=tf.float32,
                                                                 name='groundtruth_negatives')
-                    loss_list_0 = gan.model(X_0, GT_class_0, GT_location_0, GT_positives_0, GT_negatives_0)
+                    loss_list_0, feature_class_0, feature_location_0 = gan.model(X_0, GT_class_0, GT_location_0,
+                                                                                 GT_positives_0, GT_negatives_0)
+                    feature_class_softmax_0, box_top_index_0, box_top_value_0 = gan.pred(classes_size, feature_class_0,
+                                                                                         background_classes_val,
+                                                                                         all_default_boxs_len)
                     tensor_name_dirct_0 = gan.tenaor_name
                     variables_list_0 = gan.get_variables()
                     D_grad_0 = D_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0)
@@ -309,8 +313,12 @@ def train():
                     GT_negatives_1 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                     dtype=tf.float32,
                                                     name='groundtruth_negatives')
-                    loss_list_1 = gan.model(X_1, GT_class_1, GT_location_1, GT_positives_1, GT_negatives_1)
-                    tensor_name_dirct_1 = gan.tenaor_name
+                    loss_list_1, feature_class_1, feature_location_1 = gan.model(X_1, GT_class_1, GT_location_1,
+                                                                                 GT_positives_1, GT_negatives_1)
+                    # feature_class_softmax_1, box_top_index_1, box_top_value_1 = gan.pred(classes_size, feature_class_1,
+                    #                                                                      background_classes_val,
+                    #                                                                      all_default_boxs_len)
+                    # tensor_name_dirct_1 = gan.tenaor_name
                     variables_list_1 = gan.get_variables()
                     D_grad_1 = D_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1)
                     D_grad_list.append(D_grad_1)
@@ -329,8 +337,12 @@ def train():
                     GT_negatives_2 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                     dtype=tf.float32,
                                                     name='groundtruth_negatives')
-                    loss_list_2  = gan.model(X_2, GT_class_2, GT_location_2, GT_positives_2, GT_negatives_2)
-                    tensor_name_dirct_2 = gan.tenaor_name
+                    loss_list_2, feature_class_2, feature_location_2 = gan.model(X_2, GT_class_2, GT_location_2,
+                                                                                 GT_positives_2, GT_negatives_2)
+                    # feature_class_softmax_2, box_top_index_2, box_top_value_2 = gan.pred(classes_size, feature_class_2,
+                    #                                                                      background_classes_val,
+                    #                                                                      all_default_boxs_len)
+                    # tensor_name_dirct_2 = gan.tenaor_name
                     variables_list_2 = gan.get_variables()
                     D_grad_2 = D_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2)
                     D_grad_list.append(D_grad_2)
@@ -349,8 +361,12 @@ def train():
                     GT_negatives_3 = tf.placeholder(shape=[None, gan.LESP.all_default_boxs_len],
                                                     dtype=tf.float32,
                                                     name='groundtruth_negatives')
-                    loss_list_3  = gan.model(X_3, GT_class_3, GT_location_3, GT_positives_3, GT_negatives_3)
-                    tensor_name_dirct_3 = gan.tenaor_name
+                    loss_list_3, feature_class_3, feature_location_3 = gan.model(X_3, GT_class_3, GT_location_3,
+                                                                                 GT_positives_3, GT_negatives_3)
+                    # feature_class_softmax_3, box_top_index_3, box_top_value_3 = gan.pred(classes_size, feature_class_3,
+                    #                                                                      background_classes_val,
+                    #                                                                      all_default_boxs_len)
+                    # tensor_name_dirct_3 = gan.tenaor_name
                     variables_list_3 = gan.get_variables()
                     D_grad_3 = D_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3)
                     D_grad_list.append(D_grad_3)
@@ -520,6 +536,49 @@ def train():
                             val_loss_list.append(val_losses_1)
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
+
+                            f_class, f_location, f_class_softmax, box_top_index, box_top_value = sess.run(
+                                [feature_class_0, feature_location_0, feature_class_softmax_0, box_top_index_0, box_top_value_0],
+                                feed_dict={X_0: val_true_x[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)]}
+                            )
+                            top_shape = np.shape(box_top_index)
+                            pred_class = []
+                            pred_class_val = []
+                            pred_location = []
+                            for i in range(top_shape[0]):
+                                item_img_class = []
+                                item_img_class_val = []
+                                item_img_location = []
+                                for j in range(top_shape[1]):
+                                    p_class_val = f_class_softmax[i][box_top_index[i][j]]
+                                    if p_class_val < 0.5:
+                                        continue
+                                    p_class = np.argmax(f_class[i][box_top_index[i][j]])
+                                    if p_class == background_classes_val:
+                                        continue
+                                    p_location = f_location[i][box_top_index[i][j]]
+                                    if p_location[0] < 0 or p_location[1] < 0 or p_location[2] < 0 or p_location[
+                                        3] < 0 or p_location[
+                                        2] == 0 or p_location[3] == 0:
+                                        continue
+                                    is_box_filter = False
+                                    for f_index in range(len(item_img_class)):
+                                        if jaccard(p_location, item_img_location[f_index]) > 0.3 and p_class == \
+                                                item_img_class[
+                                                    f_index]:
+                                            is_box_filter = True
+                                            break
+                                    if is_box_filter == False:
+                                        item_img_class.append(p_class)
+                                        item_img_class_val.append(p_class_val)
+                                        item_img_location.append(p_location)
+                                pred_class.append(item_img_class)
+                                pred_class_val.append(item_img_class_val)
+                                pred_location.append(item_img_location)
+                            print('pred_class:' + str(pred_class))
+                            print('pred_class_val:' + str(pred_class_val))
+                            print('pred_location:' + str(pred_location))
+                            print('Labels:'+ str(val_true_l[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)]))
 
                         val_summary_op = sess.run(
                             summary_op,
