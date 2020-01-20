@@ -204,4 +204,4 @@ class Detector:
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
 
-        return self.feature_class,self.feature_location,self.feature_maps_shape
+        return self.feature_class,self.feature_location
