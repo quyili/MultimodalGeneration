@@ -26,17 +26,17 @@ class GAN:
         self.ones = tf.ones(self.input_shape, name="ones")
         self.tenaor_name = {}
 
-        self.EC_F = GEncoder('EC_F', ngf=ngf,units=units)
+        self.EC_F = GEncoder('EC_F', ngf=ngf,units=units,keep_prob=0.98)
         self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2,units=units)
 
-        self.D_F = Discriminator('D_F', ngf=ngf)
+        self.D_F = Discriminator('D_F', ngf=ngf,keep_prob=0.95)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
     def model(self, f):
         # F -> F_R VAE
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
 
-        code_f_mean, code_f_logvar = self.EC_F(f_one_hot)
+        code_f_mean, code_f_logvar = self.EC_F(f/10.0+0.9)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
@@ -59,22 +59,22 @@ class GAN:
         D_loss = 0.0
         FG_loss = 0.0
         # 使得结构特征图编码服从正态分布的对抗性损失
-        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 0.01
-        D_loss += self.mse_loss(j_code_f, 0.0) * 0.01
+        D_loss += self.mse_loss(j_code_f_rm, 1.0) * 5
+        D_loss += self.mse_loss(j_code_f, 0.0) * 5
         FG_loss += self.mse_loss(j_code_f, 1.0) * 0.01
 
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.008
-        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.008
+        FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.001
+        FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.001
 
         # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_f, 1.0) * 0.01
-        D_loss += self.mse_loss(j_f_rm, 0.0) * 0.01
-        FG_loss += self.mse_loss(j_f_rm, 1.0) * 0.5
+        D_loss += self.mse_loss(j_f, 1.0) * 5
+        D_loss += self.mse_loss(j_f_rm, 0.0) * 5
+        FG_loss += self.mse_loss(j_f_rm, 1.0) *0.05
 
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
-        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 20
+        FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 55
 
-        FG_loss += tf.reduce_mean(tf.abs(f_one_hot-f_r_prob)) * 10
+        FG_loss += tf.reduce_mean(tf.abs(f_one_hot-f_r_prob)) * 15
         FG_loss +=(tf.reduce_mean( f_r_prob[:,:,:,0])-tf.reduce_mean( f_r_prob[:,:,:,1]))*0.002
         FG_loss +=(tf.reduce_mean( f_rm_prob[:,:,:,0])-tf.reduce_mean( f_rm_prob[:,:,:,1]))*0.002
 
