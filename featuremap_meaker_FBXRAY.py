@@ -43,10 +43,10 @@ with graph.as_default():
     mask_x = get_mask(x, p=2, beta=0.0)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    SAVE_F="D:/BaiduYunDownload/chest_xray/val/NORMAL_F"
-    SAVE_M = "D:/BaiduYunDownload/chest_xray/val/NORMAL_M"
+    SAVE_F="E:/project/MultimodalGeneration/data/chest_xray/train/NORMAL_F"
+    SAVE_M = "E:/project/MultimodalGeneration/data/chest_xray/train/NORMAL_M"
     NUM="NORMAL2-IM-0373-0001"
-    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("D:/BaiduYunDownload/chest_xray/val/NORMAL/"+NUM+".jpeg")).astype(
+    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage("E:/project/MultimodalGeneration/data/chest_xray/train/NM_X/"+NUM+".jpeg")).astype(
         'float32')
     input_x = transform.resize(np.asarray(input_x), [1500, 1500]).reshape([1500,1500,1])
     fx_, mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x])})

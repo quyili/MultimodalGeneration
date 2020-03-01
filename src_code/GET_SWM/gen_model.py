@@ -1,8 +1,8 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 from discriminator import Discriminator
-from encoder import Encoder
-from decoder import Decoder
+from  encoder import Encoder
+from  decoder import Decoder
 
 
 class GAN:
@@ -25,17 +25,20 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.EC_R = Encoder('EC_R', ngf=ngf, keep_prob=0.95)
-        self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=3, keep_prob=0.9)
+        self.EC_R = Encoder('EC_R', ngf=ngf, keep_prob=0.98)
+        self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=3, keep_prob=0.97)
 
-        self.D_M = Discriminator('D_M',ngf=ngf, keep_prob=0.8)
+        self.D_M = Discriminator('D_M',ngf=ngf, keep_prob=0.9)
 
     def model(self, f,mask,x):
         self.tenaor_name["f"] = str(f)
         self.tenaor_name["mask"] = str(mask)
         self.tenaor_name["x"] = str(x)
 
-        code_rm = self.EC_R(f)
+        new_f=f+tf.random_uniform([self.input_shape[0],self.input_shape[1],
+                                                    self.input_shape[2],1], minval=0.5,maxval=0.6,
+                                                   dtype=tf.float32)*(1.0-mask)*(1.0-f)
+        code_rm = self.EC_R(new_f)
         x_g = self.DC_M(code_rm)
         self.tenaor_name["x_g"] = str(x_g)
 
@@ -44,25 +47,26 @@ class GAN:
 
         D_loss = 0.0
         G_loss = 0.0
-        L_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_x, 1.0) * 2
         D_loss += self.mse_loss(j_x_g, 0.0) * 2
-        G_loss += self.mse_loss(j_x_g, 1.0) * 10
+        G_loss += self.mse_loss(j_x_g, 1.0) * 2
 
-        # 限制像素生成范围为脑主体掩膜的范围的监督损失
-        G_loss += self.mse_loss(0.0, x_g * mask) * 0.1
+        G_loss += self.mse_loss(x_g, x) * 5
+        G_loss += self.mse_loss(x_g*mask, 0) * 0.001
 
-        self.image_list["mask"] = mask
-        self.image_list["f"] = f
-        self.image_list["x"] = x
-        self.image_list["x_g"] = x_g
+        image_list={}
+        image_list["mask"] = mask
+        image_list["f"] = f
+        image_list["new_f"] =new_f
+        image_list["x"] = x
+        image_list["x_g"] = x_g
         self.judge_list["j_x_g"]= j_x_g
         self.judge_list["j_x"] = j_x
 
         loss_list = [G_loss, D_loss]
 
-        return loss_list
+        return loss_list,image_list
 
     def get_variables(self):
         return [self.EC_R.variables

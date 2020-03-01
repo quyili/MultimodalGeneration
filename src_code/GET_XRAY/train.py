@@ -19,24 +19,24 @@ tf.flags.DEFINE_float('learning_rate', 2e-5, 'initial learning rate for Adam, de
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/X', 'X files for training')
 tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/L', 'Y files for training')
-tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/F', 'Y files for training')
+tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/NEW_F', 'Y files for training')
 tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/M', 'Y files for training')
 tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/X', 'X files for training')
 tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/L', 'Y files for training')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/F', 'Y files for training')
+tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/NEW_F', 'Y files for training')
 tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/M', 'Y files for training')
 
-tf.flags.DEFINE_string('load_model', None,
+tf.flags.DEFINE_string('load_model',None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 500, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 1000, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 1341, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
-tf.flags.DEFINE_string('load_lp_model','20200112-1859','folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_string('load_lp_model',None,'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 
 
 def mean(list):
@@ -56,14 +56,18 @@ def random(n, h, w, c):
 
 
 def mynorm(input):
-    output = (input - np.min(input)
-              ) / (np.max(input) - np.min(input))
+    if (np.max(input) - np.min(input))!=0:
+        output = (input - np.min(input)
+                  ) / (np.max(input) - np.min(input))
+    else:
+        # print("单值图：",np.max(input))
+        output = (input-input) #+1.0
     return output
 
 
 def save_images(image_dirct, checkpoints_dir, file_index=""):
     for key in image_dirct:
-        save_image(np.asarray(image_dirct[key])[0, :, :, 0], key + "_" + file_index,
+        save_image(np.asarray(image_dirct[key])[0, :, :, :], key + "_" + file_index,
                    dir=checkpoints_dir + "/samples", form=".tiff")
 
 
@@ -72,7 +76,10 @@ def save_image(image, name, dir="./samples", form=".tiff"):
         os.makedirs(dir)
     except os.error:
         pass
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
+    if image.shape[2]==1:
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image[:,:,0]), dir + "/" + name + form)
+    else:
+         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + ".mha")
 
 
 def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=True):
@@ -160,8 +167,8 @@ def train():
                     f_0 = tf.placeholder(tf.float32, shape=input_shape)
                     m_0 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_0 = gan.model(l_0, f_0, m_0, x_0)
-                    image_list_0, j_list_0 = gan.image_list, gan.judge_list
+                    loss_list_0,image_list_0= gan.model(l_0, f_0, m_0, x_0)
+                    j_list_0 =  gan.judge_list
                     tensor_name_dirct_0 = gan.tenaor_name
                     variables_list_0 = gan.get_variables()
                     G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
@@ -175,9 +182,7 @@ def train():
                     f_1 = tf.placeholder(tf.float32, shape=input_shape)
                     m_1 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_1 = gan.model(l_1, f_1, m_1, x_1)
-                    image_list_1,  j_list_1 = gan.image_list, gan.judge_list
-                    tensor_name_dirct_1 = gan.tenaor_name
+                    loss_list_1, image_list_1= gan.model(l_1, f_1, m_1, x_1)
                     variables_list_1 = gan.get_variables()
                     G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                     D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -190,9 +195,7 @@ def train():
                     f_2 = tf.placeholder(tf.float32, shape=input_shape)
                     m_2 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_2 = gan.model(l_2, f_2, m_2, x_2)
-                    image_list_2, j_list_2 = gan.image_list, gan.judge_list
-                    tensor_name_dirct_2 = gan.tenaor_name
+                    loss_list_2,image_list_2 = gan.model(l_2, f_2, m_2, x_2)
                     variables_list_2 = gan.get_variables()
                     G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                     D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
@@ -205,9 +208,7 @@ def train():
                     f_3 = tf.placeholder(tf.float32, shape=input_shape)
                     m_3 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_3 = gan.model(l_3, f_3, m_3, x_3)
-                    image_list_3,j_list_3 = gan.image_list, gan.judge_list
-                    tensor_name_dirct_3 = gan.tenaor_name
+                    loss_list_3,image_list_3 = gan.model(l_3, f_3, m_3, x_3)
                     variables_list_3 = gan.get_variables()
                     G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                     D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -231,7 +232,7 @@ def train():
         saver = tf.train.Saver()
         variables_list = gan.get_variables()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
 
             sess.run(tf.global_variables_initializer())
             if FLAGS.load_model is not None:
@@ -268,7 +269,7 @@ def train():
             try:
                 logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
                 f_train_files = read_filename(FLAGS.F)
-                x_train_files = read_filename(FLAGS.X)
+                #x_train_files = read_filename(FLAGS.X)
                 index = 0
                 epoch = 0
                 train_loss_list = []
@@ -281,8 +282,8 @@ def train():
                     for b in range(FLAGS.batch_size):
                         train_m_arr = read_file(FLAGS.M, f_train_files, index,inpu_form=".jpeg",out_form=".tiff")
                         train_f_arr = read_file(FLAGS.F, f_train_files, index,inpu_form=".jpeg",out_form=".tiff")
-                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff",norm=False)
-                        train_x_arr = read_file(FLAGS.X, x_train_files, index)
+                        train_l_arr = read_file(FLAGS.L, f_train_files, index,inpu_form=".jpeg",out_form=".tiff",norm=False)
+                        train_x_arr = read_file(FLAGS.X, f_train_files, index,inpu_form=".tiff",out_form=".jpeg")
 
                         train_true_l.append(train_l_arr)
                         train_true_f.append(train_f_arr)
@@ -342,7 +343,7 @@ def train():
                         val_index = 0
 
                         f_val_files = read_filename(FLAGS.F_test)
-                        x_val_files = read_filename(FLAGS.X_test)
+                        #x_val_files = read_filename(FLAGS.X_test)
                         for j in range(int(math.ceil(len(f_val_files) / FLAGS.batch_size))):
                             val_true_l = []
                             val_true_f = []
@@ -351,8 +352,8 @@ def train():
                             for b in range(FLAGS.batch_size):
                                 val_m_arr = read_file(FLAGS.M_test, f_val_files,val_index,inpu_form=".jpeg",out_form=".tiff")
                                 val_f_arr = read_file(FLAGS.F_test, f_val_files, val_index,inpu_form=".jpeg",out_form=".tiff")
-                                val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index,inpu_form=".jpeg",out_form=".tiff",norm=False)
-                                val_x_arr = read_file(FLAGS.X_test, x_val_files, val_index)
+                                val_l_arr = read_file(FLAGS.L_test, f_val_files, val_index,inpu_form=".jpeg",out_form=".tiff",norm=False)
+                                val_x_arr = read_file(FLAGS.X_test, f_val_files, val_index,inpu_form=".tiff",out_form=".jpeg")
 
                                 val_true_l.append(val_l_arr)
                                 val_true_f.append(val_f_arr)
@@ -396,11 +397,11 @@ def train():
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
 
-                            if j == 0:
-                                save_images(val_image_list_0, checkpoints_dir, str(0))
-                                save_images(val_image_list_1, checkpoints_dir, str(1))
-                                save_images(val_image_list_2, checkpoints_dir, str(2))
-                                save_images(val_image_list_3, checkpoints_dir, str(3))
+                            if j%1 == 0:
+                                save_images(val_image_list_0, checkpoints_dir, str(j) + "_0")
+                                save_images(val_image_list_1, checkpoints_dir, str(j) + "_1")
+                                save_images(val_image_list_2, checkpoints_dir, str(j) + "_2")
+                                save_images(val_image_list_3, checkpoints_dir, str(j) + "_3")
 
                         val_summary_op = sess.run(
                             summary_op,

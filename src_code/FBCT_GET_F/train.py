@@ -18,15 +18,15 @@ tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 # tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/M', 'X files for training')
-tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/F', 'X files for training')
+tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/NEW_F', 'X files for training')
 # tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/test/M', 'X files for training')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/test/F', 'X files for training')
-tf.flags.DEFINE_string('load_model', None,
+tf.flags.DEFINE_string('load_model',None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 500, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 4000, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 259, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
@@ -150,9 +150,9 @@ def train():
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
                     with tf.name_scope("GPU_0"):
-                        # m_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_0 = tf.placeholder(tf.float32, shape=input_shape)
                         F_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(F_0)
+                        image_list_0, code_list_0, j_list_0, loss_list_0 = gan.model(F_0,m_0)
                         tensor_name_dirct_0 = gan.tenaor_name
                         evaluation_list_0 = gan.evaluation(image_list_0)
                         evaluation_code_list_0 = gan.evaluation_code(code_list_0)
@@ -165,9 +165,9 @@ def train():
                         D_grad_list.append(D_grad_0)
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
-                        # m_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_1 = tf.placeholder(tf.float32, shape=input_shape)
                         F_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(F_1)
+                        image_list_1, code_list_1, j_list_1, loss_list_1 = gan.model(F_1,m_1)
                         tensor_name_dirct_1 = gan.tenaor_name
                         evaluation_list_1 = gan.evaluation(image_list_1)
                         evaluation_code_list_1 = gan.evaluation_code(code_list_1)
@@ -180,9 +180,9 @@ def train():
                         D_grad_list.append(D_grad_1)
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
-                        # m_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_2 = tf.placeholder(tf.float32, shape=input_shape)
                         F_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(F_2)
+                        image_list_2, code_list_2, j_list_2, loss_list_2 = gan.model(F_2,m_2)
                         tensor_name_dirct_2 = gan.tenaor_name
                         evaluation_list_2 = gan.evaluation(image_list_2)
                         evaluation_code_list_2 = gan.evaluation_code(code_list_2)
@@ -195,9 +195,9 @@ def train():
                         D_grad_list.append(D_grad_2)
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
-                        # m_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_3 = tf.placeholder(tf.float32, shape=input_shape)
                         F_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(F_3)
+                        image_list_3, code_list_3, j_list_3, loss_list_3 = gan.model(F_3,m_3)
                         tensor_name_dirct_3 = gan.tenaor_name
                         evaluation_list_3 = gan.evaluation(image_list_3)
                         evaluation_code_list_3 = gan.evaluation_code(code_list_3)
@@ -235,7 +235,7 @@ def train():
             val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
             saver = tf.train.Saver()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
             if FLAGS.load_model is not None:
                 logging.info("restore model:" + FLAGS.load_model)
                 if FLAGS.checkpoint is not None:
@@ -384,11 +384,9 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if j == 0:
-                                save_images(val_image_list_0, checkpoints_dir, str(0))
-                                save_images(val_image_list_1, checkpoints_dir, str(1))
-                                save_images(val_image_list_2, checkpoints_dir, str(2))
-                                save_images(val_image_list_3, checkpoints_dir, str(3))
+                            if j %2== 0:
+                                save_images(val_image_list_0, checkpoints_dir, str(j))
+
 
                         val_summary_op = sess.run(
                             summary_op,

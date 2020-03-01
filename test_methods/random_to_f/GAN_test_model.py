@@ -1,6 +1,6 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from discriminator import Discriminator
+from detect_discriminator import Discriminator
 from feature_discriminator import FeatureDiscriminator
 from GAN_test_encoder import GEncoder
 from GAN_test_decoder import GDecoder

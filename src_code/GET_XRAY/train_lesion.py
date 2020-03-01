@@ -15,18 +15,18 @@ tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 2e-4')
+tf.flags.DEFINE_float('learning_rate', 2e-7, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/X', 'X files for training')
 tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/train/L', 'Y files for training')
 tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/X', 'X files for training')
 tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/chest_xray/test/L', 'Y files for training')
-tf.flags.DEFINE_string('load_model', None,
+tf.flags.DEFINE_string('load_model', '20200117-0352',
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 300, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 90, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 5224, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
@@ -63,7 +63,6 @@ def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_f
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
     elif  L_arr.shape[2]==3:
         img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
-
     if out_size== None:
         img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
         img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
@@ -175,7 +174,7 @@ def train():
         val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
         saver = tf.train.Saver()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
 
             sess.run(tf.global_variables_initializer())
             if FLAGS.load_model is not None:

@@ -1,6 +1,6 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from discriminator import Discriminator
+from detect_discriminator import Discriminator
 from encoder import Encoder
 from decoder import Decoder
 
