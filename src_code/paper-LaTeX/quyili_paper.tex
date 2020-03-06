@@ -351,8 +351,8 @@ GANÖ±½Ó´ÓËæ»úÔëÉùÖÐÉú³ÉµÄÒ½Ñ§Í¼ÏñºÜÄÑÉú³ÉÏÖÊµµÄ½á¹¹ÐÅÏ¢¡£ÎÒÃÇ½«Ìá¹©»ù±¾ÂÖÀªºÍ½á¹
 	\State $s = ones \times ((s1 + s2)> 0)$
 	\State $s = gaussian\_blur(s,sigma2)$
 	\State $s = ones \times ((s1 + s2)> beta)$
-	\State $s = s \times (x > gama)$
 	\State $s = medfilt(s)$
+	\State $s = s \times (x > gama)$
 	\end{algorithmic}  
 \end{algorithm}
 ÔÚËã·¨~\ref {alg:1}ÖÐ£¬ÎÒÃÇÊ¹ÓÃSobel¼ì²âËã×Ó$sobel()$´ÓÕæÊµÍ¼ÏñÖÐÌáÈ¡Ë®Æ½ºÍ´¹Ö±±ßÔµ¼ì²âÍ¼¡£Ã¿¸ö±ßÔµ¼ì²âÍ¼Ö´ÐÐ×î´ó¹æÔ¼$reduce\_min()$ºÍ×îÐ¡¹æÔ¼$reduce\_min()$ÒÔ»ñµÃÁ½¸öÈÚºÏË®Æ½´¹Ö±±ßÔµ¼ì²âÍ¼µÄ½á¹ûÍ¼£¬¶ÔÁ½ÕÅÍ¼½øÐÐ$3\times3$µÄ¸ßË¹Ä£ºý$gaussian\_blur()$¿ÉÒÔ¶ÔÏßÌõÂÖÀª¼Ó´Ö£¬È»ºóÃ¿¸öÈÚºÏÍ¼¼ÆËãÓëÍ¨¹ý¾ùÖµº¯Êý$mean()$¼ÆËã³öµÄÆ½¾ùÏñËØÖµµÄ²î¿ÉÒÔÈ¥µô´ó²¿·Ö±³¾°ÏñËØÖ»±£Áô×îÍ»³öµÄÏßÌõÂÖÀª¡£¸ù¾ÝÏñËØãÐÖµ¶ÔÁ½¸ö²îÒìÍ¼½øÐÐ¶þÖµ»¯£¬È»ºó¶ÔÁ½¸ö¶þ½øÖÆÍ¼ÏñÇóºÍ»ñµÃÍêÕûµÄÂÖÀªÏßÌõ£¬È»ºóÍêÈ«¶þÖµ»¯¡£ÔÙ½øÐÐÒ»´Î¸ßË¹Ä£ºý¿ÉÒÔ¶ÔÏßÌõ¼Ó´Ö²¢ÄÜÊ¹ÓÐ¶ÏµãµÄÏßÌõÏàÁ¬³ÉÕûÌå£¬×îºóºÍÔ­Ê¼Í¼µÄ¶þÖµ»¯ÑÚÄ¤Ïà³Ë¿ÉÒÔÍêÈ«È¥µô¶ÔÓ¦ÓÚÔ­Ê¼Í¼±³¾°ÇøÓòµÄÔëÉù£¬ÔÙÓÃ$3\times3$µÄÖÐÖµÂË²¨º¯Êý$medfilt()$È¥µôÊ£ÓàµÄ¹ÂÁ¢µÄÔëµã£¬¼´¿ÉµÃµ½ÎÒÃÇÐèÒªµÄ¸É¾»ÇåÎúÓÖÍêÕû¼ò½àµÄ½á¹¹ÌØÕ÷Í¼¡£

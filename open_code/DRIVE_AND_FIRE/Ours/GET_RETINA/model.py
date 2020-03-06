@@ -1,8 +1,7 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 from discriminator import Discriminator
-from encoder import Encoder
-from decoder import Decoder
+from unet import Unet
 
 
 class GAN:
@@ -25,80 +24,51 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
+        self.G_X = Unet('G_X', ngf=ngf,output_channl=3, keep_prob=0.97)
 
-        self.EC_R = Encoder('EC_R', ngf=ngf, keep_prob=0.98)
-        self.DC_M = Decoder('DC_M', ngf=ngf, keep_prob=0.98)
+        self.D_X = Discriminator('D_X',ngf=ngf, keep_prob=0.9)
 
-        self.D_M = Discriminator('D_M', ngf=ngf, keep_prob=0.9)
-
-
-    def model(self, l,f,mask,x):
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
-                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        new_f=(f+tf.random_uniform([self.input_shape[0],self.input_shape[1],
-                                                        self.input_shape[2],1], minval=0.5,maxval=0.6,
-                                                       dtype=tf.float32)*(1.0 - mask)*(1.0- f))
-        f_rm_expand = tf.concat([new_f,
-                                 label_expand*0.9+0.1],
-                                axis=-1)
-
-        code_rm = self.EC_R(f_rm_expand)
-        x_g = self.DC_M(code_rm)
-
-        l_g_prob = self.LESP(x_g)
-
-        j_x_g = self.D_M(x_g)
-        j_x = self.D_M(x)
-
-        D_loss = 0.0
-        G_loss = 0.0
-        L_loss = 0.0
-        # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_x, 1.0) * 2
-        D_loss += self.mse_loss(j_x_g, 0.0) * 2
-        G_loss += self.mse_loss(j_x_g, 1.0) * 1
-
-        G_loss += self.mse_loss(x_g, x) * 5
-        G_loss += self.mse_loss(x_g*mask, 0.0) * 0.001
-
-        # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        L_loss += self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]), 
-                                         tf.reduce_mean(l_g_prob  ,axis=[1,2])) * 0.001
-       
-        l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
-
-        L_acc=self.acc( l_r,l_g)
-
-        self.tenaor_name["l"] = str(l)
+    def model(self, f,mask,x):
         self.tenaor_name["f"] = str(f)
         self.tenaor_name["mask"] = str(mask)
         self.tenaor_name["x"] = str(x)
+
+        new_f=f+tf.random_uniform([self.input_shape[0],self.input_shape[1],
+                                                    self.input_shape[2],1], minval=0.5,maxval=0.6,
+                                                   dtype=tf.float32)*(1.0-mask)*(1.0-f)
+        x_g = self.G_X(new_f)
         self.tenaor_name["x_g"] = str(x_g)
-        self.tenaor_name["l_g"] = str(l_g)
+
+        j_x_g = self.D_X(x_g)
+        j_x = self.D_X(x)
+
+        D_loss = 0.0
+        G_loss = 0.0
+        # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
+        D_loss += self.mse_loss(j_x, 1.0) * 2
+        D_loss += self.mse_loss(j_x_g, 0.0) * 2
+        G_loss += self.mse_loss(j_x_g, 1.0) * 2
+
+        G_loss += self.mse_loss(x_g, x) * 5
+        G_loss += self.mse_loss(x_g*mask, 0) * 0.001
 
         image_list={}
         image_list["mask"] = mask
-        # image_list["f_rm_expand"] = f_rm_expand
         image_list["f"] = f
-        image_list["new_f"] = new_f
+        image_list["new_f"] =new_f
         image_list["x"] = x
         image_list["x_g"] = x_g
         self.judge_list["j_x_g"]= j_x_g
         self.judge_list["j_x"] = j_x
 
-        loss_list = [G_loss+L_loss, D_loss, L_loss, L_acc,G_loss]
+        loss_list = [G_loss, D_loss]
 
         return loss_list,image_list
 
     def get_variables(self):
-        return [self.EC_R.variables
-                + self.DC_M.variables
+        return [self.G_X.variables
             ,
-                self.D_M.variables
-            ,
-                self.LESP.variables]
+                self.D_X.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -117,16 +87,13 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_and_L_loss, D_loss,L_loss,L_acc,G_loss = loss_list[0], loss_list[1],loss_list[2],loss_list[3],loss_list[4]
-        tf.summary.scalar('loss/G_and_L_loss', G_and_L_loss)
-        tf.summary.scalar('loss/D_loss', D_loss)
-        tf.summary.scalar('loss/L_loss', L_loss)
-        tf.summary.scalar('loss/L_acc', L_acc)
+        G_loss, D_loss= loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
+        tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_dirct):
         for key in image_dirct:
-            tf.summary.image('image/' + key, image_dirct[key][:,:,:,0:1])
+            tf.summary.image('image/' + key, image_dirct[key])
 
     def acc(self,x,y):
          correct_prediction = tf.equal(x, y)

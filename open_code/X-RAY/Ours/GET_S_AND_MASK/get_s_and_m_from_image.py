@@ -87,28 +87,16 @@ with graph.as_default():
     mask_x = get_mask(x, p=2, beta=0.15)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples"
-    SAVE_F="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/NORMAL_F"
-    SAVE_M = "E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/NORMAL_M"
+    PATH="E:/project/MultimodalGeneration/data/x-ray/NORMAL_X"
+    SAVE_F="E:/project/MultimodalGeneration/data/x-ray/NORMAL_F"
+    SAVE_M = "E:/project/MultimodalGeneration/data/x-ray/NORMAL_M"
     try:
         os.makedirs(SAVE_F)
         os.makedirs(SAVE_M)
     except os.error:
         pass
 
-    # files = os.listdir(PATH)
-    files = [
-        # "IM-0043-0001.jpeg",
-        # "IM-0065-0001.jpeg",
-        # "IM-0075-0001.jpeg",
-        # "IM-0087-0001.jpeg",
-        # "NORMAL2-IM-0271-0001.jpeg",
-        # "NORMAL2-IM-0272-0001.jpeg",
-        # "NORMAL2-IM-0276-0001.jpeg",
-        # "NORMAL2-IM-0282-0001.jpeg",
-        # "NORMAL2-IM-0373-0001.jpeg",
-        "IM-0268-0001.jpeg",
-    ]
+    files = os.listdir(PATH)
     for file in files:
         input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH+"/"+file))
         input_x = transform.resize(np.asarray(input_x), [1500, 1500]).reshape([1500,1500,1])

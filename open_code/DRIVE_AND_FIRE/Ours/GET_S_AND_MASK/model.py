@@ -1,14 +1,13 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from GAN_test_discriminator import Discriminator
-from GAN_test_feature_discriminator import FeatureDiscriminator
-from GAN_test_encoder import GEncoder
-from GAN_test_decoder import GDecoder
-from encoder import Encoder
-from decoder import Decoder
-import numpy as np
+from discriminator import Discriminator
+from feature_discriminator import FeatureDiscriminator
+from VAE_encoder import VEncoder
+from VAE_decoder import VDecoder
+from unet import Unet
 
-class GAN:
+
+class VAE_GAN:
     def __init__(self,
                  image_size,
                  learning_rate=2e-5,
@@ -28,61 +27,16 @@ class GAN:
         self.ones = tf.ones(self.input_shape, name="ones")
         self.tenaor_name = {}
 
-        self.EC_F = GEncoder('EC_F', ngf=ngf,units=units,keep_prob=0.85)
-        self.DC_F = GDecoder('DC_F', ngf=ngf, output_channl=2,units=units)
+        self.EC_F = VEncoder('EC_F', ngf=ngf,units=units,keep_prob=0.85)
+        self.DC_F = VDecoder('DC_F', ngf=ngf, output_channl=2,units=units)
 
-        self.EC_M = Encoder('EC_M', ngf=ngf/2,keep_prob=0.9)
-        self.DC_M = Decoder('DC_M', ngf=ngf/2, output_channl=2)
+        self.G_M = Unet('G_M', ngf=ngf/2,keep_prob=0.9,output_channl=2)
 
         self.D_F = Discriminator('D_F', ngf=ngf,keep_prob=0.85)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
-    def gauss_2d_kernel(self,kernel_size=3, sigma=0.0):
-        kernel = np.zeros([kernel_size, kernel_size])
-        center = (kernel_size - 1) / 2
-        if sigma == 0:
-            sigma = ((kernel_size - 1) * 0.5 - 1) * 0.3 + 0.8
-        s = 2 * (sigma ** 2)
-        sum_val = 0
-        for i in range(0, kernel_size):
-            for j in range(0, kernel_size):
-                x = i - center
-                y = j - center
-                kernel[i, j] = np.exp(-(x ** 2 + y ** 2) / s)
-                sum_val += kernel[i, j]
-        sum_val = 1 / sum_val
-        return kernel * sum_val
-
-    def gaussian_blur_op(self,image, kernel, kernel_size, cdim=3):
-        # kernel as placeholder variable, so it can change
-        outputs = []
-        pad_w = (kernel_size * kernel_size - 1) // 2
-        padded = tf.pad(image, [[0, 0], [pad_w, pad_w], [pad_w, pad_w], [0, 0]], mode='REFLECT')
-        for channel_idx in range(cdim):
-            data_c = padded[:, :, :, channel_idx:(channel_idx + 1)]
-            g = tf.reshape(kernel, [1, -1, 1, 1])
-            data_c = tf.nn.conv2d(data_c, g, [1, 1, 1, 1], 'VALID')
-            g = tf.reshape(kernel, [-1, 1, 1, 1])
-            data_c = tf.nn.conv2d(data_c, g, [1, 1, 1, 1], 'VALID')
-            outputs.append(data_c)
-        return tf.concat(outputs, axis=3)
-
-    def gaussian_blur(self,x, sigma=0.5, alpha=0.15):
-        gauss_filter = self.gauss_2d_kernel(3, sigma)
-        gauss_filter = gauss_filter.astype(dtype=np.float32)
-        y = self.gaussian_blur_op(x, gauss_filter, 3, cdim=1)
-        y = tf.ones(y.get_shape().as_list()) * tf.cast(y > alpha, dtype="float32")
-        return y
-
-    def get_mask(self, mask, p=5):
-        shape = mask.get_shape().as_list()
-        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
-        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
-        return mask
-
     def model(self, f,mask):
         # F -> F_R VAE
-        # f = self.gaussian_blur(f, sigma=0.7, alpha=0.3)
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
         m_one_hot = tf.reshape(tf.one_hot(tf.cast(mask, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
 
@@ -106,8 +60,8 @@ class GAN:
         j_code_f_rm = self.FD_F(code_f_rm)
         j_code_f = self.FD_F(code_f)
 
-        mask_r_prob = self.DC_M(self.EC_M(f_one_hot))
-        mask_rm_prob = self.DC_M(self.EC_M(f_rm_prob))
+        mask_r_prob = self.G_M(f_one_hot)
+        mask_rm_prob = self.G_M(f_rm_prob)
 
         D_loss = 0.0
         FG_loss = 0.0
@@ -158,8 +112,7 @@ class GAN:
     def get_variables(self):
         return [self.EC_F.variables
                 + self.DC_F.variables
-                +self.EC_M.variables
-                + self.DC_M.variables
+                +self.G_M.variables
             ,
                 self.D_F.variables +
                 self.FD_F.variables
@@ -172,11 +125,10 @@ class GAN:
             )
             return learning_step
 
-        FG_optimizer = make_optimizer(name='Adam_FG')
-        MG_optimizer = make_optimizer(name='Adam_MG')
+        G_optimizer = make_optimizer(name='Adam_G')
         D_optimizer = make_optimizer(name='Adam_D')
 
-        return FG_optimizer, MG_optimizer, D_optimizer
+        return G_optimizer,  D_optimizer
 
     def evaluation_code(self, code_list):
         code_f, code_f_rm = \
@@ -209,9 +161,8 @@ class GAN:
         tf.summary.histogram('discriminator/FALSE/j_f_rm', j_f_rm)
 
     def loss_summary(self, loss_list):
-        FG_loss,  D_loss = loss_list[0], loss_list[1]
-        tf.summary.scalar('loss/FG_loss', FG_loss)
-        # tf.summary.scalar('loss/MG_loss', MG_loss)
+        G_loss,  D_loss = loss_list[0], loss_list[1]
+        tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
 
     def image_summary(self, image_list):
@@ -219,10 +170,6 @@ class GAN:
         tf.summary.image('image/f', f)
         tf.summary.image('image/f_rm', f_rm)
         tf.summary.image('image/f_r', f_r)
-        #tf.summary.image('image/f_one_hot1', f_one_hot[:,:,:,0:1])
-        #tf.summary.image('image/f_one_hot2', f_one_hot[:,:,:,1:2])
-        #tf.summary.image('image/f_r_prob1', f_r_prob[:,:,:,0:1])
-        #tf.summary.image('image/f_r_prob2', f_r_prob[:,:,:,1:2])
         tf.summary.image('image/mask', mask)
         tf.summary.image('image/mask_rm', mask_rm)
         tf.summary.image('image/mask_r', mask_r)

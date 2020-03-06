@@ -1,8 +1,6 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from encoder import Encoder
-from decoder import Decoder
-
+from unet import Unet
 
 class GAN:
     def __init__(self,
@@ -24,14 +22,10 @@ class GAN:
         self.image_list = {}
         self.prob_list = {}
 
-        self.EC_L_X = Encoder('EC_L_X', ngf=ngf)
-        self.EC_L_Y = Encoder('EC_L_Y', ngf=ngf)
-        self.EC_L_Z = Encoder('EC_L_Z', ngf=ngf)
-        self.EC_L_W = Encoder('EC_L_W', ngf=ngf)
-        self.DC_L_X = Decoder('DC_L_X', ngf=ngf, output_channl=5)
-        self.DC_L_Y = Decoder('DC_L_Y', ngf=ngf, output_channl=5)
-        self.DC_L_Z = Decoder('DC_L_Z', ngf=ngf, output_channl=5)
-        self.DC_L_W = Decoder('DC_L_W', ngf=ngf, output_channl=5)
+        self.SEG_L_X = Unet('SEG_L_X', ngf=ngf, output_channl=5)
+        self.SEG_L_Y = Unet('SEG_L_Y', ngf=ngf, output_channl=5)
+        self.SEG_L_Z = Unet('SEG_L_Z', ngf=ngf, output_channl=5)
+        self.SEG_L_W = Unet('SEG_L_W', ngf=ngf, output_channl=5)
 
     def model(self, l_x, l_y, l_z, l_w, x, y, z, w):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
@@ -46,32 +40,11 @@ class GAN:
         label_expand_w = tf.reshape(tf.one_hot(tf.cast(l_w, dtype=tf.int32), axis=-1, depth=5),
                                     shape=[self.input_shape[0], self.input_shape[1],
                                            self.input_shape[2], 5])
-        l_x = l_x * 0.25
-        l_y = l_y * 0.25
-        l_z = l_z * 0.25
-        l_w = l_w * 0.25
 
-        code_x = self.EC_L_X(x)
-        code_y = self.EC_L_Y(y)
-        code_z = self.EC_L_Z(z)
-        code_w = self.EC_L_W(w)
-
-        l_f_prob_by_x = self.DC_L_X(code_x)
-        l_f_prob_by_y = self.DC_L_Y(code_y)
-        l_f_prob_by_z = self.DC_L_Z(code_z)
-        l_f_prob_by_w = self.DC_L_W(code_w)
-        l_f_by_x = tf.reshape(
-            tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        l_f_by_y = tf.reshape(
-            tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        l_f_by_z = tf.reshape(
-            tf.cast(tf.argmax(l_f_prob_by_z, axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
-        l_f_by_w = tf.reshape(
-            tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32) * 0.25,
-            shape=self.input_shape)
+        l_f_prob_by_x = self.SEG_L_X(x)
+        l_f_prob_by_y = self.SEG_L_Y(y)
+        l_f_prob_by_z = self.SEG_L_Z(z)
+        l_f_prob_by_w = self.SEG_L_W(w)
 
         G_loss = 0.0
         G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
@@ -84,7 +57,6 @@ class GAN:
                                   l_f_prob_by_x[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_x[:, :, :, 4],
                                   l_f_prob_by_x[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_x, l_f_by_x) * 5
 
         G_loss += self.mse_loss(label_expand_y[:, :, :, 0],
                                 l_f_prob_by_y[:, :, :, 0]) \
@@ -96,7 +68,6 @@ class GAN:
                                   l_f_prob_by_y[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_y[:, :, :, 4],
                                   l_f_prob_by_y[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_y, l_f_by_y) * 5
 
         G_loss += self.mse_loss(label_expand_z[:, :, :, 0],
                                 l_f_prob_by_z[:, :, :, 0]) \
@@ -108,7 +79,6 @@ class GAN:
                                   l_f_prob_by_z[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_z[:, :, :, 4],
                                   l_f_prob_by_z[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_z, l_f_by_z) * 5
 
         G_loss += self.mse_loss(label_expand_w[:, :, :, 0],
                                 l_f_prob_by_w[:, :, :, 0]) \
@@ -120,12 +90,23 @@ class GAN:
                                   l_f_prob_by_w[:, :, :, 3]) * 15 \
                   + self.mse_loss(label_expand_w[:, :, :, 4],
                                   l_f_prob_by_w[:, :, :, 4]) * 15
-        G_loss += self.mse_loss(l_w, l_f_by_w) * 5
 
-        self.image_list["l_x"] = l_x
-        self.image_list["l_y"] = l_y
-        self.image_list["l_z"] = l_z
-        self.image_list["l_w"] = l_w
+        l_f_by_x = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_x, axis=-1), dtype=tf.float32),
+            shape=self.input_shape)
+        l_f_by_y = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_y, axis=-1), dtype=tf.float32),
+            shape=self.input_shape)
+        l_f_by_z = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_z, axis=-1), dtype=tf.float32),
+            shape=self.input_shape)
+        l_f_by_w = tf.reshape(
+            tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32),
+            shape=self.input_shape)
+        self.image_list["l_x"] = l_x* 0.25
+        self.image_list["l_y"] = l_y* 0.25
+        self.image_list["l_z"] = l_z* 0.25
+        self.image_list["l_w"] = l_w* 0.25
         self.image_list["x"] = x
         self.image_list["y"] = y
         self.image_list["z"] = z
@@ -141,22 +122,18 @@ class GAN:
         self.prob_list["l_f_prob_by_z"] = l_f_prob_by_z
         self.prob_list["l_f_prob_by_w"] = l_f_prob_by_w
 
-        self.image_list["l_f_by_x"] = l_f_by_x
-        self.image_list["l_f_by_y"] = l_f_by_y
-        self.image_list["l_f_by_z"] = l_f_by_z
-        self.image_list["l_f_by_w"] = l_f_by_w
+        self.image_list["l_f_by_x"] = l_f_by_x* 0.25
+        self.image_list["l_f_by_y"] = l_f_by_y* 0.25
+        self.image_list["l_f_by_z"] = l_f_by_z* 0.25
+        self.image_list["l_f_by_w"] = l_f_by_w* 0.25
 
         return G_loss
 
     def get_variables(self):
-        return [self.EC_L_X.variables
-                + self.EC_L_Y.variables
-                + self.EC_L_Z.variables
-                + self.EC_L_W.variables
-                + self.DC_L_X.variables
-                + self.DC_L_Y.variables
-                + self.DC_L_Z.variables
-                + self.DC_L_W.variables
+        return [self.SEG_L_X.variables
+                + self.SEG_L_Y.variables
+                + self.SEG_L_Z.variables
+                + self.SEG_L_W.variables
                 ]
 
     def optimize(self):
