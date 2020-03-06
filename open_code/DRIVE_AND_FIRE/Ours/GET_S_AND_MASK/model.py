@@ -40,7 +40,7 @@ class VAE_GAN:
         f_one_hot = tf.reshape(tf.one_hot(tf.cast(f, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
         m_one_hot = tf.reshape(tf.one_hot(tf.cast(mask, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
 
-        code_f_mean, code_f_logvar = self.EC_F(f/10.0+0.9)
+        code_f_mean, code_f_logvar = self.EC_F(f*0.1 + 0.9)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
@@ -88,7 +88,6 @@ class VAE_GAN:
 
         FG_loss += self.mse_loss(0.0,m_one_hot *f_r_prob  ) * 1
         FG_loss += self.mse_loss(0.0,mask_rm_prob *f_rm_prob  ) * 1
-        FG_loss += self.mse_loss(m_one_hot ,mask_rm_prob) * 10 
 
         MG_loss += self.mse_loss(m_one_hot , mask_r_prob ) * 15
 

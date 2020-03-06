@@ -1,7 +1,6 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from detector import Detector
-# from detect_discriminator import Discriminator
+from ssd import Detector
 import numpy as np
 
 
