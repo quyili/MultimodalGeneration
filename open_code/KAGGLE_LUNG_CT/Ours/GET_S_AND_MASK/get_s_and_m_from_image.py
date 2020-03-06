@@ -4,18 +4,8 @@ import numpy as np
 import SimpleITK
 import cv2
 import scipy.signal as signal
-from skimage import transform
 import os
-
-PATH = "E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/"
-SAVE_F = "E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/F_"
-SAVE_M = "E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/M_"
-file="x_1_3"+".tiff"
-alpha=0.0125
-k_size1=7
-p=2
-beta=0.48
-k_size2=3
+from skimage import transform
 
 def np_norm(input):
     output = (input - np.min(input)) / (np.max(input) - np.min(input))
@@ -64,13 +54,12 @@ def gaussian_blur(x,sigma=0.5,alpha=0.15,bin=False):
         y = tf.ones(y.get_shape().as_list()) * tf.cast(y > alpha, dtype="float32")
     return y
 
-
 def get_f(x, j=0.1):
     x1 = tf_norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
     x2 = tf_norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
 
-    x1 =gaussian_blur(x1,sigma=0.6)
-    x2 =gaussian_blur(x2,sigma=0.6)
+    x1 =gaussian_blur(x1,sigma=0.4)
+    x2 =gaussian_blur(x2,sigma=0.4)
 
     x1 = tf.reduce_mean(x1, axis=[1, 2, 3]) - x1
     x2 = x2 - tf.reduce_mean(x2, axis=[1, 2, 3])
@@ -82,7 +71,6 @@ def get_f(x, j=0.1):
     x12 = tf.ones(x12.get_shape().as_list()) * tf.cast(x12 > 0.0, dtype="float32")
     return x12
 
-
 def get_mask(m, p=5,beta=0.0):
     m=tf_norm(m)
     mask = 1.0 - tf.ones(m.get_shape().as_list()) * tf.cast(m > beta, dtype="float32")
@@ -91,35 +79,32 @@ def get_mask(m, p=5,beta=0.0):
     mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
     return mask
 
-
 graph = tf.Graph()
 with graph.as_default():
-    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 1])
-
-    ## 3D
-    # fx = get_f(x, j=0.09)
-    # mask_x = get_mask(x, p=2, beta=0.2)
-
-    fx = get_f(x, j=alpha)
+    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 3])
+    fx = get_f(x, j=0.014)
     fx = gaussian_blur(fx, sigma=0.3, alpha=0.05, bin=True)
-    mask_x = get_mask(x, p=2, beta=beta)
-
+    mask_x = get_mask(x, p=10, beta=0.3)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+    PATH = "E:/project/MultimodalGeneration/data/SWM/train/X"
+    SAVE_F = "E:/project/MultimodalGeneration/data/SWM/train/F_"
+    SAVE_M = "E:/project/MultimodalGeneration/data/SWM/train/M_"
     try:
         os.makedirs(SAVE_F)
         os.makedirs(SAVE_M)
     except os.error:
         pass
 
-    # files = os.listdir(PATH)
-    # for file in files:
-    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file))
-    input_x = np.asarray(input_x).reshape([512, 512, 1])
-    fx_,mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x]).astype( 'float32') })
-    fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=k_size1)
-    mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=k_size2)
-    new_file = file.replace(".tiff", ".tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), SAVE_F + "/" + new_file)
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
-    print(file + "==>" + new_file)
+    files = os.listdir(PATH)
+    for file in files:
+        input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH+"/"+file))
+        input_x = transform.resize(np.asarray(input_x), [512, 512, 3])
+        fx_, mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x])})
+        fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=5)
+        mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
+        new_file=file.replace(".jpg",".tiff")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0-mask_x_)*fx_), SAVE_F+"/"+new_file)
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
+        print(file + "==>" + new_file)
+

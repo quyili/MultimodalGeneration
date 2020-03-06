@@ -337,7 +337,7 @@ GANÖ±½Ó´ÓËæ»úÔëÉùÖÐÉú³ÉµÄÒ½Ñ§Í¼ÏñºÜÄÑÉú³ÉÏÖÊµµÄ½á¹¹ÐÅÏ¢¡£ÎÒÃÇ½«Ìá¹©»ù±¾ÂÖÀªºÍ½á¹
 	\caption{Structural feature map extraction}
 	\label{alg:1}
 	\begin{algorithmic}[1]
-	\State Input image $x$,
+	\State Input a real grayscale image $x$,
 	 pixel threshold $alpha$ and $beta$ and $gama$,
 	 gaussian kernel variance $sigma1$ and $sigma2$
 	\State $s1 = reduce\_min(sobel(x))$
@@ -376,7 +376,7 @@ GANÖ±½Ó´ÓËæ»úÔëÉùÖÐÉú³ÉµÄÒ½Ñ§Í¼ÏñºÜÄÑÉú³ÉÏÖÊµµÄ½á¹¹ÐÅÏ¢¡£ÎÒÃÇ½«Ìá¹©»ù±¾ÂÖÀªºÍ½á¹
 	\caption{Mask Extraction}
 	\label{alg:2}
 	\begin{algorithmic}[1]
-		\State Input a real image $x$,  pixel threshold $alpha$, the expanded pixel value $p$
+		\State Input a real grayscale image $x$,  pixel threshold $alpha$, the expanded pixel value $p$
 		\State $m = 1.0 - ones \times (x > alpha)$
 		\State $new\_size=[x.width() + p, x.length() + p]$
 		\State $m = resize(m, new\_size)$
