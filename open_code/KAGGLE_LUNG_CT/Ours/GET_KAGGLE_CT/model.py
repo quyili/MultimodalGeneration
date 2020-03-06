@@ -1,8 +1,7 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 from discriminator import Discriminator
-from encoder import Encoder
-from decoder import Decoder
+from unet import Unet
 
 
 class GAN:
@@ -25,10 +24,9 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.EC_R = Encoder('EC_R', ngf=ngf,keep_prob=0.99)
-        self.DC_M = Decoder('DC_M', ngf=ngf,keep_prob=0.96)
+        self.G_X = Unet('G_X', ngf=ngf,output_channl=3, keep_prob=0.97)
 
-        self.D_M = Discriminator('D_M', ngf=ngf,keep_prob=0.9)
+        self.D_X = Discriminator('D_X',ngf=ngf, keep_prob=0.9)
 
     def model(self, f,mask,x):
         self.tenaor_name["f"] = str(f)
@@ -38,20 +36,18 @@ class GAN:
         new_f=f+tf.random_uniform([self.input_shape[0],self.input_shape[1],
                                                     self.input_shape[2],1], minval=0.5,maxval=0.6,
                                                    dtype=tf.float32)*(1.0-mask)*(1.0-f)
-        code_rm = self.EC_R(new_f)
-        x_g = self.DC_M(code_rm)
+        x_g = self.G_X(new_f)
         self.tenaor_name["x_g"] = str(x_g)
 
-        j_x_g = self.D_M(x_g)
-        j_x = self.D_M(x)
+        j_x_g = self.D_X(x_g)
+        j_x = self.D_X(x)
 
         D_loss = 0.0
         G_loss = 0.0
-        L_loss = 0.0
         # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_x, 1.0)*2
-        D_loss += self.mse_loss(j_x_g, 0.0)*2
-        G_loss += self.mse_loss(j_x_g, 1.0)*1
+        D_loss += self.mse_loss(j_x, 1.0) * 2
+        D_loss += self.mse_loss(j_x_g, 0.0) * 2
+        G_loss += self.mse_loss(j_x_g, 1.0) * 2
 
         G_loss += self.mse_loss(x_g, x)*5
         G_loss += self.mse_loss(x_g*mask,x*mask)*0.001
@@ -59,7 +55,7 @@ class GAN:
         image_list={}
         image_list["mask"] = mask
         image_list["f"] = f
-        image_list["new_f"] = new_f
+        image_list["new_f"] =new_f
         image_list["x"] = x
         image_list["x_g"] = x_g
         self.judge_list["j_x_g"]= j_x_g
@@ -70,10 +66,9 @@ class GAN:
         return loss_list,image_list
 
     def get_variables(self):
-        return [self.EC_R.variables
-                + self.DC_M.variables
+        return [self.G_X.variables
             ,
-                self.D_M.variables]
+                self.D_X.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
