@@ -22,10 +22,10 @@ class GAN:
         self.image_list = {}
         self.prob_list = {}
 
-        self.SEG_L_X = Unet('SEG_L_X', ngf=ngf, output_channl=5)
-        self.SEG_L_Y = Unet('SEG_L_Y', ngf=ngf, output_channl=5)
-        self.SEG_L_Z = Unet('SEG_L_Z', ngf=ngf, output_channl=5)
-        self.SEG_L_W = Unet('SEG_L_W', ngf=ngf, output_channl=5)
+        self.G_L_X = Unet('G_L_X', ngf=ngf, output_channl=5)
+        self.G_L_Y = Unet('G_L_Y', ngf=ngf, output_channl=5)
+        self.G_L_Z = Unet('G_L_Z', ngf=ngf, output_channl=5)
+        self.G_L_W = Unet('G_L_W', ngf=ngf, output_channl=5)
 
     def model(self, l_x, l_y, l_z, l_w, x, y, z, w):
         label_expand_x = tf.reshape(tf.one_hot(tf.cast(l_x, dtype=tf.int32), axis=-1, depth=5),
@@ -41,10 +41,10 @@ class GAN:
                                     shape=[self.input_shape[0], self.input_shape[1],
                                            self.input_shape[2], 5])
 
-        l_f_prob_by_x = self.SEG_L_X(x)
-        l_f_prob_by_y = self.SEG_L_Y(y)
-        l_f_prob_by_z = self.SEG_L_Z(z)
-        l_f_prob_by_w = self.SEG_L_W(w)
+        l_f_prob_by_x = self.G_L_X(x)
+        l_f_prob_by_y = self.G_L_Y(y)
+        l_f_prob_by_z = self.G_L_Z(z)
+        l_f_prob_by_w = self.G_L_W(w)
 
         G_loss = 0.0
         G_loss += self.mse_loss(label_expand_x[:, :, :, 0],
@@ -130,10 +130,10 @@ class GAN:
         return G_loss
 
     def get_variables(self):
-        return [self.SEG_L_X.variables
-                + self.SEG_L_Y.variables
-                + self.SEG_L_Z.variables
-                + self.SEG_L_W.variables
+        return [self.G_L_X.variables
+                + self.G_L_Y.variables
+                + self.G_L_Z.variables
+                + self.G_L_W.variables
                 ]
 
     def optimize(self):
