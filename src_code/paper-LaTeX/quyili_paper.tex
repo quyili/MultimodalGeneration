@@ -262,7 +262,7 @@ GANÖð½¥±»Ó¦ÓÃµ½¸÷¸ö²¿Î»µÄÆ÷¹Ù£¬ÖîÈçÄÔ²¿MRIµ½CTÍ¼ÏñµÄ×ª»»\cite{20nie2017medical},
 \end{figure*}
 ÈçÍ¼ËùÊ¾£¬ÀàËÆÓÚVGGNetµÄCNN·ÖÀàÄ£ÐÍ£¬½ÓÊÕÍ¼Ïñ×÷ÎªÊäÈë£¬ÊäÈëÒ»¸öÀà±ð¸ÅÂÊÏòÁ¿£¬¸ÃÏòÁ¿ÓëÊäÈëµÄÀà±ð±êÇ©Í¨¹ýËðÊ§º¯ÊýÇóµÃËðÊ§£¬ÔÙ¶ÔËðÊ§º¯ÊýÇóµ¼£¬¼´¿É·´Ïò´«²¥µÃµ½È«²¿Ä£ÐÍ²ÎÊýµÄÌÝ¶È£¬ÔÙ¶ÔÄ£ÐÍ²ÎÊýÖ´ÐÐÌÝ¶È¸üÐÂ£¬¼´¿ÉÊ¹µÃÄ£ÐÍ²ÎÊýµÃµ½Ñ§Ï°ºÍÑµÁ·£¬Í¨¹ýÕâÑù²»¶ÏµØÑ§Ï°£¬Ä£ÐÍ²ÎÊý×îÖÕÊÕÁ²¡£Ê¹ÓÃÑµÁ·ºÃµÄVGGNetÄ£ÐÍ·ÖÀàÊ±£¬Í¨¹ý$agrmax()$º¯Êý¶ÔÔ¤²âµÄÀà±ð¸ÅÂÊÏòÁ¿½øÐÐ´¦Àí¼´¿ÉµÃµ½Ô¤²âµÄÍ¼ÏñÀà±ð¡£
 \subsection{Éú³É¶Ô¿¹ÍøÂç}
-Éú³ÉÊ½¶Ô¿¹ÍøÂç£¨GAN, Generative Adversarial Networks£©\cite{103salvaris2018generative}Ìá³öºó£¬Óë¾í»ýÉñ¾­ÍøÂç½áºÏ³ÉÎªÒ»ÖÖÎÞ¼à¶½Ñ§Ï°Éî¶ÈÑ§Ï°Ä£ÐÍ\cite{104radford2015unsupervised}¡£GANÖ÷Òª°üÀ¨ÁËÁ½¸ö²¿·Ö£¬¼´Éú³ÉÆ÷ÍøÂç$G$£¨Generator£©ºÍÅÐ±ðÆ÷ÍøÂç$D$£¨Discriminator£©£¬Á½Õß²»¶Ï²©ÞÄ£¬½ø¶øÊ¹$G$Ñ§Ï°µ½Êý¾ÝµÄ·Ö²¼£¬Èç¹ûÓÃµ½Í¼Æ¬Éú³ÉÉÏ£¬ÔòÑµÁ·Íê³Éºó£¬$G$¿ÉÒÔ´ÓÒ»¶ÎËæ»úÊýÖÐÉú³É±ÆÕæµÄÍ¼Ïñ¡£$G$½ÓÊÕÒ»¸öËæ»úµÄÔëÉù$z$£¬Í¨¹ýÕâ¸öÔëÉùÉú³ÉÍ¼Ïñ$x$£»$D$ÊäÈëÍ¼Æ¬$x$£¬Êä³ö¸ÃÍ¼Æ¬ÎªÕæÊµÍ¼Æ¬µÄ¸ÅÂÊ$D(x)$£¬Èç¹ûÎª1£¬¾Í´ú±í100\%ÊÇÕæÊµµÄÍ¼Æ¬£¬¶øÊä³öÎª0£¬¾Í´ú±íÊÇÍêÈ«²»ÕæÊµµÄÍ¼Æ¬¡£ÑµÁ·¹ý³ÌÖÐ£¬Éú³ÉÍøÂç$G$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿Éú³ÉÕæÊµµÄÍ¼Æ¬È¥ÆÛÆ­ÅÐ±ðÍøÂç$D$¡£¶øÂç$D$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿±æ±ð³ö$G$Éú³ÉµÄ¼ÙÍ¼ÏñºÍÕæÊµµÄÍ¼Ïñ¡£ÕâÑù£¬$G$ºÍÂç$D$¹¹³ÉÁËÒ»¸ö¶¯Ì¬µÄ¡°²©ÞÄ¹ý³Ì¡±£¬×îÖÕµÄÆ½ºâµã¼´ÄÉÊ²¾ùºâµã£¨Nash equilibrium point£©¡£ÑµÁ·Ê±Í¨¹ýËðÊ§º¯ÊýÊ¹¶þÕßÐÎ³É¶Ô¿¹£¬×îÖÕÁ½¸öÍøÂç´ïµ½¶¯Ì¬¾ùºâµÄ±êÖ¾ÊÇÉú³ÉÆ÷Éú³ÉµÄÍ¼Ïñ½Ó½üÓÚÕæÊµÍ¼Ïñ·Ö²¼£¬¶øÅÐ±ðÆ÷Ê¶±ð²»³öÕæ¼ÙÍ¼Ïñ£¬¶ÔÓÚ¸ø¶¨Í¼ÏñµÄÔ¤²âÎªÕæµÄ¸ÅÂÊ»ù±¾½Ó½ü 0.5£¨´¦ÓÚËæ»ú²Â²âË®Æ½£©¡£GANµÄÒ»¸öµäÐÍËðÊ§º¯ÊýÈçÏÂ£º
+Éú³ÉÊ½¶Ô¿¹ÍøÂç£¨GAN, Generative Adversarial Networks£©\cite{103salvaris2018generative}Ìá³öºó£¬Óë¾í»ýÉñ¾­ÍøÂç½áºÏ³ÉÎªÒ»ÖÖÎÞ¼à¶½Ñ§Ï°Éî¶ÈÑ§Ï°Ä£ÐÍ\cite{97radford2015unsupervised}¡£GANÖ÷Òª°üÀ¨ÁËÁ½¸ö²¿·Ö£¬¼´Éú³ÉÆ÷ÍøÂç$G$£¨Generator£©ºÍÅÐ±ðÆ÷ÍøÂç$D$£¨Discriminator£©£¬Á½Õß²»¶Ï²©ÞÄ£¬½ø¶øÊ¹$G$Ñ§Ï°µ½Êý¾ÝµÄ·Ö²¼£¬Èç¹ûÓÃµ½Í¼Æ¬Éú³ÉÉÏ£¬ÔòÑµÁ·Íê³Éºó£¬$G$¿ÉÒÔ´ÓÒ»¶ÎËæ»úÊýÖÐÉú³É±ÆÕæµÄÍ¼Ïñ¡£$G$½ÓÊÕÒ»¸öËæ»úµÄÔëÉù$z$£¬Í¨¹ýÕâ¸öÔëÉùÉú³ÉÍ¼Ïñ$x$£»$D$ÊäÈëÍ¼Æ¬$x$£¬Êä³ö¸ÃÍ¼Æ¬ÎªÕæÊµÍ¼Æ¬µÄ¸ÅÂÊ$D(x)$£¬Èç¹ûÎª1£¬¾Í´ú±í100\%ÊÇÕæÊµµÄÍ¼Æ¬£¬¶øÊä³öÎª0£¬¾Í´ú±íÊÇÍêÈ«²»ÕæÊµµÄÍ¼Æ¬¡£ÑµÁ·¹ý³ÌÖÐ£¬Éú³ÉÍøÂç$G$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿Éú³ÉÕæÊµµÄÍ¼Æ¬È¥ÆÛÆ­ÅÐ±ðÍøÂç$D$¡£¶øÂç$D$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿±æ±ð³ö$G$Éú³ÉµÄ¼ÙÍ¼ÏñºÍÕæÊµµÄÍ¼Ïñ¡£ÕâÑù£¬$G$ºÍÂç$D$¹¹³ÉÁËÒ»¸ö¶¯Ì¬µÄ¡°²©ÞÄ¹ý³Ì¡±£¬×îÖÕµÄÆ½ºâµã¼´ÄÉÊ²¾ùºâµã£¨Nash equilibrium point£©¡£ÑµÁ·Ê±Í¨¹ýËðÊ§º¯ÊýÊ¹¶þÕßÐÎ³É¶Ô¿¹£¬×îÖÕÁ½¸öÍøÂç´ïµ½¶¯Ì¬¾ùºâµÄ±êÖ¾ÊÇÉú³ÉÆ÷Éú³ÉµÄÍ¼Ïñ½Ó½üÓÚÕæÊµÍ¼Ïñ·Ö²¼£¬¶øÅÐ±ðÆ÷Ê¶±ð²»³öÕæ¼ÙÍ¼Ïñ£¬¶ÔÓÚ¸ø¶¨Í¼ÏñµÄÔ¤²âÎªÕæµÄ¸ÅÂÊ»ù±¾½Ó½ü 0.5£¨´¦ÓÚËæ»ú²Â²âË®Æ½£©¡£GANµÄÒ»¸öµäÐÍËðÊ§º¯ÊýÈçÏÂ£º
 \begin{equation}
 \min_G \max_D V(G,D)=\mathbb{E}_{x\sim p_{data}(x)}[\log(D(x))]+\mathbb{E}_{z\sim p_z(z)}[\log(1-D(G(z)))].
 \end{equation}
@@ -449,7 +449,9 @@ s'=s+z'\times(1-m)\times(1-s),
 \end{figure*}
 ÈçÍ¼~\ref {mm_mri_generate}ËùÊ¾£¬Ê×ÏÈ£¬ÎÒÃÇÍ¨¹ýÑµÁ·ºÃµÄ$G_s$Éú³É½á¹¹ÌØÕ÷Í¼$ s_g $£¬ÈÚºÏËæ»úÔëÉùºóµÃµ½$s'$£¬ÔÙ¸ù¾ÝÐèÒª¿ÉÌí¼ÓÖ¸¶¨µÄ²¡Ôî±êÇ©$ l $£¬Óë$s'$ÔÚÍ¨µÀÏò¶ÑµþÈÚºÏµÃµ½×îºóµÄÈÚºÏÍ¼¡£È»ºó£¬ÎÒÃÇÊ¹ÓÃÒ»¸ö½ÓÊÜ¶ÀÈÈÌõ¼þ¾ØÕóµÄÌõ¼þÉú³ÉÆ÷$ G $£¬¶ÔÈÚºÏÍ¼±àÂëºóÌí¼Ó²»Í¬µÄÌõ¼þ¾ØÕó$one\_hot(i)$£¬È»ºóÔÙ½âÂëÉú³É²»Í¬Ä£µÄºÏ³ÉÍ¼ÏñÌ¬$ x_{g,i} $¡£ÎÒÃÇÊ¹ÓÃ¼ø±ðÆ÷$ D $Ìá¹©µÄ¶Ô¿¹ÐÔËðÊ§ºÍÀà±ðÖ¸µ¼ËðÊ§À´Ö¸µ¼ºÏ³ÉÍ¼Ïñ±Æ½üÕæÊµÓ°ÏñµÄ·Ö²¼¡£ºÏ³ÉµÄ¶àÄ£Ì¬Ó°ÏñÎÒÃÇ¿ÉÒÔ¸ù¾ÝÐèÒªÍ¨¹ý²¡Ôî±êÇ©Éú³ÉÆ÷$G_{l,i}$Ìí¼Ó²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§¡¢Í¨¹ýÄ£Ì¬×ª»»Æ÷$G_{t}$Ìí¼ÓÄ£Ì¬Åä×¼ËðÊ§¡£
 
-$D$ÔÚVGG11Ä£ÐÍ½á¹¹µÄ»ù´¡ÉÏ½øÐÐÁËµ÷ÕûÊÊÅä£¬$G$ÔÚU-netµÄÄ£ÐÍ½á¹¹µÄ»ù´¡ÉÏ½øÐÐÁËµ÷ÕûÊÊÅä£¬¶àÄ£Ì¬Ó°ÏñºÏ³É¹ý³ÌµÄËðÊ§ÏîÈçÏÂ£¬ÆäÖÐ$ x_{g,i} $ÊÇÄ£Ì¬$ i $µÄºÏ³ÉÍ¼Ïñ£¬ $d(x_{i})$ºÍ$c(x_{i})$ÊÇ¼ø±ðÆ÷Êä³ö$D(x_i)$µÄÕæ¼Ù¼ø±ð½á¹ûºÍÄ£Ì¬Àà±ð¼ø±ð½á¹û£¬ $d(x_{g,i})$¡¢$c(x_{g,i})$
+$D$ÔÚVGG11Ä£ÐÍ½á¹¹µÄ»ù´¡ÉÏ½øÐÐÁËµ÷ÕûÊÊÅä£¬$G$ÔÚU-netµÄÄ£ÐÍ½á¹¹µÄ»ù´¡ÉÏ½øÐÐÁËµ÷ÕûÊÊÅä¡£ÔÚµ¥Ä£Ì¬Ê±£¬$D$Îªµ¥Ïß½á¹¹£¬$G$ÎªU-netÉú³ÉÆ÷ÔÚÊ×²ã½ÓÊÕÊäÈë£¬$G$Óë$D$×é³ÉÒ»×é»ù±¾GAN½á¹¹¡£ÔÚ¶àÄ£Ì¬Ê±£¬$D$ÎªÔÚ×îºóÁ½²ãË«ÏßÊä³öÁ½¸ö½á¹û£¬¼´Õæ¼Ù¼ø±ð½á¹û¾ØÕóºÍÀà±ð¼ø±ð½á¹û¾ØÕó£¬$G$ÒÔU-netÉú³ÉÆ÷Îª»ù±¾½á¹¹£¬ÔÚ±àÂëËõÐ¡³ß´ç½×¶ÎµÄ×îºó²ãÊä³öºóµþ¼ÓÊäÈëµÄÌõ¼þ¾ØÕó£¬ÔÙ½øÐÐºóÐøµÄ½âÂë»¹Ô­³ß´ç¹ý³Ì£¬$G$Óë$D$×é³ÉÒ»×éACGAN\cite{98odena2016conditional}½á¹¹¡£
+
+¶àÄ£Ì¬Ó°ÏñºÏ³É¹ý³ÌµÄËðÊ§ÏîÈçÏÂ£¬ÆäÖÐ$ x_{g,i} $ÊÇÄ£Ì¬$ i $µÄºÏ³ÉÍ¼Ïñ£¬ $d(x_{i})$ºÍ$c(x_{i})$ÊÇ¼ø±ðÆ÷Êä³ö$D(x_i)$µÄÕæ¼Ù¼ø±ð½á¹ûºÍÄ£Ì¬Àà±ð¼ø±ð½á¹û£¬ $d(x_{g,i})$¡¢$c(x_{g,i})$
 Îª$D(x_{g,i})$µÄÕæ¼Ù¼ø±ð½á¹ûºÍÄ£Ì¬Àà±ð¼ø±ð½á¹û¡£
 \begin{itemize}
 	\item{¶àÄ£Ì¬ºÏ³ÉÓ°Ïñ¶Ô¿¹ÐÔÑµÁ·ËðÊ§}
@@ -489,6 +491,7 @@ $s_i$Îª²ÉÓÃAlgorithm1´ÓÕæÊµÓ°Ïñ$x_i$ÌáÈ¡³öµÄ½á¹¹ÌØÕ÷Í¼£¬
 $l_i$ÎªÕæÊµÓ°Ïñ$x_i$µÄ²¡Ôî±êÇ©£¬
 $m_i$Îª²ÉÓÃAlgorithm2´ÓÕæÊµÓ°Ïñ$x_i$ÌáÈ¡³öµÄÑÚÄ¤£¬
 $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢$\alpha_2=0.6$¡£
+ÔÚSkrGAN\cite{96zhang2019skrgan:}µÄÑµÁ·ÖÐ£¬Ò»·½ÃæÊ¼ÖÕ²ÉÓÃ´ÓÕæÊµÊý¾Ý¼¯ÖÐÌáÈ¡µÄ²ÝÍ¼½øÐÐÑµÁ·£¬ÁíÒ»·½ÃæSkrGAN½«Ç°Êö×Ô¼à¶½ËðÊ§Óë¶Ô¿¹ÐÔËðÊ§¼ÓÈ¨ÇóºÍ×÷Îª×ÜËðÊ§£¬ÕâÊ¹µÃÔÚÊý¾Ý¼¯½ÏÐ¡Ê±£¬ÑµÁ·Ñù±¾¹ýÉÙ£¬ÑµÁ·¹ý³Ì¿ÉÊÓÎªÔ­Ê¼Êý¾Ý¼¯Ó°ÏñµÄÖØ½¨£¬ÕâÊ¹µÃÄ£ÐÍµÄÑµÁ·½«²»³ä·Ö¡¢¼«Ò×¹ýÄâºÏÇÒÈ±·¦¶ÔºÏ³É²ÝÍ¼µÄÊÊÓ¦ÄÜÁ¦¡£µ±SkrGANµÚÒ»²½ºÏ³ÉµÄ²ÝÍ¼³öÏÖ±ÈÔ­Ê¼²ÝÍ¼¸ü·á¸»µÄ¶àÑùÐÔÊ±£¬Î´¾­¹ýºÏ³É²ÝÍ¼ÑµÁ·µÄSkrGANÍ¼ÏñÉú³ÉÄ£ÐÍ½«È±·¦¶ÔºÏ³ÉµÄ²ÝÍ¼µÄ½øÒ»²½ºÏ³ÉÄÜÁ¦£¬×îÖÕÊ¹µÃÄ£ÐÍºÏ³ÉµÄÓ°Ïñ¶àÑùÐÔ²î¡£ÔÚÎÒÃÇµÄ·½°¸ÖÐ£¬ÎÒÃÇÊ×ÏÈ²ÉÓÃÕæÊµµÄ½á¹¹ÌØÕ÷Í¼½øÐÐÕæÊµÓ°ÏñµÄÖØ½¨Ô¤ÑµÁ·£¬´ËÊ±ËðÊ§º¯Êý¼´ÎªÉÏÊöµÄ×Ô¼à¶½ËðÊ§£¬ÔÚÄ£ÐÍÊÕÁ²ºóÔÙÊ¹ÓÃ´óÁ¿µÄºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼½øÐÐ¶Ô¿¹ÐÔÑµÁ·ºÏ³ÉÕæÊµÓ°Ïñ¡£ÕâÑùÎÒÃÇÍ¨¹ýÔ¤ÑµÁ·¼ÓËÙÑµÁ·½ø³Ì£¬Í¨¹ý¶Ô¿¹ÐÔÑµÁ·Ìá¸ßÄ£ÐÍ·º»¯ÄÜÁ¦¡£
 
 \subsection{¶àÄ£Ì¬Ó°ÏñµÄÅä×¼}
 \begin{figure*}[thbp!]
@@ -644,37 +647,52 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 	\begin{center}
 		\caption{²»Í¬Êý¾Ý¼¯ÉÏºÏ³ÉÍ¼ÏñÖÊÁ¿µÄÁ¿»¯ÆÀ¹À£¨¶þ£©}
 		\label{evalu_on_all_dataset2}
-		\resizebox{\textwidth}{24mm}{
-			\begin{tabular}{ll|lllllll}
-				\hline
-				\rule{0pt}{10pt}
-				%			\multicolumn{2}{c|}{Evaluation}&\multicolumn{6}{c}{Method}\\
-				%			\hline
-				Dataset &Metric &Ours$^*$ &Ours &SkrGAN$^+$\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised} &ACGAN\cite{98odena2016conditional} &WGAN\cite{99arjovsky2017wasserstein} &PGGAN\cite{100karras2017progressive}\\
-				\hline
-				\multirow{2}*{\tabincell{l}{\textbf{Color}\\\textbf{Fundus}}}
-%		  		&SWD ¡ý &xxx &0.025 &0.160 &0.149 &0.078 &0.036 \\
-				&MS-SSIM ¡ü  &-     &0.607 &0.584 &0.392 &0.412 &0.501 &0.463 \\
-				&FID ¡ý      &-     &30.13 &37.91 &227.4 &152.2 &187.5 &154.6\\
-				\hline
-				\multirow{2}*{\tabincell{l}{\textbf{BRATS}\\\textbf{MRI}}}
-%				&SWD ¡ý &xxx &0.025 &0.160 &0.149 &0.078 &0.036 \\
-				&MS-SSIM ¡ü  &0.738 &0.727 &0.713 &0.561 &0.578 &0.685 &0.701 \\
-				&FID ¡ý      &21.15 &22.27 &28.46 &104.53 &81.80 &39.41 &33.26\\
-				\hline
-				\multirow{2}*{\tabincell{l}{\textbf{TC Lung}\\\textbf{CT}}}
-				%				&SWD ¡ý &xxx &0.025 &0.160 &0.149 &0.078 &0.036 \\
-				&MS-SSIM ¡ü  &-     &0.676 &0.667 &0.592 &0.609 &0.639 &0.641 \\
-				&FID ¡ý      &-     &27.40 &29.81 &93.65 &68.28 &34.32 &34.03\\
-				\hline
-				\\[-6pt]
-			\end{tabular}
+		\resizebox{0.7\textwidth}{24mm}{
+%			\begin{tabular}{ll|lllllll}
+%				\hline
+%				\rule{0pt}{10pt}
+%				Dataset &Metric &Ours$^*$ &Ours &SkrGAN$^+$\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised} &ACGAN\cite{98odena2016conditional} &WGAN\cite{99arjovsky2017wasserstein} &PGGAN\cite{100karras2017progressive}\\
+%				\hline
+%				\multirow{2}*{\tabincell{l}{\textbf{Color}\\\textbf{Fundus}}}
+%				&MS-SSIM ¡ü  &-     &0.607 &0.584 &0.392 &0.412 &0.501 &0.463 \\
+%				&FID ¡ý      &-     &30.13 &37.91 &227.4 &152.2 &187.5 &154.6\\
+%				\hline
+%				\multirow{2}*{\tabincell{l}{\textbf{BRATS}\\\textbf{MRI}}}
+%				&MS-SSIM ¡ü  &0.738 &0.727 &0.713 &0.561 &0.578 &0.685 &0.701 \\
+%				&FID ¡ý      &21.15 &22.27 &28.46 &104.53 &81.80 &39.41 &33.26\\
+%				\hline
+%				\multirow{2}*{\tabincell{l}{\textbf{TC Lung}\\\textbf{CT}}}
+%				&MS-SSIM ¡ü  &-     &0.676 &0.667 &0.592 &0.609 &0.639 &0.641 \\
+%				&FID ¡ý      &-     &27.40 &29.81 &93.65 &68.28 &34.32 &34.03\\
+%				\hline
+%				\\[-6pt]
+%			\end{tabular}
+		\begin{tabular}{ll|llll}
+			\hline
+			\rule{0pt}{10pt}
+			Dataset &Metric &Ours$^+$ &Ours &SkrGAN$^*$ &GAN$^\#$\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{Color}\\\textbf{Fundus}}}
+			&MS-SSIM ¡ü  &-     &0.607 &0.584 &0.392\\
+			&FID ¡ý      &-     &30.13 &37.91 &227.41\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{BRATS}\\\textbf{MRI}}}
+			&MS-SSIM ¡ü  &0.738 &0.727 &0.713 &0.561\\
+			&FID ¡ý      &21.15 &22.27 &28.46 &104.53\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{TC Lung}\\\textbf{CT}}}
+			&MS-SSIM ¡ü  &-     &0.676 &0.667 &0.592\\
+			&FID ¡ý      &-     &27.40 &29.81 &93.65\\
+			\hline
+			\\[-6pt]
+		\end{tabular}
 		}
 	\footnotesize
-	\item[*] ±íÊ¾¸ù¾Ý²¡Ôî±êÇ©¶ÔºÏ³ÉÊý¾Ý¼¯ÖÐÓ°ÏñÓëÔ­Êý¾Ý¼¯ÖÐÓ°ÏñµÄÖ×ÁöÇÐ¸î³öÀ´½øÐÐÆÀ¹ÀµÄ½á¹û¡£
-	\item[+] ±íÊ¾ÓÉÓÚSkrGAN\cite{96zhang2019skrgan:}ÖÐÎ´¸ø³ö²ÝÍ¼ÏêÏ¸Ëã·¨»ò¿ªÔ´´úÂëºÍ¼ø±ðÆ÷ÍøÂç½á¹¹£¬
-	ÎÒÃÇÊ¹ÓÃ²ÉÓÃÎÒÃÇµÄËã·¨ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÊäÈë£¬
-	ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔÎÒÃÇµÄ¼ø±ðÆ÷Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£
+	\item[+] ±íÊ¾ºÏ³ÉÖ×ÁöµÄÆÀ¹À½á¹û£¬¼´¸ù¾Ý²¡Ôî±êÇ©¶ÔºÏ³ÉÊý¾Ý¼¯ÖÐÓ°ÏñÓëÔ­Êý¾Ý¼¯ÖÐÓ°ÏñµÄÖ×ÁöÇÐ¸î³öÀ´½øÐÐÆÀ¹ÀµÄ½á¹û¡£
+	\item[\#] ±íÊ¾»ù´¡GANµÄÆÀ¹À½á¹û£¬¼´ÔÚDCGAN\cite{97radford2015unsupervised}µÄ»ù´¡ÉÏ£¬½«Éú³ÉÍøÂç¼ÓÉîÎªU-net£¬½«¼ø±ðÆ÷ÍøÂç¼ÓÉîÎªVGG11¡£
+	\item[*] ±íÊ¾¸´ÏÖµÄSkrGANµÄÆÀ¹À½á¹û¡£ÓÉÓÚSkrGAN\cite{96zhang2019skrgan:}ÖÐÎ´¸ø³ö²ÝÍ¼ÏêÏ¸Ëã·¨»ò¿ªÔ´´úÂëºÍ¼ø±ðÆ÷ÍøÂç½á¹¹£¬
+	ÎÒÃÇÊ¹ÓÃ²ÉÓÃÎÒÃÇµÄËã·¨ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÊäÈë£¬ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔÎÒÃÇ²ÉÓÃµÄ¼ø±ðÆ÷VGG11Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£
+
 	\end{center}
 \end{table}
 
@@ -753,7 +771,7 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊý¾ÝµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊý¾ÝµÄÎ¢µ÷ÐÔÄÜÓëÍêÕûÕæÊµÊý¾Ýµ
 ÎÒÃÇÊ¹ÓÃDRIVEÊÓÍøÄ¤Í¼ÏñÑµÁ·¼¯+¶ÔFIREÊÓÍøÄ¤Í¼ÏñÈ«Êý¾Ý¼¯×÷ÎªÑµÁ·Êý¾ÝºÏ³ÉÁË´óÁ¿µÄÊÓÍøÄ¤Í¼Ïñ¡£ºÏ³ÉÊ±£¬ÓÉÓÚÖ»ÓÐµ¥Ä£Ì¬Êý¾ÝÇÒ½á¹¹ÌØÕ÷Í¼Óë±êÇ©Êý¾Ý´æÔÚ³åÍ»£¬Òò´ËÎÞ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§ºÍÄ£Ì¬Åä×¼ËðÊ§¡£
 %È»ºó£¬ÎÒÃÇ²ÉÓÃstudent-teacherÄ£Ê½£¬ÏÈÓÃDRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯ÑµÁ·ÁËÒ»¸öÊÓÍøÄ¤Ñª¹Ü×¢ÊÍÄ£ÐÍ£¬ÔÙÊ¹ÓÃ¸ÃÄ£ÐÍºÏ³ÉµÄÊÓÍøÄ¤Êý¾Ý½øÐÐ×¢ÊÍ£¬Éú³ÉµÄÑª¹Ü×¢ÊÍ½á¹û¼´¿É×÷ÎªÒ»ÖÖ´Ö±êÇ©Ê¹ÓÃ¡£
 ÎÒÃÇÍ¨¹ýËõ·ÅÑÚÄ¤¿ÉÒÔÈ¥³ý½á¹¹ÌØÕ÷Í¼µÄÍâ²ãÔ²ÐÎÂÖÀª£¬Ö»±£ÁôÔ²ÄÚµÄÑª¹ÜÏßÂ·£¬ÎÒÃÇÒÔ´ËÑª¹ÜÏßÂ·Í¼×÷Îª²ÉÓÃ¸Ã½á¹¹ÌØÕ÷Í¼ºÏ³ÉµÄÊÓÍøÄ¤Í¼ÏñµÄÑª¹Ü×¢ÊÍ´Ö±êÇ©¡£
-ÎÒÃÇÒÔU-netÎª·Ö¸îÄ£ÐÍ£¬Ê¹ÓÃDRIVEÊÓÍøÄ¤Í¼ÏñÑµÁ·¼¯+ºÏ³ÉÊÓÍøÄ¤Í¼Ïñ¼°Æä´Ö±êÇ©Êý¾Ý¼¯£¬ÔÚDRIVEÊÓÍøÄ¤Í¼Ïñ²âÊÔ¼¯ÉÏ£¬²ÉÓÃËæ»ú»ìºÏÄ£Ê½ÑµÁ·ÊÓÍøÄ¤Ñª¹Ü×¢ÊÍÄ£ÐÍ£¬ÓëÖ»Ê¹ÓÃDRIVEÊÓÍøÄ¤Í¼ÏñÑµÁ·¼¯µÄ·Ö¸î½á¹û¶Ô±È£¬À´ÑéÖ¤ºÏ³ÉÑÛµ×ÊÓÍøÄ¤Êý¾ÝÔÚÊÓÍøÄ¤Ñª¹Ü×¢ÊÍÈÎÎñÖÐµÄ¿ÉÓÃÐÔ¡£ÓÉÓÚÎÒÃÇ²ÉÓÃµÄÊý¾Ý¼¯µÄÊý¾ÝÁ¿½öÓÐSkrGANµÄ¶þÊ®·ÖÖ®Ò»£¬Òò´Ë¾¡¹ÜÔÚ½á¹¹ÌØÕ÷Í¼´Ö±êÇ©ÉÏÎÒÃÇµÄ·½·¨ÓÐÒ»Ð©ÌáÉý£¬µ«ÎÒÃÇºÏ³ÉµÄÊÓÍøÄ¤Í¼ÏñµÄºÏ³ÉÖÊÁ¿ºÍ¶àÑùÐÔÏà¶ÔÀ´ËµÒÀÈ»½Ï²î¡£´Ó¶ÔÈÎÎñµÄÌáÉýÐ§¹ûÀ´¿´£¬ÎÒÃÇµÄºÏ³ÉÍ¼Ïñ¶Ô·Ö¸îAccuracyµÄÌáÉýÓëSkrGAN»ù±¾Ò»ÖÂ£¬ÔÚSensitivityºÍAUCÖ¸±êÉÏÂÔµÍ¡£µ«Èç±í~\ref{DRIVE_availability_test}ÖÐSkrGAN*ËùÊ¾£¬µ±ÎÒÃÇ²ÉÓÃÏàÍ¬µÄÊý¾Ý¼¯½øÐÐ½üËÆ¸´ÏÖºó£¬ÎÒÃÇµÄ·½·¨ÔÚ¸÷¸öÖ¸±êÉÏ¶¼¸ü¸ß¡£ÊµÑé½á¹ûÈç±í~\ref{DRIVE_availability_test}ËùÊ¾¡£
+ÎÒÃÇÒÔU-netÎª·Ö¸îÄ£ÐÍ£¬Ê¹ÓÃDRIVEÊÓÍøÄ¤Í¼ÏñÑµÁ·¼¯+ºÏ³ÉÊÓÍøÄ¤Í¼Ïñ¼°Æä´Ö±êÇ©Êý¾Ý¼¯£¬ÔÚDRIVEÊÓÍøÄ¤Í¼Ïñ²âÊÔ¼¯ÉÏ£¬²ÉÓÃËæ»ú»ìºÏÄ£Ê½ÑµÁ·ÊÓÍøÄ¤Ñª¹Ü×¢ÊÍÄ£ÐÍ£¬ÓëÖ»Ê¹ÓÃDRIVEÊÓÍøÄ¤Í¼ÏñÑµÁ·¼¯µÄ·Ö¸î½á¹û¶Ô±È£¬À´ÑéÖ¤ºÏ³ÉÑÛµ×ÊÓÍøÄ¤Êý¾ÝÔÚÊÓÍøÄ¤Ñª¹Ü×¢ÊÍÈÎÎñÖÐµÄ¿ÉÓÃÐÔ¡£ÓÉÓÚÎÒÃÇ²ÉÓÃµÄÊý¾Ý¼¯µÄÊý¾ÝÁ¿½öÓÐSkrGANµÄ¶þÊ®·ÖÖ®Ò»£¬Òò´Ë¾¡¹ÜÔÚ½á¹¹ÌØÕ÷Í¼´Ö±êÇ©ÉÏÎÒÃÇµÄ·½·¨ÓÐÒ»Ð©ÌáÉý£¬µ«ÎÒÃÇºÏ³ÉµÄÊÓÍøÄ¤Í¼ÏñµÄºÏ³ÉÖÊÁ¿ºÍ¶àÑùÐÔÏà¶ÔÀ´ËµÒÀÈ»½Ï²î¡£´Ó¶ÔÈÎÎñµÄÌáÉýÐ§¹ûÀ´¿´£¬ÎÒÃÇµÄºÏ³ÉÍ¼Ïñ¶Ô·Ö¸îAccuracyµÄÌáÉýÓëSkrGAN»ù±¾Ò»ÖÂ£¬ÔÚSensitivityºÍAUCÖ¸±êÉÏÂÔµÍ¡£µ«Èç±í~\ref{DRIVE_availability_test}ÖÐSkrGAN$^*$ËùÊ¾£¬µ±ÎÒÃÇ²ÉÓÃÏàÍ¬µÄÊý¾Ý¼¯½øÐÐ½üËÆ¸´ÏÖºó£¬ÎÒÃÇµÄ·½·¨ÔÚ¸÷¸öÖ¸±êÉÏ¶¼¸ü¸ß¡£ÊµÑé½á¹ûÈç±í~\ref{DRIVE_availability_test}ËùÊ¾¡£
 \begin{table}[thbp!]
 	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 	\begin{center}
@@ -766,10 +784,14 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊý¾ÝµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊý¾ÝµÄÎ¢µ÷ÐÔÄÜÓëÍêÕûÕæÊµÊý¾Ýµ
 			\tabincell{c}{DRIVEÑµÁ·¼¯}  	 	&  DRIVE²âÊÔ¼¯ 	&0.7781 &0.9477 &0.9705
 			  \\
 		   \tabincell{c}{DRIVEÑµÁ·¼¯+2000ÕÅ\\SkrGANºÏ³ÉÍ¼Ïñ}	 &  DRIVE²âÊÔ¼¯ 	& 0.8464 &0.9513 &0.9762 \\
-		   \tabincell{c}{DRIVEÑµÁ·¼¯+2000ÕÅ\\SkrGAN*ºÏ³ÉÍ¼Ïñ}	 &  DRIVE²âÊÔ¼¯ 	& 0.8297 &0.9428 &0.9732 \\
+		   \tabincell{c}{DRIVEÑµÁ·¼¯+2000ÕÅ\\SkrGAN$^*$ºÏ³ÉÍ¼Ïñ}	 &  DRIVE²âÊÔ¼¯ 	& 0.8297 &0.9428 &0.9732 \\
 			\tabincell{c}{DRIVEÑµÁ·¼¯+2000ÕÅ\\ÎÒÃÇµÄºÏ³ÉÍ¼Ïñ}	&  DRIVE²âÊÔ¼¯  	& 0.8416 &0.9518 &0.9749 \\	
 			\hline
 		\end{tabular}
+	\footnotesize
+	\item[*] ±íÊ¾¸´ÏÖµÄSkrGANµÄÆÀ¹À½á¹û¡£ÓÉÓÚSkrGAN\cite{96zhang2019skrgan:}ÖÐÎ´¸ø³ö²ÝÍ¼ÏêÏ¸Ëã·¨»ò¿ªÔ´´úÂëºÍ¼ø±ðÆ÷ÍøÂç½á¹¹£¬
+	ÎÒÃÇÊ¹ÓÃ²ÉÓÃÎÒÃÇµÄËã·¨ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÊäÈë£¬ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔÎÒÃÇ²ÉÓÃµÄ¼ø±ðÆ÷VGG11Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£
+	
 	\end{center}
 \end{table}
 \subsubsection{ºÏ³ÉÐØ²¿X¹âÏßÊý¾ÝÓÃÓÚ·ÎÑ×·ÖÀàÈÎÎñ}
