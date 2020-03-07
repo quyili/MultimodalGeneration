@@ -27,11 +27,6 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.G_L_X = Unet('G_L_X', ngf=ngf, output_channl=5)
-        self.G_L_Y = Unet('G_L_Y', ngf=ngf, output_channl=5)
-        self.G_L_Z = Unet('G_L_Z', ngf=ngf, output_channl=5)
-        self.G_L_W = Unet('G_L_W', ngf=ngf, output_channl=5)
-
         self.G_T = Unet('G_T', ngf=ngf)
 
         self.G_X = Unet('G_X', ngf=ngf)
@@ -102,15 +97,6 @@ class GAN:
         self.tenaor_name["z_g"] = str(z_g)
         self.tenaor_name["w_g"] = str(w_g)
 
-        l_g_prob_by_x = self.G_L_X(x_g)
-        l_g_prob_by_y = self.G_L_Y(y_g)
-        l_g_prob_by_z = self.G_L_Z(z_g)
-        l_g_prob_by_w = self.G_L_W(w_g)
-        l_g_by_x = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_x, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        l_g_by_y = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_y, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        l_g_by_z = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_z, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        l_g_by_w = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_w, axis=-1), dtype=tf.float32), shape=self.input_shape)
-
         y_g_t_by_x = self.G_T(x_g, cy_code)
         z_g_t_by_x = self.G_T(x_g, cz_code)
         w_g_t_by_x = self.G_T(x_g, cw_code)
@@ -166,52 +152,6 @@ class GAN:
         G_loss += self.mse_loss(j_z_g_c, cz) * 50 * 2
         G_loss += self.mse_loss(j_w_g_c, cw) * 50 * 2
 
-
-        G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_x[:, :, :, 0]) * 0.5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_x[:, :, :, 1]) * 5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_x[:, :, :, 2]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_x[:, :, :, 3]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_x[:, :, :, 4]) * 25 * 5
-
-        G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_y[:, :, :, 0]) * 0.5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_y[:, :, :, 1]) * 5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_y[:, :, :, 2]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_y[:, :, :, 3]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_y[:, :, :, 4]) * 25 * 5
-
-        G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_z[:, :, :, 0]) * 0.5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_z[:, :, :, 1]) * 5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_z[:, :, :, 2]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_z[:, :, :, 3]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_z[:, :, :, 4]) * 25 * 5
-
-        G_loss += self.mse_loss(label_expand[:, :, :, 0],
-                                l_g_prob_by_w[:, :, :, 0]) * 0.5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 1],
-                                  l_g_prob_by_w[:, :, :, 1]) * 5 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 2],
-                                  l_g_prob_by_w[:, :, :, 2]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 3],
-                                  l_g_prob_by_w[:, :, :, 3]) * 25 * 5 \
-                  + self.mse_loss(label_expand[:, :, :, 4],
-                                  l_g_prob_by_w[:, :, :, 4]) * 25 * 5
-
-
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 20  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_z) * 20  # + self.ssim_loss(x_g, x_g_t_by_z) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_w) * 20  # + self.ssim_loss(x_g, x_g_t_by_w) * 2
@@ -246,22 +186,12 @@ class GAN:
         self.image_list["new_f"] = new_f
         self.prob_list["label_expand"] = label_expand
         self.prob_list["f_rm_expand"] = f_rm_expand
-        self.image_list["l"] = l
+        self.image_list["l"] = l*0.25
 
         self.image_list["x_g"] = x_g
         self.image_list["y_g"] = y_g
         self.image_list["z_g"] = z_g
         self.image_list["w_g"] = w_g
-
-        self.prob_list["l_g_prob_by_x"] = l_g_prob_by_x
-        self.prob_list["l_g_prob_by_y"] = l_g_prob_by_y
-        self.prob_list["l_g_prob_by_z"] = l_g_prob_by_z
-        self.prob_list["l_g_prob_by_w"] = l_g_prob_by_w
-        self.image_list["l_g_by_x"] = l_g_by_x
-        self.image_list["l_g_by_y"] = l_g_by_y
-        self.image_list["l_g_by_z"] = l_g_by_z
-        self.image_list["l_g_by_w"] = l_g_by_w
-
 
         self.image_list["y_g_t_by_x"] = y_g_t_by_x
         self.image_list["z_g_t_by_x"] = z_g_t_by_x
@@ -298,11 +228,7 @@ class GAN:
             ,
                 self.D_X.variables
             ,
-                self.G_T.variables+
-                self.G_L_X.variables+
-                self.G_L_Y.variables+
-                self.G_L_Z.variables+
-                self.G_L_W.variables
+                self.G_T.variables
              ]
 
     def optimize(self):
