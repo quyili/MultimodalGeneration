@@ -210,7 +210,7 @@ Therefore, we designed an unsupervised GAN-based registration multi-modal medica
 病灶是指人体器官的病变区域，例如肺结节、肿瘤、结石等。医学影像中的病灶信息对医生来说至关重要，它们是医生进行诊断的重要依据。在医学影像中，病灶组织与正常组织、病灶的不同种类、病灶的严重程度等不一定具有很明显的视觉差异，往往需要极具经验的专业医生进行判断。在智能医学影像处理任务中，病灶信息同样是模型进行学习和推理的重要信息，因此，医学影像的训练数据需要具有丰富经验的专业医生对医学影像中的病灶进行标注，这是十分巨大的工作量。现实中由于医生这个职业的特殊性，他们本身的工作任务就十分繁重，大量的标注任务需要耗费大量的时间。
 \item \textbf{图像合成}
 图像合成或图像生成是指从一个随机噪声矩阵或一个具有一定指导信息的矩阵合成一张预期的完整的目标图像的过程，其中，从带有指导信息的矩阵合成图像进一步发展为像素到像素转换的图像转换。图像转换是图像合成的一种。从数学本质上，图像合成可以视为一个数据分布到另一个数据分布的变换。随着生成对抗网络（GAN）\cite{25goodfellow2014generative}的提出，从随机噪声合成图像的相关研究发展迅速。
-随后包括风格迁移、人像转换等诸多图像转换应用被提出。其中，医学影像的合成指以医学影像为预期输出的目标图像的图像合成，医学影像的模态转换指以一种医学影像模态为输入合成另一种模态的医学影像的像素到像素的图像转换过程。
+随后包括风格迁移\cite{139gatys2016image},\cite{140johnson2016perceptual},\cite{6zhu2017unpaired},\cite{141azadi2018multi}、人像转换\cite{1zhao2018modular},\cite{5liang2018generative},\cite{13choi2018stargan:},\cite{27isola2017image-to-image}等诸多图像转换应用被提出。其中，医学影像的合成指以医学影像为预期输出的目标图像的图像合成，医学影像的模态转换指以一种医学影像模态为输入合成另一种模态的医学影像的像素到像素的图像转换过程。
 \end{itemize}
 
 总的来说，当前的合成医学影像的研究中还存在模态数量少、训练数据要求配准、不能有效合成病灶、无法从随机噪声无限合成、需要额外的数据产生生理结构信息、合成质量评价不客观等各项未能很好解决的问题。本研究的目的正是针对上述的这些问题，基于当前的图像合成技术和相关研究成果，进一步出探索一套完整的可以同时解决上述多个问题的解决方案，实现可控制病灶合成并带有病灶标签的配准的多模态医学影像的合成。
@@ -224,7 +224,15 @@ Therefore, we designed an unsupervised GAN-based registration multi-modal medica
 
 对合成的多模态医学影像，本研究将其与真实影像按照不同比例进行混合用于训练智能医学影像处理模型，然后根据模型的评估结果来验证合成病灶的有效性和合成影像在智能医学影像处理任务中的可用性，并以此作为一种对合成医学影像的合成质量的评估方法。
 
-本研究的技术路线图如图\ref{jslx}所示，图中详细直观地展示了上述的研究思路和研究过程。
+本研究的研究思路和内容如图\ref{yjlx}所示，图中详细直观地展示了上述的研究思路和研究过程。
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/yjlx}
+	\caption{研究思路和内容}
+	\label{yjlx}
+\end{figure*}
+
+本研究的技术路线图如图\ref{jslx}所示，图中详细直观地展示了在研究过程中采用的技术、模型的路线。
 \begin{figure*}[thbp!]
 	\centering
 	\includegraphics[width=1\textwidth]{figures/jslx}
@@ -258,27 +266,55 @@ Therefore, we designed an unsupervised GAN-based registration multi-modal medica
 \newpage
 \chead{第2章\ 国内外研究现状}
 \section{国内外研究现状}
+随着深度学习的发展，国内外出现了许多与本研究相关的研究。首先，许多在一般自然图像或人像上进行的图像合成的相关研究使得图像合成技术取到了充分的发展，尤其是基于GAN的图像合成技术，在许多研究中展现出了强大的合成能力和巨大的潜能。其次，在与本研究更相关的医学影像合成领域，广阔的应用前景吸引着研究者们开始尝试，在近两年也出现了一些优秀的研究成果。本研究基于无数前人的优秀研究基础，在如下国内外研究现状的深入分析基础上探寻当前仍存在的问题，深入研究和充分实验后提出新的解决方案。
+
+
 \begin{itemize}
 \item \textbf{图像合成的研究现状}
-图像到图像转换任务在最近的研究中被公式化为使用编码器和解码器组成的CNN实现对像素到像素的映射\cite{27isola2017image-to-image},\cite{28liu2017unsupervised},\cite{29kim2017learning},\cite{30zhu2017imagine},\cite{31zhang2018densely},\cite{32gong2018learning}。GAN可采用无监督或自监督训练，也可进行有监督训练，还能使用合成数据进行辅助训练\cite{4shin2018medical},\cite{42huo2018adversarial},\cite{43iglesias2013is},\cite{44shrivastava2017learning}，因此在数据集样本不足的场景下，GAN更为适用。
+上一章节对图像合成的概念进行了介绍和解释。在最近的图像合成研究中，CNN和GAN成为了应用最广泛的技术。语义分割模型FCN\cite{68long2015fully}是采用CNN输出整张图片的最早的研究之一，
+之后在语义分割领域，优秀的CNN模型不断涌现，例如
+SegNet\cite{117badrinarayanan2017segnet:}、
+U-Net\cite{51ronneberger2015u-net:}、
+DeepLab系列\cite{118chen2015semantic,104chen2018deeplab:,119chen2017rethinking,120chen2018encoder-decoder}、
+Fully Convolutional DenseNet\cite{121jegou2017the}、
+E-Net\cite{122paszke2017enet:}、
+EncNet\cite{135zhang2018context}、
+Mask R-CNN\cite{123he2017mask}、
+PSPNet\cite{124zhao2017pyramid}、
+RefineNet\cite{125lin2017refinenet}、
+G-FRNet\cite{126amirul2017gated}、
+DecoupledNet\cite{127hong2015decoupled}、
+DenseASPP\cite{134yang2018denseaspp}、
+ResNet DUC\cite{133wang2018understanding}、
+DFANet\cite{132li2019dfanet}、
+DANet\cite{131fu2019dual}、
+Auto Deeplab\cite{130liu2019auto}、
+APCNet\cite{129he2019adaptive}、
+CANet\cite{128zhang2019canet}
+等，这些模型在CNN模型结构上一步步发展，许多通用的模型结构设计方法和训练方法被提出和不断发展。
+在以语义分割为主的图像合成任务中，CNN图像生成模型也在发展过程中从结构上被模式化成一个编码器和一个解码器连接起来的生成器结构。采用CNN合成图像的大多数研究是有监督训练，且与其他多数CNN任务一样，任务中CNN起到的作用是提取输入的某种特征或对输入的特征进行转换而不是对输入添加更加丰富的细节，例如图像转换任务\cite{139gatys2016image},\cite{140johnson2016perceptual},\cite{66miao2018dilated},\cite{36vannguyen2015crossdomain}或前述的一系列语义分割任务。CNN对训练标签的要求限制了CNN在图像合成领域的应用场景。
 
-在人像合成领域，多域转换的发展最近已经有了进展\cite{1zhao2018modular},\cite{5liang2018generative},\cite{13choi2018stargan:},\cite{27isola2017image-to-image}。从这些研究中可以看出，采用基本的生成对抗网络进行处理主要有这些缺点：（i）$n$个域需要训练$n(n-1)$数量个转换模型; （ii）在学习特定的转换模型时，不可利用其他域的数据。对此，诸如CycleGAN 、 IcGAN\cite{71perarnau2016invertible}、StarGAN\cite{13choi2018stargan:}、ContrastGAN\cite{5liang2018generative}等可实现图像到图像的多域转换方案或模型被陆续提出，最近的ModularGAN\cite{1zhao2018modular}、ComboGAN\cite{74anoosheh2018combogan:}和XGAN\cite{75royer2018xgan:}将网络模块化为多个部件开启了另一种思路。
+相反，GAN天生是采用无监督训练的方法，同时也可添加有监督损失进行有监督训练\cite{4shin2018medical},\cite{42huo2018adversarial},\cite{44shrivastava2017learning}。因此，最近越来越多的研究采用GAN来进行图像合成任务。由于编解码结构在CNN上的有效性，在采用GAN的图像合成的发展中，图像合成任务也被模式化为使用编码器和解码器组成的生成器进行的像素到像素的映射\cite{27isola2017image-to-image},\cite{28liu2017unsupervised},\cite{29kim2017learning},\cite{30zhu2017imagine},\cite{31zhang2018densely},\cite{32gong2018learning}，其中编码器实现对输入进行特征提取和融合，解码器实现对特征进行填充还原和添加细节。GAN在图像生成任务中的惊人表现和相关数据集的发展逐步催生了图像合成领域中一些研究方向的火热，例如人像合成\cite{1zhao2018modular},\cite{5liang2018generative},\cite{13choi2018stargan:},\cite{27isola2017image-to-image}、风格迁移\cite{6zhu2017unpaired},\cite{141azadi2018multi}和草图补全\cite{27isola2017image-to-image},\cite{81xian2018texturegan:},\cite{142xian2018texturegan}等。在结构设计和训练方法上，DCGAN\cite{97radford2015unsupervised}通过采用更深层和复杂的CNN作为生成器和鉴别器使得合成质量在原生GAN的基础上有了很大的提升，展现了GAN的巨大潜力。随后ACGAN\cite{98odena2016conditional}在GAN最重要的变体CGAN\cite{70mirza2014conditional}的基础上提出了多类别图像合成方法，为GAN的应用展现了一个更加广阔的前景。之后CycleGAN\cite{6zhu2017unpaired},\cite{13choi2018stargan:}的出现，为GAN在多域图像转换中的应用开辟了一条广阔的大路，在此基础上，IcGAN\cite{71perarnau2016invertible}、StarGAN\cite{13choi2018stargan:}、ContrastGAN\cite{5liang2018generative}等可实现图像到图像的多域转换方案或模型被陆续提出，最近的ModularGAN\cite{1zhao2018modular}、ComboGAN\cite{74anoosheh2018combogan:}和XGAN\cite{75royer2018xgan:}将网络模块化为多个部件又开启了另一种思路。
+
+总的来说，无论是采用CNN还是GAN的图像合成都得到了充分的发展，尤其是在语义分割、人像合成等领域，图像合成方法得到了广泛和深入的应用与发展，产生了大量的优秀研究成果。在这些研究的基础上实现高质量的医学影像的合成将具备充分的可行性，这一方面开拓了图像合成方法的应用领域，同时也能进一步的发展图像合成方法和技术。
 
 \item \textbf{医学影像合成的研究现状}
-一些研究通过不同模态数据之间的转换\cite{2zhang2018translating},\cite{20nie2017medical},\cite{22burgos2015robust},\cite{40kamnitsas2017unsupervised}来减少诊断和治疗中给医生和病人带来不必要的代价（例如病人辐射剂量的减少）,甚至提高治疗的可行性\cite{22burgos2015robust}，同时不同模态数据之间的转换可以很好的缓解数据样本稀少的难题\cite{4shin2018medical}。
-在GAN之前，一些研究使用图字典映射\cite{22burgos2015robust}、稀疏编码\cite{33huang2017simultaneous},\cite{34vemulapalli2015unsupervised}，CNN\cite{36vannguyen2015crossdomain}等探索了医学影像的跨模态转换。
-在GAN展现了强大的生成能力之后，出现了许多基于GAN的医学影像转换研究\cite{2zhang2018translating},\cite{20nie2017medical},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}。
-许多研究使用GAN实现了更高质量的转换结果\cite{1zhao2018modular},\cite{5liang2018generative},\cite{6zhu2017unpaired},\cite{13choi2018stargan:}。
-最近一些研究实现了基于未配准的多模态数据的转换\cite{2zhang2018translating},\cite{85joyce2017robust}。
-GAN逐渐被应用到各个部位的器官，诸如脑部MRI到CT图像的转换\cite{20nie2017medical},\cite{40kamnitsas2017unsupervised}、视网膜血管注释到图像的转换\cite{41costa2017towards}、采用CycleGAN\cite{6zhu2017unpaired}的无监督心脏MRI到CT图像的相互转换与分割\cite{20nie2017medical}等。
-当前，在医学影像处理任务中，GAN被广泛应用于医学影像重建\cite{61fan2018a},\cite{65anirudh2018lose}、合成\cite{4shin2018medical},\cite{41costa2017towards},\cite{43iglesias2013is},\cite{44shrivastava2017learning}、转换\cite{2zhang2018translating},\cite{20nie2017medical},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}、超分辨率\cite{14You2018CT},\cite{15lyu2018super-resolution}等各类研究。在CycleGAN\cite{6zhu2017unpaired}实现了不成对的图像到图像转换之后，许多基于CycleGAN的研究从各个角度对GAN进行了发展。
+在深度学习提出之前，一些研究使用图字典映射\cite{22burgos2015robust}、稀疏编码\cite{33huang2017simultaneous},\cite{34vemulapalli2015unsupervised}等方法进行了医学影像合成的最初尝试。随后在CNN的发展浪潮中，也有基于CNN的医学影像合成的研究出现\cite{66miao2018dilated},\cite{36vannguyen2015crossdomain}。
 
-但在当前的医学影像合成的研究中，两模态之间的转换合成很多\cite{2zhang2018translating},\cite{20nie2017medical},\cite{22burgos2015robust},\cite{34vemulapalli2015unsupervised},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}，对多模态的研究依然稀少\cite{84chartsias2018multimodal},\cite{85joyce2017robust},\cite{4shin2018medical}。
-对于多模态影像的合成，\cite{84chartsias2018multimodal}实现多输入多输出的MRI合成，但对输入的多模态数据要求配准，\cite{85joyce2017robust}进一步实现了未配准的多输入合成模型，能够从其输入的任何子集执行MRI图像合成，但限制了输出为单一模态。\cite{66miao2018dilated}针对医学图像配准进行了深入研究。\cite{4shin2018medical}应用GAN合成脑肿瘤图像实现数据增强和数据匿名化，但需要额外训练解剖结构分割网络。
+随着语义分割、人像合成等领域中基于GAN的图像合成的发展，语义分割、人像合成等领域当前最优秀的图像合成方法，应用于高质量的医学影像的合成成为了医学影像合成研究的趋势。GAN逐步被广泛应用于医学影像的分割\cite{40kamnitsas2017unsupervised}，重建\cite{61fan2018a},\cite{65anirudh2018lose}、合成\cite{4shin2018medical},\cite{41costa2017towards},\cite{43iglesias2013is},\cite{44shrivastava2017learning}、转换\cite{2zhang2018translating},\cite{20nie2017medical},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}和超分辨率\cite{14You2018CT},\cite{15lyu2018super-resolution}等各类研究。
 
-\cite{41costa2017towards}研究了基于变分自编码器(VAE)\cite{87kingma2014auto-encoding},\cite{88rezende2014stochastic}的思想实现血管注释图的随机生成，进而合成彩色视网膜图像。\cite{96zhang2019skrgan:}在更广泛的数据集上采用Sobel算子实现对医学影像结构信息草图的提取，并通过GAN实现的草图的随机生成，再进一步实现对医学影像的合成。
-本文基于前述这些研究，对多模态医学影像的合成的各个环节进行更科学的规划和改进，实现了多个数据集上更清晰简明的结构特征图的提取、更稳定的基于VAE的结构特征图的随机合成、更逼真的基于条件GAN的配准多模态医学影像的合成、可控可验证的病灶信息的添加和合成、合成数据的可用性的量化验证。
+其中，医学影像的模态转换是当前医学影像合成的研究中发展最成熟的方向。一些医学影像模态转换的研究旨在减少诊断和治疗中给医生和病人带来不必要的代价，例如无需配准数据的心脏MRI与CT之间的互相转换\cite{2zhang2018translating}，脑部MRI转换合成CT图像\cite{20nie2017medical}，低剂量肺部CT合成高剂量CT\cite{136yi2018sharpness-aware,137yang2018low-dose,138WolterinkGenerative}等通过无辐射的MRI或低辐射的低剂量CT影像合成高辐射的高剂量CT来减少病人辐射剂量的研究，并声称他们合成的医学影像可以直接提供给医生进行诊断，也有的研究甚至表示可以提高治疗的可行性\cite{22burgos2015robust}。
+这些的医学影像模态转换合成的研究中，很多研究仅针对两模态之间的转换\cite{2zhang2018translating},\cite{20nie2017medical},\cite{22burgos2015robust},\cite{34vemulapalli2015unsupervised},\cite{35osokin2017gans},\cite{36vannguyen2015crossdomain},\cite{40kamnitsas2017unsupervised}，
+对于多个模态的互相转换合成的研究则相对较少\cite{84chartsias2018multimodal},\cite{85joyce2017robust},\cite{4shin2018medical}。
+在多模态影像合成的研究中，\cite{84chartsias2018multimodal}实现了多输入多输出的MRI合成，但对输入的多模态数据要求配准，\cite{66miao2018dilated}中详细展示了CNN在医学图像的转换配准中的潜力，于是\cite{85joyce2017robust}中通过模型的自动学习进一步实现了未配准的多输入合成模型，能够从其输入的任何子集执行MRI合成，但其限制了输出为单一模态。
+
+与模态转换合成方式不同最近的另一些研究，则试图通过合成数据来缓解医学影像数据样本稀少的难题，如脑MRI的合成\cite{4shin2018medical}、视网膜的合成\cite{41costa2017towards}、多种不同部位和不同模态的单模态医学影像的合成\cite{96zhang2019skrgan:}。
+其中，\cite{4shin2018medical}应用GAN合成脑肿瘤图像实现了通过合成影像进行数据增强和数据匿名化，但其输入为从真实数据中提取的脑结构分割图，不仅需要额外的数据标签和额外训练一个脑结构分割网络，还需要在另一个真实数据集上使用分割网络获得合成所需的分割图输入，这使得该方法的合成手多种因素的限制。\cite{4shin2018medical}首次通过在输入时添加肿瘤分割标签来指导病灶的合成，然而其合成过程没有额外的损失约束，仅采用了鉴别器提供的整体的对抗性损失进行指导，这使得病灶的合成极具不确定性，同时该研究也并未对其合成的肿瘤病灶的有效性进行深入验证和分析。
+\cite{41costa2017towards}中通过变分自编码器(VAE)\cite{87kingma2014auto-encoding},\cite{88rezende2014stochastic}实现了血管注释图的随机生成，进而以合成的血管注释图合成了彩色视网膜图像，从合成数量上没有限制，但该研究仍需训练一个血管分割网络从真实图像中提取血管注释图来训练血管注释图的VAE生成网络。
+而SkrGAN\cite{96zhang2019skrgan:}与本研究的思路不谋而合，该研究在更广泛的数据集上采用Sobel算子实现对医学影像结构信息草图的提取，并通过GAN实现的草图的随机生成，再进一步实现了对医学影像的合成。SkrGAN在训练中，仅进行了单模态影像的合成尝试，并一方面由于始终采用从真实数据集中提取的草图进行训练，并以输入草图对应的真实影像为监督标签，使得其模型的训练极易过拟合且缺乏对合成草图的适应能力，最终导致模型合成的医学影像缺乏多样性，另一方面提取的草图对原图生理结构信息的勾勒效果较差，使得合成的影像在结构细节上存在残缺或模糊的情况。与前述绝大部分的研究相同的是，SkrGAN合成的医学影像没有考虑病灶信息的合成，也没有对应的病灶标签的产出，这使得绝大多数的合成数据没有可用性。
 \end{itemize}
+
+基于对前述这些相关研究的分析，本研究对多模态医学影像的合成的各个环节进行了更科学的规划和改进，实现了多个数据集上更清晰简明的结构特征图的提取、更稳定的基于VAE的结构特征图的随机合成、更逼真的基于条件GAN的配准多模态医学影像的合成、可控可验证的病灶信息的添加和合成、合成数据的可用性的量化验证。
 
 \newpage
 \chead{第3章\ 基础方法和数据集}
