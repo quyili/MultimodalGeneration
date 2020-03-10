@@ -266,6 +266,8 @@ Therefore, we designed an unsupervised GAN-based registration multi-modal medica
 \newpage
 \chead{µÚ2ÕÂ\ ¹úÄÚÍâÑÐ¾¿ÏÖ×´}
 \section{¹úÄÚÍâÑÐ¾¿ÏÖ×´}
+±¾ÎÄÔÚÉÏÒ»ÕÂÖÐ½éÉÜÁË±¾ÑÐ¾¿µÄÎÊÌâ±³¾°¡¢ÑÐ¾¿ÒâÒåºÍÑÐ¾¿Ë¼Â·£¬ÔÚ±¾ÕÂÖÐ£¬½«¶ÔÓë±¾ÑÐ¾¿Ïà¹ØµÄ¹úÄÚÍâÑÐ¾¿ÏÖ×´½øÐÐÏ¸ÖÂ·ÖÎö¡£
+
 Ëæ×ÅÉî¶ÈÑ§Ï°µÄ·¢Õ¹£¬¹úÄÚÍâ³öÏÖÁËÐí¶àÓë±¾ÑÐ¾¿Ïà¹ØµÄÑÐ¾¿¡£Ê×ÏÈ£¬Ðí¶àÔÚÒ»°ã×ÔÈ»Í¼Ïñ»òÈËÏñÉÏ½øÐÐµÄÍ¼ÏñºÏ³ÉµÄÏà¹ØÑÐ¾¿Ê¹µÃÍ¼ÏñºÏ³É¼¼ÊõÈ¡µ½ÁË³ä·ÖµÄ·¢Õ¹£¬ÓÈÆäÊÇ»ùÓÚGANµÄÍ¼ÏñºÏ³É¼¼Êõ£¬ÔÚÐí¶àÑÐ¾¿ÖÐÕ¹ÏÖ³öÁËÇ¿´óµÄºÏ³ÉÄÜÁ¦ºÍ¾Þ´óµÄÇ±ÄÜ¡£Æä´Î£¬ÔÚÓë±¾ÑÐ¾¿¸üÏà¹ØµÄÒ½Ñ§Ó°ÏñºÏ³ÉÁìÓò£¬¹ãÀ«µÄÓ¦ÓÃÇ°¾°ÎüÒý×ÅÑÐ¾¿ÕßÃÇ¿ªÊ¼³¢ÊÔ£¬ÔÚ½üÁ½ÄêÒ²³öÏÖÁËÒ»Ð©ÓÅÐãµÄÑÐ¾¿³É¹û¡£±¾ÑÐ¾¿»ùÓÚÎÞÊýÇ°ÈËµÄÓÅÐãÑÐ¾¿»ù´¡£¬ÔÚÈçÏÂ¹úÄÚÍâÑÐ¾¿ÏÖ×´µÄÉîÈë·ÖÎö»ù´¡ÉÏÌ½Ñ°µ±Ç°ÈÔ´æÔÚµÄÎÊÌâ£¬ÉîÈëÑÐ¾¿ºÍ³ä·ÖÊµÑéºóÌá³öÐÂµÄ½â¾ö·½°¸¡£
 
 \subsection{Í¼ÏñºÏ³ÉµÄÑÐ¾¿ÏÖ×´}
@@ -320,20 +322,13 @@ CANet\cite{128zhang2019canet}
 ÔÚ¶ÔÏà¹ØÑÐ¾¿½øÐÐÉÏÊöµÄ·ÖÎöÖÐ²»ÄÑ·¢ÏÖ£¬µ±Ç°ºÏ³ÉÒ½Ñ§Ó°Ïñ¾¡¹ÜÈ¡µÃÁË³¤×ãµÄ½øÕ¹£¬¾ß±¸ÁËºÜºÃµÄÑÐ¾¿»ù´¡£¬µ«ÒÀÈ»ÓÐÐí¶àÎÊÌâØ½´ý½â¾ö£¬ÒÀÈ»ÓÐ¼ÌÐøÉîÈëÑÐ¾¿µÄ¾Þ´ó¼ÛÖµºÍ¿Õ¼ä¡£ÔÚÇ°Êö¸÷ÏîÑÐ¾¿µÄ»ù´¡Ö®ÉÏ£¬±¾ÑÐ¾¿¶Ô¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄºÏ³É·½°¸µÄ¸÷¸ö»·½Ú½øÐÐÁË¸ü¿ÆÑ§µÄ¹æ»®ºÍ¸Ä½ø£¬ÊµÏÖÁË¶à¸öÊý¾Ý¼¯ÉÏ¸üÇåÎú¼òÃ÷µÄ½á¹¹ÌØÕ÷Í¼µÄÌáÈ¡¡¢¸üÎÈ¶¨µÄ»ùÓÚVAEµÄ½á¹¹ÌØÕ÷Í¼µÄËæ»úºÏ³É¡¢¸ü±ÆÕæµÄ»ùÓÚÌõ¼þGANµÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄºÏ³É¡¢¿É¿Ø¿ÉÑéÖ¤µÄ²¡ÔîÐÅÏ¢µÄÌí¼ÓºÍºÏ³É¡¢ºÏ³ÉÊý¾ÝµÄ¿ÉÓÃÐÔµÄÁ¿»¯ÑéÖ¤¡£
 
 \newpage
-\chead{µÚ3ÕÂ\ »ù´¡·½·¨ºÍÊý¾Ý¼¯}
-\section{»ù´¡·½·¨ºÍÊý¾Ý¼¯}
-\subsection{Êý¾Ý¼¯}
-ÔÚÎÒÃÇµÄÊµÑéÖÐÊ¹ÓÃÁËÁù¸ö¹«¿ªÊý¾Ý¼¯£º
-\begin{itemize}
-\item \textbf{BRATS2015Êý¾Ý¼¯\cite{91menze:hal-00935640}}¹«¿ªÊý¾Ý¼¯BRATS2015°üº¬T1 / T2 / T1c / FlairµÄËÄ¸öÅä×¼Ä£Ì¬ÄÔ²¿3D MRI¡£ÑµÁ·¼¯Ã¿¸öÄ£Ì¬ÓÐ274¸ö´óÐ¡Îª155 $ \times $ 240 $ \times $ 240ÕÅÍ¼¼°¶ÔÓ¦µÄ274ÕÅÖ×Áö·Ö¸î±êÇ©Í¼¡£ ÎÒÃÇ½«Ñù±¾°´9:1ÖØÐÂ»®·ÖÑµÁ·¼¯ºÍ²âÊÔ¼¯£¬È»ºóÈ¡Ã¿¸ö3D MRIµÄ55-105Ö®¼äµÄ50¸öÇÐÆ¬¹¹½¨2DÊý¾Ý¼¯¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯¡£
-\item \textbf{Kaggle Chest X-RayÊý¾Ý¼¯\footnote{https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia }}¸ÃÊý¾Ý¼¯°üÀ¨5863¸ö²¡¶¾ÐÔ·ÎÑ×¡¢Ï¸¾úÐÔ·ÎÑ×ºÍÕý³£·Î²¿µÄÕýÃæ2D XÉäÏß»Ò¶ÈÍ¼£¬Í¼Æ¬³ß´ç´Ó384*127µ½2772*2304²»µÈ¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£
-\item \textbf{Kaggle Lung CTÊý¾Ý¼¯\footnote{https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/}}¸ÃÊý¾Ý¼¯°üº¬267¸öÐØ²¿ÖÁ¸¹²¿ºáÏò½ØÃæµÄ2D CT»Ò¶ÈÍ¼£¬³ß´çÎª512*512¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯¡£
-\item \textbf{DRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯\footnote{http://www.isi.uu.nl/Research/Databases/DRIVE/}}¸ÃÊý¾Ý¼¯µÄÑµÁ·¼¯ºÍ²âÊÔ¼¯¸÷°üº¬20ÕÅ2D²ÊÉ«ÑÛµ×ÊÓÍøÄ¤ÕÕÆ¬£¬³ß´ç¾ùÎª565*584£¬ÑµÁ·¼¯»¹ÓÐ20ÕÅ¶ÔÓ¦µÄÊÓÍøÄ¤Ñª¹ÜÖ÷ÊÓÍ¼¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çÍ³Ò»²åÖµÎª512*512¡£
-\item \textbf{FIREÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯\footnote{https://projects.ics.forth.gr/cvrl/fire/}}¸ÃÊý¾Ý¼¯°üº¬268ÕÅ2912*2912µÄ2D²ÊÉ«ÑÛµ×ÊÓÍøÄ¤ÕÕÆ¬¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£
-\item \textbf{Ìì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}}¸ÃÊý¾Ý¼¯°üº¬·Î²¿3D CTÉ¨Ãè¹²1837ÕÅ£¬ÑµÁ·¼¯1470ÕÅ£¬²âÊÔ¼¯145ÕÅ¡£ÑµÁ·¼¯Ìá¹©µÄ±ê×¢ÐÅÏ¢Îª£ºÖÐÐÄ×ø±ê+Ö±¾¶£¨µ¥Î»Îªmm£©+Àà±ð£¨1-½á½Ú£¬2-·ÎÃÜ¶ÈÔö¸ßÓ°£¬3-·ÎÆøÖ×»ò·Î´óÅÝ£¬5-Ë÷Ìõ£¬31-¶¯ÂöÓ²»¯»ò¸Æ»¯£¬32-ÁÜ°Í½á¸Æ»¯£¬33-ÐØÄ¤Ôöºñ£©¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇ¸ù¾Ý±ê×¢ÐÅÏ¢ÇÐÈ¡ÓÐ±ê×¢µÄslice¼°ÆäÇ°ºóslice×é³ÉµÄ3Í¨µÀÍ¼£¬ÔÙ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£ÕâÑùÎÒÃÇµÃµ½Ò»¸ö°üº¬17156ÕÅ512*512*3µÄCTÍ¼£¬ÐÂµÄ±êÇ©ÎªÖÐ¼äÍ¨µÀµÄÔ­Ê¼±êÇ©¡£
-\end{itemize}
+\chead{µÚ3ÕÂ\ »ù´¡·½·¨}
+\section{»ù´¡·½·¨}
+±¾ÎÄÔÚÇ°Á½¸öÕÂ½ÚÖÐ¼òÒª½éÉÜÁË±¾ÑÐ¾¿µÄ¼¼ÊõÂ·ÏßºÍÏà¹ØÑÐ¾¿»ù´¡£¬ÔÚ±¾ÕÂ½ÚÖÐ£¬½«¶Ô±¾ÑÐ¾¿Ê¹ÓÃµÄ»ù´¡·½·¨½øÐÐ½éÉÜ£¬±¾ÎÄºóÐøÕÂ½ÚÖÐÌá³öµÄ·½·¨½«¶Ô±¾ÕÂÌáµ½µÄ·½·¨½øÐÐµ÷ÓÃ¡¢¸Ä½øºÍÀ©Õ¹¡£±¾ÕÂ½«¶Ô»ùÓÚCNNµÄÍ¼Ïñ·ÖÀà¡¢Éú³É¶Ô¿¹ÍøÂç¡¢±ä·Ö×Ô¶¯±àÂëÆ÷¡¢ÓïÒå·Ö¸î¡¢Ä¿±ê¼ì²â½øÐÐÒÀ´Î½éÉÜ¡£
+%ºóÐøÕÂ½ÚµÄÊµÑé½«ÔÚ±¾ÕÂ½éÉÜµÄ¸÷¸öÊý¾Ý¼¯ÉÏ½øÐÐ
+
 \subsection{»ùÓÚCNNµÄÍ¼Ïñ·ÖÀà}
-Í¼Ïñ·ÖÀàÊÇÖ¸²ÉÓÃÉè¼ÆµÄËã·¨ºÍÄ£ÐÍÓÃ¸ø¶¨µÄÒ»×éÃ¿ÕÅÍ¼Ïñ¶¼±»±ê¼ÇÁË¶ÔÓ¦µÄÀà±ðµÄÍ¼Ïñ¼¯×÷ÎªÑµÁ·¼¯½øÐÐÑµÁ·ºÍÑ§Ï°£¬È»ºóÔÙ¶ÔÁíÒ»×éÐÂµÄ²âÊÔÍ¼Ïñ¼¯Ô¤²âÆä±êÇ©Àà±ðµÄÈÎÎñ¡£¾í»ýÊÇ´«Í³Êý×ÖÍ¼Ïñ´¦ÀíÖÐ¶ÔÍ¼Ïñ½øÐÐµÄÒ»ÖÖ»ù±¾²Ù×÷£¬Ò²±»³ÆÎªÂË²¨¡£¾í»ýÉñ¾­ÍøÂç£¨CNN£©ÊÇÔÚ´«Í³Éñ¾­ÍøÂçµÄ»ù´¡ÉÏÓ¦ÓÃÁË¾í»ý²Ù×÷£¬¾í»ý²Ù×÷Óë¼¤»îº¯Êý¡¢Åú¹éÒ»»¯¡¢³Ø»¯²Ù×÷¡¢È«Á¬½Ó²Ù×÷µÈ¶à²ã¸´ºÏ¾ÍµÃµ½ÁËÒ»¸ö¸´ÔÓµÄÉñ¾­ÍøÂç£¬ÔÙÍ¨¹ýÉñ¾­ÍøÂçµÄ·´Ïò´«²¥»úÖÆ£¬CNN¾Í¿ÉÒÔ×Ô¶¯Ñ§Ï°¾í»ýºËµÄ²ÎÊý£¬´Ó¶øÄÜÑ§»á´¦ÀíÊ®·Ö¸´ÔÓµÄÍ¼Ïñ´¦ÀíÈÎÎñ¡£Éî¶ÈÑ§Ï°ÕýÊÇ´Ó»ùÓÚCNNµÄÍ¼Ïñ·ÖÀà¿ªÊ¼·¢Õ¹¡£1998ÄêÊ×¸öCNNÄ£ÐÍLeNetÌá³ö£¬µ«Ö±µ½2012ÄêILSVRC£¨ImageNet Large Scale Visual Recognition Challenge£©ÖÐCNNÄ£ÐÍAlexNet\cite{114krizhevsky2017imagenet}ÒÔ¸ß³ö10\%µÄÕýÈ·ÂÊÁ¦Ñ¹µÚ¶þÃûÈ¡µÃ¹Ú¾ü£¬¾í»ýÉñ¾­ÍøÂçµÄ¾Þ´óÓÅÊÆ²Å±»ÈËÃÇ·¢ÏÖ¡£´ËºóCNNÄ£ÐÍ½øÈëÁË·ÉËÙ·¢Õ¹ÆÚ£¬VGGNet\cite{102simonyan2014very}¡¢GoogleNet\cite{115szegedy2015going}¡¢ResNet\cite{116he2015deep}µÈ¾­µäÍøÂçÏà¼ÌÌá³ö£¬Í¼Ïñ·ÖÀàÈÎÎñÒ²ËæÖ®¿ìËÙ·¢Õ¹¡£
+Í¼Ïñ·ÖÀàÊÇÖ¸²ÉÓÃÉè¼ÆµÄËã·¨ºÍÄ£ÐÍÓÃ¸ø¶¨µÄÒ»×éÃ¿ÕÅÍ¼Ïñ¶¼±»±ê¼ÇÁË¶ÔÓ¦µÄÀà±ðµÄÍ¼Ïñ¼¯×÷ÎªÑµÁ·¼¯½øÐÐÑµÁ·ºÍÑ§Ï°£¬È»ºóÔÙ¶ÔÁíÒ»×éÐÂµÄ²âÊÔÍ¼Ïñ¼¯Ô¤²âÆä±êÇ©Àà±ðµÄÈÎÎñ¡£¾í»ýÊÇ´«Í³Êý×ÖÍ¼Ïñ´¦ÀíÖÐ¶ÔÍ¼Ïñ½øÐÐµÄÒ»ÖÖ»ù±¾²Ù×÷£¬Ò²±»³ÆÎªÂË²¨¡£¾í»ýÉñ¾­ÍøÂç£¨CNN£©ÊÇÔÚ´«Í³Éñ¾­ÍøÂçµÄ»ù´¡ÉÏÓ¦ÓÃÁË¾í»ý²Ù×÷£¬¾í»ý²Ù×÷Óë¼¤»îº¯Êý¡¢Åú¹éÒ»»¯¡¢³Ø»¯²Ù×÷¡¢È«Á¬½Ó²Ù×÷µÈ¶à²ã¸´ºÏ¾ÍµÃµ½ÁËÒ»¸ö¸´ÔÓµÄÉñ¾­ÍøÂç£¬ÔÙÍ¨¹ýÉñ¾­ÍøÂçµÄ»ùÓÚËæ»úÌÝ¶ÈÏÂ½µ£¨SGD£©Ëã·¨µÄ·´Ïò´«²¥»úÖÆ£¬CNNÖÐ¾í»ýºËµÄ²ÎÊýºÍÆäËû¿ÉÑ§Ï°µÄ²ÎÊý¾ÍÄÜ²»¶ÏµØ¸ù¾ÝÌÝ¶È¸üÐÂÊµÏÖ×Ô¶¯Ñ§Ï°£¬´Ó¶øÄÜÑ§»á´¦ÀíÊ®·Ö¸´ÔÓµÄÍ¼Ïñ´¦ÀíÈÎÎñ¡£Éî¶ÈÑ§Ï°ÕýÊÇ´Ó»ùÓÚCNNµÄÍ¼Ïñ·ÖÀà¿ªÊ¼·¢Õ¹¡£1998ÄêÊ×¸öCNNÄ£ÐÍLeNet\cite{103lecun1998gradient}Ìá³ö£¬µ«Ö±µ½2012ÄêILSVRC£¨ImageNet Large Scale Visual Recognition Challenge£©\cite{144russakovsky2015imagenet}ÖÐCNNÄ£ÐÍAlexNet\cite{114krizhevsky2017imagenet}ÒÔ¸ß³ö10\%µÄÕýÈ·ÂÊÁ¦Ñ¹µÚ¶þÃûÈ¡µÃ¹Ú¾ü£¬¾í»ýÉñ¾­ÍøÂçµÄ¾Þ´óÓÅÊÆ²Å¹ãÎªÈËÖª¡£´ËºóCNNÄ£ÐÍ½øÈëÁË·ÉËÙ·¢Õ¹ÆÚ£¬VGGNet\cite{102simonyan2014very}¡¢GoogleNet\cite{115szegedy2015going}¡¢ResNet\cite{116he2015deep}µÈ¾­µäÍøÂçÏà¼ÌÌá³ö£¬Í¼Ïñ·ÖÀàÈÎÎñÒ²ËæÖ®¿ìËÙ·¢Õ¹¡£
 \begin{figure*}[thbp!]
 	\centering
 	\includegraphics[width=0.95\textwidth]{figures/VGG}
@@ -342,31 +337,31 @@ CANet\cite{128zhang2019canet}
 \end{figure*}
 ÈçÍ¼ËùÊ¾£¬ÀàËÆÓÚVGGNetµÄCNN·ÖÀàÄ£ÐÍ£¬½ÓÊÕÍ¼Ïñ×÷ÎªÊäÈë£¬ÊäÈëÒ»¸öÀà±ð¸ÅÂÊÏòÁ¿£¬¸ÃÏòÁ¿ÓëÊäÈëµÄÀà±ð±êÇ©Í¨¹ýËðÊ§º¯ÊýÇóµÃËðÊ§£¬ÔÙ¶ÔËðÊ§º¯ÊýÇóµ¼£¬¼´¿É·´Ïò´«²¥µÃµ½È«²¿Ä£ÐÍ²ÎÊýµÄÌÝ¶È£¬ÔÙ¶ÔÄ£ÐÍ²ÎÊýÖ´ÐÐÌÝ¶È¸üÐÂ£¬¼´¿ÉÊ¹µÃÄ£ÐÍ²ÎÊýµÃµ½Ñ§Ï°ºÍÑµÁ·£¬Í¨¹ýÕâÑù²»¶ÏµØÑ§Ï°£¬Ä£ÐÍ²ÎÊý×îÖÕÊÕÁ²¡£Ê¹ÓÃÑµÁ·ºÃµÄVGGNetÄ£ÐÍ·ÖÀàÊ±£¬Í¨¹ý$agrmax()$º¯Êý¶ÔÔ¤²âµÄÀà±ð¸ÅÂÊÏòÁ¿½øÐÐ´¦Àí¼´¿ÉµÃµ½Ô¤²âµÄÍ¼ÏñÀà±ð¡£
 \subsection{Éú³É¶Ô¿¹ÍøÂç}
-Éú³É¶Ô¿¹ÍøÂç£¨GAN£¬Generative Adversarial Networks£©\cite{25goodfellow2014generative}Ìá³öºó£¬Óë¾í»ýÉñ¾­ÍøÂç½áºÏ³ÉÎªÒ»ÖÖÎÞ¼à¶½Ñ§Ï°Éî¶ÈÑ§Ï°Ä£ÐÍ\cite{97radford2015unsupervised}¡£GANÖ÷Òª°üÀ¨ÁËÁ½¸ö²¿·Ö£¬¼´Éú³ÉÆ÷ÍøÂç$G$£¨Generator£©ºÍÅÐ±ðÆ÷ÍøÂç$D$£¨Discriminator£©£¬Á½Õß²»¶Ï²©ÞÄ£¬½ø¶øÊ¹$G$Ñ§Ï°µ½Êý¾ÝµÄ·Ö²¼£¬Èç¹ûÓÃµ½Í¼Æ¬Éú³ÉÉÏ£¬ÔòÑµÁ·Íê³Éºó£¬$G$¿ÉÒÔ´ÓÒ»¶ÎËæ»úÊýÖÐÉú³É±ÆÕæµÄÍ¼Ïñ¡£$G$½ÓÊÕÒ»¸öËæ»úµÄÔëÉù$z$£¬Í¨¹ýÕâ¸öÔëÉùÉú³ÉÍ¼Ïñ$x$£»$D$ÊäÈëÍ¼Æ¬$x$£¬Êä³ö¸ÃÍ¼Æ¬ÎªÕæÊµÍ¼Æ¬µÄ¸ÅÂÊ$D(x)$£¬Èç¹ûÎª1£¬¾Í´ú±í100\%ÊÇÕæÊµµÄÍ¼Æ¬£¬¶øÊä³öÎª0£¬¾Í´ú±íÊÇÍêÈ«²»ÕæÊµµÄÍ¼Æ¬¡£ÑµÁ·¹ý³ÌÖÐ£¬Éú³ÉÍøÂç$G$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿Éú³ÉÕæÊµµÄÍ¼Æ¬È¥ÆÛÆ­ÅÐ±ðÍøÂç$D$¡£¶øÂç$D$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿±æ±ð³ö$G$Éú³ÉµÄ¼ÙÍ¼ÏñºÍÕæÊµµÄÍ¼Ïñ¡£ÕâÑù£¬$G$ºÍÂç$D$¹¹³ÉÁËÒ»¸ö¶¯Ì¬µÄ¡°²©ÞÄ¹ý³Ì¡±£¬×îÖÕµÄÆ½ºâµã¼´ÄÉÊ²¾ùºâµã£¨Nash equilibrium point£©¡£ÑµÁ·Ê±Í¨¹ýËðÊ§º¯ÊýÊ¹¶þÕßÐÎ³É¶Ô¿¹£¬×îÖÕÁ½¸öÍøÂç´ïµ½¶¯Ì¬¾ùºâµÄ±êÖ¾ÊÇÉú³ÉÆ÷Éú³ÉµÄÍ¼Ïñ½Ó½üÓÚÕæÊµÍ¼Ïñ·Ö²¼£¬¶øÅÐ±ðÆ÷Ê¶±ð²»³öÕæ¼ÙÍ¼Ïñ£¬¶ÔÓÚ¸ø¶¨Í¼ÏñµÄÔ¤²âÎªÕæµÄ¸ÅÂÊ»ù±¾½Ó½ü 0.5£¨´¦ÓÚËæ»ú²Â²âË®Æ½£©¡£GANµÄÒ»¸öµäÐÍËðÊ§º¯ÊýÈçÏÂ£º
+Éú³É¶Ô¿¹ÍøÂç£¨GAN£¬Generative Adversarial Networks£©\cite{25goodfellow2014generative}Ìá³öºó£¬Óë¾í»ýÉñ¾­ÍøÂç½áºÏ³ÉÎªÒ»ÖÖÎÞ¼à¶½Ñ§Ï°µÄÉî¶ÈÑ§Ï°Ä£ÐÍ\cite{97radford2015unsupervised}¡£GANÖ÷Òª°üÀ¨ÁËÁ½¸ö²¿·Ö£¬¼´Éú³ÉÆ÷ÍøÂç$G$£¨Generator£©ºÍ¼ø±ðÆ÷ÍøÂç$D$£¨Discriminator£©£¬Á½Õß²»¶Ï²©ÞÄ£¬½ø¶øÊ¹$G$Ñ§Ï°µ½Êý¾ÝµÄ·Ö²¼£¬Èç¹ûÓÃµ½Í¼Æ¬Éú³ÉÉÏ£¬ÔòÑµÁ·Íê³Éºó£¬$G$¿ÉÒÔ´ÓÒ»¶ÎËæ»úÊýÖÐÉú³É±ÆÕæµÄÍ¼Ïñ¡£$G$½ÓÊÕÒ»¸öËæ»úµÄÔëÉù$z$£¬Í¨¹ýÕâ¸öÔëÉùÉú³ÉÍ¼Ïñ$x$£»$D$ÊäÈëÍ¼Æ¬$x$£¬Êä³ö¸ÃÍ¼Æ¬ÎªÕæÊµÍ¼Æ¬µÄ¸ÅÂÊ$D(x)$£¬Èç¹ûÎª1£¬¾Í´ú±í100\%ÊÇÕæÊµµÄÍ¼Æ¬£¬¶øÊä³öÎª0£¬¾Í´ú±íÊÇÍêÈ«²»ÕæÊµµÄÍ¼Æ¬¡£ÑµÁ·¹ý³ÌÖÐ£¬Éú³ÉÍøÂç$G$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿Éú³ÉÕæÊµµÄÍ¼Æ¬È¥ÆÛÆ­¼ø±ðÆ÷$D$¡£¶ø$D$µÄÄ¿±ê¾ÍÊÇ¾¡Á¿±æ±ð³ö$G$Éú³ÉµÄ¼ÙÍ¼ÏñºÍÕæÊµµÄÍ¼Ïñ¡£ÕâÑù£¬$G$ºÍÂç$D$¹¹³ÉÁËÒ»¸ö¶¯Ì¬µÄ¡°²©ÞÄ¡±¹ý³Ì£¬×îÖÕµÄÆ½ºâµã¼´ÄÉÊ²¾ùºâµã£¨Nash equilibrium point£©¡£ÑµÁ·Ê±Í¨¹ýËðÊ§º¯ÊýÊ¹¶þÕßÐÎ³É¶Ô¿¹£¬×îÖÕÁ½¸öÍøÂç´ïµ½¶¯Ì¬¾ùºâµÄ±êÖ¾ÊÇÉú³ÉÆ÷Éú³ÉµÄÍ¼Ïñ½Ó½üÓÚÕæÊµÍ¼Ïñ·Ö²¼£¬¶øÅÐ±ðÆ÷Ê¶±ð²»³öÕæ¼ÙÍ¼Ïñ£¬¶ÔÓÚ¸ø¶¨Í¼ÏñµÄÔ¤²âÎªÕæµÄ¸ÅÂÊ»ù±¾½Ó½ü 0.5£¨´¦ÓÚËæ»ú²Â²âË®Æ½£©¡£GANµÄÒ»¸öµäÐÍËðÊ§º¯ÊýÈçÏÂ£º
 \begin{equation}
 \min_G \max_D V(G,D)=\mathbb{E}_{x\sim p_{data}(x)}[\log(D(x))]+\mathbb{E}_{z\sim p_z(z)}[\log(1-D(G(z)))].
 \end{equation}
 
-Ïà±È½Ï´«Í³µÄÄ£ÐÍ£¬GAN´æÔÚÁ½¸ö²»Í¬µÄÍøÂç£¬¶ø²»ÊÇµ¥Ò»µÄÍøÂç£¬²¢ÇÒÑµÁ··½Ê½²ÉÓÃµÄÊÇ¶Ô¿¹ÑµÁ··½Ê½¡£GANÖÐ$G$µÄÌÝ¶È¸üÐÂÐÅÏ¢À´×ÔÅÐ±ðÆ÷$D$£¬¶ø²»ÊÇÖ±½ÓÀ´×ÔÊý¾ÝÑù±¾¡£
+Ïà±È½Ï´«Í³µÄÄ£ÐÍ£¬GAN´æÔÚÁ½¸ö²»Í¬µÄÍøÂç£¬¶ø²»ÊÇµ¥Ò»µÄÍøÂç£¬²¢ÇÒÑµÁ··½Ê½²ÉÓÃµÄÊÇ¶Ô¿¹ÑµÁ··½Ê½¡£GANÖÐ$G$µÄÌÝ¶È¸üÐÂÐÅÏ¢À´×Ô¼ø±ðÆ÷$D$£¬¶ø²»ÊÇÖ±½ÓÀ´×ÔÊý¾ÝÑù±¾¡£
 GAN¾ßÓÐÒÔÏÂÓÅµã£º
 GAN×÷ÎªÒ»ÖÖÉú³ÉÄ£ÐÍ£¬ÎÞÐè¸´ÔÓµÄËðÊ§º¯ÊýÉè¼Æ£¬Ïà±È½ÏÊÜÏÞ²£¶û×ÈÂü»ú£¨RBM£¬Restricted Boltzmann machine,£©ºÍGenerative Stochastic Networks£¨GSNs£©\cite{105alain2015gsns}µÈÆäËûÉú³ÉÄ£ÐÍÖ»ÓÃµ½ÁË·´Ïò´«²¥£¬¶ø²»ÐèÒª¸´ÔÓµÄÂí¶û¿Æ·òÁ´£»
 GANÏà±ÈÒ»°ãCNNÄ£ÐÍ£¬¿ÉÒÔ²úÉú¸ü¼ÓÇåÎú¡¢ÕæÊµµÄÑù±¾£»
 GAN²ÉÓÃÎÞ¼à¶½µÄÑ§Ï°·½Ê½ÑµÁ·£¬¿ÉÒÔ±»¹ã·ºÓÃÔÚÎÞ¼à¶½Ñ§Ï°ºÍ°ë¼à¶½Ñ§Ï°ÁìÓò£»
-GANÓ¦ÓÃ³¡¾°·á¸»£¬±ÈÈçÍ¼Æ¬·ç¸ñÇ¨ÒÆ¡¢³¬·Ö±æÂÊ¡¢Í¼Ïñ²¹È«¡¢È¥Ôë¡£
+GANÓ¦ÓÃ³¡¾°·á¸»£¬±ÈÈçÍ¼Æ¬·ç¸ñÇ¨ÒÆ¡¢³¬·Ö±æÂÊ¡¢²ÝÍ¼²¹È«¡¢Í¼ÏñÈ¥ÔëµÈ¡£
 
 \subsection{±ä·Ö×Ô±àÂëÆ÷}
-±ä·Ö×Ô±àÂëÆ÷£¨VAE£¬Variational auto-encoder£©\cite{106kingma2013auto-encoding}ÊÇÒ»ÀàÖØÒªµÄÉú³ÉÄ£ÐÍ£¬ËüÓÚ2013ÄêÓÉDiederik P.KingmaºÍMax WellingÌá³ö£¬
-Í¨¹ý2016ÄêCarl DoerschµÄ½éÉÜÂÛÎÄ\cite{107doersch2016tutorial}µÃµ½·ÉËÙ·¢Õ¹¡£VAEÓëGANÒ»Ñù£¬ÊÇÎÞ¼à¶½Ñ§Ï°×î¾ßÇ°¾°µÄ·½·¨Ö®Ò»¡£
+±ä·Ö×Ô±àÂëÆ÷£¨VAE£¬Variational auto-encoder£©\cite{106kingma2013auto-encoding}ÊÇÁíÒ»ÀàÖØÒªµÄÉú³ÉÄ£ÐÍ£¬ËüÓÚ2013ÄêÓÉDiederik P.KingmaºÍMax Welling×îÔçÌá³ö£¬
+ÔÚ2016ÄêCarl DoerschµÄ½éÉÜÂÛÎÄ\cite{107doersch2016tutorial}·¢±íºóµÃµ½¿ìËÙ·¢Õ¹¡£VAEÓëGANÒ»Ñù£¬ÊÇÎÞ¼à¶½Ñ§Ï°×î¾ßÇ°¾°µÄ·½·¨Ö®Ò»¡£
 VAEÓëGANÁ½¸öµÄÄ¿±ê»ù±¾ÊÇÒ»ÖÂµÄ£¬¼´Ï£Íû¹¹½¨Ò»¸ö´ÓÒþ±äÁ¿$z$Éú³ÉÄ¿±êÊý¾Ý$x$µÄÄ£ÐÍ£¬µ«ÊÇÊµÏÖÉÏÓÐËù²»Í¬¡£
 ¸ü×¼È·µØ½²£¬Á½Õß¼ÙÉèÁË$z$·þ´ÓÄ³Ð©³£¼ûµÄ·Ö²¼£¨±ÈÈçÕýÌ¬·Ö²¼»ò¾ùÔÈ·Ö²¼£©£¬È»ºóÏ£ÍûÑµÁ·Ò»¸öÄ£ÐÍ$x=G(z)$£¬Õâ¸öÄ£ÐÍÄÜ¹»½«Ô­À´µÄ¸ÅÂÊ·Ö²¼Ó³Éäµ½ÑµÁ·¼¯µÄ¸ÅÂÊ·Ö²¼£¬
-VAE°üº¬±àÂëÆ÷$E$ºÍ½âÂëÆ÷$G$£¬±àÂëÆ÷½«Êý¾Ý·Ö²¼µÄ¸ß¼¶ÌØÕ÷Ó³Éäµ½Êý¾ÝµÄµÍ¼¶±íÕ÷£¬µÍ¼¶±íÕ÷½Ð×÷±¾Õ÷ÏòÁ¿£¨latent  vector£©£¬¼´$z$¡£½âÂëÆ÷½ÓÊÕÊý¾ÝµÄµÍ¼¶±íÕ÷£¬È»ºóÊä³öÍ¬ÑùÊý¾ÝµÄ¸ß¼¶±íÕ÷£¬¼´ÖØ½¨µÄÊý¾Ý$x_r$¡£
+VAE°üº¬±àÂëÆ÷$E$ºÍ½âÂëÆ÷$G$£¬±àÂëÆ÷½«Êý¾Ý·Ö²¼µÄ¸ß¼¶ÌØÕ÷Ó³Éäµ½Êý¾ÝµÄµÍ¼¶±íÕ÷£¬µÍ¼¶±íÕ÷±»³Æ×÷±¾Õ÷ÏòÁ¿£¨latent  vector£©£¬¼´$z$¡£½âÂëÆ÷½ÓÊÕÊý¾ÝµÄµÍ¼¶±íÕ÷£¬È»ºóÊä³öÍ¬ÑùÊý¾ÝµÄ¸ß¼¶±íÕ÷£¬¼´ÖØ½¨µÄÊý¾Ý$x_r$¡£
 
 Ò»¸ö±ê×¼VAEÖÐ£¬Òþ±äÁ¿$z$·þ´Ó±ê×¼ÕýÌ¬·Ö²¼£¬¼´$z\sim\mathcal{N}(0,1^2)$¡£
 ±àÂëÆ÷$E$½«Ô­Ê¼Êý¾Ý$x$ÄâºÏÎªÒ»¸ö¾ùÖµ$\mu(x)$ºÍ·½²î$\sigma(x)$£¬
-Í¨¹ýÖØ²ÉÑù¼¼ÇÉ¹¹½¨ÁËÒ»¸öÌõ¼þÕýÌ¬·Ö²¼$\widetilde{z}=\mu{x}+\exp(0.5\times\sigma{x})\times z$£¬ÔÙÓÃ½âÂëÆ÷$G$¶Ô$\widetilde{z}$½âÂëµÃµ½$x_r$¡£
+Í¨¹ýÖØ²ÉÑù¼¼ÇÉ\cite{106kingma2013auto-encoding}¹¹½¨ÁËÒ»¸öÌõ¼þÕýÌ¬·Ö²¼$\widetilde{z}=\mu{x}+\exp(0.5\times\sigma{x})\times z$£¬ÔÙÓÃ½âÂëÆ÷$G$¶Ô$\widetilde{z}$½âÂëµÃµ½$x_r$¡£
 VAEÊ¹ÓÃKLÉ¢¶ÈÀ´¶ÈÁ¿Á½¸öÔ­Ê¼Êý¾ÝµÄ¸ÅÂÊ·Ö²¼ºÍÖØ½¨Êý¾ÝµÄ¸ÅÂÊ·Ö²¼Ö®¼äµÄ²îÒì£¬
 ÒÔKLÉ¢¶È×îÐ¡»¯ÎªÓÅ»¯Ä¿±ê£¬
-ÓÉ´ËÍÆµ¼µÃµ½µÄËðÊ§º¯ÊýÈçÏÂËùÊ¾£¬ÏêÏ¸µÄÍÆµ¼¹ý³Ì¿ÉÒÔ²Î¼ûÔ­ÂÛÎÄ£º
+VAE\cite{106kingma2013auto-encoding}ÎÄÖÐ¶Ô´Ë½øÐÐÁËÏêÏ¸µÄÍÆµ¼ºÍÕ¹¿ª£¬ÓÉ´ËÍÆµ¼µÃµ½µÄËðÊ§º¯ÊýÈçÏÂËùÊ¾£º
 \begin{alignat}{2}
 \min_{E,D} \quad &L(E,D)=\mathbb{E}_{x}[\Vert{x-D(\widetilde{z})}\Vert_{2}^{2}],\\
 \mbox{s.t.}\quad
@@ -382,7 +377,7 @@ VAEÊ¹ÓÃKLÉ¢¶ÈÀ´¶ÈÁ¿Á½¸öÔ­Ê¼Êý¾ÝµÄ¸ÅÂÊ·Ö²¼ºÍÖØ½¨Êý¾ÝµÄ¸ÅÂÊ·Ö²¼Ö®¼äµÄ²îÒì£¬
 	\label{U-net}
 \end{figure*}
 \subsection{ÓïÒå·Ö¸î}
-Í¼ÏñÓïÒå·Ö¸îÊÇÊý×ÖÍ¼Ïñ´¦ÀíÁìÓòÒ»¸ö¾­µäÈÎÎñ£¬Ö¸½«Í¼ÏñÏñËØ°´ÕÕÍ¼ÏñÖÐ±í´ïÓïÒåº¬ÒåµÄ²»Í¬½øÐÐ·Ö×é£¨Grouping£©»ò·Ö¸î£¨Segmentation£©¡£ÔÚÉî¶ÈÑ§Ï°Ó¦ÓÃµ½¼ÆËã»úÊÓ¾õÁìÓòÖ®Ç°£¬ÈËÃÇÊ¹ÓÃTextonForestºÍËæ»úÉ­ÁÖ·ÖÀàÆ÷½øÐÐÓïÒå·Ö¸î£¬2015ÄêÈ«¾í»ýÉñ¾­ÍøÂç£¨FCN£©\cite{108long2014fully}Ê×´Î½«Éî¶ÈÑ§Ï°Ó¦ÓÃÔÚÍ¼ÏñÓïÒå·Ö¸îÈÎÎñÉÏ£¬Í¨¹ý¶ÔÈ«³ß´çÍ¼Æ¬½øÐÐ¶Ëµ½¶ËµÄ·Ö¸îÈ¡µÃÁËÊ®·ÖÏÔÖøµÄÌáÉý¡£´ËºóU-net\cite{51ronneberger2015u-net:}ÔÚÉúÎïÒ½Ñ§Í¼ÏñµÄÓïÒå·Ö¸îÈÎÎñÉÏ²ÉÓÃ±àÂëÆ÷-½âÂëÆ÷½á¹¹²¢Ó¦ÓÃskip connectionsÈ¡µÃÁË¸ü¾ªÈËµÄ·Ö¸îÐ§¹û£¬Æô·¢ÁËºóÀ´µÄÐí¶àÑÐ¾¿¡£ÈçÍ¼ËùÊ¾£¬U-net½ÓÊÕÒ»ÕÅÍ¼Æ¬ÊäÈë£¬Êä³öÎª·Ö¸î½á¹ûµÄ¸ÅÂÊ¾ØÕó£¬Í¨¹ý$agrmax()$º¯Êý¼´¿ÉµÃµ½·Ö¸îÑÚÄ¤±êÇ©¡£
+Í¼ÏñÓïÒå·Ö¸îÊÇÊý×ÖÍ¼Ïñ´¦ÀíÁìÓòÒ»¸ö¾­µäÈÎÎñ£¬Ö¸½«Í¼ÏñÏñËØ°´ÕÕÍ¼ÏñÖÐ±í´ïÓïÒåº¬ÒåµÄ²»Í¬½øÐÐ·Ö×é£¨Grouping£©»ò·Ö¸î£¨Segmentation£©¡£ÔÚÉî¶ÈÑ§Ï°Ó¦ÓÃµ½¼ÆËã»úÊÓ¾õÁìÓòÖ®Ç°£¬ÈËÃÇÊ¹ÓÃTextonForestºÍËæ»úÉ­ÁÖ·ÖÀàÆ÷½øÐÐÓïÒå·Ö¸î£¬2015ÄêÈ«¾í»ýÉñ¾­ÍøÂç£¨FCN£©\cite{108long2014fully}Ê×´Î½«Éî¶ÈÑ§Ï°Ó¦ÓÃÔÚÍ¼ÏñÓïÒå·Ö¸îÈÎÎñÉÏ£¬Í¨¹ý¶ÔÈ«³ß´çÍ¼Æ¬½øÐÐ¶Ëµ½¶ËµÄ·Ö¸îÈ¡µÃÁËÊ®·ÖÏÔÖøµÄÌáÉý¡£´ËºóU-net\cite{51ronneberger2015u-net:}ÔÚÉúÎïÒ½Ñ§Í¼ÏñµÄÓïÒå·Ö¸îÈÎÎñÉÏ²ÉÓÃ±àÂëÆ÷-½âÂëÆ÷½á¹¹²¢Ó¦ÓÃÌøÔ¾Á¬½Ó£¨skip connections£©È¡µÃÁË¸ü¾ªÈËµÄ·Ö¸îÐ§¹û£¬Æô·¢ÁËºóÀ´µÄÐí¶àÑÐ¾¿¡£ÈçÍ¼ËùÊ¾£¬U-net½ÓÊÕÒ»ÕÅÍ¼Æ¬ÊäÈë£¬Êä³öÎª·Ö¸î½á¹ûµÄ¸ÅÂÊ¾ØÕó£¬Í¨¹ý$agrmax()$º¯Êý¼´¿ÉµÃµ½·Ö¸îÑÚÄ¤±êÇ©¡£
 
 \begin{figure*}[thbp!]
 	\centering
@@ -391,13 +386,14 @@ VAEÊ¹ÓÃKLÉ¢¶ÈÀ´¶ÈÁ¿Á½¸öÔ­Ê¼Êý¾ÝµÄ¸ÅÂÊ·Ö²¼ºÍÖØ½¨Êý¾ÝµÄ¸ÅÂÊ·Ö²¼Ö®¼äµÄ²îÒì£¬
 	\label{YOlO_and_SSD}
 \end{figure*}
 \subsection{Ä¿±ê¼ì²â}
-Í¼ÏñÄ¿±ê¼ì²âÍ¬ÑùÊÇÊý×ÖÍ¼Ïñ´¦ÀíÁìÓò¾­µäÈÎÎñÖ®Ò»¡£Ä¿±ê¼ì²âÈÎÎñÊÇÅÐ¶ÏÍ¼ÏñÎïÌåµÄÊÇ·ñÊÇÄ¿±êÀà±ð²¢ÔÚÍ¼ÖÐ±ê¼Ç³öÄ¿±êÀà±ðÎïÌåµÄÎ»ÖÃ¡£½ü¼¸ÄêÀ´£¬Ëæ×ÅÉî¶ÈÑ§Ï°µÄáÈÆð£¬»ùÓÚ¾í»ýÉñ¾­ÍøÂçµÄÄ¿±ê¼ì²âËã·¨È¡µÃÁËºÜ´óµÄÍ»ÆÆ¡£µ±Ç°±È½ÏÁ÷ÐÐµÄÄ£ÐÍ¿ÉÒÔ·ÖÎªÁ½Àà£ºÒ»ÀàÊÇ»ùÓÚRegion ProposalµÄR-CNN\cite{113girshick2014rich}ÀàÄ£ÐÍ£¨R-CNN£¬Fast R-CNN\cite{111girshick2015fast}, Faster R-CNN\cite{112ren2017faster}µÈ£©£¬°üº¬Á½¸ö½×¶Î£¬ÐèÒªÏÈÇ°ÏòÍÆÀí²úÉúÄ¿±êºòÑ¡¿ò£¬È»ºóÔÙ¶ÔºòÑ¡¿ò½øÐÐ·ÖÀàºÍ»Ø¹é£»ÁíÒ»ÀàÊÇYOlO\cite{110redmon2015you}¡¢SSD\cite{109liu2016ssd:}ÕâÀàµ¥½×¶ÎËã·¨£¬Æä½öÓÃµ¥¸ö¾í»ýÉñ¾­ÍøÂç¼´¿ÉÖ±½ÓÔ¤²â²»Í¬Ä¿±êµÄÀà±ðÓëÎ»ÖÃ¡£
+Í¼ÏñÄ¿±ê¼ì²âÍ¬ÑùÊÇÊý×ÖÍ¼Ïñ´¦ÀíÁìÓò¾­µäÈÎÎñÖ®Ò»¡£Ä¿±ê¼ì²âÈÎÎñÊÇÅÐ¶ÏÍ¼ÏñÎïÌåµÄÊÇ·ñÊÇÄ¿±êÀà±ð²¢ÔÚÍ¼ÖÐ±ê¼Ç³öÄ¿±êÀà±ðÎïÌåµÄÎ»ÖÃ¡£½ü¼¸ÄêÀ´£¬Ëæ×ÅÉî¶ÈÑ§Ï°µÄáÈÆð£¬»ùÓÚ¾í»ýÉñ¾­ÍøÂçµÄÄ¿±ê¼ì²âËã·¨È¡µÃÁËºÜ´óµÄÍ»ÆÆ¡£µ±Ç°±È½ÏÁ÷ÐÐµÄÄ£ÐÍ¿ÉÒÔ·ÖÎªÁ½Àà£ºÒ»Àà»ùÓÚRegion ProposalµÄR-CNN\cite{113girshick2014rich}ÀàÄ£ÐÍ£¨R-CNN£¬Fast R-CNN\cite{111girshick2015fast}, Faster R-CNN\cite{112ren2017faster}µÈ£©£¬°üº¬Á½¸ö½×¶Î£¬ÐèÒªÏÈÇ°ÏòÍÆÀí²úÉúÄ¿±êºòÑ¡¿ò£¬È»ºóÔÙ¶ÔºòÑ¡¿ò½øÐÐ·ÖÀàºÍ»Ø¹éÒÔÉ¸Ñ¡³ö×îÖÕµÄ¼ì²â¿ò£»ÁíÒ»ÀàÊÇYOlO\cite{110redmon2015you}¡¢SSD\cite{109liu2016ssd:}µÈµ¥½×¶ÎËã·¨Ä£ÐÍ£¬½öÓÃµ¥¸ö¾í»ýÉñ¾­ÍøÂç¼´¿ÉÊµÏÖÖ±½ÓÔ¤²â²»Í¬Ä¿±êµÄÀà±ðÓëÎ»ÖÃ¡£
 
-ÈçÍ¼ËùÊ¾£¬SSD»ùÓÚVGG16\cite{102simonyan2014very}Ä£ÐÍ½øÐÐÐÞ¸Ä£¬ÏÈ½«ÊäÈëÍ¼Æ¬µ½Ô¤ÑµÁ·ºÃµÄ·ÖÀàÍøÂçÖÐÀ´»ñµÃ²»Í¬´óÐ¡µÄÌØÕ÷Ó³Éä£¬Í¨¹ý³éÈ¡µÄ¶à²ã¾í»ý²ãµÄfeature map¹¹Ôì6¸ö²»Í¬³ß¶È´óÐ¡µÄbbox£¬È»ºó·Ö±ð½øÐÐ¼ì²âºÍ·ÖÀà£¬Éú³É¶à¸öbbox£¬ÔÙ½«²»Í¬feature map»ñµÃµÄbbox½áºÏÆðÀ´£¬¾­¹ý·Ç¼«´óÖµÒÖÖÆ£¨NMS£©·½·¨À´ÒÖÖÆµôÒ»²¿·ÖÖØµþ»òÕß²»ÕýÈ·µÄbbox£¬Éú³É×îÖÕµÄbbox¼¯ºÏ£¬Õâ¾ÍÊÇ×îºóÊä³öµÄÄ¿±ê¼ì²â½á¹û¡£
+ÈçÍ¼ËùÊ¾£¬SSDÄ£ÐÍ»ùÓÚVGG16\cite{102simonyan2014very}Ä£ÐÍ½øÐÐÐÞ¸Ä£¬ÏÈ½«Í¼Æ¬ÊäÈëµ½Ô¤ÑµÁ·ºÃµÄ·ÖÀàÍøÂçÖÐÀ´»ñµÃ²»Í¬´óÐ¡µÄÌØÕ÷Ó³Éä£¬Í¨¹ý³éÈ¡µÄ¶à²ã¾í»ý²ãµÄÌØÕ÷Í¼£¨feature map£©¹¹Ôì6¸ö²»Í¬³ß¶È´óÐ¡µÄ¼ì²âºòÑ¡¿ò£¨bbox£©£¬È»ºó·Ö±ð½øÐÐ¼ì²âºÍ·ÖÀà£¬Éú³É¶à¸öºòÑ¡¿ò£¬ÔÙ½«²»Í¬ÌØÕ÷Í¼»ñµÃµÄºòÑ¡¿ò½áºÏÆðÀ´£¬¾­¹ý·Ç¼«´óÖµÒÖÖÆ£¨NMS£©·½·¨À´ÒÖÖÆµôÒ»²¿·ÖÖØµþ»òÕß²»ÕýÈ·µÄºòÑ¡¿ò£¬Éú³É×îÖÕµÄºòÑ¡¿ò¼¯ºÏ£¬Õâ¾ÍÊÇ×îºóÊä³öµÄÄ¿±ê¼ì²â½á¹û¡£
 
 \newpage
 \chead{µÚ4ÕÂ\ ´ø²¡Ôî±êÇ©µÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄºÏ³É}
 \section{´ø²¡Ôî±êÇ©µÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄºÏ³É}
+±¾ÎÄÔÚµÚÒ»ÕÂÖÐ½éÉÜÁË±¾ÑÐ¾¿ÃæÁÙµÄÈý¸öÖ÷ÒªµÄÌôÕ½ºÍ¶ÔÓ¦µÄÑÐ¾¿Ë¼Â·ºÍ¼¼ÊõÂ·Ïß£¬ÔÚµÚ¶þÕÂÖÐ·ÖÎöÁËµ±Ç°Ïà¹ØµÄÑÐ¾¿µÄÑÐ¾¿³É¹ûºÍÈÔ´æÔÚµÄÎÊÌâ£¬È»ºóÔÚÉÏÒ»ÕÂ½ÚÖÐ¶Ô¼¸ÖÖÖ÷ÒªµÄ»ùÓÚÉî¶ÈÑ§Ï°µÄÍ¼Ïñ´¦ÀíÈÎÎñ½øÐÐÁË½éÉÜ¡£ÔÚ±¾ÕÂÖÐ£¬±¾ÎÄ½«»ùÓÚÇ°ÊöµÄÑÐ¾¿Ë¼Â·ºÍ¼¼ÊõÂ·Ïß£¬ÔÚÇ°ÈËÑÐ¾¿µÄ»ù´¡ÉÏ¼ÌÐø·¢Õ¹¡¢¸Ä½øºÍ´´ÐÂ£¬ÖÂÁ¦ÓÚ½â¾öµ±Ç°ÑÐ¾¿ÈÔ´æÔÚµÄÎÊÌâºÍ²»×ã£¬ÊµÏÖ´ø²¡Ôî±êÇ©µÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄºÏ³É¡£±¾½Ú½â¾ö·½°¸½«¶ÔÉÏÒ»ÕÂ½éÉÜµÄ»ù´¡·½·¨Ö±½ÓÓ¦ÓÃ£¬¶ø²»ÔÙÕ¹¿ª½éÉÜ¡£±¾ÕÂ½«ÏÈ¶Ô±¾ÑÐ¾¿Ìá³öµÄ½â¾ö·½°¸µÄÕûÌå¼Ü¹¹ºÍ½×¶Î»®·Ö½øÐÐ½éÉÜ£¬ËæºóÒÀ´Î½éÉÜ¸÷¸ö½×¶Î½â¾öµÄÎÊÌâºÍÏêÏ¸µÄ·½·¨²½Öè¡£
 \subsection{ÕûÌå¼Ü¹¹}
 \begin{figure*}[thbp!]
 	\centering
@@ -409,7 +405,7 @@ VAEÊ¹ÓÃKLÉ¢¶ÈÀ´¶ÈÁ¿Á½¸öÔ­Ê¼Êý¾ÝµÄ¸ÅÂÊ·Ö²¼ºÍÖØ½¨Êý¾ÝµÄ¸ÅÂÊ·Ö²¼Ö®¼äµÄ²îÒì£¬
 ÔÚ½á¹¹ÌØÕ÷Í¼ÌáÈ¡ºÍÉú³É½×¶Î£¬ÎÒÃÇÖ÷ÒªµÄÔ¤ÆÚ²ú³öÎªÒ»¸ö½á¹¹ÌØÕ÷Í¼Éú³ÉÆ÷£¬¸ÃÉú³ÉÆ÷¿ÉÒÔ´ÓËæ»úÕýÌ¬·Ö²¼¾ØÕóÉú³É½á¹¹ÌØÕ÷Í¼¡£
 ÔÚ¶àÄ£Ì¬Ó°ÏñºÏ³É½×¶Î£¬ÎÒÃÇÒÔ½á¹¹ÌØÕ÷Í¼ÎªÊäÈëÑµÁ·Ò»¸öÌõ¼þÉú³ÉÆ÷£¬¸ÃÌõ¼þÉú³ÉÆ÷¿ÉÒÔ¸ù¾Ý²»Í¬Ìõ¼þºÏ³É²»Í¬Ä£Ì¬µÄÓ°Ïñ¡£ÈôÐèÒªÔÚºÏ³ÉÓ°ÏñÖÐÌí¼ÓÖ¸¶¨µÄ²¡ÔîÐÅÏ¢£¬Ôò¿É½«²¡Ôî±êÇ©Óë½á¹¹ÌØÕ÷Í¼ÈÚºÏºó×÷ÎªÊäÈë£¬Í¬Ê±Í¨¹ý²¡Ôî±êÇ©Éú³ÉÆ÷Ìí¼Ó²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§¡£Èô¶ÔºÏ³É¶àÄ£Ì¬µÄÓ°ÏñÓÐ¸ßÅä×¼¶ÈÒªÇó£¬Ôò¿ÉÒÔÍ¨¹ýÄ£Ì¬×ª»»Æ÷¶ÔºÏ³ÉµÄ¶àÄ£Ì¬Ó°Ïñ½øÐÐÄ£Ì¬×ª»»Ò»ÖÂÐÔÔ¼Êø±£Ö¤ÏñËØ¼¶Åä×¼¡£
 ÔÚºÏ³ÉÊý¾Ý¼¯¹¹½¨½×¶Î£¬ÎÒÃÇÊ¹ÓÃÇ°ÃæÁ½¸ö½×¶ÎÉú³ÉµÄÄ£ÐÍ´ÓËæ»úÕýÌ¬·Ö²¼¾ØÕóºÏ³ÉÅä×¼µÄ¶àÄ£Ì¬Ó°Ïñ¡£
-×îºóÊÇ¶ÔºÏ³ÉÊý¾Ý¿ÉÓÃÐÔÑéÖ¤½×¶Î£¬ÎÒÃÇ¶ÔºÏ³ÉÊý¾ÝÔÚÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñÖÐµÄ¿ÉÓÃÐÔ½øÐÐÊµÑéÑéÖ¤£¬¸Ã½×¶ÎÏê¼ûÏÂÒ»ÕÂ½Ú¡£
+×îºóÊÇ¶ÔºÏ³ÉÊý¾Ý¿ÉÓÃÐÔÑéÖ¤½×¶Î£¬ÎÒÃÇ¶ÔºÏ³ÉÊý¾ÝÔÚÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñÖÐµÄ¿ÉÓÃÐÔ½øÐÐÊµÑéÑéÖ¤£¬ÏÂÒ»ÕÂ½Ú½«¶ÔÊµÑéÑéÖ¤ºÍÆÀ¹À½øÐÐÏêÏ¸½éÉÜ¡£
 \subsection{½á¹¹ÌØÕ÷Í¼µÄÌáÈ¡ºÍÉú³É}
 GANÖ±½Ó´ÓËæ»úÔëÉùÖÐÉú³ÉµÄÒ½Ñ§Í¼ÏñºÜÄÑÉú³ÉÏÖÊµµÄ½á¹¹ÐÅÏ¢¡£ÎÒÃÇ½«Ìá¹©»ù±¾ÂÖÀªºÍ½á¹¹ÐÅÏ¢µÄÍ¼Ïñ³ÆÎª½á¹¹ÌØÕ÷Í¼¡£ÀýÈç£¬ÊÓÍøÄ¤Ñª¹Ü·Ö²¼Í¼¿ÉÒÔ¿´×÷ÊÇÊÓÍøÄ¤Í¼ÏñµÄ½á¹¹ÌØÕ÷Í¼\cite{41costa2017towards}¡£½á¹¹ÌØÕ÷Í¼¿ÉÒÔÎªºÏ³ÉÒ½Ñ§Í¼ÏñÌá¹©±ØÒªµÄ»ù±¾Ö¸µ¼¡£ÔÚºÏ³ÉÒ½Ñ§Ó°ÏñÊ±£¬Ò»Ð©ÑÐ¾¿´Ó×éÖ¯·Ö¸î±êÇ©\cite{4shin2018medical}»ñÈ¡ÁË»ù±¾µÄ½á¹¹ÐÅÏ¢¡£µ«ÊÇ£¬ÖîÈçÊÓÍøÄ¤Ñª¹ÜÍ¼ºÍÄÔ×éÖ¯·Ö¸î±êÇ©Ö®ÀàµÄÒ»°ã½á¹¹ÌØÕ÷£¬ÔÚ´ÓÔ­Ê¼Í¼ÏñÖÐÌáÈ¡Ö®Ç°ÐèÒª¶îÍâµÄÊý¾ÝÀ´ÑµÁ·Ò»¸öÌáÈ¡Ä£ÐÍ¡£Îª´Ë£¬ÎÒÃÇÊ×ÏÈÉè¼ÆÁËÒ»ÖÖÖ±½Ó´ÓÒ½Ñ§Ó°ÏñÖ±½ÓÌáÈ¡½á¹¹ÌØÕ÷Í¼µÄ·½·¨£¬¸Ã·½·¨¾ßÓÐ²Ù×÷¿ìËÙ£¬ÎÞÐèÑµÁ·£¬ÎÞÐè¸½¼ÓÊý¾ÝµÄÓÅµã¡£
 \subsubsection{½á¹¹ÌØÕ÷Í¼ÌáÈ¡·½·¨}
@@ -437,14 +433,9 @@ GANÖ±½Ó´ÓËæ»úÔëÉùÖÐÉú³ÉµÄÒ½Ñ§Í¼ÏñºÜÄÑÉú³ÉÏÖÊµµÄ½á¹¹ÐÅÏ¢¡£ÎÒÃÇ½«Ìá¹©»ù±¾ÂÖÀªºÍ½á¹
 	\end{algorithmic}  
 \end{algorithm}
 ÔÚËã·¨~\ref {alg:1}ÖÐ£¬ÎÒÃÇÊ¹ÓÃSobel¼ì²âËã×Ó$sobel()$´ÓÕæÊµÍ¼ÏñÖÐÌáÈ¡Ë®Æ½ºÍ´¹Ö±±ßÔµ¼ì²âÍ¼¡£Ã¿¸ö±ßÔµ¼ì²âÍ¼Ö´ÐÐ×î´ó¹æÔ¼$reduce\_min()$ºÍ×îÐ¡¹æÔ¼$reduce\_min()$ÒÔ»ñµÃÁ½¸öÈÚºÏË®Æ½´¹Ö±±ßÔµ¼ì²âÍ¼µÄ½á¹ûÍ¼£¬¶ÔÁ½ÕÅÍ¼½øÐÐ$3\times3$µÄ¸ßË¹Ä£ºý$gaussian\_blur()$¿ÉÒÔ¶ÔÏßÌõÂÖÀª¼Ó´Ö£¬È»ºóÃ¿¸öÈÚºÏÍ¼¼ÆËãÓëÍ¨¹ý¾ùÖµº¯Êý$mean()$¼ÆËã³öµÄÆ½¾ùÏñËØÖµµÄ²î¿ÉÒÔÈ¥µô´ó²¿·Ö±³¾°ÏñËØÖ»±£Áô×îÍ»³öµÄÏßÌõÂÖÀª¡£¸ù¾ÝÏñËØãÐÖµ¶ÔÁ½¸ö²îÒìÍ¼½øÐÐ¶þÖµ»¯£¬È»ºó¶ÔÁ½¸ö¶þ½øÖÆÍ¼ÏñÇóºÍ»ñµÃÍêÕûµÄÂÖÀªÏßÌõ£¬È»ºóÍêÈ«¶þÖµ»¯¡£ÔÙ½øÐÐÒ»´Î¸ßË¹Ä£ºý¿ÉÒÔ¶ÔÏßÌõ¼Ó´Ö²¢ÄÜÊ¹ÓÐ¶ÏµãµÄÏßÌõÏàÁ¬³ÉÕûÌå£¬×îºóºÍÔ­Ê¼Í¼µÄ¶þÖµ»¯ÑÚÄ¤Ïà³Ë¿ÉÒÔÍêÈ«È¥µô¶ÔÓ¦ÓÚÔ­Ê¼Í¼±³¾°ÇøÓòµÄÔëÉù£¬ÔÙÓÃ$3\times3$µÄÖÐÖµÂË²¨º¯Êý$medfilt()$È¥µôÊ£ÓàµÄ¹ÂÁ¢µÄÔëµã£¬¼´¿ÉµÃµ½ÎÒÃÇÐèÒªµÄ¸É¾»ÇåÎúÓÖÍêÕû¼ò½àµÄ½á¹¹ÌØÕ÷Í¼¡£
-¶ÔÓÚÒ»Ð©ÓÐ²¡Ôî½á¹¹ÐÅÏ¢µÄ½á¹¹ÌØÕ÷Í¼£¬ÎÒÃÇ¿ÉÒÔÊ¹ÓÃ²¡Ôî·Ö¸î±êÇ©ÑÚÄ¤È¥³ý½á¹¹ÌØÕ÷Í¼ÖÐµÄÔ­Ê¼²¡Ôî²¿·ÖµÄ½á¹¹ÐÅÏ¢£¬»òÕßÆúÓÃ¡£±¾ÎÄÖÐ£¬ÎÒÃÇ¶ÔBRATS2015Êý¾Ý¼¯ÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼Ê¹ÓÃÖ×Áö·Ö¸î±êÇ©ÑÚÄ¤È¥³ýÁË½á¹¹ÌØÕ÷Í¼ÖÐµÄÔ­Ê¼Ö×Áö½á¹¹ÐÅÏ¢£¬¶ÔKaggle Chest X-RayÊý¾Ý¼¯ÖÐÆúÓÃ·ÎÑ×Ó°Ïñ¶øÖ»Ñ¡ÓÃÕý³£Ó°ÏñÉú³É½á¹¹ÌØÕ÷Í¼¡£
-\begin{figure}[thbp!]
-	\centering
-	\includegraphics[width=1\linewidth]{figures/brats_m_f}
-	\caption{BRATS2015Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼ÏñºÍÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼¡£ÆäÖÐ×ÓÍ¼ÒÀ´ÎÎªT1¡¢T2¡¢T1c¡¢FlairËÄ¸öÄ£Ì¬µÄMRI¡¢´ÓFlairÌáÈ¡³öÀ´µÄÑÚÄ¤¡¢´ÓFlair²ÉÓÃSobelËã×ÓÌáÈ¡³öÀ´µÄË®Æ½ÏòºÍ´¹Ö±Ïò±ßÔµ¼ì²â½á¹ûÍ¼¡¢´ÓFlairÌáÈ¡³öÀ´µÄ½á¹¹ÌØÕ÷Í¼¡¢²ÉÓÃÖ×Áö·Ö¸î±êÇ©ÑÚÄ¤È¥µôÖ×Áö²¡Ôî½á¹¹ÐÅÏ¢µÄ´ÓFlairÌáÈ¡³öÀ´µÄ½á¹¹ÌØÕ÷Í¼¡¢Ö×Áö·Ö¸î±êÇ©µÄ¶þÖµ»¯ÑÚÄ¤¡£}
-	\label{brats_m_f}
-\end{figure}
-\cite{96zhang2019skrgan:}ÀûÓÃSobel±ßÔµ¼ì²â·½·¨ÌáÈ¡³õÊ¼½á¹¹±ß½ç£¬È»ºóÀûÓÃ¸ßË¹µÍÍ¨ÂË²¨È¥³ý¹ÂÁ¢ÔëÉùºÍÏñËØ£¬×îºóÀûÓÃÒ»¸öÓÉ¿ª¿×¹ý³ÌºÍ±Õ¿×¹ý³Ì×é³ÉµÄÐÎÌ¬Ñ§²Ù×÷½øÒ»²½È¥³ýÔëÉù£¬Ìî³äÄÒ×´½á¹¹µÃµ½ÁË½á¹¹²ÝÍ¼¡£ºÍSkrGANµÄ·½·¨Ïà±È£¬ÎÒÃÇµÄ·½·¨·Ö±ð¿¼ÂÇÁËSobel±ßÔµ¼ì²â½á¹ûµÄ¸ßÏñËØÖµÂÖÀªºÍµÍÏñËØÖµÂÖÀª£¬×îºóÔÙ¶ÔÂÖÀª×éºÏµÃµ½ÁË¸üÍêÕûµÄÂÖÀªÐÅÏ¢¡£Í¬Ê±Á½´Î¸ßË¹Ä£ºýµÄÓ¦ÓÃÍ»³öÁËÂÖÀªÏßÌõÐÅÏ¢£¬²ÉÓÃÍ¨¹ýÓëÏñËØ¾ùÖµ×÷²îºóµÄ¶þÖµ»¯¼´¿É·ÖÀëÂÖÀªÏßÌõºÍ±³¾°£¬ÕâÓë¿ª¿×±Õ¿×·ÖÀë±³¾°µÄ·½·¨Ïà±È±£ÁôµÄÂÖÀª¸´ÔÓ³Ì¶È¸üµÍ¡¢ÏßÌõ¸üÇåÎú¡£×îºóÎÒÃÇ½øÐÐµÄÈ¥Ôë¹ý³ÌÄÜÍêÈ«È¥³ý¶ÔÓ¦Ô­Ê¼Í¼±³¾°ÇøÓòµÄ²¿·ÖµÄÔëÉùºÍÆ÷¹ÙÄÚ¾ø´ó²¿·ÖÔëµã¶ø²»ÆÆ»µÂÖÀªÏßÌõ¡£´ÓÉú³É½á¹û¿´£¬ÎÒÃÇµÄ½á¹¹ÌØÕ÷Í¼¸ü¼ÓÇåÎúÃ÷ÁË¡¢ÂÖÀª¸ü¼Ó¸É¾»¼ò½à¡¢ÏßÌõ¸ü¼Ó·ûºÏÔ­Í¼µÄÊÓ¾õ³ÊÏÖ¡£
+¶ÔÓÚÒ»Ð©ÓÐ²¡Ôî½á¹¹ÐÅÏ¢µÄ½á¹¹ÌØÕ÷Í¼£¬ÎÒÃÇ¿ÉÒÔÊ¹ÓÃ²¡Ôî·Ö¸î±êÇ©ÑÚÄ¤È¥³ý½á¹¹ÌØÕ÷Í¼ÖÐµÄÔ­Ê¼²¡Ôî²¿·ÖµÄ½á¹¹ÐÅÏ¢£¬»òÕßÆúÓÃ¡£
+
+SkrGAN\cite{96zhang2019skrgan:}µÄ·½·¨Óë±¾ÑÐ¾¿µÄË¼Â·²»Ä±¶øºÏ£¬ÆäÀûÓÃSobel±ßÔµ¼ì²â·½·¨ÌáÈ¡³õÊ¼½á¹¹±ß½ç£¬È»ºóÀûÓÃ¸ßË¹µÍÍ¨ÂË²¨È¥³ý¹ÂÁ¢ÔëÉùºÍÏñËØ£¬×îºóÀûÓÃÒ»¸öÓÉ¿ª¿×¹ý³ÌºÍ±Õ¿×¹ý³Ì×é³ÉµÄÐÎÌ¬Ñ§²Ù×÷½øÒ»²½È¥³ýÔëÉù£¬Ìî³äÄÒ×´½á¹¹µÃµ½ÁË½á¹¹²ÝÍ¼¡£ºÍSkrGANµÄ·½·¨Ïà±È£¬ÎÒÃÇµÄ·½·¨·Ö±ð¿¼ÂÇÁËSobel±ßÔµ¼ì²â½á¹ûµÄ¸ßÏñËØÖµÂÖÀªºÍµÍÏñËØÖµÂÖÀª£¬×îºóÔÙ¶ÔÂÖÀª×éºÏµÃµ½ÁË¸üÍêÕûµÄÂÖÀªÐÅÏ¢¡£Í¬Ê±Á½´Î¸ßË¹Ä£ºýµÄÓ¦ÓÃÍ»³öÁËÂÖÀªÏßÌõÐÅÏ¢£¬²ÉÓÃÍ¨¹ýÓëÏñËØ¾ùÖµ×÷²îºóµÄ¶þÖµ»¯¼´¿É·ÖÀëÂÖÀªÏßÌõºÍ±³¾°£¬ÕâÓë¿ª¿×±Õ¿×·ÖÀë±³¾°µÄ·½·¨Ïà±È±£ÁôµÄÂÖÀª¸´ÔÓ³Ì¶È¸üµÍ¡¢ÏßÌõ¸üÇåÎú¡£×îºóÎÒÃÇ½øÐÐµÄÈ¥Ôë¹ý³ÌÄÜÍêÈ«È¥³ý¶ÔÓ¦Ô­Ê¼Í¼±³¾°ÇøÓòµÄ²¿·ÖµÄÔëÉùºÍÆ÷¹ÙÄÚ¾ø´ó²¿·ÖÔëµã¶ø²»ÆÆ»µÂÖÀªÏßÌõ¡£´ÓÉú³É½á¹û¿´£¬ÎÒÃÇµÄ½á¹¹ÌØÕ÷Í¼¸ü¼ÓÇåÎúÃ÷ÁË¡¢ÂÖÀª¸ü¼Ó¸É¾»¼ò½à¡¢ÏßÌõ¸ü¼Ó·ûºÏÔ­Í¼µÄÊÓ¾õ³ÊÏÖ¡£
 
 \subsubsection{½á¹¹ÌØÕ÷Í¼Éú³ÉÑµÁ·}
 \begin{figure}[thbp!]
@@ -508,12 +499,6 @@ $E_s$¡¢$D_{z}$ºÍ$D_{s}$¾ùÔÚVGG11Ä£ÐÍ½á¹¹µÄ»ù´¡ÉÏ½øÐÐÁËµ÷ÕûÊÊÅä£¬$G_m$ºÍ$G_s$ÔÚU-
 \end{itemize}
 
 \subsubsection{½á¹¹ÌØÕ÷Í¼ÓëËæ»úÔëÉùµÄÈÚºÏ}
-\begin{figure}[thbp!]
-	\centering
-	\includegraphics[width=0.98\linewidth]{figures/image_f_mask_newf}
-	\caption{¸÷Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼ÏñºÍÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼¡££¨a£©ÎªDRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯¡££¨b£©ÎªKaggle Chest X-RayÊý¾Ý¼¯¡££¨c£©Kaggle Lung CTÊý¾Ý¼¯¡££¨d£©ÎªÌì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯¡£ÒÔÉÏ×ÓÍ¼ÖÐ´Ó×óµ½ÓÒÒÀ´ÎÎªÔ­Í¼¡¢½á¹¹ÌØÕ÷Í¼¡¢ÑÚÄ¤¡¢ÈÚºÏÁËËæ»úÔëÉù½á¹¹ÌØÕ÷Í¼¡£}
-	\label{image_and_f}
-\end{figure}
 ÔÚÊ¹ÓÃ½á¹¹ÌØÕ÷Í¼ºÏ³ÉÒ½Ñ§Ó°ÏñÊ±£¬ÓÉÓÚ½á¹¹ÌØÕ÷Í¼ÊÇ¼òµ¥¶þÖµÍ¼£¬Ö±½ÓÊ¹ÓÃ½á¹¹ÌØÕ÷Í¼×÷ÎªÊäÈë»á¼õÉÙÊäÈëµÄ¶àÑùÐÔºÍËæ»úÐÔ£¬ÔÚÊ¹ÓÃÐ¡Êý¾Ý¼¯Ê±£¬ÑµÁ·½«ÓÈÆäÀ§ÄÑ¡£ÔÚÆÕÍ¨µÄGANµÄÑµÁ·ÖÐ£¬ÒÔÎªËæ»úÔëÉù¾ØÕóÊäÈë£¬¿ÉÒÔ´øÀ´ÎÞÏÞµÄ¶àÑùÐÔ¡£Òò´Ë£¬ÎÒÃÇÉè¼ÆÁËÈçÏÂµÄ¼ÆËã¹«Ê½£¬¿ÉÒÔÈÚºÏ½á¹¹ÌØÕ÷Í¼µÄ½á¹¹ÐÅÏ¢ºÍËæ»úÔëÉùµÄËæ»úÐÅÏ¢£º
 \begin{equation}
 s'=s+z'\times(1-m)\times(1-s),
@@ -623,25 +608,55 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 
 ÓÉÓÚ¿ÉÉú³ÉµÄ½á¹¹ÌØÕ÷Í¼ÊýÁ¿ÊÇÎÞÏÞÖÆµÄ£¬ÎÒÃÇ¿ÉÒÔ¸ù¾ÝÐèÒª¶ÔºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼¡¢ÑÚÄ¤ºÍºÏ³ÉÓ°Ïñ½øÐÐ¹ýÂË£¬µÃµ½ÎÒÃÇÐèÒªµÄÓÉ½á¹¹ÌØÕ÷Í¼£¬ÑÚÄ¤£¬²¡Ôî±êÇ©ºÍ¶àÄ£Ì¬ºÏ³ÉÓ°Ïñ×é³ÉµÄºÏ³ÉÊý¾Ý¼¯¡£
 
-ÔÚ»ùÓÚ²»Í¬µÄÑµÁ·Êý¾ÝºÍÐèÇóÊ±£¬¿ÉÒÔ¶ÔÎÒÃÇµÄ·½°¸ÖÐµÄÒ»Ð©·½·¨½øÐÐÑ¡ÔñÐÔÓ¦ÓÃ£¬ÔÚ±¾ÎÄÖÐ£¬ÎÒÃÇÓÐ¶à¸öºÏ³ÉÈÎÎñ£¬¾ßÌåÇé¿öÈçÏÂ£º
-\begin{itemize}
-	\item \textbf{¶àÄ£Ì¬ÄÔÖ×ÁöMRIµÄºÏ³É}ÎÒÃÇÒÔBRATS2015Êý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬ÒÔÆäÖ×Áö·Ö¸î±êÇ©ÎªÊäÈëµÄ²¡Ôî±êÇ©£¬ºÏ³ÉT1¡¢T2¡¢T1c¡¢FlairËÄ¸öÄ£Ì¬£¬Ê¹ÓÃÄ£Ì¬×ª»»Æ÷Ìá¹©Ä£Ì¬Åä×¼ËðÊ§£¬Ê¹ÓÃÒ»¸öU-net\cite{51ronneberger2015u-net:}×÷ÎªÖ×Áö·Ö¸îÆ÷Ìá¹©²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§¡£´ËÍâ£¬ÔÚ½á¹¹ÌØÕ÷Í¼Éú³ÉÑµÁ·Ê±£¬ÎÒÃÇÊ¹ÓÃÖ×Áö·Ö¸î±êÇ©ÑÚÄ¤È¥³ýÁË½á¹¹ÌØÕ÷Í¼ÖÐµÄÔ­Ê¼Ö×Áö½á¹¹ÐÅÏ¢£¬ÔÚºÏ³É¶àÄ£Ì¬MRIÑµÁ·Ê±£¬ÎÒÃÇÍ¨¹ýÑÚÄ¤¶Ô¾­¹ýÊý¾ÝÔöÇ¿ºóµÄÖ×Áö·Ö¸î±êÇ©¹ýÂËºóÔÙÊäÈë£¬ÎÞÔ¤ÑµÁ·¹ý³Ì¡£
-	\item \textbf{ÑÛµ×ÊÓÍøÄ¤Í¼ÏñµÄºÏ³É}ÎÒÃÇÒÔDRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯ºÍFIREÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬ÎÞ²¡Ôî±êÇ©ºÍ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬Ö±½ÓºÏ³Éµ¥Ä£Ì¬µÄ²ÊÉ«ÑÛµ×ÊÓÍøÄ¤Í¼Ïñ£¬²ÉÓÃÔÚÕæÊµÓ°Ïñ¼°Æä½á¹¹ÌØÕ÷Í¼ÉÏ½øÐÐµÄÔ¤ÑµÁ·¡£
-	\item \textbf{·Î²¿CTµÄºÏ³É}ÎÒÃÇÒÔKaggle Lung CTÊý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬ÎÞ²¡Ôî±êÇ©ºÍ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬Ö±½ÓºÏ³Éµ¥Ä£Ì¬µÄ·Î²¿CT£¬²ÉÓÃÔÚÕæÊµÓ°Ïñ¼°Æä½á¹¹ÌØÕ÷Í¼ÉÏ½øÐÐµÄÔ¤ÑµÁ·¡£
-	\item \textbf{ÐØ²¿X-rayµÄºÏ³É}ÎÒÃÇÒÔKaggle Chest X-RayÊý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬½«·ÎÑ×Àà±ð±êÇ©À©Õ¹ÎªÓë½á¹¹ÌØÕ÷Í¼Í¬³ß´çµÄ¶ÀÈÈ¾ØÕóºó×÷ÎªÊäÈëµÄ²¡Ôî±êÇ©£¬ÒÔVGG-11\cite{102simonyan2014very}×÷Îª·ÎÑ×·ÖÀàÆ÷Ìá¹©²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬ºÏ³É¾ßÓÐÖ¸¶¨·ÎÑ×Àà±ðµÄµ¥Ä£Ì¬ÐØ²¿X-ray£¬²ÉÓÃÔÚÕæÊµÓ°Ïñ¼°Æä½á¹¹ÌØÕ÷Í¼ÉÏ½øÐÐµÄÔ¤ÑµÁ·¡£
-	\item \textbf{·Î²¿µÍ¼ÁÁ¿CTµÄºÏ³É}ÎÒÃÇÒÔÌì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬½«Ä¿±ê¼ì²â±êÇ©À©Õ¹ÎªÓë½á¹¹ÌØÕ÷Í¼Í¬³ß´çµÄ¿òÍ¼ºó×÷ÎªÊäÈëµÄ²¡Ôî±êÇ©£¬ÒÔSSD\cite{101liu2016ssd:}×÷Îª²¡Ôî¼ì²âÆ÷Ìá¹©²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬ÊµÏÖ¾ßÓÐ¸ù¾ÝÊäÈëµÄ¼ì²â¿òÐÅÏ¢ºÏ³ÉµÄ¶ÔÓ¦²¡ÔîµÄµ¥Ä£Ì¬·Î²¿µÍ¼ÁÁ¿CT£¬ÎÞÔ¤ÑµÁ·¹ý³Ì¡£
-\end{itemize}	
-
 
 \newpage
 \chead{µÚ5ÕÂ\ ºÏ³ÉÒ½Ñ§Ó°ÏñµÄÐÔÄÜÆÀ¹À}
 \section{ºÏ³ÉÒ½Ñ§Ó°ÏñµÄÐÔÄÜÆÀ¹À}
-\subsection{ÆÀ¹ÀÖ¸±ê}
+\subsection{Êý¾Ý¼¯}
+±¾ÑÐ¾¿ÔÚÁù¸ö¹«¿ªÊý¾Ý¼¯ÖÐ½øÐÐÁËÊµÑéÑéÖ¤£¬º­¸ÇÁË²ÊÉ«ÕÕÆ¬¡¢MRI¡¢CT¡¢X-rayµÈ³£¼ûµÄ³ÉÏñÄ£Ì¬£¬º­¸ÇÁËÄÔ²¿¡¢ÊÓÍøÄ¤¡¢·Î²¿½ØÃæ¡¢ÐØ²¿µÈ¶à¸ö³ÉÏñ²¿Î»£¬º­¸ÇÁËÖ×Áö·Ö¸î¡¢Ñª¹Ü·Ö¸î¡¢·ÎÑ×·ÖÀà¡¢·Î½á½Ú¼ì²âµÈ¶àÖÖÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñ¡£ÕâÁù¸ö¹«¿ªÊý¾Ý¼¯µÄÏêÏ¸Çé¿öºÍÔ¤´¦Àí·½Ê½ÈçÏÂ£º
+\begin{itemize}
+	\item \textbf{BRATS2015Êý¾Ý¼¯\cite{91menze:hal-00935640}}¹«¿ªÊý¾Ý¼¯BRATS2015°üº¬T1 / T2 / T1c / FlairµÄËÄ¸öÅä×¼Ä£Ì¬ÄÔ²¿3D MRI¡£ÑµÁ·¼¯Ã¿¸öÄ£Ì¬ÓÐ274¸ö´óÐ¡Îª155 $ \times $ 240 $ \times $ 240ÕÅÍ¼¼°¶ÔÓ¦µÄ274ÕÅÖ×Áö·Ö¸î±êÇ©Í¼¡£ ÎÒÃÇ½«Ñù±¾°´9:1ÖØÐÂ»®·ÖÑµÁ·¼¯ºÍ²âÊÔ¼¯£¬È»ºóÈ¡Ã¿¸ö3D MRIµÄ55-105Ö®¼äµÄ50¸öÇÐÆ¬¹¹½¨2DÊý¾Ý¼¯¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯¡£
+	\item \textbf{Kaggle Chest X-RayÊý¾Ý¼¯\footnote{https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia }}¸ÃÊý¾Ý¼¯°üÀ¨5863¸ö²¡¶¾ÐÔ·ÎÑ×¡¢Ï¸¾úÐÔ·ÎÑ×ºÍÕý³£·Î²¿µÄÕýÃæ2D XÉäÏß»Ò¶ÈÍ¼£¬Í¼Æ¬³ß´ç´Ó384*127µ½2772*2304²»µÈ¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£
+	\item \textbf{Kaggle Lung CTÊý¾Ý¼¯\footnote{https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/}}¸ÃÊý¾Ý¼¯°üº¬267¸öÐØ²¿ÖÁ¸¹²¿ºáÏò½ØÃæµÄ2D CT»Ò¶ÈÍ¼£¬³ß´çÎª512*512¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯¡£
+	\item \textbf{DRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯\footnote{http://www.isi.uu.nl/Research/Databases/DRIVE/}}¸ÃÊý¾Ý¼¯µÄÑµÁ·¼¯ºÍ²âÊÔ¼¯¸÷°üº¬20ÕÅ2D²ÊÉ«ÑÛµ×ÊÓÍøÄ¤ÕÕÆ¬£¬³ß´ç¾ùÎª565*584£¬ÑµÁ·¼¯»¹ÓÐ20ÕÅ¶ÔÓ¦µÄÊÓÍøÄ¤Ñª¹ÜÖ÷ÊÓÍ¼¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çÍ³Ò»²åÖµÎª512*512¡£
+	\item \textbf{FIREÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯\footnote{https://projects.ics.forth.gr/cvrl/fire/}}¸ÃÊý¾Ý¼¯°üº¬268ÕÅ2912*2912µÄ2D²ÊÉ«ÑÛµ×ÊÓÍøÄ¤ÕÕÆ¬¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£
+	\item \textbf{Ìì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}}¸ÃÊý¾Ý¼¯°üº¬·Î²¿3D CTÉ¨Ãè¹²1837ÕÅ£¬ÑµÁ·¼¯1470ÕÅ£¬²âÊÔ¼¯145ÕÅ¡£ÑµÁ·¼¯Ìá¹©µÄ±ê×¢ÐÅÏ¢Îª£ºÖÐÐÄ×ø±ê+Ö±¾¶£¨µ¥Î»Îªmm£©+Àà±ð£¨1-½á½Ú£¬2-·ÎÃÜ¶ÈÔö¸ßÓ°£¬3-·ÎÆøÖ×»ò·Î´óÅÝ£¬5-Ë÷Ìõ£¬31-¶¯ÂöÓ²»¯»ò¸Æ»¯£¬32-ÁÜ°Í½á¸Æ»¯£¬33-ÐØÄ¤Ôöºñ£©¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬ÎÒÃÇ¸ù¾Ý±ê×¢ÐÅÏ¢ÇÐÈ¡ÓÐ±ê×¢µÄslice¼°ÆäÇ°ºóslice×é³ÉµÄ3Í¨µÀÍ¼£¬ÔÙ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£ÕâÑùÎÒÃÇµÃµ½Ò»¸ö°üº¬17156ÕÅ512*512*3µÄCTÍ¼£¬ÐÂµÄ±êÇ©ÎªÖÐ¼äÍ¨µÀµÄÔ­Ê¼±êÇ©¡£
+\end{itemize}
+
+Í¼~\ref{brats_m_f}ÖÐÕ¹Ê¾ÁËBRATS2015Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼ÏñµÄËÄ¸öÄ£Ì¬¡¢ÌáÈ¡³öµÄÑÚÄ¤ºÍ½á¹¹ÌØÕ÷Í¼¡£
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=1\linewidth]{figures/brats_m_f}
+	\caption{BRATS2015Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼ÏñºÍÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼¡£ÆäÖÐ×ÓÍ¼ÒÀ´ÎÎªT1¡¢T2¡¢T1c¡¢FlairËÄ¸öÄ£Ì¬µÄMRI¡¢´ÓFlairÌáÈ¡³öÀ´µÄÑÚÄ¤¡¢´ÓFlair²ÉÓÃSobelËã×ÓÌáÈ¡³öÀ´µÄË®Æ½ÏòºÍ´¹Ö±Ïò±ßÔµ¼ì²â½á¹ûÍ¼¡¢´ÓFlairÌáÈ¡³öÀ´µÄ½á¹¹ÌØÕ÷Í¼¡¢²ÉÓÃÖ×Áö·Ö¸î±êÇ©ÑÚÄ¤È¥µôÖ×Áö²¡Ôî½á¹¹ÐÅÏ¢µÄ´ÓFlairÌáÈ¡³öÀ´µÄ½á¹¹ÌØÕ÷Í¼¡¢Ö×Áö·Ö¸î±êÇ©µÄ¶þÖµ»¯ÑÚÄ¤¡£}
+	\label{brats_m_f}
+\end{figure}
+
+Í¼~\ref{image_and_f}ÖÐÕ¹Ê¾ÁËDRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯¡¢Kaggle Chest X-RayÊý¾Ý¼¯¡¢Kaggle Lung CTÊý¾Ý¼¯ºÍÌì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼Ïñ¡¢ÌáÈ¡³öµÄÑÚÄ¤ºÍ½á¹¹ÌØÕ÷Í¼ÒÔ¼°ÈÚºÏÔëÉùºóµÄ½á¹¹ÌØÕ÷Í¼¡£
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/image_f_mask_newf}
+	\caption{¸÷Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼ÏñºÍÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼¡££¨a£©ÎªDRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯¡££¨b£©ÎªKaggle Chest X-RayÊý¾Ý¼¯¡££¨c£©Kaggle Lung CTÊý¾Ý¼¯¡££¨d£©ÎªÌì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯¡£ÒÔÉÏ×ÓÍ¼ÖÐ´Ó×óµ½ÓÒÒÀ´ÎÎªÔ­Í¼¡¢½á¹¹ÌØÕ÷Í¼¡¢ÑÚÄ¤¡¢ÈÚºÏÁËËæ»úÔëÉù½á¹¹ÌØÕ÷Í¼¡£}
+	\label{image_and_f}
+\end{figure}
+
+\subsection{ÊµÑéÉèÖÃ}
+\subsubsection{ÑµÁ·ÉèÖÃ}
+ÈçÎÞÌØÊâËµÃ÷£¬Ã¿¸öÊµÑéµÄµü´ú´ÎÊýµÈÓÚÑµÁ·Êý¾Ý¼¯µÄ200¸öepoch¡£ Ñ§Ï°ÂÊÎª1e-5£¬ÎÞÈ¨ÖØË¥¼õ£¬Ê¹ÓÃbetaÎª1Îª0.5µÄAdamÓÅ»¯Æ÷£¬Åú´¦Àí´óÐ¡Îª1¡£ ÆÀ¹À½á¹ûÊÇ2DÍ¼ÏñÉÏ¶àÄ£Ì¬½á¹ûµÄÆ½¾ùÖµ£¬Ã¿¸öÊµÑé¶¼¾­¹ýÁË4´ÎÑµÁ·±£Áô×î¼Ñ½á¹û¡£
+
+ÔÚ»ùÓÚ²»Í¬µÄÑµÁ·Êý¾ÝºÍÐèÇóÊ±£¬ÎÒÃÇµÄ·½°¸¿ÉÒÔ¶ÔÆäÖÐµÄÒ»Ð©·½·¨½øÐÐÑ¡ÔñÐÔÓ¦ÓÃ£¬ÔÚ±¾ÎÄÖÐ£¬ÎÒÃÇÔÚ¶à¸öÊý¾Ý¼¯ÉÏÓÐ¶à¸öºÏ³ÉÈÎÎñ£¬¾ßÌåµÄÊÊÅä·½°¸ÈçÏÂ£º
+\begin{itemize}
+	\item \textbf{¶àÄ£Ì¬ÄÔÖ×ÁöMRIµÄºÏ³É} ÎÒÃÇÒÔBRATS2015Êý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬ÒÔÆäÖ×Áö·Ö¸î±êÇ©ÎªÊäÈëµÄ²¡Ôî±êÇ©£¬ºÏ³ÉT1¡¢T2¡¢T1c¡¢FlairËÄ¸öÄ£Ì¬£¬Ê¹ÓÃÄ£Ì¬×ª»»Æ÷Ìá¹©Ä£Ì¬Åä×¼ËðÊ§£¬Ê¹ÓÃÒ»¸öU-net\cite{51ronneberger2015u-net:}×÷ÎªÖ×Áö·Ö¸îÆ÷Ìá¹©²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§¡£´ËÍâ£¬ÔÚ½á¹¹ÌØÕ÷Í¼Éú³ÉÑµÁ·Ê±£¬ÎÒÃÇÊ¹ÓÃÖ×Áö·Ö¸î±êÇ©ÑÚÄ¤È¥³ýÁË½á¹¹ÌØÕ÷Í¼ÖÐµÄÔ­Ê¼Ö×Áö½á¹¹ÐÅÏ¢£¨ÈçÍ¼~\ref{brats_m_f}ËùÊ¾£©£¬ÔÚºÏ³É¶àÄ£Ì¬MRIÑµÁ·Ê±£¬ÎÒÃÇÍ¨¹ýÑÚÄ¤¶Ô¾­¹ýÊý¾ÝÔöÇ¿ºóµÄÖ×Áö·Ö¸î±êÇ©¹ýÂËºóÔÙÊäÈë£¬ÎÞÔ¤ÑµÁ·¹ý³Ì¡£
+	\item \textbf{ÑÛµ×ÊÓÍøÄ¤Í¼ÏñµÄºÏ³É} ÎÒÃÇÒÔDRIVEÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯ºÍFIREÊÓÍøÄ¤Í¼ÏñÊý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬ÎÞ²¡Ôî±êÇ©ºÍ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬Ö±½ÓºÏ³Éµ¥Ä£Ì¬µÄ²ÊÉ«ÑÛµ×ÊÓÍøÄ¤Í¼Ïñ£¬²ÉÓÃÔÚÕæÊµÓ°Ïñ¼°Æä½á¹¹ÌØÕ÷Í¼ÉÏ½øÐÐµÄÔ¤ÑµÁ·¡£
+	\item \textbf{·Î²¿CTµÄºÏ³É} ÎÒÃÇÒÔKaggle Lung CTÊý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬ÎÞ²¡Ôî±êÇ©ºÍ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬Ö±½ÓºÏ³Éµ¥Ä£Ì¬µÄ·Î²¿CT£¬²ÉÓÃÔÚÕæÊµÓ°Ïñ¼°Æä½á¹¹ÌØÕ÷Í¼ÉÏ½øÐÐµÄÔ¤ÑµÁ·¡£
+	\item \textbf{ÐØ²¿X-rayµÄºÏ³É} ÎÒÃÇÒÔKaggle Chest X-RayÊý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬¶ÔKaggle Chest X-RayÊý¾Ý¼¯ÖÐÆúÓÃ·ÎÑ×Ó°Ïñ¶ÔKaggle Chest X-RayÊý¾Ý¼¯ÖÐÆúÓÃ·ÎÑ×Ó°Ïñ¶øÖ»Ñ¡ÓÃÕý³£Ó°ÏñÀ´Éú³É½á¹¹ÌØÕ÷Í¼£¬È»ºó½«·ÎÑ×Àà±ð±êÇ©À©Õ¹ÎªÓë½á¹¹ÌØÕ÷Í¼Í¬³ß´çµÄ¶ÀÈÈ¾ØÕóºó×÷ÎªÊäÈëµÄ²¡Ôî±êÇ©£¬ÒÔVGG-11\cite{102simonyan2014very}×÷Îª·ÎÑ×·ÖÀàÆ÷Ìá¹©²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬ºÏ³É¾ßÓÐÖ¸¶¨·ÎÑ×Àà±ðµÄµ¥Ä£Ì¬ÐØ²¿X-ray£¬²ÉÓÃÔÚÕæÊµÓ°Ïñ¼°Æä½á¹¹ÌØÕ÷Í¼ÉÏ½øÐÐµÄÔ¤ÑµÁ·¡£
+	\item \textbf{·Î²¿µÍ¼ÁÁ¿CTµÄºÏ³É} ÎÒÃÇÒÔÌì³ØÈ«ÇòÊý¾ÝÖÇÄÜ´óÈü(2019)Êý¾Ý¼¯×÷ÎªÑµÁ·Êý¾Ý£¬½«Ä¿±ê¼ì²â±êÇ©À©Õ¹ÎªÓë½á¹¹ÌØÕ÷Í¼Í¬³ß´çµÄ¿òÍ¼ºó×÷ÎªÊäÈëµÄ²¡Ôî±êÇ©£¬ÒÔSSD\cite{101liu2016ssd:}×÷Îª²¡Ôî¼ì²âÆ÷Ìá¹©²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬ÎÞÄ£Ì¬Åä×¼ËðÊ§£¬ÊµÏÖ¾ßÓÐ¸ù¾ÝÊäÈëµÄ¼ì²â¿òÐÅÏ¢ºÏ³ÉµÄ¶ÔÓ¦²¡ÔîµÄµ¥Ä£Ì¬·Î²¿µÍ¼ÁÁ¿CT£¬ÎÞÔ¤ÑµÁ·¹ý³Ì¡£
+\end{itemize}
+
+\subsubsection{ÆÀ¹ÀÖ¸±ê}
 \cite{96zhang2019skrgan:}ÖÐÍ¬ÑùÔÚÒ»Ð©Êý¾Ý¼¯ÉÏÊµÏÖÁË½Ï¸ßÖÊÁ¿µÄºÏ³É£¬ÎÒÃÇÒÔÆäÖÐµÄ²¿·Ö½á¹û×÷ÎªÒ»¸ö²Î¿¼»ù×¼¡£
 ÕâÏî¹¤×÷ÖÐ£¬ÎÒÃÇÊ¹ÓÃ¶à³ß¶È½á¹¹ÏàËÆÐÔ£¨MS-SSIM£©£¬ºÍFreshet Inception¾àÀë £¨FID£©À´ÆÀ¹ÀºÏ³ÉÒ½Ñ§Í¼ÏñµÄÐÔÄÜ¡£MS-SSIM ÊÇÒ»ÖÖ¹ã·ºÊ¹ÓÃµÄÖ¸±ê£¬ÓÃÓÚ²âÁ¿Åä¶ÔÍ¼ÏñµÄÏàËÆÐÔ£¬ÆäÖÐ MS-SSIM Ô½¸ß£¬ÐÔÄÜÔ½ºÃ¡£FID ÔÚÏñËØ¼¶±ð¼ÆËãÕæÊµÍ¼ÏñºÍ¼ÙÍ¼ÏñÖ®¼äµÄ¾àÀë£¬ÆäÖÐ FID Ô½µÍ£¬ÐÔÄÜÔ½ºÃ¡£
 ÎÒÃÇÊ¹ÓÃDice Score \cite {95dice1945measures}ºÍ¾ù·½Îó²î£¨MSE£©\cite {94prasad1990the}À´ÆÀ¹À·Ö¸î½á¹û£¬Ê¹ÓÃÃô¸Ð¶È£¨Sensitivity£©¡¢¾«¶È£¨Accuracy£©ºÍArea Under the ROC Curve £¨AUC£©À´ÆÀ¹ÀÑª¹Ü×¢ÊÍ½á¹û£¬Ê¹ÓÃ¾«¶È£¨Accuracy£©À´ÆÀ¹ÀÎÒÃÇµÄ·ÖÀà½á¹û£¬Ê¹ÓÃ½»²¢±È£¨IOU£©À´ÆÀ¹À¼ì²â½á¹û¡£
-\subsection{ÑµÁ·ÉèÖÃ}
-ÈçÎÞÌØÊâËµÃ÷£¬Ã¿¸öÊµÑéµÄµü´ú´ÎÊýµÈÓÚÑµÁ·Êý¾Ý¼¯µÄ200¸öepoch¡£ Ñ§Ï°ÂÊÎª1e-5£¬ÎÞÈ¨ÖØË¥¼õ£¬Ê¹ÓÃbetaÎª1Îª0.5µÄAdamÓÅ»¯Æ÷£¬Åú´¦Àí´óÐ¡Îª1¡£ ÆÀ¹À½á¹ûÊÇ2DÍ¼ÏñÉÏ¶àÄ£Ì¬½á¹ûµÄÆ½¾ùÖµ£¬Ã¿¸öÊµÑé¶¼¾­¹ýÁË4´ÎÑµÁ·±£Áô×î¼Ñ½á¹û¡£
+	
 
 \subsection{ºÏ³É·½·¨ÔÚÄÔÖ×ÁöMRIÊý¾Ý¼¯ÉÏµÄ¶Ô±ÈÊµÑé}
 \begin{table*}[thbp!]
