@@ -255,7 +255,7 @@ Therefore, we designed an unsupervised GAN-based registration multi-modal medica
 	\item ×îºó£¬±¾ÑÐ¾¿Ìá³öÊ¹ÓÃºÏ³ÉÊý¾ÝÑµÁ·ÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÄ£ÐÍ£¬Í¨¹ý¶ÔÄ£ÐÍ´¦ÀíÄÜÁ¦µÄÆÀ¹ÀÑéÖ¤ºÏ³É²¡ÔîµÄÓÐÐ§ÐÔºÍºÏ³ÉÊý¾ÝµÄ¿ÉÓÃÐÔ£¬¼ä½ÓÆÀ¹ÀºÏ³ÉÓ°ÏñµÄÐÔÄÜºÍÖÊÁ¿¡£±¾ÑÐ¾¿ÔÚ¶àÏîÊµÑéÖÐµÄ½á¹û±íÃ÷±¾ÑÐ¾¿ºÏ³ÉµÄÊý¾Ý¿ÉÒÔÏÔÖøÌá¸ß¶àÖÖÖÇÄÜÓ°Ïñ´¦ÀíÄ£ÐÍµÄ·º»¯ÄÜÁ¦£¬ÓÈÆäÊÇÍ¼Ïñ·Ö¸îÀàÄ£ÐÍ¡£
 \end{itemize}	
 
-\subsection{ÂÛÎÄµÄ½á¹¹}
+\subsection{±¾ÎÄµÄ½á¹¹}
 ±¾ÎÄÒ»¹²ÓÐÎåÕÂ£¬Ã¿Ò»ÕÂµÄÄÚÈÝ°²ÅÅÈçÏÂ£º
 
 µÚÒ»ÕÂ£ºÐ÷ÂÛ¡£½éÉÜ±¾ÎÄµÄÑÐ¾¿µÄÎÊÌâ±³¾°¡¢ÑÐ¾¿µÄÄ¿µÄ¡¢ÑÐ¾¿µÄË¼Â·ºÍ¼¼ÊõÂ·ÏßºÍÎÄ±¾µÄÖ÷Òª¹±Ï×¡£
@@ -660,7 +660,7 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 
 \subsection{ÊµÑéÉèÖÃ}
 \subsubsection{ÑµÁ·ÉèÖÃ}
-ÈçÎÞÌØÊâËµÃ÷£¬Ã¿¸öÊµÑéµÄµü´ú´ÎÊýµÈÓÚÑµÁ·Êý¾Ý¼¯µÄ200¸öepoch¡£ Ñ§Ï°ÂÊÎª1e-5£¬ÎÞÈ¨ÖØË¥¼õ£¬Ê¹ÓÃbetaÎª1Îª0.5µÄAdamÓÅ»¯Æ÷£¬Åú´¦Àí´óÐ¡Îª1¡£ ÆÀ¹À½á¹ûÊÇ2DÍ¼ÏñÉÏ¶àÄ£Ì¬½á¹ûµÄÆ½¾ùÖµ£¬Ã¿¸öÊµÑé¶¼¾­¹ýÁË4´ÎÑµÁ·±£Áô×î¼Ñ½á¹û¡£
+±¾ÑÐ¾¿ÊµÑé²ÉÓÃµÄÓ²¼þ»·¾³ÎªÒ»¸öNVIDIA V100GPU¼¯Èº£¬Èí¼þ»·¾³ÎªPython3.6¡¢CUDA8.0ºÍTensorFlow1.13.2¡£ÈçÎÞÌØÊâËµÃ÷£¬Ã¿¸öÊµÑéµÄµü´ú´ÎÊýµÈÓÚÑµÁ·Êý¾Ý¼¯µÄ500¸öepoch¡£ Ñ§Ï°ÂÊÎª1e-5£¬ÎÞÈ¨ÖØË¥¼õ£¬Ê¹ÓÃbetaÎª1Îª0.5µÄAdamÓÅ»¯Æ÷£¬Åú´¦Àí´óÐ¡Îª1¡£ ÆÀ¹À½á¹ûÊÇ2DÍ¼ÏñÉÏËùÓÐÄ£Ì¬½á¹ûµÄÆ½¾ùÖµ£¬Ã¿¸öÊµÑéµÄ½á¹û¶¼Îª¾­¹ýÁËÖÁÉÙ4´ÎÑµÁ·±£ÁôµÄ×î¼Ñ½á¹û¡£
 
 ÔÚ»ùÓÚ²»Í¬µÄÑµÁ·Êý¾ÝºÍÐèÇóÊ±£¬±¾ÑÐ¾¿µÄ·½°¸¿ÉÒÔ¶ÔÆäÖÐµÄÒ»Ð©·½·¨½øÐÐÑ¡ÔñÐÔÓ¦ÓÃ£¬ÔÚ±¾ÎÄÖÐ£¬±¾ÑÐ¾¿ÔÚ¶à¸öÊý¾Ý¼¯ÉÏÓÐ¶à¸öºÏ³ÉÈÎÎñ£¬¾ßÌåµÄÊÊÅä·½°¸ÈçÏÂ£º
 \begin{itemize}
@@ -672,7 +672,7 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 \end{itemize}
 
 \subsubsection{ÆÀ¹ÀÖ¸±ê}
-±¾ÑÐ¾¿ÒÔSkrGAN\cite{96zhang2019skrgan:}ÖÐÊµÏÖµÄ½Ï¸ßÖÊÁ¿µÄºÏ³É½á¹û×÷ÎªÒ»¸ö»ù×¼¶Ô±È¡£
+±¾ÑÐ¾¿ÒÔSkrGAN\cite{96zhang2019skrgan:}ÖÐÊµÏÖµÄµ±Ç°×îºÃÖÊÁ¿µÄºÏ³É½á¹û×÷ÎªÒ»¸ö»ù×¼¶Ô±È¡£
 ÕâÏî¹¤×÷ÖÐ£¬±¾ÑÐ¾¿Ê¹ÓÃ¶à³ß¶È½á¹¹ÏàËÆÐÔ£¨MS-SSIM£©£¬ºÍFreshet Inception¾àÀë £¨FID£©À´ÆÀ¹ÀºÏ³ÉÒ½Ñ§Í¼ÏñµÄÐÔÄÜ¡£MS-SSIM ÊÇÒ»ÖÖ¹ã·ºÊ¹ÓÃµÄÖ¸±ê£¬ÓÃÓÚ²âÁ¿Åä¶ÔÍ¼ÏñµÄÏàËÆÐÔ£¬ÆäÖÐ MS-SSIM Ô½¸ß£¬ÐÔÄÜÔ½ºÃ¡£FID ÔÚÏñËØ¼¶±ð¼ÆËãÕæÊµÍ¼ÏñºÍ¼ÙÍ¼ÏñÖ®¼äµÄ¾àÀë£¬ÆäÖÐ FID Ô½µÍ£¬ÐÔÄÜÔ½ºÃ¡£
 ±¾ÑÐ¾¿Ê¹ÓÃDice Score \cite {95dice1945measures}ºÍ¾ù·½Îó²î£¨MSE£©\cite {94prasad1990the}À´ÆÀ¹À·Ö¸î½á¹û£¬Ê¹ÓÃÃô¸Ð¶È£¨Sensitivity£©¡¢¾«¶È£¨Accuracy£©ºÍArea Under the ROC Curve £¨AUC£©À´ÆÀ¹ÀÑª¹Ü×¢ÊÍ½á¹û£¬Ê¹ÓÃ¾«¶È£¨Accuracy£©À´ÆÀ¹À±¾ÑÐ¾¿µÄ·ÖÀà½á¹û£¬Ê¹ÓÃ½»²¢±È£¨IOU£©À´ÆÀ¹À¼ì²â½á¹û¡£
 	
@@ -1024,9 +1024,9 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊý¾ÝµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊý¾ÝµÄÎ¢µ÷ÐÔÄÜÓëÍêÕûÕæÊµÊý¾Ýµ
 ×îºó£¬±¾ÑÐ¾¿ÊµÏÖÁË¶ÔºÏ³ÉÒ½Ñ§Ó°ÏñÓÃ×÷ÖÇÄÜÒ½Ñ§Í¼Ïñ´¦ÀíÈÎÎñµÄÔ¤ÑµÁ·Êý¾Ý»òÔöÇ¿Êý¾ÝµÄ¿ÉÓÃÐÔÑéÖ¤£¬¶àÏîÊµÑé½á¹û±íÃ÷±¾ÑÐ¾¿ºÏ³ÉµÄÊý¾Ý¿ÉÒÔÏÔ×ÅÌá¸ßÄ£ÐÍµÄ·º»¯ÄÜÁ¦£¬ÓÈÆäÊÇÔÚÍ¼Ïñ·Ö¸îÀàÈÎÎñÖÐ¡£
 ±¾ÑÐ¾¿ÖÐµÄºËÐÄ¹±Ï×¼òÒª×Ü½áÈçÏÂ
 \begin{itemize}
-	\item ±¾ÑÐ¾¿Ìá³öÒ»ÖÖ½á¹¹ÌØÕ÷Í¼ÌáÈ¡·½·¨£¬ÒÔÖ±½Ó´ÓÒ½Ñ§Í¼ÏñÖÐÌáÈ¡½âÆÊ½á¹¹ÐÅÏ¢£¬¶øÎÞÐèÑµÁ·»ò¸½¼Ó±êÇ©Êý¾Ý¡£
-	\item ±¾ÑÐ¾¿½áºÏVAEºÍGANµÄÌØµãÌá³öÁËÒ»ÖÖ½á¹¹ÌØÕ÷Í¼Éú³É·½·¨£¬ÒÔ´Ó¶àÎ¬ÕýÌ¬·Ö²¼¾ØÕóÉú³É½á¹¹ÌØÕ÷Í¼¡£
-	\item ±¾ÑÐ¾¿ÊµÏÖÁË´Ó½á¹¹ÌØÕ÷Í¼ºÍËæ»úÑ¡ÔñµÄ²¡±ä±êÇ©ÖÐºÏ³É¾ßÓÐÏàÓ¦²¡±äÐÅÏ¢µÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Í¼Ïñ¡£
+	\item ±¾ÑÐ¾¿Ìá³öÒ»ÖÖ½á¹¹ÌØÕ÷Í¼ÌáÈ¡·½·¨£¬¿ÉÖ±½Ó´ÓÒ½Ñ§Í¼ÏñÖÐÌáÈ¡³öÇåÎú¸É¾»µÄ½âÆÊ½á¹¹ÐÅÏ¢£¬ÎÞÐèÑµÁ·»ò¸½¼Ó±êÇ©Êý¾Ý¡£
+	\item ±¾ÑÐ¾¿½áºÏVAEºÍGANµÄÌØµãÌá³öÁËÒ»ÖÖ½á¹¹ÌØÕ÷Í¼Éú³É·½·¨£¬¿É´Ó¶àÎ¬ÕýÌ¬·Ö²¼¾ØÕóÉú³ÉËæ»ú½á¹¹ÌØÕ÷Í¼¡£
+	\item ±¾ÑÐ¾¿Ìá³öÁËÒ»ÖÖ¿É´Ó½á¹¹ÌØÕ÷Í¼ºÍËæ»úÑ¡ÔñµÄ²¡±ä±êÇ©ÖÐºÏ³É¾ßÓÐÏàÓ¦²¡±äÐÅÏ¢µÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Í¼ÏñµÄ·½·¨¡£
 	\item ±¾ÑÐ¾¿Í¨¹ý¶àÏîºÏ³ÉÊý¾Ý¿ÉÓÃÐÔÊµÑé£¬ÑéÖ¤ºÏ³ÉÊý¾Ý¿ÉÒÔÓÃ×÷¶àÖÖÖÇÄÜÒ½Ñ§Í¼Ïñ´¦ÀíÈÎÎñµÄÔ¤ÑµÁ·Êý¾Ý»òÔöÇ¿Êý¾Ý¡£
 \end{itemize}
 
