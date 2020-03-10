@@ -13,6 +13,9 @@
 
 \usepackage{chngcntr}%Í¼Æ¬°´ÕÂ½Ú±êºÅ
 \counterwithin{figure}{section}
+\counterwithin{table}{section}
+%\renewcommand {\thetable} {\thechapter{}.\arabic{table}}
+%\renewcommand {\thefigure} {\thechapter{}.\arabic{figure}}
 
 \usepackage{geometry}%Ò³ÃæÉèÖÃ
 \usepackage{titlesec}%ÐÞ¸ÄÕÂ½Ú¸ñÊ½
@@ -357,10 +360,10 @@ ACGAN\cite{98odena2016conditional}ÔÚÉÏÊöGANµÄ»ù´¡ÉÏ½øÐÐÁË¸Ä½ø£¬Ê¹µÃGAN½á¹¹¿ÉÒÔÉú
 \begin{figure*}[thbp!]
 	\centering
 	\includegraphics[width=1\textwidth]{figures/ACGAN}
-	\caption{ACGANÄ£ÐÍ½á¹¹\protect\footnotemark[1]¡£}
+	\caption{ACGANÄ£ÐÍ½á¹¹\protect\footnotemark¡£}
 	\label{ACGAN}	
 \end{figure*}
-\footnotetext[1]{https://twitter.com/ch402/status/793535193835417601}
+\footnotetext{https://twitter.com/ch402/status/793535193835417601}
 
 \subsection{±ä·Ö×Ô±àÂëÆ÷}
 ±ä·Ö×Ô±àÂëÆ÷£¨VAE£¬Variational auto-encoder£©\cite{106kingma2013auto-encoding}ÊÇÁíÒ»ÀàÖØÒªµÄÉú³ÉÄ£ÐÍ£¬ËüÓÚ2013ÄêÓÉDiederik P.KingmaºÍMax Welling×îÔçÌá³ö£¬
@@ -401,7 +404,7 @@ VAE\cite{106kingma2013auto-encoding}ÎÄÖÐ¶Ô´Ë½øÐÐÁËÏêÏ¸µÄÍÆµ¼ºÍÕ¹¿ª£¬ÓÉ´ËÍÆµ¼µÃµ½
 \subsection{Ä¿±ê¼ì²â}
 Í¼ÏñÄ¿±ê¼ì²âÍ¬ÑùÊÇÊý×ÖÍ¼Ïñ´¦ÀíÁìÓò¾­µäÈÎÎñÖ®Ò»¡£Ä¿±ê¼ì²âÈÎÎñÊÇÅÐ¶ÏÍ¼ÏñÎïÌåµÄÊÇ·ñÊÇÄ¿±êÀà±ð²¢ÔÚÍ¼ÖÐ±ê¼Ç³öÄ¿±êÀà±ðÎïÌåµÄÎ»ÖÃ¡£½ü¼¸ÄêÀ´£¬Ëæ×ÅÉî¶ÈÑ§Ï°µÄáÈÆð£¬»ùÓÚ¾í»ýÉñ¾­ÍøÂçµÄÄ¿±ê¼ì²âËã·¨È¡µÃÁËºÜ´óµÄÍ»ÆÆ¡£µ±Ç°±È½ÏÁ÷ÐÐµÄÄ£ÐÍ¿ÉÒÔ·ÖÎªÁ½Àà£ºÒ»Àà»ùÓÚRegion ProposalµÄR-CNN\cite{113girshick2014rich}ÀàÄ£ÐÍ£¨R-CNN£¬Fast R-CNN\cite{111girshick2015fast}, Faster R-CNN\cite{112ren2017faster}µÈ£©£¬°üº¬Á½¸ö½×¶Î£¬ÐèÒªÏÈÇ°ÏòÍÆÀí²úÉúÄ¿±êºòÑ¡¿ò£¬È»ºóÔÙ¶ÔºòÑ¡¿ò½øÐÐ·ÖÀàºÍ»Ø¹éÒÔÉ¸Ñ¡³ö×îÖÕµÄ¼ì²â¿ò£»ÁíÒ»ÀàÊÇYOlO\cite{110redmon2015you}¡¢SSD\cite{109liu2016ssd:}µÈµ¥½×¶ÎËã·¨Ä£ÐÍ£¬½öÓÃµ¥¸ö¾í»ýÉñ¾­ÍøÂç¼´¿ÉÊµÏÖÖ±½ÓÔ¤²â²»Í¬Ä¿±êµÄÀà±ðÓëÎ»ÖÃ¡£
 
-ÈçÍ¼ËùÊ¾£¬SSDÄ£ÐÍ»ùÓÚVGG16\cite{102simonyan2014very}Ä£ÐÍ½øÐÐÐÞ¸Ä£¬ÏÈ½«Í¼Æ¬ÊäÈëµ½Ô¤ÑµÁ·ºÃµÄ·ÖÀàÍøÂçÖÐÀ´»ñµÃ²»Í¬´óÐ¡µÄÌØÕ÷Ó³Éä£¬Í¨¹ý³éÈ¡µÄ¶à²ã¾í»ý²ãµÄÌØÕ÷Í¼£¨feature map£©¹¹Ôì6¸ö²»Í¬³ß¶È´óÐ¡µÄ¼ì²âºòÑ¡¿ò£¨bbox£©£¬È»ºó·Ö±ð½øÐÐ¼ì²âºÍ·ÖÀà£¬Éú³É¶à¸öºòÑ¡¿ò£¬ÔÙ½«²»Í¬ÌØÕ÷Í¼»ñµÃµÄºòÑ¡¿ò½áºÏÆðÀ´£¬¾­¹ý·Ç¼«´óÖµÒÖÖÆ£¨NMS£©·½·¨À´ÒÖÖÆµôÒ»²¿·ÖÖØµþ»òÕß²»ÕýÈ·µÄºòÑ¡¿ò£¬Éú³É×îÖÕµÄºòÑ¡¿ò¼¯ºÏ£¬Õâ¾ÍÊÇ×îºóÊä³öµÄÄ¿±ê¼ì²â½á¹û¡£
+ÈçÍ¼\ref{YOlO_and_SSD}ËùÊ¾£¬SSDÄ£ÐÍ»ùÓÚVGG16\cite{102simonyan2014very}Ä£ÐÍ½øÐÐÐÞ¸Ä£¬ÏÈ½«Í¼Æ¬ÊäÈëµ½Ô¤ÑµÁ·ºÃµÄ·ÖÀàÍøÂçÖÐÀ´»ñµÃ²»Í¬´óÐ¡µÄÌØÕ÷Ó³Éä£¬Í¨¹ý³éÈ¡µÄ¶à²ã¾í»ý²ãµÄÌØÕ÷Í¼£¨feature map£©¹¹Ôì6¸ö²»Í¬³ß¶È´óÐ¡µÄ¼ì²âºòÑ¡¿ò£¨bbox£©£¬È»ºó·Ö±ð½øÐÐ¼ì²âºÍ·ÖÀà£¬Éú³É¶à¸öºòÑ¡¿ò£¬ÔÙ½«²»Í¬ÌØÕ÷Í¼»ñµÃµÄºòÑ¡¿ò½áºÏÆðÀ´£¬¾­¹ý·Ç¼«´óÖµÒÖÖÆ£¨NMS£©·½·¨À´ÒÖÖÆµôÒ»²¿·ÖÖØµþ»òÕß²»ÕýÈ·µÄºòÑ¡¿ò£¬Éú³É×îÖÕµÄºòÑ¡¿ò¼¯ºÏ£¬Õâ¾ÍÊÇ×îºóÊä³öµÄÄ¿±ê¼ì²â½á¹û¡£
 
 \newpage
 \chead{µÚ4ÕÂ\ ´ø²¡Ôî±êÇ©µÄÅä×¼¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄºÏ³É}
@@ -635,7 +638,7 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 	\caption{BRATS2015Êý¾Ý¼¯ÖÐÒ½Ñ§Í¼ÏñºÍÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼¡£ÆäÖÐ×ÓÍ¼ÒÀ´ÎÎªT1¡¢T2¡¢T1c¡¢FlairËÄ¸öÄ£Ì¬µÄMRI¡¢´ÓFlairÌáÈ¡³öÀ´µÄÑÚÄ¤¡¢´ÓFlair²ÉÓÃSobelËã×ÓÌáÈ¡³öÀ´µÄË®Æ½ÏòºÍ´¹Ö±Ïò±ßÔµ¼ì²â½á¹ûÍ¼¡¢´ÓFlairÌáÈ¡³öÀ´µÄ½á¹¹ÌØÕ÷Í¼¡¢²ÉÓÃÖ×Áö·Ö¸î±êÇ©ÑÚÄ¤È¥µôÖ×Áö²¡Ôî½á¹¹ÐÅÏ¢µÄ´ÓFlairÌáÈ¡³öÀ´µÄ½á¹¹ÌØÕ÷Í¼¡¢Ö×Áö·Ö¸î±êÇ©µÄ¶þÖµ»¯ÑÚÄ¤¡£}
 	\label{brats_m_f}
 \end{figure}
-±¾ÑÐ¾¿ÔÚÁù¸ö¹«¿ªÊý¾Ý¼¯ÖÐ½øÐÐÁËÊµÑéÑéÖ¤£¬º­¸ÇÁË²ÊÉ«ÕÕÆ¬¡¢MRI¡¢CT¡¢X-rayµÈ³£¼ûµÄ³ÉÏñÄ£Ì¬£¬º­¸ÇÁËÄÔ²¿¡¢ÊÓÍøÄ¤¡¢·Î²¿½ØÃæ¡¢ÐØ²¿µÈ¶à¸ö³ÉÏñ²¿Î»£¬º­¸ÇÁËÖ×Áö·Ö¸î¡¢Ñª¹Ü·Ö¸î¡¢·ÎÑ×·ÖÀà¡¢·Î½á½Ú¼ì²âµÈ¶àÖÖÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñ¡£ÕâÁù¸ö¹«¿ªÊý¾Ý¼¯µÄÏêÏ¸Çé¿öºÍÔ¤´¦Àí·½Ê½ÈçÏÂ£º
+±¾ÑÐ¾¿ÔÚÁù¸ö¹«¿ªÊý¾Ý¼¯ÖÐ½øÐÐÁËÊµÑéÑéÖ¤£¬º­¸ÇÁË²ÊÉ«ÕÕÆ¬¡¢X-ray¡¢MRI¡¢CTµÈ³£¼ûµÄ³ÉÏñÄ£Ì¬£¬º­¸ÇÁËÄÔ²¿¡¢ÊÓÍøÄ¤¡¢·Î²¿½ØÃæ¡¢ÐØ²¿µÈ¶à¸ö³ÉÏñ²¿Î»£¬º­¸ÇÁËÖ×Áö·Ö¸î¡¢Ñª¹Ü·Ö¸î¡¢·ÎÑ×·ÖÀà¡¢·Î½á½Ú¼ì²âµÈ¶àÖÖÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñ¡£ÕâÁù¸ö¹«¿ªÊý¾Ý¼¯µÄÏêÏ¸Çé¿öºÍÔ¤´¦Àí·½Ê½ÈçÏÂ£º
 \begin{itemize}
 	\item \textbf{BRATS2015Êý¾Ý¼¯\cite{91menze:hal-00935640}}¹«¿ªÊý¾Ý¼¯BRATS2015°üº¬T1 / T2 / T1c / FlairµÄËÄ¸öÅä×¼Ä£Ì¬ÄÔ²¿3D MRI¡£ÑµÁ·¼¯Ã¿¸öÄ£Ì¬ÓÐ274¸ö´óÐ¡Îª155 $ \times $ 240 $ \times $ 240ÕÅÍ¼¼°¶ÔÓ¦µÄ274ÕÅÖ×Áö·Ö¸î±êÇ©Í¼¡£ ±¾ÑÐ¾¿½«Ñù±¾°´9:1ÖØÐÂ»®·ÖÑµÁ·¼¯ºÍ²âÊÔ¼¯£¬È»ºóÈ¡Ã¿¸ö3D MRIµÄ55-105Ö®¼äµÄ50¸öÇÐÆ¬¹¹½¨2DÊý¾Ý¼¯¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬±¾ÑÐ¾¿ÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯¡£
 	\item \textbf{Kaggle Chest X-RayÊý¾Ý¼¯\footnote{https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia }}¸ÃÊý¾Ý¼¯°üÀ¨5863¸ö²¡¶¾ÐÔ·ÎÑ×¡¢Ï¸¾úÐÔ·ÎÑ×ºÍÕý³£·Î²¿µÄÕýÃæ2D XÉäÏß»Ò¶ÈÍ¼£¬Í¼Æ¬³ß´ç´Ó384*127µ½2772*2304²»µÈ¡£ÔÚÊý¾ÝÔ¤´¦ÀíÊ±£¬±¾ÑÐ¾¿ÒÑ¶ÔÃ¿¸öÍ¼Ïñ¶¼½øÐÐ±ê×¼»¯£¬³ß´çËõ·ÅÎª512*512¡£
@@ -677,18 +680,18 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 \subsection{ÔÚÄÔÖ×ÁöMRIÊý¾Ý¼¯ÉÏµÄÏûÈÚÊµÑé}
 \begin{table*}[thbp!]
 	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
-	\caption{Ablation Experiment Setting on BRATS2015}
+	\caption{BRATS2015ÉÏÏûÈÚÊµÑéµÄÊµÑéÉèÖÃ}
 	\label{Ablation Experiment Setting on BRATS2015}
 	\centering
 	\resizebox{\textwidth}{30mm}{
 	\begin{tabular}{c|c|c|c|c|c}
 		%\toprule
 		\hline
-		ÊµÑé		&\tabincell{c}{ÊäÈë½á¹¹\\ÌØÕ÷Í¼} &\tabincell{c}{ÑÚÄ¤¹ýÂË\\²¡Ôî±êÇ©} &\tabincell{c}{ÊäÈëÈÚºÏ\\Ëæ»úÔëÉù} &\tabincell{c}{Ä£Ì¬Åä\\×¼ËðÊ§$\mathcal{L}_{reg}$} &\tabincell{c}{²¡ÔîÉú³É\\Ö¸µ¼ËðÊ§$\mathcal{L}_{les}$}  \\
+		ÊµÑé		&\tabincell{c}{ÊäÈë½á¹¹\\ÌØÕ÷Í¼} &\tabincell{c}{ÊäÈëÈÚºÏ\\Ëæ»úÔëÉù} &\tabincell{c}{Ä£Ì¬Åä\\×¼ËðÊ§$\mathcal{L}_{reg}$}   &\tabincell{c}{Ìí¼Ó²¡Ôî±êÇ©ºÍ\\²¡ÔîÉú³ÉËðÊ§$\mathcal{L}_{les}$} &\tabincell{c}{Ê¹ÓÃÑÚÄ¤¹ýÂË\\É¸Ñ¡²¡Ôî±êÇ©}   \\
 		%\midrule
 		\hline
 		\tabincell{l}{A}	&$\times$	&$\times$	&$\times$	&$\times$	&$\times$ \\
-		\tabincell{l}{B}	&$\surd$	&$\times$	&$\times$	&$\times$    &$\surd$\\
+		\tabincell{l}{B}	&$\surd$	&$\times$	&$\times$	&$\times$    &$\times$\\
 		\tabincell{l}{C}	&$\surd$	&$\surd$	&$\times$	&$\times$	&$\times$ \\
 		\tabincell{l}{D}	&$\surd$	&$\surd$	&$\surd$	&$\times$	&$\times$ \\
 		\tabincell{l}{E}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\times$ \\
@@ -708,16 +711,16 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/ablation}
-	\caption{ÏûÈÚÊµÑéµÄºÏ³ÉÍ¼Ïñ¡£ Ä£ÐÍA£ºÓÃËæ»úÔëÉùÌæ»»½á¹¹ÌØÕ÷Í¼£¬ÓÉÓÚÃ»ÓÐ½á¹¹ÌØÕ÷Í¼ÔÚÄÔÂÖÀªÉÏµÄÔ¼Êø£¬Ä£ÐÍAÉú³ÉµÄÍ¼Ïñ·ûºÏMRIµÄÌØÕ÷£¬µ«²»·ûºÏ´óÄÔµÄ½á¹¹ÌØÕ÷¡£ Ä£ÐÍB£ºÃ»ÓÐÑÚÄ¤¶ÔÊäÈë±êÇ©¹ýÂË£¬ºÜÈÝÒ×¿´³öºÏ³ÉµÄÖ×Áö³¬³öÁË´óÄÔµÄÂÖÀª¡£ Ä£ÐÍC£ºÃ»ÓÐÈÚºÏËæ»úÔëÉùµÄ½á¹û£¬ÔÚÓëÆäËûÊµÑéÏàÍ¬µÄÑµÁ·epochºóºÏ³ÉÖÊÁ¿½Ï²îÇÒÉú³ÉµÄÍ¼ÏñµÄÅä×¼Ð§¹û²»ÊÇºÜºÃ£¬Ò²Ã»ºÏ³ÉÃ÷ÏÔµÄ²¡ÔîÐÅÏ¢¡£ Ä£ÐÍD£ºÃ»ÓÐÄ£Ì¬Åä×¼ËðÊ§£¬Éú³ÉµÄÍ¼ÏñµÄÅä×¼Ð§¹û²»ÊÇºÜºÃ£¬ÓÈÆäÊÇ±ßÔµÏ¸½Ú¡£ Ä£ÐÍE£ºÃ»ÓÐ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬¿ÉÒÔ¿´³öÉú³ÉµÄÍ¼ÏñÖÐµÄ²¡±äÉ¢ÂÒËæÒâ£¬¹ý¶É¿äÕÅ£¬ÓëÊäÈëµÄ²¡Ôî±êÇ©²»ÎÇºÏ¡£ Ä£ÐÍF£º±¾ÑÐ¾¿ÍêÕûµÄÄ£ÐÍ£¬ºÏ³ÉÁËÓëÊäÈë²¡Ôî±êÇ©ÎÇºÏµÄ²¡ÔîÐÅÏ¢£¬Åä×¼¶È¸ß£¬ºÏ³ÉÖÊÁ¿¸ß¡£¸Ã×éÊµÑéÖÐ£¬ÊµÑéC-F¾ù²ÉÓÃÏàÍ¬µÄ½á¹¹ÌØÕ÷Í¼×÷ÎªÊäÈë¡£}
+	\caption{ÏûÈÚÊµÑéµÄºÏ³ÉÍ¼Ïñ¡£ Ä£ÐÍA£ºÓÃËæ»úÔëÉùÌæ»»½á¹¹ÌØÕ÷Í¼ÇÒÒ²Òò´ËÎÞ×Ô¼à¶½Ô¤ÑµÁ·¹ý³Ì£¬ÓÉÓÚÃ»ÓÐ½á¹¹ÌØÕ÷Í¼ÔÚÄÔÂÖÀªÉÏµÄÔ¼Êø£¬Ä£ÐÍAÉú³ÉµÄÍ¼Ïñ·ûºÏMRIµÄÌØÕ÷£¬µ«²»·ûºÏ´óÄÔµÄ½á¹¹ÌØÕ÷¡£ Ä£ÐÍB£ºÒÔ½á¹¹ÌØÕ÷Í¼ÎªÊäÈëµ«Ã»ÓÐÈÚºÏËæ»úÔëÉù£¬ÔÚÓëÆäËûÊµÑéÏàÍ¬µÄÑµÁ·epochºóºÏ³ÉÖÊÁ¿½Ï²îÇÒÉú³ÉµÄÍ¼ÏñµÄÅä×¼Ð§¹û²»ÊÇºÜºÃ£¬Ò²Ã»ºÏ³ÉÃ÷ÏÔµÄ²¡ÔîÐÅÏ¢¡£ Ä£ÐÍC£ºÃ»ÓÐÄ£Ì¬Åä×¼ËðÊ§£¬Éú³ÉµÄÍ¼ÏñµÄÅä×¼Ð§¹û²»ÊÇºÜºÃ£¬ÓÈÆäÊÇ±ßÔµÏ¸½Ú¡£ Ä£ÐÍD£ºÃ»ÓÐ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§£¬¿ÉÒÔ¿´³öÉú³ÉµÄÍ¼ÏñÖÐµÄ²¡±äÉ¢ÂÒËæÒâ£¬¹ý¶É¿äÕÅ£¬ÓëÊäÈëµÄ²¡Ôî±êÇ©²»ÎÇºÏ¡£Ä£ÐÍE£ºÃ»ÓÐÑÚÄ¤¶ÔÊäÈë±êÇ©¹ýÂË£¬ºÜÈÝÒ×¿´³öºÏ³ÉµÄÖ×Áö³¬³öÁË´óÄÔµÄÂÖÀª¡£ Ä£ÐÍF£º±¾ÑÐ¾¿ÍêÕûµÄÄ£ÐÍ£¬ºÏ³ÉÁËÓëÊäÈë²¡Ôî±êÇ©ÎÇºÏµÄ²¡ÔîÐÅÏ¢£¬Åä×¼¶È¸ß£¬ºÏ³ÉÖÊÁ¿¸ß¡£¸Ã×éÊµÑéÖÐ£¬ÊµÑé	B¡¢C¡¢E¡¢F¾ù²ÉÓÃÏàÍ¬µÄ½á¹¹ÌØÕ÷Í¼×÷ÎªÊäÈë¡£}
 	\label{ablation_mri}
 \end{figure}
 
-Í¼\ref{ablation_mri}ÏÔÊ¾ÁËÏûÈÚ¶Ô±ÈÊµÑéÖÐÉú³ÉµÄºÏ³ÉÍ¼ÏñµÄÊ¾Àý¡£
-Í¼\ref{ablation}ÎªÏûÈÚÊµÑéÁ¿»¯ÆÀ¹À½á¹ûµÄÖù×´Í¼¶Ô±ÈÇé¿ö£¬²»ÄÑ¿´³ö£¬±¾ÑÐ¾¿µÄÃ¿Ò»Ïî·½·¨¶¼Æðµ½ÁËÕë¶ÔÐÔµÄÌáÉýÐ§Á¦¡£
+Í¼\ref{ablation_mri}ÏÔÊ¾ÁËÏûÈÚ¶Ô±ÈÊµÑéÖÐÉú³ÉµÄºÏ³ÉÍ¼ÏñµÄÊ¾Àý¡£¿ÉÒÔÖ±¹Û¶Ô±È¿´³ö£¬±¾ÑÐ¾¿µÄ¸÷Ïî¸Ä½ø¾ù¶ÔºÏ³ÉÓ°ÏñµÄÕæÊµ³Ì¶È¶¼ÓÐÌáÉý×÷ÓÃ£¬µ«ÔÚÌí¼Ó²¡Ôî±êÇ©ÇÒÊ¹ÓÃ²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§Ê±£¬Èô²»²ÉÓÃÑÚÄ¤¶Ô²¡Ôî±êÇ©½øÐÐÉ¸Ñ¡£¬¿ÉÄÜ»áÉú³ÉÈçÍ¼ÖÐÄ£ÐÍEÀàËÆµÄ½á¹¹²»ºÏÀíµÄÓ°Ïñ¡£
+Í¼\ref{ablation}ÎªÏûÈÚÊµÑéÁ¿»¯ÆÀ¹À½á¹ûµÄÖù×´Í¼¶Ô±ÈÇé¿ö£¬²»ÄÑ¿´³ö£¬±¾ÑÐ¾¿µÄÃ¿Ò»Ïî·½·¨¶¼Æðµ½ÁËÕë¶ÔÐÔµÄÌáÉýÐ§Á¦£¬ÆäÖÐ£¬²ÉÓÃ½á¹¹ÌØÕ÷Í¼×÷ÎªÊäÈë¶ÔÆÀ¹À½á¹ûµÄÌáÉý×îÎªÍ»³ö£¬Æä´ÎÊÇ¶Ô½á¹¹ÌØÕ÷Í¼ÈÚºÏËæ»úÔëÉùºÍÔÚ¶Ô²¡Ôî±êÇ©¹ýÂËÖ®ºóÌí¼Ó²¡ÔîÉú³ÉÖ¸µ¼ËðÊ§²úÉúµÄÌáÉý¡£Í¼ÖÐµÄÊý¾ÝÖÐÖµµÃ×¢ÒâµÄÊÇ£¬²»¶ÔÊäÈëµÄ²¡Ôî±êÇ©½øÐÐ¹ýÂË£¬ºÏ³ÉµÄÓ°ÏñÖÐ²»Ö¹»á´æÔÚ½á¹¹²»ºÏÀíµÄÓ°Ïñ£¬ÓëÕæÊµÊý¾Ý¼¯½øÐÐÏàËÆ¶ÈÆÀ¹ÀµÄ½á¹ûÒ²»áÒò´ËÄÑÒÔÌáÉýÉõÖÁÏÂ½µ¡£
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.7\linewidth]{figures/XIAORONG}
-	\caption{ÄÔÖ×ÁöMRIÊý¾Ý¼¯ÉÏÏûÈÚÊµÑéÁ¿»¯ÆÀ¹À½á¹ûµÄÖù×´Í¼¡£}
+	\caption{ÄÔÖ×ÁöMRIÊý¾Ý¼¯ÉÏÏûÈÚÊµÑéµÄÁ¿»¯ÆÀ¹À½á¹û¡£}
 	\label{ablation}
 \end{figure}
 \subsection{¶àÊý¾Ý¼¯ÉÏÓëÆäËû·½·¨µÄ¶Ô±ÈÊµÑé}
@@ -791,21 +794,21 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 			&FID ¡ý      &-     &30.13 &37.91 &227.41\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{BRATS}\\\textbf{MRI}}}
-			&MS-SSIM ¡ü  &0.738 &0.727 &0.713 &0.561\\
-			&FID ¡ý      &21.15 &22.27 &28.46 &104.53\\
+			&MS-SSIM ¡ü  &0.692 &0.686 &0.653 &0.504\\
+			&FID ¡ý      &20.15 &21.87 &28.76 &124.53\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{TC Lung}\\\textbf{CT}}}
-			&MS-SSIM ¡ü  &-     &0.676 &0.667 &0.592\\
-			&FID ¡ý      &-     &27.40 &29.81 &93.65\\
+			&MS-SSIM ¡ü  &-     &0.676 &0.667 &0.543\\
+			&FID ¡ý      &-     &27.40 &29.81 &113.65\\
 			\hline
 			\\[-6pt]
 		\end{tabular}
 		}
 	\footnotesize
-	\item[+] ±íÊ¾ºÏ³ÉÖ×ÁöµÄÆÀ¹À½á¹û£¬¼´¸ù¾Ý²¡Ôî±êÇ©¶ÔºÏ³ÉÊý¾Ý¼¯ÖÐÓ°ÏñÓëÔ­Êý¾Ý¼¯ÖÐÓ°ÏñµÄÖ×ÁöÇÐ¸î³öÀ´½øÐÐÆÀ¹ÀµÄ½á¹û¡£
-	\item[\#] ±íÊ¾»ù´¡GANµÄÆÀ¹À½á¹û£¬¼´ÔÚDCGAN\cite{97radford2015unsupervised}µÄ»ù´¡ÉÏ£¬½«Éú³ÉÍøÂç¼ÓÉîÎªU-net£¬½«¼ø±ðÆ÷ÍøÂç¼ÓÉîÎªVGG11¡£
+	\item[+] ±íÊ¾ºÏ³ÉÖ×ÁöµÄÆÀ¹À£¬¼´¸ù¾Ý²¡Ôî±êÇ©¶ÔºÏ³ÉÊý¾Ý¼¯Ó°ÏñºÍÔ­Êý¾Ý¼¯Ó°ÏñÖÐÇÐ¸î³öµÄÖ×ÁöµÄÆÀ¹À¡£
+	\item[\#] ±íÊ¾»ù´¡GANµÄÆÀ¹À£¬¼´ÔÚDCGAN\cite{97radford2015unsupervised}µÄ»ù´¡ÉÏ½«Éú³ÉÆ÷¼ÓÉîÎªU-net£¬½«¼ø±ðÆ÷¼ÓÉîÎªVGG11¡£
 	\item[*] ±íÊ¾¸´ÏÖµÄSkrGANµÄÆÀ¹À½á¹û¡£ÓÉÓÚSkrGAN\cite{96zhang2019skrgan:}ÖÐÎ´¸ø³ö²ÝÍ¼ÏêÏ¸Ëã·¨»ò¿ªÔ´´úÂëºÍ¼ø±ðÆ÷ÍøÂç½á¹¹£¬
-	±¾ÑÐ¾¿Ê¹ÓÃ²ÉÓÃ±¾ÑÐ¾¿µÄËã·¨ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÊäÈë£¬ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔ±¾ÑÐ¾¿²ÉÓÃµÄ¼ø±ðÆ÷VGG11Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£
+	±¾ÑÐ¾¿Ê¹ÓÃ²ÉÓÃ±¾ÑÐ¾¿µÄËã·¨ÌáÈ¡µÄÕæÊµÓ°ÏñµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÑµÁ·ÊäÈë£¬ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔ±¾ÑÐ¾¿²ÉÓÃµÄ¼ø±ðÆ÷VGG11Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·¡¢²ÉÓÃ×Ô¼à¶½ºÍ¶Ô¿¹ÐÔ»ìºÏËðÊ§£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£ºÏ³É¶àÄ£Ì¬Ó°ÏñÊ±£¬ÒÔ±¾ÑÐ¾¿ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼ÎªÊäÈë¡£
 
 	\end{center}
 \end{table}
@@ -904,12 +907,13 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊý¾ÝµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊý¾ÝµÄÎ¢µ÷ÐÔÄÜÓëÍêÕûÕæÊµÊý¾Ýµ
 		\end{tabular}
 	\footnotesize
 	\item[*] ±íÊ¾¸´ÏÖµÄSkrGANµÄÆÀ¹À½á¹û¡£ÓÉÓÚSkrGAN\cite{96zhang2019skrgan:}ÖÐÎ´¸ø³ö²ÝÍ¼ÏêÏ¸Ëã·¨»ò¿ªÔ´´úÂëºÍ¼ø±ðÆ÷ÍøÂç½á¹¹£¬
-	±¾ÑÐ¾¿Ê¹ÓÃ²ÉÓÃ±¾ÑÐ¾¿µÄËã·¨ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÊäÈë£¬ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔ±¾ÑÐ¾¿²ÉÓÃµÄ¼ø±ðÆ÷VGG11Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£
+	±¾ÑÐ¾¿Ê¹ÓÃ²ÉÓÃ±¾ÑÐ¾¿µÄËã·¨ÌáÈ¡µÄÕæÊµÓ°ÏñµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼£¨0Óë1ÏñËØÖµµ÷×ª£©×÷ÎªÑµÁ·ÊäÈë£¬ÒÔU-netÎª»ù´¡Éú³ÉÄ£ÐÍ¡¢ÒÔ±¾ÑÐ¾¿²ÉÓÃµÄ¼ø±ðÆ÷VGG11Îª¼ø±ðÆ÷ºÏ³É¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ²¡ÔîËðÊ§¡¢ÎÞÅä×¼ËðÊ§¡¢ÎÞ×Ô¼à¶½Ô¤ÑµÁ·¡¢²ÉÓÃ×Ô¼à¶½ºÍ¶Ô¿¹ÐÔ»ìºÏËðÊ§£¬ÒÔ´Ë½üËÆÎª¶ÔSkrGANµÄ¸´ÏÖ¡£ºÏ³É¶àÄ£Ì¬Ó°ÏñÊ±£¬ÒÔ±¾ÑÐ¾¿ºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼µÄ·´¶þÖµÍ¼ÎªÊäÈë¡£
+	
 	
 	\end{center}
 \end{table}
 \subsubsection{ºÏ³ÉÐØ²¿X¹âÏßÊý¾ÝÓÃÓÚ·ÎÑ×·ÖÀàÈÎÎñ}
-±¾ÑÐ¾¿²ÉÓÃKaggle Chest X-RayÊý¾Ý¼¯ºÏ³ÉÁË´óÁ¿´øÓÐ²¡±äÀà±ð±êÇ©µÄÐØ²¿X-RayÊý¾Ý¡£ºÏ³ÉÊ±£¬ÓÉÓÚÖ»ÓÐµ¥Ä£Ì¬Êý¾Ý£¬Òò´ËÎÞÄ£Ì¬Åä×¼ËðÊ§£¬ÊäÈëµÄ²¡Ôî±êÇ©ÎªÀ©Õ¹³ÉµÄÓë½á¹¹ÌØÕ÷Í¼Í¬³ß´ç¶ÀÈÈ¾ØÕóµÄ·ÎÑ×Àà±ð±êÇ©¡£È»ºóÔÙÊ¹ÓÃKaggle Chest X-RayÊý¾Ý¼¯+ºÏ³ÉX-RayÊý¾Ý²ÉÓÃËæ»ú»ìºÏÄ£Ê½ÑµÁ·ÁËÒ»¸öÐØ²¿X-Ray·ÎÑ×·ÖÀàÄ£ÐÍ£¬±¾ÑÐ¾¿½«¸ÃÄ£ÐÍºÍÖ»²ÉÓÃKaggle Chest X-RayÊý¾Ý¼¯ÑµÁ·µÄÄ£ÐÍ½øÐÐ¶Ô±È¡£½á¹ûÈç±í~\ref{Ray_availability_test}£¬¿É¼ûÔÚ¸ÃÊý¾Ý¼¯ÉÏ£¬±¾ÑÐ¾¿µÄºÏ³ÉÊý¾ÝÍ¬Ñù¿ÉÒÔÔÚ·ÖÀàÈÎÎñÖÐ¾ßÓÐÁ¼ºÃµÄ¿ÉÓÃÐÔ£¬µ«Ïà¶ÔÓÚ·Ö¸îÈÎÎñ£¬ÓÉÓÚºÏ³ÉÊ±ÊäÈëµÄ·ÖÀà±êÇ©µÄÖ¸ÏòÐÔ½ÏÈõ£¬ºÏ³ÉÍ¼ÏñËù¾ßÓÐµÄÀà±ðÊôÐÔ²»Èç·Ö¸îÀàÈÎÎñºÏ³É²¡ÔîÄÇÑù¼¯ÖÐºÍÍ»³ö£¬Òò´Ë·ÖÀàÈÎÎñÊ¹ÓÃºÏ³ÉÊý¾ÝµÄÌáÉýÐ§¹ûÏà¶Ô²»Ã÷ÏÔ¡£
+±¾ÑÐ¾¿²ÉÓÃKaggle Chest X-RayÊý¾Ý¼¯ºÏ³ÉÁË´óÁ¿´øÓÐ²¡±äÀà±ð±êÇ©µÄÐØ²¿X-RayÊý¾Ý¡£ºÏ³ÉÊ±£¬ÓÉÓÚÖ»ÓÐµ¥Ä£Ì¬Êý¾Ý£¬Òò´ËÎÞÄ£Ì¬Åä×¼ËðÊ§£¬ÊäÈëµÄ²¡Ôî±êÇ©ÎªÀ©Õ¹³ÉµÄÓë½á¹¹ÌØÕ÷Í¼Í¬³ß´ç¶ÀÈÈ¾ØÕóµÄ·ÎÑ×Àà±ð±êÇ©¡£È»ºóÔÙÊ¹ÓÃKaggle Chest X-RayÊý¾Ý¼¯+ºÏ³ÉX-RayÊý¾Ý²ÉÓÃËæ»ú»ìºÏÄ£Ê½ÑµÁ·ÁËÒ»¸öÐØ²¿X-Ray·ÎÑ×·ÖÀàÄ£ÐÍ£¬±¾ÑÐ¾¿½«¸ÃÄ£ÐÍºÍÖ»²ÉÓÃKaggle Chest X-RayÊý¾Ý¼¯ÑµÁ·µÄÄ£ÐÍ½øÐÐ¶Ô±È¡£½á¹ûÈç±í~\ref{X-Ray_availability_test}ËùÊ¾£¬¿É¼ûÔÚ¸ÃÊý¾Ý¼¯ÉÏ£¬±¾ÑÐ¾¿µÄºÏ³ÉÊý¾ÝÍ¬Ñù¿ÉÒÔÔÚ·ÖÀàÈÎÎñÖÐ¾ßÓÐÁ¼ºÃµÄ¿ÉÓÃÐÔ£¬µ«Ïà¶ÔÓÚ·Ö¸îÈÎÎñ£¬ÓÉÓÚºÏ³ÉÊ±ÊäÈëµÄ·ÖÀà±êÇ©µÄÖ¸ÏòÐÔ½ÏÈõ£¬ºÏ³ÉÍ¼ÏñËù¾ßÓÐµÄÀà±ðÊôÐÔ²»Èç·Ö¸îÀàÈÎÎñºÏ³É²¡ÔîÄÇÑù¼¯ÖÐºÍÍ»³ö£¬Òò´Ë·ÖÀàÈÎÎñÊ¹ÓÃºÏ³ÉÊý¾ÝµÄÌáÉýÐ§¹ûÏà¶Ô²»Ã÷ÏÔ¡£
 \begin{table}[thbp!]
 	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 	\begin{center}
@@ -975,35 +979,35 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊý¾ÝµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊý¾ÝµÄÎ¢µ÷ÐÔÄÜÓëÍêÕûÕæÊµÊý¾Ýµ
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/MRI_images}
-	\caption{ÄÔ²¿MRIºÏ³ÉÐ§¹û¶Ô±È¡£(a) PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬(b) WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ (c) DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬(d) ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬(e) SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄ¶þÖµ·´×ªÍ¼Ïñ£¬(f) ±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼ÏñºÍÊäÈëµÄ½á¹¹ÌØÕ÷Í¼¡£(a)-(e)ÎªÔÚADNIÊý¾Ý¼¯ÉÏÂú×ãÒ»Ð©Î´ÖªÌõ¼þµÄÉ¸Ñ¡³öµÄÊý¾ÝÉÏ½øÐÐÑµÁ·µÄºÏ³ÉÐ§¹û£¬(f) ÔÚBRATS2015ÉÏºÏ³ÉÑµÁ·¡£}
+	\caption{ÄÔ²¿MRIºÏ³ÉÐ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄ¶þÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼ÏñºÍÊäÈëµÄ½á¹¹ÌØÕ÷Í¼¡££¨a£©-£¨e£©ÎªÔÚNeuromorphometricsÄÔMRIÊý¾Ý¼¯ÉÏÂú×ãÒ»Ð©Î´ÖªÌõ¼þµÄÉ¸Ñ¡³öµÄÊý¾ÝÉÏ½øÐÐÑµÁ·µÄºÏ³ÉÐ§¹û£¬£¨f£© ÔÚBRATS2015ÉÏºÏ³ÉÑµÁ·¡£}
 	\label{generated_MRI}
 \end{figure}
-Ç°Êö±í~\ref{evalu_on_all_dataset2}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿µÄ·½·¨ÓëÆäËû·½·¨ÔÚBRATS2015ÉÏµÄÁ¿»¯¶Ô±È½á¹û¡£Í¼~\ref{generated_MRI}ÖÐÕ¹Ê¾ÁË\cite{96zhang2019skrgan:}ÖÐÆäËû·½·¨ºÍ±¾ÑÐ¾¿µÄ·½·¨ºÏ³ÉµÄÄÔMRIµÄÊÓ¾õÐ§¹û£¬ÓÉÓÚ\cite{96zhang2019skrgan:}ÖÐ²ÉÓÃµÄADNIÊý¾Ý¼¯ÉÏÉ¸Ñ¡Ìõ¼þµÄÎ´Öª£¬±¾ÑÐ¾¿²ÉÓÃÔÚBRATS2015ÉÏÑµÁ·µÄºÏ³ÉÄÔMRIÓëÖ®ÔÚºÏ³ÉÊÓ¾õÐ§¹ûÉÏ¼òµ¥±È½Ï¡£´ÓÍ¼~\ref{generated_MRI}ÖÐ(e)ºÍ(f)ÖÐ²»ÄÑ¿´³ö£¬±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼¸ü¼Ó¼ò½àÇåÎú¡¢¸´ÔÓ¶ÈµÍºÍÏÞÖÆÉÙµÄÍ¬Ê±¸ù¾ÝºÏ³ÉÖ¸µ¼ÐÔ¡£´ÓºÏ³ÉMRIÀ´¿´£¬±¾ÑÐ¾¿µÄºÏ³ÉµÄÄÔMRI¸ü¼ÓÇåÎúÕæÊµ¡¢¸É¾»Õû½à£¬·þ´ÓÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄºÏ³ÉÖ¸µ¼È´ÓÐ¸ü¶àÑùµÄºÏ³É¿Õ¼ä¡£
+Ç°Êö±í~\ref{evalu_on_all_dataset2}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿µÄ·½·¨ÓëÆäËû·½·¨ÔÚBRATS2015ÉÏµÄÁ¿»¯¶Ô±È½á¹û¡£Í¼~\ref{generated_MRI}ÖÐÕ¹Ê¾ÁËSkrGANÖÐÆäËû·½·¨ºÍ±¾ÑÐ¾¿µÄ·½·¨ºÏ³ÉµÄÄÔMRIµÄÊÓ¾õÐ§¹û£¬ÓÉÓÚSkrGANÖÐ£¬²ÉÓÃµÄNeuromorphometricsÄÔMRIÊý¾Ý¼¯\footnote{http://www.neuromorphometrics.com/}ÉÏÉ¸Ñ¡Ìõ¼þµÄÎ´Öª£¬±¾ÑÐ¾¿²ÉÓÃÔÚBRATS2015ÉÏÑµÁ·µÄºÏ³ÉÄÔMRIÓëÖ®ÔÚºÏ³ÉÊÓ¾õÐ§¹ûÉÏ¼òµ¥±È½Ï¡£´ÓÍ¼~\ref{generated_MRI}ÖÐ£¨e£©ºÍ£¨f£©ÖÐ²»ÄÑ¿´³ö£¬±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼¸ü¼Ó¼ò½àÇåÎú¡¢¸´ÔÓ¶ÈµÍºÍÏÞÖÆÉÙµÄÍ¬Ê±¸ù¾ÝºÏ³ÉÖ¸µ¼ÐÔ¡£´ÓºÏ³ÉMRIÀ´¿´£¬±¾ÑÐ¾¿µÄºÏ³ÉµÄÄÔMRI¸ü¼ÓÇåÎúÕæÊµ¡¢¸É¾»Õû½à£¬·þ´ÓÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄºÏ³ÉÖ¸µ¼È´ÓÐ¸ü¶àÑùµÄºÏ³É¿Õ¼ä¡£
 
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/SWM_images}
-	\caption{ÊÓÍøÄ¤ºÏ³ÉÐ§¹û¶Ô±È¡£(a) PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬(b) WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ (c) DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬(d) ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬(e) SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶þÖµ·´×ªÍ¼Ïñ£¬(f) ±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
+	\caption{ÊÓÍøÄ¤ºÏ³ÉÐ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶þÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
 	\label{generated_swm}
 \end{figure}
-Ç°Êö±í~\ref{evalu_on_all_dataset2}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿µÄ·½·¨ÓëÆäËû·½·¨ÔÚDRIVE+FIREÊý¾Ý¼¯ÉÏµÄÁ¿»¯¶Ô±È½á¹û¡£´Ë´¦£¬Í¼~\ref{generated_swm}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚDRIVE+FIREµÄ288ÕÅÑÛµ×ÊÓÍøÄ¤Êý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍÊÓÍøÄ¤Ó°Ïñ£¬ºÍ\cite{96zhang2019skrgan:}ÖÐÆäËû·½·¨ÔÚ×Ô½¨µÄ6432ÕÅÊÓÍøÄ¤Êý¾Ý¼¯ÉÏµÄºÏ³ÉµÄÊÓÍøÄ¤Í¼Ïñ¶Ô±È£¬±¾ÑÐ¾¿²ÉÓÃ¸üÉÙµÄÑµÁ·Ñù±¾ºÏ³ÉµÄÊÓÍøÄ¤ÓëSkrGANÐ§¹û·Ç³£½Ó½ü£¬Ïà±ÈÆäËû·½·¨¸ü¼Ó±ÆÕæ£¬ÔÚÑª¹ÜºÍÉñ¾­½»»ãµãµÈÏ¸½ÚÉÏ¸ü¼ÓºÏÀíºÍÕæÊµ¡£ÆäÖÐ£¬(e)ºÍ(f)Õ¹Ê¾ÁË±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²ÝÍ¼µÄÇø±ð£¬±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼Ñª¹ÜÏßÌõ×ßÏò¸ü¼Ó×ÔÈ»ÕæÊµ¡¢ÔëÉù¸üÉÙ¡£
+Ç°Êö±í~\ref{evalu_on_all_dataset2}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿µÄ·½·¨ÓëÆäËû·½·¨ÔÚDRIVE+FIREÊý¾Ý¼¯ÉÏµÄÁ¿»¯¶Ô±È½á¹û¡£´Ë´¦£¬Í¼~\ref{generated_swm}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚDRIVE+FIREµÄ288ÕÅÑÛµ×ÊÓÍøÄ¤Êý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍÊÓÍøÄ¤Ó°Ïñ£¬ºÍSkrGANÖÐÆäËû·½·¨ÔÚ×Ô½¨µÄ6432ÕÅÊÓÍøÄ¤Êý¾Ý¼¯ÉÏµÄºÏ³ÉµÄÊÓÍøÄ¤Í¼Ïñ¶Ô±È£¬±¾ÑÐ¾¿²ÉÓÃ¸üÉÙµÄÑµÁ·Ñù±¾ºÏ³ÉµÄÊÓÍøÄ¤ÓëSkrGANÐ§¹û·Ç³£½Ó½ü£¬Ïà±ÈÆäËû·½·¨¸ü¼Ó±ÆÕæ£¬ÔÚÑª¹ÜºÍÉñ¾­½»»ãµãµÈÏ¸½ÚÉÏ¸ü¼ÓºÏÀíºÍÕæÊµ¡£ÆäÖÐ£¬£¨e£©ºÍ£¨f£©Õ¹Ê¾ÁË±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²ÝÍ¼µÄÇø±ð£¬±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼Ñª¹ÜÏßÌõ×ßÏò¸ü¼Ó×ÔÈ»ÕæÊµ¡¢ÔëÉù¸üÉÙ¡£
 
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/XRAY_images}
-	\caption{X-rayºÏ³ÉÐ§¹û¶Ô±È¡£(a) PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬(b) WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ (c) DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬(d) ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬(e) SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶þÖµ·´×ªÍ¼Ïñ£¬(f) ±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
+	\caption{X-rayºÏ³ÉÐ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶þÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
 	\label{generated_xray}
 \end{figure}
-Í¼~\ref{generated_xray}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚX-rayÊý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍX-rayÓ°Ïñ£¬ºÍÆäËû·½·¨ºÏ³ÉµÄ½á¹û¶Ô±È£¬±¾ÑÐ¾¿µÄºÏ³ÉX-ray¸ü¼Ó±ÆÕæ£¬Àß¹ÇºÍ¼¹ÖùµÈÏ¸½Ú¸ü¼Ó·á¸»ºÍ·ûºÏÉúÀíÂß¼­¡£ÆäÖÐ£¬(e)ºÍ(f)Õ¹Ê¾ÁË±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²ÝÍ¼µÄÇø±ð£¬±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ÔÚ¼¹ÖùµÈ¹Ø¼üÉúÀí½á¹¹ÉÏÌáÈ¡³öµÄÐÅÏ¢¸üÍêÕû£¬Àß¹ÇµÈºËÐÄ²¿Î»µÄÔëÉù¸üÉÙ¡¢ÔÓÓàÏßÌõ¸üÉÙ¡¢ºËÐÄµÄ½á¹¹ÐÅÏ¢¸üÍ»³ö¡¢ÏßÌõÓëÏßÌõÖ®¼ä¸ü¼Ó¶ÀÁ¢ÇåÎúÎÞ¸ÉÈÅ£¬±¾ÑÐ¾¿µÄÃ¿ÌõÏßÌõ¶¼¸üË³»¬¾ùÔÈ£¬¶ÔÓ¦ºÏ³ÉµÄX-rayÔÚ½á¹¹ÉÏ¸ü¼Ó×ÔÈ»ÕæÊµ£¬¶øSkrGANÓÉÓÚÆä²ÝÍ¼¼¹Öù´¦Ï¸½ÚµÄÍ»Ø££¬ºÏ³ÉX-rayÔÚ¼¹Öù´¦Ò²ÓÐÃ÷ÏÔè¦´Ã¡£
+Í¼~\ref{generated_xray}ÖÐÕ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚX-rayÊý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍX-rayÓ°Ïñ£¬ºÍÆäËû·½·¨ºÏ³ÉµÄ½á¹û¶Ô±È£¬±¾ÑÐ¾¿µÄºÏ³ÉX-ray¸ü¼Ó±ÆÕæ£¬Àß¹ÇºÍ¼¹ÖùµÈÏ¸½Ú¸ü¼Ó·á¸»ºÍ·ûºÏÉúÀíÂß¼­¡£ÆäÖÐ£¬£¨e£©ºÍ£¨f£©Õ¹Ê¾ÁË±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²ÝÍ¼µÄÇø±ð£¬±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ÔÚ¼¹ÖùµÈ¹Ø¼üÉúÀí½á¹¹ÉÏÌáÈ¡³öµÄÐÅÏ¢¸üÍêÕû£¬Àß¹ÇµÈºËÐÄ²¿Î»µÄÔëÉù¸üÉÙ¡¢ÔÓÓàÏßÌõ¸üÉÙ¡¢ºËÐÄµÄ½á¹¹ÐÅÏ¢¸üÍ»³ö¡¢ÏßÌõÓëÏßÌõÖ®¼ä¸ü¼Ó¶ÀÁ¢ÇåÎúÎÞ¸ÉÈÅ£¬±¾ÑÐ¾¿µÄÃ¿ÌõÏßÌõ¶¼¸üË³»¬¾ùÔÈ£¬¶ÔÓ¦ºÏ³ÉµÄX-rayÔÚ½á¹¹ÉÏ¸ü¼Ó×ÔÈ»ÕæÊµ£¬¶øSkrGANÓÉÓÚÆä²ÝÍ¼¼¹Öù´¦Ï¸½ÚµÄÍ»Ø££¬ºÏ³ÉX-rayÔÚ¼¹Öù´¦Ò²ÓÐÃ÷ÏÔè¦´Ã¡£
 
 
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/FBCT_images}
-	\caption{·Î²¿CTºÏ³ÉÐ§¹û¶Ô±È¡£(a) PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬(b) WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ (c) DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬(d) ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬(e) SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶þÖµ·´×ªÍ¼Ïñ£¬(f) ÔÚKaggle Lung CTÊý¾Ý¼¯ÉÏ£¬±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼£¬(g) ÔÚÌì³Ø·Î²¿CTÊý¾Ý¼¯ÉÏ£¬±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£(f)-(g)Êä³öµÄºÏ³ÉÍ¼ÏñËØÖµÔÚ0-1Ö®¼ä£¬ÊÓ¾õÉÏÓë(a)-(e)ÖÐ·Ç¹éÒ»»¯µÄºÏ³É½á¹ûÓÐÒ»Ð©²îÒì¡£}
+	\caption{·Î²¿CTºÏ³ÉÐ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶þÖµ·´×ªÍ¼Ïñ£¬£¨f£© ÔÚKaggle Lung CTÊý¾Ý¼¯ÉÏ£¬±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼£¬£¨g£© ÔÚÌì³Ø·Î²¿CTÊý¾Ý¼¯ÉÏ£¬±¾ÑÐ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡££¨f£©-£¨g£©Êä³öµÄºÏ³ÉÍ¼ÏñËØÖµÔÚ0-1Ö®¼ä£¬ÊÓ¾õÉÏÓë£¨a£©-£¨e£©ÖÐ·Ç¹éÒ»»¯µÄºÏ³É½á¹ûÓÐÒ»Ð©²îÒì¡£}
 	\label{generated_FBCT}
 \end{figure}
-Í¼~\ref{generated_FBCT}ÖÐ(f)Õ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚ·Î²¿CTÊý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍCTÓ°Ïñ£¬ºÍÆäËû·½·¨ºÏ³ÉµÄ½á¹û¶Ô±È£¬±¾ÑÐ¾¿µÄºÏ³ÉCT¸ü¼ÓÇåÎúÕæÊµ¡£ÆäÖÐ£¬(e)ºÍ(f)Õ¹Ê¾ÁË±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²ÝÍ¼µÄÇø±ð£¬±¾ÑÐ¾¿ÌáÈ¡³öµÄ½á¹¹ÌØÕ÷Í¼¸´ÔÓ¶È¸üµÍ£¬½öÓÉ¹Ø¼ü½á¹¹µÄÂÖÀªÏßÌõ¹´»­¶ø³É£¬SkrGANµÄ²ÝÍ¼ÖÐ°üº¬ÁË´óÃæ»ýµÄÏñËØÇøÓò¡¢ºÚ°×½»´í½çÏÞ²»Ã÷ÇÒ³äÂúÔëÉùÔÓÂÒÎÞÕÂ£¬´ÓºÏ³ÉµÄCTÀ´¿´£¬SkrGANµÄºÏ³ÉµÄ·ÎÖÐÈ±·¦ÉúÀí½á¹¹ÄÚÈÝ£¬¶ø±¾ÑÐ¾¿µÄºÏ³ÉµÄ·ÎÖÐ¾ßÓÐ·ûºÏÉúÀí½á¹¹µÄÆø¹ÜÑª¹ÜµÈ½á¹¹¡£Í¼~\ref{generated_FBCT}ÖÐ(g) Õ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚÌì³Ø·Î²¿CTÊý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍCTÓ°Ïñ£¬Ð§¹û·Ç³£±ÆÕæ¡¢·ÎÖÐºÏ³ÉµÄ½á¹¹ÐÅÏ¢·á¸»ÏêÊµ¡£
+Í¼~\ref{generated_FBCT}ÖÐ£¨f£©Õ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚ·Î²¿CTÊý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍCTÓ°Ïñ£¬ºÍÆäËû·½·¨ºÏ³ÉµÄ½á¹û¶Ô±È£¬±¾ÑÐ¾¿µÄºÏ³ÉCT¸ü¼ÓÇåÎúÕæÊµ¡£ÆäÖÐ£¬£¨e£©ºÍ£¨f£©Õ¹Ê¾ÁË±¾ÑÐ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²ÝÍ¼µÄÇø±ð£¬±¾ÑÐ¾¿ÌáÈ¡³öµÄ½á¹¹ÌØÕ÷Í¼¸´ÔÓ¶È¸üµÍ£¬½öÓÉ¹Ø¼ü½á¹¹µÄÂÖÀªÏßÌõ¹´»­¶ø³É£¬SkrGANµÄ²ÝÍ¼ÖÐ°üº¬ÁË´óÃæ»ýµÄÏñËØÇøÓò¡¢ºÚ°×½»´í½çÏÞ²»Ã÷ÇÒ³äÂúÔëÉùÔÓÂÒÎÞÕÂ£¬´ÓºÏ³ÉµÄCTÀ´¿´£¬SkrGANµÄºÏ³ÉµÄ·ÎÖÐÈ±·¦ÉúÀí½á¹¹ÄÚÈÝ£¬¶ø±¾ÑÐ¾¿µÄºÏ³ÉµÄ·ÎÖÐ¾ßÓÐ·ûºÏÉúÀí½á¹¹µÄÆø¹ÜÑª¹ÜµÈ½á¹¹¡£Í¼~\ref{generated_FBCT}ÖÐ£¨g£©Õ¹Ê¾ÁË±¾ÑÐ¾¿ÔÚÌì³Ø·Î²¿CTÊý¾Ý¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍCTÓ°Ïñ£¬Ð§¹û·Ç³£±ÆÕæ¡¢·ÎÖÐºÏ³ÉµÄ½á¹¹ÐÅÏ¢·á¸»ÏêÊµ¡£
 
 
 \newpage
@@ -1011,7 +1015,7 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊý¾ÝµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊý¾ÝµÄÎ¢µ÷ÐÔÄÜÓëÍêÕûÕæÊµÊý¾Ýµ
 \section{½áÓï}
 ÔÚµ±Ç°ºÏ³ÉÒ½Ñ§Ó°ÏñµÄÑÐ¾¿ÖÐ£¬ÒÀÈ»´æÔÚ¸´ÔÓµÄÉúÀí½á¹¹ÐÅÏ¢ÄÑÒÔºÏ³É¡¢ÎÞ·¨ºÏ³É¾«È·Åä×¼µÄ¶àÄ£Ì¬Ó°Ïñ¡¢ÎÞ·¨È·±£ºÏ³ÉÓÐÐ§µÄ²¡ÔîÐÅÏ¢¡¢¶ÔºÏ³É²¡ÔîµÄÓÐÐ§ÐÔºÍºÏ³ÉÓ°ÏñµÄ¿ÉÓÃÐÔÎÞ·¨Á¿»¯ÆÀ¹ÀµÈ¶àÏîÎÊÌâ¡£±¾ÎÄ»ùÓÚÇ°ÈËµÄ¶àÏîÑÐ¾¿»ù´¡£¬½øÐÐÁËÉîÈëµÄ·ÖÎö¡¢¸Ä½øºÍ´´ÐÂ£¬Ìá³öÁËÒ»Ì×ÍêÕûµÄ½â¾öÏÖ´æÎÊÌâµÄ½â¾ö·½°¸£¬²¢Í¨¹ýÔÚ¶à¸öÊý¾Ý¼¯ÉÏµÄÏêÏ¸ÊµÑéÑéÖ¤ÁËÌá³öµÄ·½°¸µÄ¿ÉÐÐÐÔºÍÓÐÐ§ÐÔ¡£
 
-±¾ÑÐ¾¿Ìá³öµÄ·½°¸·Ö³ÉÁ½¸öÖ÷Òª½×¶Î£¬ÏÈºÏ³É°üº¬½á¹¹ÐÅÏ¢µÄ½á¹¹ÌØÕ÷Í¼£¬ÔÙ²ÉÓÃ»ùÓÚACGAN½á¹¹µÄÌõ¼þÉú³ÉÆ÷½øÐÐ¶àÄ£Ì¬Ó°ÏñµÄºÏ³É£¬²¢²ÉÓÃÒ»¸ö»ùÓÚCycleGAN\cite{6zhu2017unpaired}½á¹¹µÄÌõ¼þ×ª»»Æ÷ÊµÏÖ¶ÔºÏ³É¶àÄ£Ì¬Ó°ÏñµÄÅä×¼Ô¼Êø£¬Í¬Ê±¿ÉÍ¨¹ýÊäÈë²¡Ôî±êÇ©Í¼ÓÃÒÔÌá¹©ºÏ³É²¡ÔîµÄÖ¸µ¼ÐÅÏ¢£¬È»ºó²ÉÓÃÒ»¸ö²¡Ôî´¦ÀíÆ÷Ô¼ÊøÉú³ÉÆ÷ºÏ³ÉÖ¸¶¨µÄ²¡ÔîÄÚÈÝ¡£±¾ÑÐ¾¿Ö±½Ó½«ºÏ³ÉÊý¾ÝÓÃÓÚÑµÁ·ÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÄ£ÐÍ£¬È»ºó¸ù¾ÝÄ£ÐÍµÄÆÀ¹À½á¹ûÀ´ÑéÖ¤ºÏ³É²¡ÔîµÄÓÐÐ§ÐÔºÍºÏ³ÉÓ°ÏñÔÚÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñÖÐµÄ¿ÉÓÃÐÔ£¬ÒÔ´Ë¼ä½ÓÆÀ¹À¶ÔºÏ³ÉÒ½Ñ§Ó°ÏñµÄÖÊÁ¿¡£
+±¾ÑÐ¾¿Ìá³öµÄ·½°¸·Ö³ÉÁ½¸öÖ÷Òª½×¶Î£¬ÏÈºÏ³É°üº¬½á¹¹ÐÅÏ¢µÄ½á¹¹ÌØÕ÷Í¼£¬ÔÙ²ÉÓÃ»ùÓÚACGAN½á¹¹µÄÌõ¼þÉú³ÉÆ÷½øÐÐ¶àÄ£Ì¬Ó°ÏñµÄºÏ³É£¬²¢²ÉÓÃÒ»¸ö»ùÓÚCycleGAN½á¹¹µÄÌõ¼þ×ª»»Æ÷ÊµÏÖ¶ÔºÏ³É¶àÄ£Ì¬Ó°ÏñµÄÅä×¼Ô¼Êø£¬Í¬Ê±¿ÉÍ¨¹ýÊäÈë²¡Ôî±êÇ©Í¼ÓÃÒÔÌá¹©ºÏ³É²¡ÔîµÄÖ¸µ¼ÐÅÏ¢£¬È»ºó²ÉÓÃÒ»¸ö²¡Ôî´¦ÀíÆ÷Ô¼ÊøÉú³ÉÆ÷ºÏ³ÉÖ¸¶¨µÄ²¡ÔîÄÚÈÝ¡£±¾ÑÐ¾¿Ö±½Ó½«ºÏ³ÉÊý¾ÝÓÃÓÚÑµÁ·ÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÄ£ÐÍ£¬È»ºó¸ù¾ÝÄ£ÐÍµÄÆÀ¹À½á¹ûÀ´ÑéÖ¤ºÏ³É²¡ÔîµÄÓÐÐ§ÐÔºÍºÏ³ÉÓ°ÏñÔÚÖÇÄÜÒ½Ñ§Ó°Ïñ´¦ÀíÈÎÎñÖÐµÄ¿ÉÓÃÐÔ£¬ÒÔ´Ë¼ä½ÓÆÀ¹À¶ÔºÏ³ÉÒ½Ñ§Ó°ÏñµÄÖÊÁ¿¡£
 
 ¾ßÌåÀ´Ëµ£¬±¾ÑÐ¾¿Ìá³öÁËÒ»ÖÖ´ÓÕýÌ¬·Ö²¼Ëæ»úÔëÉù·Ö½×¶ÎºÏ³É¿É´ø²¡Ôî±êÇ©µÄÅä×¼µÄ¶àÄ£Ì¬Ò½Ñ§Ó°ÏñµÄ·½·¨£¬²¢ÔÚ¶à¸öÊý¾Ý¼¯ÉÏ½øÐÐÁË³ä·ÖµÄÊµÑéÑéÖ¤ºÍÐ§¹ûÕ¹Ê¾¡£
 Ê×ÏÈ£¬±¾ÑÐ¾¿Ìá³öÁËÒ»ÖÖ½á¹¹ÌØÕ÷Í¼ÌáÈ¡·½·¨£¬ÎÞÐèÑµÁ·»ò¸½¼Ó±êÇ©Êý¾Ý¼´¿ÉÖ±½Ó´ÓÒ½Ñ§Í¼ÏñÖÐÌáÈ¡½âÆÊ½á¹¹ÐÅÏ¢£¬Ïà½ÏÓÚµ±Ç°×îºÃµÄ²ÝÍ¼ÌáÈ¡·½·¨£¬±¾ÑÐ¾¿ÌáÈ¡µÄ½á¹¹ÌØÕ÷Í¼¸ü¼Ó¸É¾»¼ò½à¡¢ÏßÌõÇåÎú¡¢ÍêÕûºÏÀí¡£
