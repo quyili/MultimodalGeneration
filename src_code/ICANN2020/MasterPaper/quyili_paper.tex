@@ -1,0 +1,1114 @@
+\RequirePackage[l2tabu, orthodox]{nag}%check package and command
+\documentclass[12pt]{article}
+\usepackage{graphicx}%illustration
+\usepackage{amsmath}%mathmatical environment
+\usepackage{amssymb}%mathmatical symbol
+\usepackage{microtype}%improve separation distance
+\usepackage{fancyhdr}%设置页眉和页脚
+\usepackage{CJK}%中文支持
+\usepackage{CJKnumb}%CJK下的数字
+\usepackage{indentfirst}%中文段落首行缩进
+\usepackage{ctexcap}%中文文档的一大集格式,必备
+\usepackage{subfigure}%使用子图形，两图并排，需要的宏包
+
+\usepackage{chngcntr}%图片按章节标号
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\counterwithin{equation}{section}
+%\renewcommand {\thetable} {\thechapter{}.\arabic{table}}
+%\renewcommand {\thefigure} {\thechapter{}.\arabic{figure}}
+
+\usepackage{geometry}%页面设置
+\usepackage{titlesec}%修改章节格式
+\usepackage{titletoc}%修改目录中的章节格式
+\usepackage{float}%图片浮动
+\usepackage{cite}%文献引用
+\usepackage{bm}%加粗加黑
+\usepackage{booktabs}%表格制作
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\geometry{left=3cm,right=3cm,top=3cm,bottom=3cm}% 页边距
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\lhead{}
+\chead{}%页眉中部
+\rhead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\renewcommand{\baselinestretch}{1.5}%设置行间距（必须在导言区）
+\renewcommand{\thesubfigure}{}%设置子图标题的标记（此处设置为空）
+\setcounter{secnumdepth}{3}%设定章节编号深度
+\setcounter{tocdepth}{2}%设定章节目录深度
+\renewcommand{\headrulewidth}{0.1em}
+\newcommand{\xiaoErHao}{\fontsize{18pt}{\baselineskip}\selectfont}% 小二号
+\titleformat{\section}{\centering\xiaoErHao\bfseries}{第\CJKnumber{\thesection}章}{1em}{}%章的格式
+\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}% 上引用
+\newcommand{\dash}{\bfseries ------}
+\titlecontents{section}[0pt]{\bfseries\filright\addvspace{6pt}}%
+{\contentspush{第\CJKnumber{\thecontentslabel}章\quad}}%
+{}{\titlerule*[9pt]{.}\contentspage}% 修改目录中的章节格式
+\begin{document}
+\newcommand{\rn}{{\mathbb R^n}}
+\newcommand{\cnr}{{C(n,r_1)}}
+\newcommand{\cnri}{{C(n,r_i)}}
+
+\begin{titlepage}
+\vspace*{0pt}
+\begin{center}
+\huge{\textbf{中山大学硕士学位论文}}\\
+
+\vspace*{40pt}
+\LARGE{基于GAN的多模态医学影像的合成}\\
+
+\vspace*{5pt}
+\Large{Synthesis of Multimodal Medical Images Based on GAN}\\
+
+\vspace*{60pt}
+\begin{tabular}{lc}
+     学位申请人：  & \underline{\makebox[6cm][c]{瞿毅力}} \\
+     指\ 导\ 老\ 师： & \underline{\makebox[6cm][c]{卢宇彤教授}}\\
+     专\ 业\ 名\ 称： & \underline{\makebox[6cm][c]{软件工程}} \\
+\end{tabular}
+\end{center}
+
+\vspace*{40pt}
+\Large{
+\begin{tabular}{c}
+     答辩委员会（签名）：\\
+     主席：\\
+     委员：\\
+\end{tabular}}
+\vspace*{35pt}
+\begin{center}
+\Large{二零二零年五月十六日}
+\end{center}
+\end{titlepage}
+
+\newpage
+\section*{}
+\begin{center}
+\large\textbf{论文原创性声明}
+\end{center}
+
+本人郑重声明：所呈交的学位论文，是本人在导师的指导下，独立进行研究工作所取得的成果。除文中已经注明引用的内容外，本论文不包含任何其他个人或集体已经发表或撰写过的作品成果。对本文的研究作出重要贡献的个人和集体，均已在文中以明确方式标明。本人完全意识到本声明的法律结果由本人承担。
+\vskip 1cm
+
+\hspace{7cm} 学位论文作者签名：
+
+\vspace{0.2cm}
+
+\hspace{7.1cm}日期：\quad~~ 年~~\quad 月~~\quad 日
+
+\vspace{2cm}
+
+\begin{center}
+\large \textbf{学位论文使用授权声明}
+\end{center}
+
+本人完全了解中山大学有关保留、使用学位论文的规定，即：学校有权保留学位论文并向国家主管部门或其指定机构送交论文的电子版和纸质版；有权将学位论文用于非赢利目的的少量复制并允许论文进入学校图书馆、院系资料室被查阅；有权将学位论文的内容编入有关数据库进行检索；可以采用复印、缩印或其他方法保存学位论文；可以为建立了馆际合作关系的兄弟高校用户提供文献传递服务和交换服务。
+
+保密论文保密期满后，适用本声明。
+\vskip 1cm
+
+\hspace{2.5cm} 学位论文作者签名： \hspace{2cm}   \quad~~导师签名：
+
+\vspace{0.3cm}
+
+\hspace{2.5cm} 日期：\quad~~年\quad~~月\quad~~日  \hspace{2cm}   日期：\quad~~年\quad~~月\quad~~日
+\thispagestyle{empty}
+
+\begin{CJK*}{GBK}{song}
+\newpage
+\chead{摘要}
+\pagenumbering{Roman}
+\begin{center}
+\textbf{\Large{基于GAN的多模态医学影像的合成}}\\
+\end{center}
+\begin{center}
+\large{
+\begin{tabular}{l}
+     专业：软件工程 \\
+     硕士生：瞿毅力\\
+     指导老师：卢宇彤教授\\
+\end{tabular}}
+\end{center}
+\section*{摘要}
+\addcontentsline{toc}{section}{摘要}
+%题目：基于GAN的带病灶标签的配准多模态医学影像的合成。
+
+医学影像数据的采集和标注非常困难，尤其是配准的多模态数据。合成的医学影像数据可以很好地缓解此问题，但医学影像包含复杂的生理结构信息，直接合成很易生成不合理的结构、轮廓。此外，当前医学影像合成的研究还存在模态数量少、训练数据要求配准、不能有效合成病灶、无法从随机噪声无限合成、合成影像可用性未评估等各项未能很好解决的问题。
+
+针对这些问题，本研究设计了一种基于GAN的配准多模态医学影像合成方法，无需配准训练数据，先从随机矩阵合成具有生理结构信息的结构特征图，进而生成一组有病灶标签的多模态配准医学影像。本研究在多个数据集上验证了合成数据中病灶信息的有效程度和合成数据在病灶处理任务中的可用程度。本研究主要工作如下：
+
+1.\ 本研究提出了一种基于Sobel边缘检测算子的结构特征图的提取与随机生成方法，无需额外的解剖结构分割标签或标签提取训练，可直接从任意模态的真实影像提取得到结构特征，用以辅助GAN学习生成更合理的合成影像。
+
+2.\ 本研究实现了带标签多模态配准影像的合成。本研究将随机生成的结构特征图随机选取的病灶标签融合，通过生成网络合成多模态医学影像。我们通过实现生成的不同模态影像间的互相转换确保了它们的互相配准，通过对生成的影像的病灶信息的再处理还原出病灶标签确保了生成影像根据输入的标签生成了对应的病灶信息。
+
+3.\ 本研究对合成数据的可用性进行了客观的验证。本研究使用不同数据量的合成数据和真实数据构建的数据集来训练病灶处理网络，验证了合成数据可以在医学影像智能处理任务作为预训练数据和增强数据来提高模型的能力。\\
+
+\textbf{关键词：}医学影像、生成对抗网络、图像合成、多模态配准、边缘检测
+\end{CJK*}
+
+\newpage
+\chead{Abstract}
+\begin{center}
+\textbf{\Large{Synthesis of Multimodal Medical Images Based on GAN}}\\
+\end{center}
+\begin{center}
+\large{
+\begin{tabular}{l}
+     Major: Software Engineering\\
+     Name: Yili Qu\\
+     Supervisor: Prof. Yutong Lu\\
+\end{tabular}}
+\end{center}
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+%Title: Synthesis of Registered Multimodal Medical Images with Lesion Label Based on GAN
+
+The acquisition and labeling of medical image data is very difficult, especially for registered multi-modal data. Synthesized medical image data can alleviate this problem well, but medical images have complex physiological structure information, and direct synthesis can easily generate unreasonable physiological structures. In addition, the current research on medical image synthesis also includes a small number of modalities, the need to register multi-modal training data, the inability to synthesize designated lesions and test them, the inability to synthesize from random matrices, the need for additional data to generate physiological structure information, and the evaluation of synthesis quality. Objectives and other issues that are not well resolved.
+
+Therefore, we designed an unsupervised GAN-based registration multi-modal medical image synthesis method. Without the need to register training data, we first synthesized a structural feature map with physiological structure information from a random matrix, and then generated a set of lesion labels. Multimodal registration medical image. We verified the validity of the lesion information in our synthetic data and the availability of the synthetic data in the lesion processing task on multiple data sets. The main work of this article is as follows:
+
+1. \ We propose a method for extracting and randomly generating structural feature maps based on the Sobel edge detection operator. No additional anatomical structure segmentation labels or label extraction training are required, and structural features can be directly extracted from real images of arbitrary modes To assist GAN learning to generate more reasonable synthetic images.
+
+2. \ We have realized the synthesis of labeled multi-modal registration images. We randomly fuse the randomly generated lesion feature maps with selected lesion labels and synthesize multi-modal medical images by generating a network. We ensure the mutual registration by implementing the mutual conversion between the different modal images that are generated. By reprocessing the lesion information of the generated images, we restore the lesion labels to ensure that the generated images generate corresponding lesion information based on the input labels. .
+
+3. \ We have objectively verified the usability of the synthesized data. We used data sets constructed from synthetic data of different data amounts and real data to train the lesion processing network, and verified that the synthetic data can be used as pre-trained data and enhanced data in medical image intelligent processing tasks to improve the model's ability. \\
+
+\textbf{Keywords:} Medical images, generative adversarial networks, image synthesis, multimodal registration, edge detection
+
+\newpage
+\chead{目录}
+\tableofcontents
+
+\newpage
+\chead{第一章\ 绪论}
+\pagenumbering{arabic}
+%\chead{中山大学硕士学位论文}%页眉中部
+%\renewcommand{\headrulewidth}{0.1em}
+\begin{CJK*}{GBK}{song}
+\section{绪论}
+\subsection{研究背景和目的}
+近年来，随着深度学习的提出和发展，深度学习表现出的极强的学习能力为研究者们打开了一扇新世界的大门。如今，深度学习在各个领域得到了广泛的应用，其中，利用深度学习处理医学影像的相关研究更是越来越多，智能医学影像处理也成为了深度学习落地应用最多最有影响力的领域之一。在原理上，深度学习本身依赖于数据驱动，自然，诸多的智能医学影像处理任务需要大量的医学影像数据来进行训练学习。然而，相对于人人都可用手机拍照上传的自然图像来说，医学影像数据的采集和标注要困难得多，尤其是对于配准的多模态医学影像数据。具体来说，医学影像数据集的构建将会面对医学伦理与法律法规、病人隐私保护与数据脱敏、医院多部门的协调、病人及家属的配合、合格的采集设备、有经验的专业医生的标注、充足的病例特别是罕见病病例、常年累月的数据积累等等诸多的问题。这种数据集构建的困难和涉及其他相关利益又迫使一些医疗机构拒绝公开数据。这造成了当前相对于自然图像领域公开数据集的百花齐放、日新月异，医学影像公开数据集则显得寥寥无几、蜗行牛步。
+
+随着生成对抗网络的强大生成能力被逐步挖掘出来，面对这种医学影像数据集稀少、数据量小的现状，通过合成的医学影像数据来进行数据增强以解决样本不足的问题成为了一种可行方案。然而，医学影像的特殊性还在于其包含了复杂的生理结构信息，采用合成自然图像的方式直接从随机噪声合成医学影像极易生成不复合生理逻辑的结构或轮廓。这使得合成方案的设计和合成训练十分具有挑战性。
+
+另一方面，多模态的医学影像包含更多的有医学价值的信息，无论是对医生还是对智能医学影像处理任务，多模态影像都能更好的帮助诊断。但同样的，多模态影像相对于单模态影像采集难度更大，还需要考虑模态之间的配准，因此公开可用的多模态数据集少之又少。然而，在当前医学影像合成的研究中，许多方案只考虑了单模态影像的情况，对于多模态影像的合成，不是简单将多个单模态模型训练多次就能合成可用的多模态影像的，还需要确保合成的多模态影像之间保持相互配准。这是多模态医学影像合成的另一个挑战。
+
+此外，对于医学影像，其最有价值之处在于其中的病灶信息。医学影像中的病灶信息是医生进行诊断的重要依据，也是智能医学影像处理模型推理诊断的重要依据。然而，当前绝大多数的医学影像合成的研究中，未针对病灶信息的合成进行任何针对性研究，致使合成的医学影像尽管整体上与真实影像相似但关键的病灶信息却不能确保有效的合成，即使影像中合成了病灶也无法提供对应的病灶标签，不能对合成的医学影像在医学诊断上的可用性进行评估和检验，更不能单独的对合成病灶的有效性进行评估和检验。这同样是合成医学影像的一个大的挑战。
+
+具体来说，在上述的问题和挑战中，核心的技术背景有如下几项：
+\begin{itemize}
+\item \textbf{深度学习}
+深度学习（Deep Learning）是机器学习（ Machine Learning）领域中一个新的研究方向，它被引入机器学习使其更接近于最初的目标——人工智能（ Artificial Intelligence）。在实现上，深度学习一般指基于深层人工神经网络模型、采用随机梯度下降等最优化方法对给定样本数据的内在规律和表示层次进行训练学习和推理的过程。深度学习中常见的神经网络模型包括卷积神经网络（CNN）模型\cite{86krizhevsky2012imagenet}、循环神经网络（RNN）模型\cite{143zaremba2014recurrent}、生成对抗网络（GAN）模型\cite{25goodfellow2014generative}等。深度学习可以处理图像、文本、语音等多种形式的信息，在搜索推荐、机器翻译、语音合成、人像识别、图像识别等诸多领域应用广泛。深度学习同样广泛应用于多种医学影像处理任务，如医学影像模态转换、医学图像分割、病灶检测、医学图像分类等。深度学习在医学影像处理的相关研究中具有十分广阔的前景\cite{16litjens2017a,17lee2017deep,18shen2017deep}。
+\item \textbf{医学影像及其模态}
+医学影像是指为了医疗或医学研究，对人体或人体某部分，以非侵入方式取得的内部组织影像，其中不同的成像方式得到的医学影像本研究称之为不同的模态，常见的医学影像模态有核磁共振成像（MRI）、CT成像、PET成像、B超成像、X射线成像等。有的模态在成像时设置不同的参数将得到具有明显视觉差异的不同的子模态，例如CT分低剂量和高剂量、MRI包括T1、T2、T1c、Flair等子模态。不同的模态对医生具有不同的参考价值，医生往往需要多个模态的影像互相对照才能做出准确的判断。在采用CNN或GAN等深度学习方法进行的医学影像的智能处理任务的训练和学习中，研究者们往往也期望获得更多模态的影像。
+\item \textbf{多模态图像的配准}
+当同一个病人的同一个部位通过不同的成像技术得到不同的模态时，如果成像位置和视角是一致的，那么得到的不同模态的影像就是对齐的，这些模态之间的这种对齐关系被称之为配准。相较于为配准多模态数据，配准后的多模态影像数据，对于医生来说可以更直观的对比关键部位在不同模态中的状态来加以诊断，对于智能医学影像处理任务来说则可以满足一些处理复杂任务的深度神经网络对多模态训练数据的要求，有助于提供更加高效可靠的智能诊断服务。在采集时，获取不同模态的配准影像需要花费更长的时间并且需要患者的耐心配合，同时还需要额外的伴随失真的配准计算。
+\item \textbf{病灶和标注}
+病灶是指人体器官的病变区域，例如肺结节、肿瘤、结石等。医学影像中的病灶信息对医生来说至关重要，它们是医生进行诊断的重要依据。在医学影像中，病灶组织与正常组织、病灶的不同种类、病灶的严重程度等不一定具有很明显的视觉差异，往往需要极具经验的专业医生进行判断。在智能医学影像处理任务中，病灶信息同样是模型进行学习和推理的重要信息，因此，医学影像的训练数据需要具有丰富经验的专业医生对医学影像中的病灶进行标注，这是十分巨大的工作量。现实中由于医生这个职业的特殊性，他们本身的工作任务就十分繁重，大量的标注任务需要耗费大量的时间。
+\item \textbf{图像合成}
+图像合成或图像生成是指从一个随机噪声矩阵或一个具有一定指导信息的矩阵合成一张预期的完整的目标图像的过程，其中，从带有指导信息的矩阵合成图像进一步发展为像素到像素转换的图像转换。图像转换是图像合成的一种。从数学本质上，图像合成可以视为一个数据分布到另一个数据分布的变换。随着生成对抗网络（GAN）\cite{25goodfellow2014generative}的提出，从随机噪声合成图像的相关研究发展迅速。
+随后包括风格迁移\cite{139gatys2016image,140johnson2016perceptual,6zhu2017unpaired,141azadi2018multi}、人像转换\cite{1zhao2018modular,5liang2018generative,13choi2018stargan:,27isola2017image-to-image}等诸多图像转换应用被提出。其中，医学影像的合成指以医学影像为预期输出的目标图像的图像合成，医学影像的模态转换指以一种医学影像模态为输入合成另一种模态的医学影像的像素到像素的图像转换过程。
+\end{itemize}
+
+总的来说，当前的合成医学影像的研究中还存在模态数量少、训练数据要求配准、不能有效合成病灶、无法从随机噪声无限合成、需要额外的数据产生生理结构信息、合成质量评价不客观等各项未能很好解决的问题。本研究的目的正是针对上述的这些问题，基于当前的图像合成技术和相关研究成果，进一步出探索一套完整的可以同时解决上述多个问题的解决方案，实现可控制病灶合成并带有病灶标签的配准的多模态医学影像的合成。
+
+\subsection{研究内容和技术路线}
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/yjlx}
+	\caption{研究内容。}
+	\label{yjlx}
+\end{figure*}
+本研究详细的研究内容如图\ref{yjlx}所示，图中简要直观地展示了上述的研究思路和研究过程。
+
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/jslx}
+	\caption{技术路线。}
+	\label{jslx}
+\end{figure*}
+针对医学影像包含的复杂的生理结构信息难以合成的问题，本研究采用渐进式合成思路，分成两个阶段实现医学影像的合成，第一个阶段是从随机噪声合成目标部位的包含结构信息的简单的二值线条轮廓图，本文中将其命名为结构特征图，然后以此结构特征图为输入进一步合成医学影像。
+
+针对多模态医学影像的合成和配准问题，本研究先采用一个基于ACGAN\cite{98odena2016conditional}结构的条件生成器进行多模态影像的合成，然后采用一个基于CycleGAN\cite{6zhu2017unpaired}结构的条件转换器进行合成的多模态影像之间的互相转换，通过像素到像素的转换一致性实现对合成多模态影像的配准约束。
+
+针对合成病灶的问题，本研究首先在输入结果特征图时额外输入一张病灶标签图用以提供合成病灶的指导信息，然后采用一个病灶处理器即一个独立的智能医学影像处理网络，来对合成的医学影像进行诊断推理提取出合成影像中的病灶信息，输入的病灶信息与提取出的病灶信息的自监督一致性约束确保了生成器根据输入合成了指定的病灶内容。
+
+对合成的多模态医学影像，本研究将其与真实影像按照不同比例进行混合用于训练智能医学影像处理模型，然后根据模型的评估结果来验证合成病灶的有效性和合成影像在智能医学影像处理任务中的可用性，并以此作为一种对合成医学影像的合成质量的评估方法。
+
+本研究的技术路线图如图\ref{jslx}所示，图中简要直观地展示了在研究过程中采用的技术、模型及简易的调用路线。
+
+\subsection{本文的主要贡献}
+本研究提出了一种从正态分布随机噪声分阶段可控制病灶合成且带有病灶标签的配准的多模态医学影像的合成方案和对合成影像性能的客观的评估方案。本研究在多个数据集上进行了充分的实验验证和效果展示。具体来说，本研究的主要贡献如下：
+\begin{itemize}
+	\item 首先，本研究提出了一种基于Sobel边缘检测算子（Sobel Operator）\cite{147Sobel}的结构特征图提取方法，无需训练或其他标签数据即可直接从医学图像中提取解剖结构信息，相较于当前最好的草图提取方法，本研究提取的结构特征图更加干净简洁、线条清晰、完整合理。
+	\item 其次，本研究提出一种结合VAE和GAN的结构特征图生成方法，可以从多维正态分布随机采样生成结构特征图，并能通过控制在正态分布中的采样位点针对性的合成满足预期结构样式的结构特征图。本研究的结构特征图合成方法可以合成任意数量的结构特征图，并且具有丰富的多样性。
+	\item 然后，本研究对结构特征图进行噪声融合处理和可控的病灶标签添加处理，再经过无需配准数据的生成训练实现了从结构特征图合成符合生理结构要求的多模态医学图像，并可以通过病灶处理器提供的病灶生成指导损失约束生成模型根据添加的病灶标签合成对应病灶信息、通过模态转换器提供的模态配准损失约束合成的多模态影像的精确配准。
+	\item 最后，本研究提出使用合成数据训练智能医学影像处理模型，通过对模型处理能力的评估验证合成病灶的有效性和合成数据的可用性，间接评估合成影像的性能和质量。本研究在多项实验中的结果表明本研究合成的数据可以显著提高多种智能影像处理模型的泛化能力，尤其是图像分割类模型。
+\end{itemize}	
+
+\subsection{本文的结构}
+本文一共有五章，每一章的内容安排如下：
+
+第一章：绪论。介绍本文的研究的问题背景、研究的目的、研究的思路和技术路线和文本的主要贡献。
+
+第二章：国内外研究现状。介绍国内外的研究现状并进行简单的分析与总结
+
+第二章：基础方法和数据集。介绍本文后续章节中的方法和实验将会运用的基础方法和数据集的简介，包括基础的生成对抗网络的介绍、变分自动编码器的介绍、图像分割任务的介绍、物体检测任务的介绍。
+
+第三章：带病灶标签的配准多模态医学影像的合成。本章是完整的方法描述，先介绍整体架构，再依次介绍结构特征图的提取和生成方法、多模态影像的合成、多模态影像的配准、病灶信息的添加和合成方法、合成数据集的构建过程。
+
+第四章：合成医学影像的性能评估。本章节介绍对合成的医学影像的评估方法和实验结果，包括通用评估指标、消融实验、通用量化评估结果、合成的病灶的有效性评估、合成数据集在智能医学影像处理任务上的可用性评估。
+
+第五章：结语。总结本文的研究成果，罗列本文的不足之处，分析本文方法落地运用的困难，并对进一步的研究方向进行展望。
+\newpage
+\chead{第2章\ 国内外研究现状}
+\section{国内外研究现状}
+本文在上一章中介绍了本研究的问题背景、研究意义和研究思路，在本章中，将对与本研究相关的国内外研究现状进行细致分析。
+
+随着深度学习的发展，国内外出现了许多与本研究相关的研究。首先，许多在一般自然图像或人像上进行的图像合成的相关研究使得图像合成技术取到了充分的发展，尤其是基于GAN的图像合成技术，在许多研究中展现出了强大的合成能力和巨大的潜能。其次，在与本研究更相关的医学影像合成领域，广阔的应用前景吸引着研究者们开始尝试，在近两年也出现了一些优秀的研究成果。本研究基于无数前人的优秀研究基础，在如下国内外研究现状的深入分析基础上探寻当前仍存在的问题，深入研究和充分实验后提出新的解决方案。
+
+\subsection{图像合成的研究现状}
+在上一章节中本文对图像合成的概念进行了介绍和解释。
+在最近的图像合成研究中，CNN和GAN成为了应用最广泛的技术。
+语义分割模型FCN\cite{68long2015fully}是采用CNN输出整张图片的最早的研究之一，
+之后在语义分割领域，优秀的CNN模型不断涌现，例如
+SegNet\cite{117badrinarayanan2017segnet:}、
+U-Net\cite{51ronneberger2015u-net:}、
+DeepLab系列\cite{118chen2015semantic,104chen2018deeplab:,119chen2017rethinking,120chen2018encoder-decoder}、
+Fully Convolutional DenseNet\cite{121jegou2017the}、
+E-Net\cite{122paszke2017enet:}、
+EncNet\cite{135zhang2018context}、
+Mask R-CNN\cite{123he2017mask}、
+PSPNet\cite{124zhao2017pyramid}、
+RefineNet\cite{125lin2017refinenet}、
+G-FRNet\cite{126amirul2017gated}、
+DecoupledNet\cite{127hong2015decoupled}、
+DenseASPP\cite{134yang2018denseaspp}、
+ResNet DUC\cite{133wang2018understanding}、
+DFANet\cite{132li2019dfanet}、
+DANet\cite{131fu2019dual}、
+Auto Deeplab\cite{130liu2019auto}、
+APCNet\cite{129he2019adaptive}、
+CANet\cite{128zhang2019canet}
+等，这些模型在CNN模型结构上一步步发展，许多通用的模型结构设计方法和训练方法被提出和不断发展。
+在以语义分割为主的图像合成任务中，CNN图像生成模型也在发展过程中从结构上被模式化成一个编码器和一个解码器连接起来的生成器结构。采用CNN合成图像的大多数研究是有监督训练，且与其他多数CNN任务一样，任务中CNN起到的作用是提取输入的某种特征或对输入的特征进行转换而不是对输入添加更加丰富的细节，例如图像转换任务\cite{139gatys2016image,140johnson2016perceptual,66miao2018dilated,36vannguyen2015crossdomain}或前述的一系列语义分割任务。CNN对训练标签的要求限制了CNN在图像合成领域的应用场景。
+
+相反，GAN天生是采用无监督训练的方法，同时也可添加有监督损失进行有监督训练\cite{4shin2018medical,42huo2018adversarial,44shrivastava2017learning}。因此，最近越来越多的研究采用GAN来进行图像合成任务。由于编解码结构在CNN上的有效性，在采用GAN的图像合成的发展中，图像合成任务也被模式化为使用编码器和解码器组成的生成器进行的像素到像素的映射\cite{27isola2017image-to-image,28liu2017unsupervised,29kim2017learning,30zhu2017imagine,31zhang2018densely,32gong2018learning}，其中编码器实现对输入进行特征提取和融合，解码器实现对特征进行填充还原和添加细节。GAN在图像生成任务中的惊人表现和相关数据集的发展逐步催生了图像合成领域中一些研究方向的火热，例如人像合成\cite{1zhao2018modular,5liang2018generative,13choi2018stargan:,27isola2017image-to-image}、风格迁移\cite{6zhu2017unpaired,141azadi2018multi}和草图补全\cite{27isola2017image-to-image,81xian2018texturegan:,142xian2018texturegan}等。在结构设计和训练方法上，DCGAN\cite{97radford2015unsupervised}通过采用更深层和复杂的CNN作为生成器和鉴别器使得合成质量在原生GAN的基础上有了很大的提升，展现了GAN的巨大潜力。随后ACGAN\cite{98odena2016conditional}在GAN最重要的变体CGAN\cite{70mirza2014conditional}的基础上提出了多类别图像合成方法，为GAN的应用展现了一个更加广阔的前景。之后CycleGAN\cite{6zhu2017unpaired}的出现，为GAN在多域图像转换中的应用开辟了一条广阔的大路，在此基础上，IcGAN\cite{71perarnau2016invertible}、StarGAN\cite{13choi2018stargan:}、ContrastGAN\cite{5liang2018generative}等可实现图像到图像的多域转换方案或模型被陆续提出，最近的ModularGAN\cite{1zhao2018modular}、ComboGAN\cite{74anoosheh2018combogan:}和XGAN\cite{75royer2018xgan:}将网络模块化为多个部件又开启了另一种思路。
+
+总的来说，无论是采用CNN还是GAN的图像合成都得到了充分的发展，尤其是在语义分割、人像合成等领域，图像合成方法得到了广泛和深入的应用与发展，产生了大量的优秀研究成果。在这些研究的基础上实现高质量的医学影像的合成将具备充分的可行性，这一方面开拓了图像合成方法的应用领域，同时也能进一步的发展图像合成方法和技术。
+
+\subsection{医学影像合成的研究现状}
+在深度学习提出之前，一些研究使用图字典映射\cite{22burgos2015robust}、稀疏编码\cite{33huang2017simultaneous,34vemulapalli2015unsupervised}等方法进行了医学影像合成的最初尝试。随后在CNN的发展浪潮中，也有基于CNN的医学影像合成的研究出现\cite{66miao2018dilated,36vannguyen2015crossdomain}。
+
+随着语义分割、人像合成等领域中基于GAN的图像合成的发展，语义分割、人像合成等领域当前最优秀的图像合成方法，应用于高质量的医学影像的合成成为了医学影像合成研究的趋势。GAN逐步被广泛应用于医学影像的分割\cite{40kamnitsas2017unsupervised}，重建\cite{61fan2018a,65anirudh2018lose}、合成\cite{4shin2018medical,41costa2017towards,43iglesias2013is,44shrivastava2017learning}、转换\cite{2zhang2018translating,20nie2017medical,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised}和超分辨率\cite{14You2018CT,15lyu2018super-resolution}等各类研究。
+
+其中，医学影像的模态转换是当前医学影像合成的研究中发展最成熟的方向。一些医学影像模态转换的研究旨在减少诊断和治疗中给医生和病人带来不必要的代价，例如无需配准数据的心脏MRI与CT之间的互相转换\cite{2zhang2018translating}，脑部MRI转换合成CT图像\cite{20nie2017medical}，低剂量肺部CT合成高剂量CT\cite{136yi2018sharpness-aware,137yang2018low-dose,138WolterinkGenerative}等通过无辐射的MRI或低辐射的低剂量CT影像合成高辐射的高剂量CT来减少病人辐射剂量的研究，并声称他们合成的医学影像可以直接提供给医生进行诊断，也有的研究甚至表示可以提高治疗的可行性\cite{22burgos2015robust}。
+这些的医学影像模态转换合成的研究中，很多研究仅针对两模态之间的转换\cite{2zhang2018translating,20nie2017medical,22burgos2015robust,34vemulapalli2015unsupervised,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised}，
+对于多个模态的互相转换合成的研究则相对较少\cite{84chartsias2018multimodal,85joyce2017robust,4shin2018medical}。
+在多模态影像合成的研究中，有研究\cite{84chartsias2018multimodal}实现了多输入多输出的MRI合成，但对输入的多模态数据要求配准，而在一些医学图像的转换配准的研究\cite{66miao2018dilated}中CNN又详细展示了在模态配准方向的潜力，于是相关研究\cite{85joyce2017robust}通过模型的自动学习进一步实现了未配准的多输入合成模型，能够从其输入的任何子集执行MRI合成，但其限制了输出为单一模态。
+
+与模态转换合成方式不同最近的另一些研究，则试图通过合成数据来缓解医学影像数据样本稀少的难题，如脑MRI的合成\cite{4shin2018medical}、视网膜的合成\cite{41costa2017towards}、多种不同部位和不同模态的单模态医学影像的合成\cite{96zhang2019skrgan:}。
+
+其中，英伟达的研究\cite{4shin2018medical}应用GAN合成脑肿瘤图像实现了通过合成影像进行数据增强和数据匿名化，但其输入为从真实数据中提取的脑结构分割图，不仅需要额外的数据标签和额外训练一个脑结构分割网络，还需要在另一个真实数据集上使用分割网络获得合成所需的分割图输入，这使得该方法的合成手多种因素的限制。该研究还首次通过在输入时添加肿瘤分割标签来指导病灶的合成，然而其合成过程没有额外的损失约束，仅采用了鉴别器提供的整体的对抗性损失进行指导，这使得病灶的合成极具不确定性，同时该研究也并未对其合成的肿瘤病灶的有效性进行深入验证和分析。
+
+一项对于视网膜合成的研究\cite{41costa2017towards}通过变分自编码器(VAE)\cite{87kingma2014auto-encoding,88rezende2014stochastic}实现了血管注释图的随机生成，进而以合成的血管注释图合成了彩色视网膜图像，从合成数量上没有限制，但该研究仍需训练一个血管分割网络从真实图像中提取血管注释图来训练血管注释图的VAE生成网络。
+
+而SkrGAN\cite{96zhang2019skrgan:}与本研究思路不谋而合，该研究在更广泛的数据集上采用Sobel算子实现对医学影像结构信息草图的提取，并通过GAN实现的草图的随机生成，再进一步实现了对医学影像的合成。SkrGAN在训练中，仅进行了单模态影像的合成尝试，并一方面由于始终采用从真实数据集中提取的草图进行训练，并以输入草图对应的真实影像为监督标签，使得其模型的训练极易过拟合且缺乏对合成草图的适应能力，最终导致模型合成的医学影像缺乏多样性，另一方面提取的草图对原图生理结构信息的勾勒效果较差，使得合成的影像在结构细节上存在残缺或模糊的情况。与前述绝大部分的研究相同的是，SkrGAN合成的医学影像没有考虑病灶信息的合成，也没有对应的病灶标签的产出，这使得绝大多数的合成数据没有可用性。
+
+\subsection{小结}
+在对相关研究进行上述的分析中不难发现，当前合成医学影像尽管取得了长足的进展，具备了很好的研究基础，但依然有许多问题亟待解决，依然有继续深入研究的巨大价值和空间。在前述各项研究的基础之上，本研究对多模态医学影像的合成方案的各个环节进行了更科学的规划和改进，实现了多个数据集上更清晰简明的结构特征图的提取、更稳定的基于VAE的结构特征图的随机合成、更逼真的基于条件GAN的配准多模态医学影像的合成、可控可验证的病灶信息的添加和合成、合成数据的可用性的量化验证。
+
+\newpage
+\chead{第3章\ 基础方法}
+\section{基础方法}
+本文在前两个章节中简要介绍了本研究的技术路线和相关研究基础，在本章节中，将对本研究使用的基础方法进行介绍，本文后续章节中提出的方法将对本章提到的方法进行调用、改进和扩展。本章将对基于CNN的图像分类、生成对抗网络、变分自动编码器、语义分割、目标检测进行依次介绍。
+%后续章节的实验将在本章介绍的各个数据集上进行
+
+\subsection{基于CNN的图像分类}
+图像分类是指采用设计的算法和模型用给定的一组每张图像都被标记了对应的类别的图像集作为训练集进行训练和学习，然后再对另一组新的测试图像集预测其标签类别的任务。卷积是传统数字图像处理中对图像进行的一种基本操作，也被称为滤波。卷积神经网络（CNN）是在传统神经网络的基础上应用了卷积操作，卷积操作与激活函数、批归一化、池化操作、全连接操作等多层复合就得到了一个复杂的神经网络，再通过神经网络的基于随机梯度下降（SGD）算法的反向传播机制，CNN中卷积核的参数和其他可学习的参数就能不断地根据梯度更新实现自动学习，从而能学会处理十分复杂的图像处理任务。深度学习正是从基于CNN的图像分类开始发展。1998年首个CNN模型LeNet\cite{103lecun1998gradient}提出，但直到2012年ILSVRC（ImageNet Large Scale Visual Recognition Challenge）\cite{144russakovsky2015imagenet}中CNN模型AlexNet\cite{114krizhevsky2017imagenet}以高出10\%的正确率力压第二名取得冠军，卷积神经网络的巨大优势才广为人知。此后CNN模型进入了飞速发展期，VGGNet\cite{102simonyan2014very}、GoogleNet\cite{115szegedy2015going}、ResNet\cite{116he2015deep}等经典网络相继提出，图像分类任务也随之快速发展。
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/VGG}
+	\caption{VGGNet模型结构设置\cite{102simonyan2014very}。随着添加更多的层（添加的层以粗体显示），配置的深度从左（A）到右（E）逐渐增加。卷积层参数标记格式为“conv$\langle$ receptive field size$\rangle$-$\langle$ number of channels$\rangle$”。为了简单起见，没有显示ReLU激活函数。}
+	\label{VGG}
+\end{figure*}
+如图所示，类似于VGGNet的CNN分类模型，接收图像作为输入，输入一个类别概率向量，该向量与输入的类别标签通过损失函数求得损失，再对损失函数求导，即可反向传播得到全部模型参数的梯度，再对模型参数执行梯度更新，即可使得模型参数得到学习和训练，通过这样不断地学习，模型参数最终收敛。使用训练好的VGGNet模型分类时，通过$agrmax()$函数对预测的类别概率向量进行处理即可得到预测的图像类别。
+\subsection{生成对抗网络}
+生成对抗网络（GAN，Generative Adversarial Networks）\cite{25goodfellow2014generative}提出后，与卷积神经网络结合成为一种无监督学习的深度学习模型\cite{97radford2015unsupervised}。GAN主要包括了两个部分，即生成器网络$G$（Generator）和鉴别器网络$D$（Discriminator），两者不断博弈，进而使$G$学习到数据的分布，如果用到图片生成上，则训练完成后，$G$可以从一段随机数中生成逼真的图像。$G$接收一个随机的噪声$z$，通过这个噪声生成图像$x$；$D$输入图片$x$，输出该图片为真实图片的概率$D(x)$，如果为1，就代表100\%是真实的图片，而输出为0，就代表是完全不真实的图片。训练过程中，生成网络$G$的目标就是尽量生成真实的图片去欺骗鉴别器$D$。而$D$的目标就是尽量辨别出$G$生成的假图像和真实的图像。这样，$G$和络$D$构成了一个动态的“博弈”过程，最终的平衡点即纳什均衡点（Nash Equilibrium Point）。训练时通过损失函数使二者形成对抗，最终两个网络达到动态均衡的标志是生成器生成的图像接近于真实图像分布，而判别器识别不出真假图像，对于给定图像的预测为真的概率基本接近 0.5（处于随机猜测水平）。GAN的一个典型损失函数如下：
+\begin{equation}
+\min_G \max_D V(G,D)=\mathbb{E}_{x\sim p_{data}(x)}[\log(D(x))]+\mathbb{E}_{z\sim p_z(z)}[\log(1-D(G(z)))].
+\end{equation}
+
+相比较传统的模型，GAN存在两个不同的网络，而不是单一的网络，并且训练方式采用的是对抗训练方式。GAN中$G$的梯度更新信息来自鉴别器$D$，而不是直接来自数据样本。
+GAN具有以下优点：
+GAN作为一种生成模型，无需复杂的损失函数设计，相比较受限玻尔兹曼机（RBM，Restricted Boltzmann Machine,）和Generative Stochastic Networks（GSNs）\cite{105alain2015gsns}等其他生成模型只用到了反向传播，而不需要复杂的马尔科夫链；
+GAN相比一般CNN模型，可以产生更加清晰、真实的样本；
+GAN采用无监督的学习方式训练，可以被广泛用在无监督学习和半监督学习领域；
+GAN应用场景丰富，比如图片风格迁移、超分辨率、草图补全、图像去噪等。
+
+ACGAN\cite{98odena2016conditional}在上述GAN的基础上进行了改进，使得GAN结构可以生成多分类数据。相比较来说，原生GAN的生成器$G$只有噪声$z$作为输入变量，ACGAN中生成器$G$输入多了一个分类变量$c$
+，两者的输出都是$x_g$没有区别，但原生GAN的鉴别器$D$输出只有该图片真假判断$d$，而ACGAN的鉴别器$D$除了真假$d(x_g)$外增加了类别判断$c(x_g)$。对应的，损失函数除了对抗性损失还有额外的类别一致性损失。图~\ref{ACGAN}展示了ACGAN的架构。
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/ACGAN}
+	\caption{ACGAN模型结构\protect\footnotemark。}
+	\label{ACGAN}	
+\end{figure*}
+\footnotetext{https://twitter.com/ch402/status/793535193835417601}
+
+\subsection{变分自编码器}
+变分自编码器（VAE，Variational Auto-Encoder）\cite{106kingma2013auto-encoding}是另一类重要的生成模型，它于2013年由Diederik P.Kingma和Max Welling最早提出，
+在2016年Carl Doersch的介绍论文\cite{107doersch2016tutorial}发表后得到快速发展。VAE与GAN一样，是无监督学习最具前景的方法之一。
+VAE与GAN两个的目标基本是一致的，即希望构建一个从隐变量$z$生成目标数据$x$的模型，但是实现上有所不同。
+更准确地讲，两者假设了$z$服从某些常见的分布（比如正态分布或均匀分布），然后希望训练一个模型$x=G(z)$，这个模型能够将原来的概率分布映射到训练集的概率分布，
+VAE包含编码器$E$和解码器$G$，编码器将数据分布的高级特征映射到数据的低级表征，低级表征被称作本征向量（Latent  Vector），即$z$。解码器接收数据的低级表征，然后输出同样数据的高级表征，即重建的数据$x_r$。
+
+一个标准VAE中，隐变量$z$服从标准正态分布，即$z\sim\mathcal{N}(0,1^2)$。
+编码器$E$将原始数据$x$拟合为一个均值$\mu(x)$和方差$\sigma(x)$，
+通过重采样技巧\cite{106kingma2013auto-encoding}构建了一个条件正态分布$\widetilde{z}=\mu(x)+\exp(0.5\times\sigma(x))\times z$，再用解码器$G$对$\widetilde{z}$解码得到$x_r$。
+VAE使用KL散度来度量两个原始数据的概率分布和重建数据的概率分布之间的差异，
+以KL散度最小化为优化目标，
+VAE\cite{106kingma2013auto-encoding}文中对此进行了详细的推导和展开，由此推导得到的损失函数如下所示：
+\begin{alignat}{2}
+\min_{E,D} \quad &L(E,D)=\mathbb{E}_{x}[\Vert{x-D(\widetilde{z})}\Vert_{2}^{2}],\\
+\mbox{s.t.}\quad
+&\widetilde{z}=\mu(x)+\exp(0.5\times \sigma(x))\times z,\\
+&[\mu(x),\sigma(x)]=E(x),\\
+&z\sim \mathcal{N}(0,1^2).
+\end{alignat}
+
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/U-net}
+	\caption{U-net模型结构\cite{51ronneberger2015u-net:}。}
+	\label{U-net}
+\end{figure*}
+\subsection{语义分割}
+图像语义分割是数字图像处理领域一个经典任务，指将图像像素按照图像中表达语义含义的不同进行分组（Grouping）或分割（Segmentation）。在深度学习应用到计算机视觉领域之前，人们使用TextonForest和随机森林分类器进行语义分割，2015年全卷积神经网络（FCN）\cite{108long2014fully}首次将深度学习应用在图像语义分割任务上，通过对全尺寸图片进行端到端的分割取得了十分显著的提升。此后U-net\cite{51ronneberger2015u-net:}在生物医学图像的语义分割任务上采用编码器-解码器结构并应用跳跃连接（Skip Connections）取得了更惊人的分割效果，启发了后来的许多研究。如图所示，U-net接收一张图片输入，输出为分割结果的概率矩阵，通过$agrmax()$函数即可得到分割掩膜标签。
+
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/YOlO_and_SSD}
+	\caption{YOlO和SSD模型结构的对比\cite{109liu2016ssd:}。}
+	\label{YOlO_and_SSD}
+\end{figure*}
+\subsection{目标检测}
+图像目标检测同样是数字图像处理领域经典任务之一。目标检测任务是判断图像物体的是否是目标类别并在图中标记出目标类别物体的位置。近几年来，随着深度学习的崛起，基于卷积神经网络的目标检测算法取得了很大的突破。当前比较流行的模型可以分为两类：一类基于Region Proposal的R-CNN\cite{113girshick2014rich}类模型（R-CNN，Fast R-CNN\cite{111girshick2015fast}, Faster R-CNN\cite{112ren2017faster}等），包含两个阶段，需要先前向推理产生目标候选框，然后再对候选框进行分类和回归以筛选出最终的检测框；另一类是YOlO\cite{110redmon2015you}、SSD\cite{109liu2016ssd:}等单阶段算法模型，仅用单个卷积神经网络即可实现直接预测不同目标的类别与位置。
+
+如图\ref{YOlO_and_SSD}所示，SSD模型基于VGG16\cite{102simonyan2014very}模型进行修改，先将图片输入到预训练好的分类网络中来获得不同大小的特征映射，通过抽取的多层卷积层的特征图（Feature Map）构造6个不同尺度大小的检测候选框（Anchor Box），然后分别进行检测和分类，生成多个候选框，再将不同特征图获得的候选框结合起来，经过非极大值抑制（NMS）方法来抑制掉一部分重叠或者不正确的候选框，生成最终的候选框集合，这就是最后输出的目标检测结果。
+
+\newpage
+\chead{第4章\ 带病灶标签的配准多模态医学影像的合成}
+\section{带病灶标签的配准多模态医学影像的合成}
+本文在第一章中介绍了本研究面临的三个主要的挑战和对应的研究思路和技术路线，在第二章中分析了当前相关的研究的研究成果和仍存在的问题，然后在上一章节中对几种主要的基于深度学习的图像处理任务进行了介绍。在本章中，本文将基于前述的研究思路和技术路线，在前人研究的基础上继续发展、改进和创新，致力于解决当前研究仍存在的问题和不足，实现带病灶标签的配准多模态医学影像的合成。本节解决方案将对上一章介绍的基础方法直接应用，而不再展开介绍。本章将先对本研究提出的解决方案的整体架构和阶段划分进行介绍，随后依次介绍各个阶段解决的问题和详细的方法步骤。
+\subsection{整体架构}
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/architecture}
+	\caption{整体架构。 A是结构特征图的提取和生成阶段。 B是多模态影像合成阶段。 C是合成数据集构建阶段。 D是合成数据可用性验证阶段。}
+	\label{architecture}
+\end{figure*}
+图~\ref{architecture}所示包括四个主要阶段。
+在结构特征图提取和生成阶段，本研究主要的预期产出为一个结构特征图生成器，该生成器可以从随机正态分布矩阵生成结构特征图。
+在多模态影像合成阶段，本研究以结构特征图为输入训练一个条件生成器，该条件生成器可以根据不同条件合成不同模态的影像。若需要在合成影像中添加指定的病灶信息，则可将病灶标签与结构特征图融合后作为输入，同时通过病灶标签生成器添加病灶生成指导损失。若对合成多模态的影像有高配准度要求，则可以通过模态转换器对合成的多模态影像进行模态转换一致性约束保证像素级配准。
+在合成数据集构建阶段，本研究使用前面两个阶段生成的模型从随机正态分布矩阵合成配准的多模态影像。
+最后是对合成数据可用性验证阶段，本研究对合成数据在智能医学影像处理任务中的可用性进行实验验证，下一章节将对实验验证和评估进行详细介绍。
+
+\begin{algorithm}
+	\caption{Structural feature map extraction}
+	\label{alg:1}
+	\begin{algorithmic}[1]
+		\State Input a real grayscale image $x$,
+		pixel threshold $alpha$ and $beta$ and $gama$,
+		gaussian kernel variance $sigma1$ and $sigma2$
+		\State $s1 = reduce\_min(sobel(x))$
+		\State $s2 = reduce\_max(sobel(x))$
+		\State $s1 = gaussian\_blur(s1,sigma1)$
+		\State $s2 = gaussian\_blur(s2,sigma1)$
+		\State $s1 = mean(s1) - s1$
+		\State $s2 = s2 - mean(s2)$
+		\State $s1 = ones \times (s1 > alpha)$
+		\State $s2 = ones \times (s2 > alpha)$
+		\State $s = ones \times ((s1 + s2)> 0)$
+		\State $s = gaussian\_blur(s,sigma2)$
+		\State $s = ones \times ((s1 + s2)> beta)$
+		\State $s = medfilt(s)$
+		\State $s = s \times (x > gama)$
+	\end{algorithmic}  
+\end{algorithm}
+\subsection{结构特征图的提取和生成}
+GAN直接从随机噪声中生成的医学图像很难生成现实的结构信息。本研究将提供基本轮廓和结构信息的图像称为结构特征图。例如，视网膜血管分布图可以看作是视网膜图像的结构特征图\cite{41costa2017towards}。结构特征图可以为合成医学图像提供必要的基本指导。在合成医学影像时，一些研究从组织分割标签\cite{4shin2018medical}获取了基本的结构信息。但是，诸如视网膜血管图和脑组织分割标签之类的一般结构特征，在从原始图像中提取之前需要额外的数据来训练一个提取模型。为此，本研究首先设计了一种直接从医学影像直接提取结构特征图的方法，该方法具有操作快速，无需训练，无需附加数据的优点。
+\subsubsection{结构特征图提取方法}
+在传统的数字图像处理方法中，Roberts算子\cite{145Roberts}、Prewitt算子\cite{146prewitt}、Sobel算子\cite{147Sobel}等都是出色的边缘检测算子。Sobel算子尤其适用于也最常用于处理医学图像。如算法~\ref{alg:1}中所示，本研究探索了一种基于Sobel算子生成的边缘检测图中进一步提取结构特征图的方法。
+
+在算法~\ref {alg:1}中，本研究使用Sobel检测算子$sobel()$从真实图像中提取水平和垂直边缘检测图。每个边缘检测图执行最大规约$reduce\_min()$和最小规约$reduce\_min()$，以获得两个融合水平垂直边缘检测图的结果图，再对两张图进行核尺寸为$3\times3$的高斯模糊$gaussian\_blur()$对线条轮廓加粗，然后每个融合图计算与通过均值函数$mean()$计算出的平均像素值的差可以去掉大部分背景像素只保留最突出的线条轮廓。根据像素阈值对两个差异图进行二值化，然后对两个二进制图像求和获得完整的轮廓线条，然后完全二值化。再进行一次高斯模糊可以对线条加粗并能使有断点的线条相连成整体，最后和原始图的二值化掩膜相乘可以完全去掉对应于原始图背景区域的噪声，再用$3\times3$的中值滤波函数$medfilt()$去掉剩余的孤立的噪点，即可得到本研究需要的干净清晰又完整简洁的结构特征图。
+对于一些有病灶结构信息的结构特征图，本研究可以使用病灶分割标签掩膜去除结构特征图中的原始病灶部分的结构信息，或者弃用。
+
+SkrGAN\cite{96zhang2019skrgan:}的方法与本研究的思路不谋而合，其利用Sobel边缘检测方法提取初始结构边界，然后利用高斯低通滤波去除孤立噪声和像素，最后利用一个由开孔过程和闭孔过程组成的形态学操作进一步去除噪声，填充囊状结构得到了结构草图。和SkrGAN的方法相比，本研究的方法分别考虑了Sobel边缘检测结果的高像素值轮廓和低像素值轮廓，最后再对轮廓组合得到了更完整的轮廓信息。同时两次高斯模糊的应用突出了轮廓线条信息，采用通过与像素均值作差后的二值化即可分离轮廓线条和背景，这与开孔闭孔分离背景的方法相比保留的轮廓复杂程度更低、线条更清晰。最后本研究进行的去噪过程能完全去除对应原始图背景区域的部分的噪声和器官内绝大部分噪点而不破坏轮廓线条。从生成结果看，本研究的结构特征图更加清晰明了、轮廓更加干净简洁、线条更加符合原图的视觉呈现。
+
+\subsubsection{结构特征图生成训练}
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.95\columnwidth]{figures/feature_train}
+	\caption{结构特征图生成训练。 $ x $是输入的真实影像，$ s $是结构特征图。 $ E_s $是VAE编码器，输出编码矩阵$ f_ {mean} $和$ f_ {logvar} $。 $ z $是来自多维正态分布$\mathcal{N}(0,1^2)$的随机噪声采样，而$ f $是近似正态分布矩阵。 $ G_s $是VAE解码器，$ s_r $是重构的结构特征图，而$ s_g $是生成的随机结构特征图。 $ D_ {s} $是结构特征鉴别符。 $ G_m $是掩膜生成器，$ m_r $是生成的掩膜。}
+	\label{feature_train}
+\end{figure}
+\begin{algorithm}
+	\caption{Mask Extraction}
+	\label{alg:2}
+	\begin{algorithmic}[1]
+		\State Input a real grayscale image $x$,  pixel threshold $alpha$, the expanded pixel value $p$
+		\State $m = 1.0 - ones \times (x > alpha)$
+		\State $new\_size=[x.width() + p, x.length() + p]$
+		\State $m = resize(m, new\_size)$
+		\State $m = crop\_padding(m,p)$
+		\State $m = medfilt(m)$
+	\end{algorithmic}  
+\end{algorithm}
+生成提供结构信息的输入时，英伟达合成脑MRI的研究\cite {4shin2018medical}仍需要输入真实图像以获取生成的脑结构分割图，这大大减少了合成数据的多样性。合成视网膜的研究 \cite {41costa2017towards}中，实现了基于VAE的方法从多维正态分布生成视网膜血管分布图。SkrGAN则采用GAN从随机噪声合成结构草图。以此为基础，本研究设计了一种混合网络，结合VAE与GAN的特征，来提高合成训练的稳定和鲁棒，实现从随机正态分布矩阵生成具有更好的多样性并且无需其他训练标签的结构特征图。此外，本研究训练了一个生成器$G_m$ ，该生成器从大脑结构特征图中获取了目标器官区域的掩膜，以供以后用于匹配病变标签。生成器与结构特征图生成的训练同步。在$G_m$ 训练期间，算法~\ref {alg:2}提取的掩膜用作标签数据，其中$resize()$为最近邻插值函数，$crop\_padding()$为边距裁切函数。如图~\ref {feature_train}所示，具体的训练过程如下：
+\begin{itemize}
+\item 结构特征图$s$使用算法~\ref {alg:1}从$ x $获得，掩膜$m$通过算法~\ref {alg:2}从$ x $获得；
+\item 通过算法~\ref{alg:1}从$x$获得结构特征图$s$，通过算法~\ref {alg:2}从$ x $获得掩膜$m$，从多维正态分布$\mathcal{N}(0,1^2)$中采样可获得随机噪声$z$；
+\item 使用$s$和$m$单独训练一个从$s$生成$m$的掩膜生成器$G_m$;
+\item 使用VAE编码器$E_s$对$s$进行编码，以获得$f_{mean}$和$f_{logvar}$，再与随机生成的噪声$z$一起构造近似正态分布矩阵$f=f_{mean}+\exp(0.5\times f_{logvar})\times z$，再用VAE解码器$G_s$解码$f$以获得重建的结构特征图$s_r$;
+\item 以VAE编码器$E_s$对$s$编码生成的近似正态分布矩阵$f$为负样本，以随机生成的噪声$z$为正样本，对特征图分布鉴别器$D_{z}$和$E_s$进行对抗训练；
+\item 以VAE解码器$G_s$对随机生成的噪声$z$解码生成的随机结构特征图$s_g$为负样本，以$s$为正样本，对结构特征图鉴别器$D_{s}$和$G_s$进行对抗训练；
+\end{itemize}
+$E_s$、$G_s$、$D_{z}$和$D_{s}$均在VGG11模型结构的基础上进行了调整适配，$G_m$在U-net的模型结构的基础上进行了调整适配。$E_s$为一个最后两层双线输出两个结果的正向VGG11（编码器）而$G_s$为一个反向VGG11（解码器），两者对接形成一个编解码结构的网络。其中，对所有模型的改进都包括将全部的步长为2的池化（Pooling）操作全部改为步长为2的卷积操作，将所有步长为2的反卷积上采样改为步长为2的最近邻插值上采样后接一个卷积层，在所有除输出层外的卷积层之后执行实例归一化和Leaky ReLu非线性激活。各个网络的损失函数如下：
+\begin{itemize}
+	\item{阶段B: 掩膜生成损失}
+	\begin{equation}
+	\mathcal{L}_{m}(G_m)=\mathbb{E}_{m,s}[\Vert{m-m_r}\Vert_{2}^{2}],
+	\end{equation}
+	其中 $m_r=G_m(s)$。
+	
+	\item{阶段C: 结构特征图重建损失} 
+	\begin{equation}
+		\mathcal{L}_{r}(E_s,G_s)=\mathbb{E}_{s,f,m}[\Vert{s-s_r}\Vert_{2}^{2}+\Vert{m_r\times s_r}\Vert_{2}^{2}],
+	\end{equation}
+	其中 $s_r=G_s(f)$。
+
+	\item{阶段D:特征图分布对抗训练损失} 
+	\begin{equation}
+		\mathcal{L}_{d1}(D_{z})=\mathbb{E}_{s,z}[\Vert{D_{z}(z)-1}\Vert_{2}^{2}+\Vert{D_{z}(f)}\Vert_{2}^{2}],
+	\end{equation}
+	\begin{equation}
+		\mathcal{L}_{g1}(E_s)=\mathbb{E}_{z}[\Vert{D_{z}(f)-1}\Vert_{2}^{2}],	
+	\end{equation}
+	其中 $f=f_{mean}+exp(0.5\times f_{logvar})\times z$，$[f_{mean},f_{logvar}]=E_s(s)$.
+
+	\item{阶段E: 结构特征图对抗训练损失} 
+	\begin{equation}
+		\mathcal{L}_{d2}(D_{s})=\mathbb{E}_{s,z}[\Vert{D_{s}(s)-1}\Vert_{2}^{2}+\Vert{D_{s}(s_g)}\Vert_{2}^{2}],
+	\end{equation}
+	\begin{equation}
+		\mathcal{L}_{g2}(G_s)=\mathbb{E}_{z}[\Vert{D_{s}(s_g)-1}\Vert_{2}^{2}++\Vert{m_g\times s_g}\Vert_{2}^{2}],	
+	\end{equation}
+	其中 $s_g=G_s(z)$，$m_g=G_m(s_g)$。
+\end{itemize}
+
+\subsubsection{结构特征图与随机噪声的融合}
+在使用结构特征图合成医学影像时，由于结构特征图是简单二值图，直接使用结构特征图作为输入会减少输入的多样性和随机性，在使用小数据集时，训练将尤其困难。通常的GAN在训练中，通过以随机噪声矩阵输入来获得无限多样的输入样本。因此，本研究设计了如下的计算公式，可以融合结构特征图的结构信息和随机噪声的随机信息：
+\begin{equation}
+s'=s+z'\times(1-m)\times(1-s),
+\end{equation}
+其中，$z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声，默认$\alpha_1,\alpha_2$取值分别为0.5和0.6，$m$是与结构特征图$s$配对的二值化掩膜。如图\ref{image_and_f}所示，最终得到的融合结构特征图$s'$，既保留了全部的结构信息，又有丰富的随机信息，同时与预期生成的医学影像更为接近，降低了学习难度。
+
+\subsection{多模态影像的合成}
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\columnwidth]{figures/mm_mri_generate_train}
+	\caption{多模态影像的合成。紫色框A为结构特征图与随机噪声融合过程，灰色框B为核心过程，黄色框内为可选过程。$ s_g $是随机合成的的结构特征图，$ m_g $是根据$ s_g $生成的掩膜，$z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声，$ s' $是融合了噪声的结构特征图，$ l $是随机选择的真实病灶标签。$ one\_hot(i) $是模态$ i $的独热矩阵表示。 $ G $是条件生成器， $ D $是鉴别器，$ x_i $是模态$ i $的真实影像。 $ G_{l,i} $是模态$ i $的病灶标签生成器， $ l_{g,i} $是病灶生成器从$ x_{g,i} $还原生成的病灶标签。$G_{t}$为模态转换器，$ x_{gt,i,j} $是$ x_{g,i} $转换合成的模态$ j $的图像。
+	}
+	\label{mm_mri_generate}
+\end{figure*}
+如图~\ref {mm_mri_generate}所示，首先，本节通过训练好的$G_s$生成结构特征图$ s_g $，融合随机噪声后得到$s'$，再根据需要可添加指定的病灶标签$ l $，与$s'$在通道向堆叠融合得到最后的融合图。然后，本节使用一个接受独热条件矩阵的条件生成器$ G $，对融合图编码后添加不同的条件矩阵$one\_hot(i)$，然后再解码生成不同模的合成图像态$ x_{g,i} $。本节使用鉴别器$ D $提供的对抗性损失和类别指导损失来指导合成图像逼近真实影像的分布。合成的多模态影像过程可以根据需要通过病灶标签生成器$G_{l,i}$添加病灶生成指导损失、通过模态转换器$G_{t}$添加模态配准损失。
+
+$D$在VGG11\cite{102simonyan2014very}模型结构的基础上进行了调整适配，$G$在U-net的模型结构的基础上进行了调整适配。在单模态时，$D$为单线结构，$G$为U-net生成器在首层接收输入，$G$与$D$组成一组基本GAN结构。在多模态时，$D$为在最后两层双线输出两个结果，即真假鉴别结果矩阵和类别鉴别结果矩阵，$G$以U-net生成器为基本结构，在编码缩小尺寸阶段的最后层输出后叠加输入的条件矩阵，再进行后续的解码还原尺寸过程，$G$与$D$组成一组ACGAN\cite{98odena2016conditional}结构。其中，对所有模型的改进都包括将全部的步长为2的池化（pooling）操作全部改为步长为2的卷积操作，将所有步长为2的反卷积上采样改为步长为2的最近邻插值上采样后接一个卷积层，在所有除输出层外的卷积层之后执行实例归一化和Leaky ReLu非线性激活。
+
+多模态影像合成过程的损失项如下，其中$ x_{g,i} $是模态$ i $的合成图像， $d(x_{i})$和$c(x_{i})$是鉴别器输出$D(x_i)$的真假鉴别结果和模态类别鉴别结果， $d(x_{g,i})$、$c(x_{g,i})$
+为$D(x_{g,i})$的真假鉴别结果和模态类别鉴别结果。
+\begin{itemize}
+	\item{多模态合成影像对抗性训练损失}
+	\begin{equation}
+		\begin{split}
+			\mathcal{L}_{d2}(D)=\mathbb{E}_{x,s_g,l}[\sum\limits_{i=0}(\Vert{d(x_i)-1}\Vert_{2}^{2}+\Vert{d(x_{g,i})}\Vert_{2}^{2}+\\
+			\Vert{c(x_i)-i}\Vert_{2}^{2}+\Vert{c(x_{g,i})-i}\Vert_{2}^{2})],
+		\end{split}
+	\end{equation}
+	\begin{equation}
+		\mathcal{L}_{g}(G)=\mathbb{E}_{s_g,l}[\sum\limits_{i=0}(\Vert{d(x_{g,i})-1}\Vert_{2}^{2}+\Vert{c(x_{g,i})-i}\Vert_{2}^{2})].
+	\end{equation}
+	其中$x_{g,i}=G(concat(s',l),one\_hot(i))$，$s'=s_g+z'\times(1-m_g)\times(1-s_g)$，$m_g=G_m(s_g)$，$z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、$\alpha_2=0.6$，$concat()$为通道堆叠连接函数；$[d(x_{i}),c(x_{i})]=D(x_{i})$，$[d(x_{g,i}),c(x_{g,i})]=D(x_{g,i})$。
+	
+	\item{病灶生成指导损失}
+	\begin{equation}
+		\mathcal{L}_{les}(G)=\mathbb{E}_{s_g,l}[\sum\limits_{i=0}(\Vert{l-l_{g,i}}\Vert_{2}^{2})],
+	\end{equation}
+	其中 $l_{g,i}=G_{l,i}(x_{g,i})$。
+	
+	\item{模态配准损失}
+	\begin{equation}
+		\mathcal{L}_{reg}(G)=\mathbb{E}_{s_g,l}[\sum\limits_{j=0}\sum\limits_{i=0,i\neq j}(\Vert{x_{g,i}-x_{gt,j,i}}\Vert_{2}^{2})],
+	\end{equation}
+	其中 $x_{gt,i,j}=G_{t}(x_{g,i},one\_hot(j))$。
+\end{itemize}
+则多模态合成生成器的总损失为：
+\begin{equation}
+\mathcal{L}(G)=\mathcal{L}_{g}(G)+\mathcal{L}_{les}(G)+\mathcal{L}_{reg}(G)
+\end{equation}
+对于小数据集，本研究可以使用从真实影像提取的结构特征图与真实医学影像进行自监督预训练，来降低对抗性训练的难度。预训练过程的损失函数如下：
+\begin{equation}
+\mathcal{L}_{p}(G)=\mathbb{E}_{s,l}[\sum\limits_{i=0}(\Vert{x_{g,i}-x_i}\Vert_{2}^{2}+\Vert{x_{g,i}\times m_i-x_{i}\times m_i}\Vert_{2}^{2})].
+\end{equation}
+其中$x_{g,i}=G(concat(s_i',l_i),one\_hot(i))$，$s_i'=s_i+z'\times(1-m_i)\times(1-s_i)$，
+$s_i$为采用算法~\ref{alg:1}从真实影像$x_i$提取出的结构特征图，
+$l_i$为真实影像$x_i$的病灶标签，
+$m_i$为采用算法~\ref{alg:2}从真实影像$x_i$提取出的掩膜，
+$z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、$\alpha_2=0.6$。
+
+在SkrGAN\cite{96zhang2019skrgan:}的训练中，一方面始终采用从真实数据集中提取的草图进行训练，另一方面SkrGAN将前述自监督损失与对抗性损失加权求和作为总损失，这使得在数据集较小时，训练样本过少，训练过程可视为原始数据集影像的重建，这使得模型的训练将不充分、极易过拟合且缺乏对合成草图的适应能力。当SkrGAN第一步合成的草图出现比原始草图更丰富的多样性时，未经过合成草图训练的SkrGAN图像生成模型将缺乏对合成的草图的进一步合成能力，最终使得模型合成的影像多样性差。本研究的方案中，首先采用真实的结构特征图进行真实影像的重建预训练，此时损失函数即为上述的自监督损失，在模型收敛后再使用大量的合成的结构特征图进行对抗性训练合成真实影像。这样预训练加速了训练进程，对抗性训练提高了模型泛化能力。
+
+\subsection{多模态影像的配准}
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\columnwidth]{figures/trans_and_segmentation_train}
+	\caption{模态转换器训练和病灶标签生成器训练。}
+	\label{trans_and_segmentation}
+\end{figure*}
+当需要确保合成的不同模态的影像精确配准时，本研究可以通过模态转换器对合成图像再进行模态转换一致性约束。模态转换器通过真实的多模态数据预先训练完成，如图~\ref {trans_and_segmentation}所示。模态转换器$G_t$同样为一个接受独热条件矩阵的条件生成器，不同条件矩阵指示转换生成不同模态的影像。
+
+模态转换器$G_t$与鉴别器$ D_t $组成一组循环生成对抗网络（CycleGAN）\cite{6zhu2017unpaired}，$D_t$与在VGG11模型结构的基础上进行了调整适配的$D$结构相同，$G_t$与在U-net的模型结构的基础上进行了调整适配的$G$结构相同，各自的损失函数如下：
+\begin{itemize}
+	\item{模态循环一致性损失}
+	\begin{equation}
+	\mathcal{L}_{cycle}(G_t)=\mathbb{E}_{x}[\sum\limits_{j=0}\sum\limits_{i=0,i\neq j}(\Vert{x_{i}-x_{cr,j,i}}\Vert_{2}^{2})],
+	\end{equation}
+	其中 $x_{cr,j,i}=G_t(x_{t,i,j},one\_hot(i)),x_{t,i,j}=G_t(x_{i},one\_hot(j))$。
+	
+	\item{模态转换合成影像对抗性训练损失}
+	\begin{equation}
+	\begin{split}
+	\mathcal{L}_{d3}(D_t)=\mathbb{E}_{x,s,l}[\sum\limits_{i=0}(\Vert{d(x_i)-1}\Vert_{2}^{2}+\Vert{d(x_{t,i,j})}\Vert_{2}^{2}+\\
+	\Vert{c(x_i)-i}\Vert_{2}^{2}+\Vert{c(x_{t,i,j})-i}\Vert_{2}^{2})],
+	\end{split}
+	\end{equation}
+	\begin{equation}
+	\mathcal{L}_{g3}(G_t)=\mathbb{E}_{s,l}[\sum\limits_{i=0}(\Vert{d(x_{t,i,j})-1}\Vert_{2}^{2}+\Vert{c(x_{t,i,j})-i}\Vert_{2}^{2})].
+	\end{equation}
+	其中$[d(x_{i}),c(x_{i})]=D_t(x_{i})$，$[d(x_{t,i,j}),c(x_{t,i,j})]=D_t(x_{t,i,j})$。
+\end{itemize}
+
+\subsection{病灶信息的添加和合成}
+当本研究需要在合成的多模态影像中添加指定的病灶信息时，本研究需要在给生成器输入结构特征图时选取合适的病灶标签与结构特征图堆叠融合后输入。由于随机选择的病灶标签所标示病灶位置可能会出现在结构特征图的目标器官轮廓之外，因此本研究可以使用目标器官的掩膜$ m $来过滤病变标签。如果病灶标签所标示病灶位置在$ m $的目标器官轮廓内，则可以采用$ l $，否则需要重新选择$ l $。融合图包含目标部位的基本解剖信息和选定的病灶信息。
+
+如图~\ref {trans_and_segmentation}中所示，为确保合成的多模态图像已根据输入的病灶标签合成了相应的病变内容，本研究使用一个病灶标签生成器对每个合成影像的病灶进行提取，还原出输入的病灶标签。病灶标签生成器用真实的影像和标签数据预先训练完成。每个模态均由独立的病灶标签生成器$G_{l,i}$来指导合成，典型的训练过程损失为：
+\begin{equation}
+\label{lesion segmentation loss}
+\mathcal{L}_{seg}(G_{l,i})=\mathbb{E}_{l,x}[\Vert{l_i-l_{r,i}}\Vert_{2}^{2}],
+\end{equation}
+其中 $l_{r,i}=G_{l,i}(x_{i})$。
+在实际应用时，损失函数应根据选取的病灶标签生成器和病灶任务的实际需要设计，例如选用U-net作为病灶标签生成器时就可以使用U-net原始的加权交叉熵损失函数\cite{51ronneberger2015u-net:}。本研究的方案中，采用U-net、VGG11、SSD等模型作为病灶标签生成器时均可基本沿用模型原有的网络结构和损失函数方案，除对输入输出结果尺寸和模型参数量的调整外无需额外的调整适配。
+\subsection{合成数据集的构建}
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\columnwidth]{figures/make_data}
+	\caption{构建合成数据集。}
+	\label{make_data}
+\end{figure*}
+如图~\ref {make_data}所示，本研究可以通过经过训练的结构特征图解码器从随机正态分布矩阵生成任意数量的结构特征图，通过掩膜生成器$ G_m $从结构特征图中获取掩膜，再与均匀分布的随机噪声融合可得到融合了噪声的结构特征图。然后，本研究可以根据标签的类型对原始标签集进行随机缩放、旋转、平移、翻转或直接生成，以获得随机病变标签集。生成的结构特征图与从随机病变标签集中随机选择的标签融合时，像训练阶段一样，本研究可以通过掩膜生成器$ G_m $从结构特征图中获取掩膜，从而选择合适的标签。最后本研究将融合图输入生成器，通过添加不同的条件向量即可合成不同模态的多模态影像。
+
+由于可生成的结构特征图数量是无限制的，本研究可以根据需要对合成的结构特征图、掩膜和合成影像进行过滤，得到本研究需要的由结构特征图，掩膜，病灶标签和多模态合成影像组成的合成数据集。
+
+\newpage
+\chead{第5章\ 合成医学影像的性能评估}
+\section{合成医学影像的性能评估}
+上一章节详细介绍了本研究的解决方案的各个阶段的方法和结合流程，本章节将在多个数据集上对这些方法进行实验验证。本章将先对使用的数据集进行介绍，然后详细介绍本研究在各个数据集上的实验设置，包括训练设置和评估指标，之后将对本研究在各个数据集上的实验方案设计、实验结果进行介绍和分析并将本研究的合成影像与当前最优秀的合成影像进行对比展示，其中实验包括消融实验，多数据集上与其他方法的对比实验，合成病灶有效性验证实验和合成数据可用性验证实验。
+
+\subsection{数据集}
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=1\linewidth]{figures/brats_m_f}
+	\caption{BRATS2015数据集中医学图像和提取的结构特征图。其中子图依次为T1、T2、T1c、Flair四个模态的MRI、从Flair提取出来的掩膜、从Flair采用Sobel算子提取出来的水平向和垂直向边缘检测结果图、从Flair提取出来的结构特征图、采用肿瘤分割标签掩膜去掉肿瘤病灶结构信息的从Flair提取出来的结构特征图、肿瘤分割标签的二值化掩膜。}
+	\label{brats_m_f}
+\end{figure}
+本研究在六个公开数据集中进行了实验验证，涵盖了彩色照片、X-ray、MRI、CT等常见的成像模态，涵盖了脑部、视网膜、肺部截面、胸部等多个成像部位，涵盖了肿瘤分割、血管分割、肺炎分类、肺结节检测等多种智能医学影像处理任务。这六个公开数据集的详细情况和预处理方式如下：
+\begin{itemize}
+	\item \textbf{BRATS2015数据集\cite{91menze:hal-00935640}}公开数据集BRATS2015包含T1、T2、T1c、Flair的四个配准模态脑部3D MRI。训练集每个模态有274个大小为155 $ \times $ 240 $ \times $ 240张图及对应的274张肿瘤分割标签图。样本按9:1重新划分训练集和测试集，然后取每个3D MRI的55-105之间的50个切片构建2D数据集。在数据预处理时，对每个图像都进行标准化。
+	\item \textbf{Kaggle Chest X-Ray数据集\footnote{https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia }}该数据集包括5863个病毒性肺炎、细菌性肺炎和正常肺部的正面2D X射线灰度图，图片尺寸从384$\times$127到2772$\times$2304不等。在数据预处理时，对每个图像都进行标准化，尺寸缩放为512$\times$512。
+	\item \textbf{Kaggle Lung CT数据集\footnote{https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/}}该数据集包含267个胸部至腹部横向截面的2D CT灰度图，尺寸为512$\times$512。在数据预处理时，对每个图像都进行标准化。
+	\item \textbf{DRIVE视网膜图像数据集\footnote{http://www.isi.uu.nl/Research/Databases/DRIVE/}}该数据集的训练集和测试集各包含20张2D彩色眼底视网膜照片，尺寸均为565$\times$584，训练集还有20张对应的视网膜血管主视图。在数据预处理时，对每个图像都进行标准化，尺寸统一插值为512$\times$512。
+	\item \textbf{FIRE视网膜图像数据集\footnote{https://projects.ics.forth.gr/cvrl/fire/}}该数据集包含268张2912$\times$2912的2D彩色眼底视网膜照片。在数据预处理时，对每个图像都进行标准化，尺寸缩放为512$\times$512。
+	\item \textbf{天池全球数据智能大赛(2019)数据集\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}}该数据集包含肺部3D CT扫描共1837张，训练集1470张，测试集145张。训练集提供的标注信息为：中心坐标+直径（单位为mm）+类别（1-结节，2-肺密度增高影，3-肺气肿或肺大泡，5-索条，31-动脉硬化或钙化，32-淋巴结钙化，33-胸膜增厚）。本文实验中仅考虑其中肺结节病灶的生成和检测。在数据预处理时，本研究根据标注信息切取有标注的slice及其前后slice组成的3通道图，再对每个图像都进行标准化，尺寸缩放为512$\times$512。这样得到的数据集包含17156张512$\times$512$\times$3的CT，新的标签为中间通道对应的原始标签中肺结节的位置标签。
+\end{itemize}
+
+图~\ref{brats_m_f}中展示了BRATS2015数据集中医学图像的四个模态、提取出的掩膜和结构特征图。
+
+图~\ref{image_and_f}中展示了DRIVE视网膜图像数据集、Kaggle Chest X-Ray数据集、Kaggle Lung CT数据集和天池全球数据智能大赛(2019)数据集中医学图像、提取出的掩膜和结构特征图以及融合噪声后的结构特征图。
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/image_f_mask_newf}
+	\caption{各数据集中医学图像和提取的结构特征图。（a）为DRIVE视网膜图像数据集。（b）为Kaggle Chest X-Ray数据集。（c）Kaggle Lung CT数据集。（d）为天池全球数据智能大赛(2019)数据集。以上子图中从左到右依次为原图、结构特征图、掩膜、融合了随机噪声结构特征图。}
+	\label{image_and_f}
+\end{figure}
+
+\subsection{实验设置}
+\subsubsection{训练设置}
+本研究中实验采用的主要硬件环境为一个NVIDIA Tesla V100GPU集群，软件环境为Python3.6、CUDA8.0和TensorFlow1.13.2\footnote{https://www.tensorflow.org/}。如无特殊说明，每个实验的迭代次数等于训练数据集的500个epoch（一个epoch为一次训练集的完全遍历）。 学习率为1e-5，无权重衰减，使用beta为1为0.5的Adam优化器，批处理大小为4（采用V100集群的多卡同步并行训练中，每张GPU上处理一张图）。 在采用$G$进行生成训练和采用$G_t$进行转换训练时，考虑到输入输出的相似性，模型卷积层的参数初始化采用均值模糊卷积核的参数，即卷积核初始化参数取前层通道数的倒数为均值。其他模型采用均值为0，方差为0.1的正态分布随机采样作为初始参数。
+本文中的评估结果均为2D图像上所有模态结果的平均值，每个实验的结果都为经过了至少4次训练保留的最佳结果。
+
+在基于不同的训练数据和需求时，本研究的方案可以对其中的一些方法进行选择性应用，在本文中，本研究在多个数据集上有多个合成任务，具体的训练方案如下：
+\begin{itemize}
+	\item \textbf{多模态脑肿瘤MRI的合成} 本研究以BRATS2015数据集作为训练数据，以其肿瘤分割标签为输入的病灶标签，合成T1、T2、T1c、Flair四个模态，使用模态转换器提供模态配准损失，使用一个U-net\cite{51ronneberger2015u-net:}作为肿瘤分割器提供病灶生成指导损失。此外，在结构特征图生成训练时，本研究使用肿瘤分割标签掩膜去除了结构特征图中的原始肿瘤结构信息（如图~\ref{brats_m_f}所示），在合成多模态MRI训练时，本研究通过掩膜对经过数据增强后的肿瘤分割标签过滤后再输入，采用在真实影像及其结构特征图上进行的预训练。
+	\item \textbf{眼底视网膜图像的合成} 本研究以DRIVE视网膜图像数据集和FIRE视网膜图像数据集作为训练数据，无病灶标签和病灶生成指导损失，无模态配准损失，直接合成单模态的彩色眼底视网膜图像，采用在真实影像及其结构特征图上进行的预训练。在视网膜血管注释实验中，本研究通过缩放掩膜去除结构特征图的外层圆形轮廓，只保留圆内的血管线路，并以此血管线路图作为以该结构特征图合成的视网膜图像的血管注释粗标签。
+	\item \textbf{肺部CT的合成} 本研究以Kaggle Lung CT数据集作为训练数据，无病灶标签和病灶生成指导损失，无模态配准损失，直接合成单模态的肺部CT，采用在真实影像及其结构特征图上进行的预训练。
+	\item \textbf{胸部X-ray的合成} 本研究以Kaggle Chest X-Ray数据集作为训练数据，对Kaggle Chest X-Ray数据集中弃用肺炎影像对Kaggle Chest X-Ray数据集中弃用肺炎影像而只选用正常影像来生成结构特征图，然后将肺炎类别标签扩展为与结构特征图同尺寸的独热矩阵后作为输入的病灶标签，以VGG11\cite{102simonyan2014very}作为肺炎分类器提供病灶生成指导损失，无模态配准损失，合成具有指定肺炎类别的单模态胸部X-ray，采用在真实影像及其结构特征图上进行的预训练。
+	\item \textbf{肺部低剂量CT的合成} 本研究以天池全球数据智能大赛(2019)数据集作为训练数据，将目标检测标签扩展为与结构特征图同尺寸的框图后作为输入的病灶标签，以SSD\cite{101liu2016ssd:}作为病灶检测器提供病灶生成指导损失，无模态配准损失，实现具有根据输入的检测框信息合成的对应病灶的单模态肺部低剂量CT，采用在真实影像及其结构特征图上进行的预训练。本研究的实验中仅进行该数据集中肺结节病灶的生成和单类别检测。
+\end{itemize}
+
+\subsubsection{评估指标}
+本研究以SkrGAN\cite{96zhang2019skrgan:}中实现的当前最好质量的合成结果作为一个基准对比。
+这项工作中，本研究使用多尺度结构相似性（MS-SSIM），和Freshet Inception距离 （FID）\cite{148karras2017progressive}来评估合成医学图像的性能。MS-SSIM 是一种广泛使用的指标，用于测量配对图像的相似性，其中 MS-SSIM 越高，性能越好。FID 在像素级别计算真实图像和假图像之间的距离，其中 FID 越低，性能越好。
+本研究使用Dice Score \cite {95dice1945measures}和均方误差（MSE）来评估分割结果，使用敏感度（Sensitivity）、正确率（Accuracy）和ROC曲线下面积（AUC，Area Under the ROC Curve ）来评估血管注释结果，使用正确率（Accuracy）来评估本研究的分类结果，使用平均精度（AP， Average Precision）来评估检测结果。
+	
+
+\subsection{在脑肿瘤MRI数据集上的消融实验}
+\begin{table*}[thbp!]
+	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+	\caption{BRATS2015上消融实验的实验设置}
+	\label{Ablation Experiment Setting on BRATS2015}
+	\centering
+	\resizebox{\textwidth}{30mm}{
+	\begin{tabular}{c|c|c|c|c|c}
+		%\toprule
+		\hline
+		实验		&\tabincell{c}{输入结构\\特征图} &\tabincell{c}{输入融合\\随机噪声} &\tabincell{c}{模态配\\准损失$\mathcal{L}_{reg}$}   &\tabincell{c}{添加病灶标签和\\病灶生成损失$\mathcal{L}_{les}$} &\tabincell{c}{使用掩膜过滤\\筛选病灶标签}   \\
+		%\midrule
+		\hline
+		\tabincell{l}{A}	&$\times$	&$\times$	&$\times$	&$\times$	&$\times$ \\
+		\tabincell{l}{B}	&$\surd$	&$\times$	&$\times$	&$\times$    &$\times$\\
+		\tabincell{l}{C}	&$\surd$	&$\surd$	&$\times$	&$\times$	&$\times$ \\
+		\tabincell{l}{D}	&$\surd$	&$\surd$	&$\surd$	&$\times$	&$\times$ \\
+		\tabincell{l}{E}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\times$ \\
+		\tabincell{l}{F}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\surd$ \\
+		\hline
+		%\bottomrule
+	\end{tabular}
+	}
+\end{table*}
+
+本研究进行了简单的消融对比实验，以验证在多模态合成阶段本研究的改进措施的的影响。
+首先本研究进行了以相同尺寸的随机噪声代替结构特征图作为MRI生成训练输入的实验来验证添加结构特征图的作用，然后在相同的训练epoch下通过对结构特征图是否融合随机噪声的对比来验证融合随机噪声可以提高模型泛化能力并加快训练收敛，再进行了无模态配准损失的实验来展示其对边缘配准的矫正作用，还进行了无病灶生成指导损失的实验来验证其对病灶合成的指导作用，最后通过选择没有掩膜限制的输入标签进行实验来验证掩膜的作用。
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/ablation}
+	\caption{消融实验的合成图像。B、C、E、F均采用了相同的结构特征图作为输入。}
+	\label{ablation_mri}
+\end{figure}
+
+图\ref{ablation_mri}显示了消融对比实验中生成的合成图像的示例，其中模型A用随机噪声替换结构特征图且也因此无自监督预训练过程，由于没有结构特征图在脑轮廓上的约束，生成的图像符合MRI的特征，但不符合大脑的结构特征。模型B以结构特征图为输入但没有融合随机噪声，在与其他实验相同的训练epoch后合成质量较差且生成的图像的配准效果不是很好，也没合成明显的病灶信息。模型C没有模态配准损失，生成的图像的配准效果不是很好，尤其是边缘细节。 模型D没有病灶生成指导损失，可以看出生成的图像中的病变散乱随意，过渡夸张，与输入的病灶标签不吻合。模型E没有掩膜对输入标签过滤，很容易看出合成的肿瘤超出了大脑的轮廓。 模型F采用本研究的完整方案，合成了与输入病灶标签吻合的病灶信息，配准度高，合成质量高。可以直观对比看出，本研究的各项改进均对合成影像的真实程度都有提升作用，但在添加病灶标签且使用病灶生成指导损失时，若不采用掩膜对病灶标签进行筛选，可能会生成如图中模型E类似的结构不合理的影像。
+
+图\ref{ablation}为消融实验量化评估结果的柱状图对比情况，不难看出，本研究的每一项方法都起到了针对性的提升效力，其中，采用结构特征图作为输入对评估结果的提升最为突出，其次是对结构特征图融合随机噪声和在对病灶标签过滤之后添加病灶生成指导损失产生的提升。图中的数据中值得注意的是，不对输入的病灶标签进行过滤，合成的影像中不止会存在结构不合理的影像，与真实数据集进行相似度评估的结果也会因此难以提升甚至下降。
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{figures/XIAORONG}
+	\caption{脑肿瘤MRI数据集上消融实验的量化评估结果。}
+	\label{ablation}
+\end{figure}
+\subsection{多数据集上与其他方法的对比实验}
+如表~\ref{evalu_on_all_dataset1}和表~\ref{evalu_on_all_dataset2}所示，本研究的方法在各个数据集上进行了量化评估，并与当前最先进的方法进行对比。
+
+表~\ref{evalu_on_all_dataset1}中，本研究与SkrGAN中的数据进行了对比，数据表明，在Kaggle Chest X-ray和Kaggle Lung CT两个数据集上，本研究的方法整体合成质量优于表中采用草图为输入的SkrGAN和采用噪声为输入的其他方法。
+
+表~\ref{evalu_on_all_dataset2}中，由于SkrGAN中两份数据集的不可获取或复现，本研究在DRIVE+FIRE彩色视网膜图像（Color Fundus）和BRATS2015两个与SkrGAN中所用的数据集类似的数据集上，对各个方法进行了复现，复现结果与表~\ref{evalu_on_all_dataset1}中两个数据集上的结果指向的结论是一致的。BRATS2015数据集上，本研究的方案可直接进行多模态合成，其余方案需对每个模态单独训练后合成，最后的评估结果是多个模态上评估结果的平均值。此外在BRATS2015数据集上，本研究添加了肿瘤分割标签作为病灶生成指导标签，评估时，本研究根据病灶标签对合成数据集中影像与原数据集中影像的肿瘤切割出来进行评估，并与完整影像的评估进行比对，结果表明，本研究的合成肿瘤信息与真实肿瘤具有极高的相似度，并在整体影像的评估中比整体平均情况更好，这说明本研究的病灶生成指导方法是有效的，这对于合成影像的应用也具有重大意义。表~\ref{evalu_on_all_dataset2}中彩色视网膜数据集上，SkrGAN中所用的数据集的数据量为本研究所用的数据集数据量的22倍多。本研究以融合了噪声的结构特征图为输入、复现SkrGAN时采用本研究的算法合成的结构特征图的反二值图（0与1像素值调转）为输入，在采用同样的生成器和鉴别器、无额外的病灶损失和配准损失的情况下，从表中结果来看，本研究的方法取得了比SkrGAN更好的评估结果，且质量远高于其他方法从随机噪声合成的图像。表~\ref{evalu_on_all_dataset2}中天池肺部CT数据集上，本研究采用肺结节检测标签作为病灶标签输入，由于肺结节的结构细微和数据集样本的充分，两者的评估结果十分接近，得益于本研究输入时融合的随机噪声带来的对模型泛化能力的提升，本研究的指标略高于复现的SkrGAN，从全部结果来看，采用结构特征图作为输入的方法远高于采用随机噪声未输入的方法。
+
+综合表~\ref{evalu_on_all_dataset1}和表~\ref{evalu_on_all_dataset2}的结果来看，采用结构特征图为输入的合成图像的质量比采用随机噪声为输入的合成图像的质量要好很多。对结构特征图融合噪声处理比不处理或二值反转处理，模型的泛化能力更强。自监督预训练在小数据集上可以明显提升合成图像质量。相较于SkrGAN的草图和其他随机噪声输入，本研究采用的结构特征图、自监督预训练、病灶损失等多种举措使得本研究的合成医学影像质量更高，与真实图像更接近。
+\begin{table}[thbp!]
+	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+	\begin{center}
+		{\caption{不同数据集上合成图像质量的量化评估（一）}\label{evalu_on_all_dataset1}}
+		\resizebox{\textwidth}{19mm}{
+			\begin{tabular}{ll|llllll}
+			\hline
+			\rule{0pt}{10pt}
+%			\multicolumn{2}{c|}{Evaluation}&\multicolumn{6}{c}{Method}\\
+%			\hline
+			Dataset &Metric &Ours &SkrGAN\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised} &ACGAN\cite{98odena2016conditional} &WGAN\cite{99arjovsky2017wasserstein} &PGGAN\cite{100karras2017progressive}\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{Kaggle Chest}\\\textbf{X-ray}}}
+%			&SWD ↓ &xxx &0.026 &0.118 &0.139 &0.196 &0.031 \\
+			&MS-SSIM ↑ &0.597 &0.506 &0.269 &0.301 &0.401 &0.493 \\
+			&FID ↓ &102.5 &114.6 &260.3 &235.2 &300.7 &124.2\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{Kaggle Lung}\\\textbf{CT}}}
+%			&SWD ↓ &xxx &0.020 &0.333 &0.317 &0.236 &0.057 \\
+			&MS-SSIM ↑ &0.473 &0.359 &0.199 &0.235 &0.277 &0.328 \\
+			&FID ↓ &66.91 &79.97 &285.0 &222.5 &349.1 &91.89\\
+			\hline
+			\\[-6pt]
+			\end{tabular}
+		}
+	\end{center}
+\end{table}
+
+\begin{table}[thbp!]
+	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+	\begin{center}
+		\caption{不同数据集上合成图像质量的量化评估（二）}
+		\label{evalu_on_all_dataset2}
+		\resizebox{0.7\textwidth}{25mm}{
+%			\begin{tabular}{ll|lllllll}
+%				\hline
+%				\rule{0pt}{10pt}
+%				Dataset &Metric &Ours$^*$ &Ours &SkrGAN$^+$\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised} &ACGAN\cite{98odena2016conditional} &WGAN\cite{99arjovsky2017wasserstein} &PGGAN\cite{100karras2017progressive}\\
+%				\hline
+%				\multirow{2}*{\tabincell{l}{\textbf{Color}\\\textbf{Fundus}}}
+%				&MS-SSIM ↑  &-     &0.607 &0.584 &0.392 &0.412 &0.501 &0.463 \\
+%				&FID ↓      &-     &30.13 &37.91 &227.4 &152.2 &187.5 &154.6\\
+%				\hline
+%				\multirow{2}*{\tabincell{l}{\textbf{BRATS}\\\textbf{MRI}}}
+%				&MS-SSIM ↑  &0.738 &0.727 &0.713 &0.561 &0.578 &0.685 &0.701 \\
+%				&FID ↓      &21.15 &22.27 &28.46 &104.53 &81.80 &39.41 &33.26\\
+%				\hline
+%				\multirow{2}*{\tabincell{l}{\textbf{TC Lung}\\\textbf{CT}}}
+%				&MS-SSIM ↑  &-     &0.676 &0.667 &0.592 &0.609 &0.639 &0.641 \\
+%				&FID ↓      &-     &27.40 &29.81 &93.65 &68.28 &34.32 &34.03\\
+%				\hline
+%				\\[-6pt]
+%			\end{tabular}
+		\begin{tabular}{ll|llll}
+			\hline
+			\rule{0pt}{10pt}
+			Dataset &Metric &Ours$^+$ &Ours &SkrGAN$^*$ &GAN$^\#$\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{DRIVE+FIRE}\\\textbf{Color Fundus}}}
+			&MS-SSIM ↑  &-     &0.607 &0.584 &0.392\\
+			&FID ↓      &-     &30.13 &37.91 &227.41\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{BRATS2015 }\textbf{MRI}}}
+			&MS-SSIM ↑  &0.692 &0.686 &0.653 &0.504\\
+			&FID ↓      &20.15 &21.87 &28.76 &124.53\\
+			\hline
+			\multirow{2}*{\tabincell{l}{\textbf{TC Lung }\textbf{CT}}}
+			&MS-SSIM ↑  &-     &0.676 &0.667 &0.543\\
+			&FID ↓      &-     &27.40 &29.81 &113.65\\
+			\hline
+			\\[-6pt]
+		\end{tabular}
+		}
+	\footnotesize
+	\item[+] 表示合成肿瘤的评估，即根据病灶标签对合成数据集影像和原数据集影像中切割出的肿瘤的评估。
+	\item[\#] 表示基础GAN的评估，即在DCGAN\cite{97radford2015unsupervised}的基础上将生成器加深为U-net，将鉴别器加深为VGG11。
+	\item[*] 表示复现的SkrGAN的评估结果。由于SkrGAN\cite{96zhang2019skrgan:}中未给出草图详细算法或开源代码和鉴别器网络结构，
+	本研究使用采用本研究的算法提取的真实影像的结构特征图的反二值图（0与1像素值调转）作为训练输入，以U-net为基础生成模型、以本研究采用的鉴别器VGG11为鉴别器合成多模态影像、无病灶损失、无配准损失、无自监督预训练、采用自监督和对抗性混合损失，以此近似为对SkrGAN的复现。合成多模态影像时，以本研究合成的结构特征图的反二值图为输入。
+
+	\end{center}
+\end{table}
+
+\subsection{合成病灶的有效性验证实验}
+\subsubsection{脑肿瘤MRI合成}
+本实验以肿瘤分割标签为病灶标签与结构特征图融合作为输入，合成4个模态的MRI时，每个模态采用一个训练好的肿瘤分割器作为病灶标签生成器，由肿瘤分割器提供分割结果与输入标签的自监督损失来确保病灶信息的合成。
+\subsubsection{对合成脑肿瘤MRI的肿瘤区域分割检验}
+如表~\ref{label_test}所示，本研究在BRATS2015训练数据集上训练了4个模态的肿瘤病变分割器，并在BRATS2015测试数据集上对其进行了测试。 然后，本研究使用训练有素的分割器对未过滤合成数据进行分割。从分割结果看，采用真实数据训练的分割器能在合成数据上表现良好，这说明合成数据与真实数据具有非常高的相似度，且合成的病灶与真实病灶的相似程度足够让分割器识别出合成病灶与非病灶部分。由此看出，本研究的合成病灶是有效的，且能对肿瘤分割器产生实质影响，本研究将进一步验证合成数据用于分割器训练的可行性。
+\begin{table}[thbp!]
+	\begin{center}
+		{\caption{肿瘤分割器对不同测试数据的分割结果}\label{label_test}}
+		\begin{tabular}{lcccc}
+			\hline
+			Testing Dataset &MSE   &Dice Score
+			\\
+			\hline
+			real 		&0.026 &0.915 \\						
+			synthetic  	&0.043 &0.838 \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+图~\ref{seg_res}展示了本研究采用在BRATS2015训练集上训练并在测试集上表现优秀的分割器对合成的MRI分割示例，不难看出，肿瘤分割器能够对合成的肿瘤进行识别和分割且分割出的肿瘤标签与输入的真实标签基本一致，这直观地表明了合成的MRI中的确根据输入的肿瘤标签生成了对应的肿瘤信息。
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{figures/seg_res}
+	\caption{脑肿瘤分割器对合成MRI的分割结果。从上至下三行依次为输入的肿瘤分割标签、合成的脑肿瘤MRI的T1模态、采用在真实数据集上训练并表现优秀的分割器对第二行合成MRI的分割结果。}
+	\label{seg_res}
+\end{figure}
+
+\subsection{合成数据的可用性验证实验}
+\subsubsection{合成脑肿瘤MRI数据用于肿瘤区域分割任务}
+如表~\ref {availability_test}所示，本研究将不同量的BRATS2015训练数据与真实BRATS合成数据混合，然后使用混合数据集进行多分割器方法进行分割训练，并在真实BRATS2015上评估模型的分割能力 测试数据集。 所有实验均以相同的迭代次数进行了完全训练，该迭代次数等于BRATS2015训练数据集上的100个epoch。 同时，本研究设置了三种数据混合模式：随机混合，首先进行实数据训练和首先进行综合数据训练。在实优先实验和综合优先实验中，来自不同来源的数据的训练迭代次数与数量成正比 数据的。 除表格中的条件外，其他条件相同。
+\begin{table}[thbp!]
+	\begin{center}
+		{\caption{BRATS2015数据集上的合成数据可用性验证实验.}\label{availability_test}}
+		\begin{tabular}{lllllcc}
+			\hline
+			\rule{0pt}{12pt}
+			NO. &Real Data &Synthetic Data & Enhanced Data  & Mixing Modes  & MSE &Dice Score\\
+			\hline
+			\\[-6pt]
+			\quad 1 & $\times$1  	 	& 0 		&0 			&- &0.026 &0.915 \\
+			\quad2 & $\times$50\% 	 & 0  		&0 			&- &0.032 &0.902 \\
+			\quad3 &0 	 	 & $\times$1  	&0 			&- &0.205 &0.708 \\
+			\quad4 &0 	 	 & $\times$2  	&0 			&random mixing &0.206 &0.736 \\
+			\quad5 &0 		 & $\times$3  	&0 			&random mixing &0.205 &0.754 \\
+			\quad6 & $\times$10\% 	 & $\times$1  	&0 			&synthetic first &0.031 &0.908 \\
+			\quad7 & $\times$10\% 	 & $\times$2   &0 			&synthetic first &0.028 &0.907 \\
+			\quad8 & $\times$10\% 	 & $\times$3   &0 			&synthetic first &0.030 &0.907 \\	
+			\quad9 & $\times$20\% 	 & $\times$80\% 	&0  		&random mixing &0.041 &0.850 \\
+			\quad10& $\times$50\% 	 & $\times$50\% 	&0  		&random mixing &0.031 &0.904 \\
+			\quad11& $\times$80\% 	 & $\times$20\% 	&0  		&random mixing &0.024 &0.935 \\
+			\quad12& $\times$1 	 	& $\times$20\% &0  		&random mixing &0.025 &0.921 \\
+			\quad13& $\times$1 	 	& $\times$50\% &0  		&random mixing &\textbf{0.023} &\textbf{0.939} \\
+			\quad14& $\times$1 	 	& $\times$80\% &0  		&random mixing &0.026 &0.916 \\
+			\quad15& $\times$1 	 	& $\times$1    &0   		&random mixing &0.027 &0.913 \\
+			\quad16& $\times$1 	 	& $\times$2   &0 			&random mixing &0.033 &0.901 \\
+			\quad17& $\times$1 	 	& $\times$3   &0 			&random mixing &0.034 &0.897 \\	
+			\quad18& $\times$1 	 	&0 		&  $\times$20\%	 	&random mixing &0.027 &0.911 \\
+			\quad19& $\times$1 	 	&0 		&  $\times$50\% 	&random mixing &0.025 &0.927 \\
+			\quad20& $\times$1    	&0 		&  $\times$80\% 	&random mixing &0.026 &0.920 \\
+			\quad21& $\times$1 	 	&0 		&  $\times$1    &random mixing &0.026 &0.915 \\
+			\quad22& $\times$1 	 	&0 		&  $\times$2   &random mixing &0.032 &0.898 \\
+			\quad23& $\times$1 	 	&0 		&  $\times$3   &random mixing &0.036 &0.885 \\			
+			\quad24& $\times$1 	 	& $\times$1 	&0  		&real first &0.195 &0.795 \\
+			\quad25& $\times$1 	 	& $\times$1 	&0  		&synthetic first &\textbf{0.021} &\textbf{0.940}
+			\\
+			\hline
+			\\[-6pt]
+		\end{tabular}
+	\end{center}
+\end{table}
+如表~\ref{availability_test}所示，实验NO.3-NO.5的结果表明，合成数据不能完全替代训练中的真实数据。
+NO.6-NO.8的结果表明，大量合成数据的预训练和少量真实数据的微调性能与完整真实数据的训练相似。
+在NO.9-NO.11中，不同混合比的结果也完全不同。当两个比率接近时，分割结果与NO.1相似。当合成数据所占比例较高时，合成数据将干扰实际数据的学习，结果低于NO.1。当合成数据所占比例较低时，可以通过合成数据提高模型的泛化能力，结果高于NO.1。
+在NO.12-NO.17中，本研究进一步尝试将不同数量的合成数据添加到真实数据中，这表明添加少量合成数据可以增强学习效果，并且合成数据越多，增强效果越好，但是当综合数据达到一定百分比然后继续增加时，它会达到相反的效果。
+在NO.18-NO.23中，本研究比较了合成数据和通过常规数据增强方法生成的增强数据的增强效果。可以发现两者在增强效果和数据量增加之间的趋势上相似但不相等。总的来说，增强模型在模型对增强数据量的敏感性方面更健壮，但增强效果较高。合成数据的限制远高于增强数据的限制。
+本研究将NO.24-NO.25与NO.15进行了比较，发现合成数据用作预训练数据时性能最佳，而用作补充训练数据时性能较差。当用作增强数据与真实数据混合时，合成数据也可以实现某些增强。
+
+通常，如果存在大量真实数据，则可以将少量合成数据用作增强数据，或者可以将大量合成数据用于预训练，然后对真实数据进行训练。如果真实数据较少，则可以使用大量的综合数据进行预训练，然后对少量真实数据进行微调，其结果可以与完整真实数据的结果相抗衡，因此得出的结论是与英伟达的合成实验\cite {4shin2018medical}一致。本研究不建议将合成数据完全用于训练，也不建议将合成数据用于补充训练破坏真实数据训练的效果。
+\subsubsection{合成眼底视网膜数据用于视网膜血管注释任务}
+本研究使用DRIVE视网膜图像训练集+对FIRE视网膜图像全数据集作为训练数据合成了大量的视网膜图像。合成时，由于只有单模态数据且结构特征图与标签数据存在冲突，因此无病灶生成指导损失和模态配准损失。
+%然后，本研究采用student-teacher模式，先用DRIVE视网膜图像数据集训练了一个视网膜血管注释模型，再使用该模型合成的视网膜数据进行注释，生成的血管注释结果即可作为一种粗标签使用。
+本研究通过缩放掩膜可以去除结构特征图的外层圆形轮廓，只保留圆内的血管线路，本研究以此血管线路图作为采用该结构特征图合成的视网膜图像的血管注释粗标签。
+本研究以U-net为分割模型，使用DRIVE视网膜图像训练集+合成视网膜图像及其粗标签数据集，在DRIVE视网膜图像测试集上，采用随机混合模式训练视网膜血管注释模型，与只使用DRIVE视网膜图像训练集的分割结果对比，来验证合成眼底视网膜数据在视网膜血管注释任务中的可用性。由于本研究采用的数据集的数据量仅有SkrGAN的二十分之一，因此尽管在结构特征图粗标签上本研究的方法有一些提升，但本研究合成的视网膜图像的合成质量和多样性相对来说依然较差。从对任务的提升效果来看，本研究的合成图像对分割Accuracy的提升与SkrGAN基本一致，在Sensitivity和AUC指标上略低。但如表~\ref{DRIVE_availability_test}中SkrGAN$^*$所示，当本研究采用相同的数据集进行近似复现后，本研究的方法在各个指标上都更高。实验结果如表~\ref{DRIVE_availability_test}所示。
+\begin{table}[thbp!]
+	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+	\begin{center}
+		{\caption{视网膜合成数据可用性验证实验}\label{DRIVE_availability_test}}
+		\begin{tabular}{cllll}
+			\hline
+			\rule{0pt}{12pt}
+			Train Data  &Test Data &Sensitivity &Accuracy &AUC\\
+			\hline
+			\tabincell{c}{DRIVE训练集}  	 	&  DRIVE测试集 	&0.7781 &0.9477 &0.9705
+			  \\
+		   \tabincell{c}{DRIVE训练集+2000张\\SkrGAN合成图像}	 &  DRIVE测试集 	& 0.8464 &0.9513 &0.9762 \\
+		   \tabincell{c}{DRIVE训练集+2000张\\SkrGAN$^*$合成图像}	 &  DRIVE测试集 	& 0.8297 &0.9428 &0.9732 \\
+			\tabincell{c}{DRIVE训练集+2000张\\本文方案的合成图像}	&  DRIVE测试集  	& 0.8416 &0.9518 &0.9749 \\	
+			\hline
+		\end{tabular}
+	\footnotesize
+	\item[*] 表示复现的SkrGAN的评估结果。由于SkrGAN\cite{96zhang2019skrgan:}中未给出草图详细算法或开源代码和鉴别器网络结构，
+	本研究使用采用本研究的算法提取的真实影像的结构特征图的反二值图（0与1像素值调转）作为训练输入，以U-net为基础生成模型、以本研究采用的鉴别器VGG11为鉴别器合成多模态影像、无病灶损失、无配准损失、无自监督预训练、采用自监督和对抗性混合损失，以此近似为对SkrGAN的复现。合成多模态影像时，以本研究合成的结构特征图的反二值图为输入。
+	
+	
+	\end{center}
+\end{table}
+\subsubsection{合成胸部X光线数据用于肺炎分类任务}
+\begin{table}[thbp!]
+	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+	\begin{center}
+		{\caption{胸部X光线合成数据可用性验证实验}\label{X-Ray_availability_test}}
+		\begin{tabular}{cllll}
+			\hline
+			\rule{0pt}{12pt}
+			Train Data  &Test Data &Accuracy \\
+			\hline
+			\tabincell{c}{Kaggle Chest X-Ray训练集}  	 	& Kaggle Chest X-Ray测试集 	&0.804 
+			\\
+			\tabincell{c}{Kaggle Chest X-Ray训练集+2000张\\合成图像}	& Kaggle Chest X-Ray测试集  	& 0.818 \\	
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+本研究采用Kaggle Chest X-Ray数据集合成了大量带有病变类别标签的胸部X-Ray数据。合成时，由于只有单模态数据，因此无模态配准损失，输入的病灶标签为扩展成的与结构特征图同尺寸独热矩阵的肺炎类别标签。然后再使用Kaggle Chest X-Ray数据集+合成X-Ray数据采用随机混合模式训练了一个胸部X-Ray肺炎分类模型，本研究将该模型和只采用Kaggle Chest X-Ray数据集训练的模型进行对比。结果如表~\ref{X-Ray_availability_test}所示，可见在该数据集上，本研究的合成数据同样可以在分类任务中具有良好的可用性，但相对于分割任务，由于合成时输入的分类标签的指向性较弱，合成图像所具有的类别属性不如分割类任务合成病灶那样集中和突出，因此分类任务使用合成数据的提升效果相对不明显。
+
+\subsubsection{合成肺部CT数据用于肺结节检测任务}
+本研究采用天池全球数据智能大赛(2019)数据集合成了大量带有病灶检测标签的肺部低剂量CT数据。合成时，由于只有单模态数据，因此无模态配准损失，输入的病灶标签为根据肺结节病灶检测框坐标信息生成的对应的二值分割掩膜，与原检测框尺寸一致的白色掩膜可以粗粒度的指示病灶合成的位置。本研究使用天池全球数据智能大赛(2019)数据集+合成肺部低剂量CT数据采用随机混合模式训练了一个病灶检测模型，将该模型的测试结果与只采用天池全球数据智能大赛(2019)数据集训练的检测模型进行对比。结果如表~\ref{TC_availability_test}，这表明，在该数据集上，本研究的合成数据同样具有良好的可用性。在检测任务中，输入的检测标签较分割标签的指向性弱，但比分类标签集中，从在对应任务中的提升效果也可以看出，合成数据在检测任务中的提升效果介于分类任务和分割任务之间。
+\begin{table}[thbp!]
+	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+	\begin{center}
+		{\caption{肺部CT合成数据可用性验证实验}\label{TC_availability_test}}
+		\begin{tabular}{cllll}
+			\hline
+			\rule{0pt}{12pt}
+			Train Data  &Test Data & AP \\
+			\hline
+			\tabincell{c}{TC Lung CT训练集}  	 	&TC Lung CT测试集 	&0.574 
+			\\
+			\tabincell{c}{TC Lung CT训练集+20000张\\合成图像}	&TC Lung CT测试集  	& 0.592 \\	
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\subsection{合成数据效果展示}
+\subsubsection{结构特征图多样性效果展示}
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.95\linewidth]{figures/Fs}
+	\caption{BRATS2015数据集上随机合成的结构特征图示例。}
+	\label{generated_f_random_sampling}
+\end{figure}
+本研究从正态分布随机采样得到如图~\ref{generated_f_random_sampling}所示的一组结构特征图，图中展示了合成的结构特征图的多样性。从图中可以看出，本研究方法随机合成结构特征图涵盖了脑部MRI以水平中线为轴的不同截面，这些样本在符合脑部生理结构的前提下在结构上千姿百态丰富多彩，表现出了非常丰富的多样性。
+\subsubsection{结构特征图正态分布效果展示}
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.9\linewidth]{figures/fs_from_n}
+	\caption{BRATS2015数据集上从正态分布顺序采样合成的结构特征图示例。}
+	\label{generated_f_continuous_sampling}
+\end{figure}
+本研究对从正态分布进行顺序采样，然后从采样结果解码，获得了如图~\ref{generated_f_continuous_sampling}所示的相邻渐变的结构特征图分布。可以看出，图中不仅合成的结构特征图都符合脑部生理结构特征，而且无论是横向还是纵向又或者对角线上的直线上，各个结构特征图都在结构上依次呈现出了渐变的效果。
+
+\subsubsection{合成医学影像效果展示}
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/F_to_MRI}
+	\caption{BRATS2015上合成的结构特征图和多模态MRI。}
+	\label{generated_mri}
+\end{figure}
+图~\ref{generated_mri}中展示了本研究在BRATS2015数据集上合成的一组掩膜、结构特征图、选择的病灶标签和合成的四个模态的MRI。可以看出，本研究合成的多模态MRI影像首先具备了极高的配准度，同时还根据输入的病灶标签合成了对应的病灶信息。
+
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/MRI_images}
+	\caption{脑部MRI合成效果对比。（a） PGGAN\cite{100karras2017progressive}的合成图像，（b） WGAN\cite{99arjovsky2017wasserstein}的合成图像， （c） DCGAN\cite{97radford2015unsupervised}的合成图像，（d） ACGAN\cite{98odena2016conditional}的合成图像，（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图的二值反转图像，（f） 本研究的方案的合成图像和输入的结构特征图。（a）-（e）为在Neuromorphometrics脑MRI数据集上满足一些未知条件的筛选出的数据上进行训练的合成效果，（f） 在BRATS2015上合成训练。}
+	\label{generated_MRI}
+\end{figure}
+前述表~\ref{evalu_on_all_dataset2}中展示了本研究的方法与其他方法在BRATS2015上的量化对比结果。图~\ref{generated_MRI}中展示了SkrGAN中其他方法和本研究的方法合成的脑MRI的视觉效果，由于SkrGAN中，采用的Neuromorphometrics脑MRI数据集\footnote{http://www.neuromorphometrics.com/}上筛选条件的未知，本研究采用在BRATS2015上训练的合成脑MRI与之在合成视觉效果上简单比较。从图~\ref{generated_MRI}中（e）和（f）中不难看出，本研究的结构特征图更加简洁清晰、复杂度低和限制少的同时根据合成指导性。从合成MRI来看，本研究的合成的脑MRI更加清晰真实、干净整洁，服从输入的结构特征图的合成指导却有更多样的合成空间。
+
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/SWM_images}
+	\caption{视网膜合成效果对比。（a） PGGAN\cite{100karras2017progressive}的合成图像，（b） WGAN\cite{99arjovsky2017wasserstein}的合成图像， （c） DCGAN\cite{97radford2015unsupervised}的合成图像，（d） ACGAN\cite{98odena2016conditional}的合成图像，（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反转图像，（f） 本研究的方案的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。}
+	\label{generated_swm}
+\end{figure}
+前述表~\ref{evalu_on_all_dataset2}中展示了本研究的方法与其他方法在DRIVE+FIRE数据集上的量化对比结果。此处，图~\ref{generated_swm}中展示了本研究在DRIVE+FIRE的288张眼底视网膜数据集上合成的结构特征图和视网膜影像，和SkrGAN中其他方法在自建的6432张视网膜数据集上的合成的视网膜图像对比，本研究采用更少的训练样本合成的视网膜与SkrGAN效果非常接近，相比其他方法更加逼真，在血管和神经交汇点等细节上更加合理和真实。其中，（e）和（f）展示了本研究的结构特征图和SkrGAN的草图的区别，本研究的结构特征图血管线条走向更加自然真实、噪声更少。
+
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/XRAY_images}
+	\caption{X-ray合成效果对比。（a） PGGAN\cite{100karras2017progressive}的合成图像，（b） WGAN\cite{99arjovsky2017wasserstein}的合成图像， （c） DCGAN\cite{97radford2015unsupervised}的合成图像，（d） ACGAN\cite{98odena2016conditional}的合成图像，（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反转图像，（f） 本研究的方案的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。}
+	\label{generated_xray}
+\end{figure}
+图~\ref{generated_xray}中展示了本研究在X-ray数据集上合成的结构特征图和X-ray影像，和其他方法合成的结果对比，本研究的合成X-ray更加逼真，肋骨和脊柱等细节更加丰富和符合生理逻辑。其中，（e）和（f）展示了本研究的结构特征图和SkrGAN的草图的区别，本研究的结构特征图在脊柱等关键生理结构上提取出的信息更完整，肋骨等核心部位的噪声更少、杂余线条更少、核心的结构信息更突出、线条与线条之间更加独立清晰无干扰，本研究的每条线条都更顺滑均匀，对应合成的X-ray在结构上更加自然真实，而SkrGAN由于其草图脊柱处细节的突兀，合成X-ray在脊柱处也有明显瑕疵。
+
+
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.98\linewidth]{figures/FBCT_images}
+	\caption{肺部CT合成效果对比。（a） PGGAN\cite{100karras2017progressive}的合成图像，（b） WGAN\cite{99arjovsky2017wasserstein}的合成图像， （c） DCGAN\cite{97radford2015unsupervised}的合成图像，（d） ACGAN\cite{98odena2016conditional}的合成图像，（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反转图像，（f） 在Kaggle Lung CT数据集上，本研究的方案的合成图像、输入的融合了噪声的结构特征图和原始结构特征图，（g） 在天池肺部CT数据集上，本研究的方案的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。（f）-（g）输出的合成图像素值在0-1之间，视觉上与（a）-（e）中非归一化的合成结果有一些差异。}
+	\label{generated_FBCT}
+\end{figure}
+图~\ref{generated_FBCT}中（f）展示了本研究在肺部CT数据集上合成的结构特征图和CT影像，和其他方法合成的结果对比，本研究的合成CT更加清晰真实。其中，（e）和（f）展示了本研究的结构特征图和SkrGAN的草图的区别，本研究提取出的结构特征图复杂度更低，仅由关键结构的轮廓线条勾画而成，SkrGAN的草图中包含了大面积的像素区域、黑白交错界限不明且充满噪声杂乱无章，从合成的CT来看，SkrGAN的合成的肺中缺乏生理结构内容，而本研究的合成的肺中具有符合生理结构的气管血管等结构。图~\ref{generated_FBCT}中（g）展示了本研究在天池肺部CT数据集上合成的结构特征图和CT影像，效果非常逼真、肺中合成的结构信息丰富详实。
+
+
+\newpage
+\chead{第6章\ 结语}
+\section{结语}
+在当前合成医学影像的研究中，依然存在复杂的生理结构信息难以合成、无法合成精确配准的多模态影像、无法确保合成有效的病灶信息、对合成病灶的有效性和合成影像的可用性无法量化评估等多项问题。本文基于前人的多项研究基础，进行了深入的分析、改进和创新，提出了一套完整的解决现存问题的解决方案，并通过在多个数据集上的详细实验验证了提出的方案的可行性和有效性。
+
+本研究提出的方案分成两个主要阶段，先合成包含结构信息的结构特征图，再采用基于ACGAN结构的条件生成器合成多模态影像，并采用一个基于CycleGAN结构的条件转换器实现对合成多模态影像的配准约束，同时可通过输入病灶标签图用以提供合成病灶的指导信息，然后采用一个病灶处理器约束生成器合成指定的病灶内容。本研究直接将合成数据用于训练智能医学影像处理模型，然后根据模型的评估结果来验证合成病灶的有效性和合成影像在智能医学影像处理任务中的可用性，以此间接评估对合成医学影像的质量。
+
+具体来说，本研究提出了一种从正态分布随机噪声分阶段合成可带病灶标签的配准的多模态医学影像的方法，并在多个数据集上进行了充分的实验验证和效果展示。
+首先，本研究提出了一种结构特征图提取方法，无需训练或附加标签数据即可直接从医学图像中提取解剖结构信息，相较于当前最好的草图提取方法，本研究提取的结构特征图更加干净简洁、线条清晰、完整合理。
+在此基础上，本研究提出一种结合VAE和GAN的结构特征图生成方法，可以从多维正态分布随机采样生成结构特征图。
+然后，本研究对结构特征图进行噪声融合处理和可控的病灶标签添加处理，再通过无监督训练实现了从结构特征图合成符合生理结构的多模态医学图像，并可以通过添加病灶标签合成对于病灶信息和实现多模态影像的精确配准。
+最后，本研究实现了对合成医学影像用作智能医学图像处理任务的预训练数据或增强数据的可用性验证，多项实验结果表明本研究合成的数据可以显着提高模型的泛化能力，尤其是在图像分割类任务中。
+本研究中的核心贡献简要总结如下
+\begin{itemize}
+	\item 本研究提出一种结构特征图提取方法，可直接从医学图像中提取出清晰干净的解剖结构信息，无需训练或附加标签数据。
+	\item 本研究结合VAE和GAN的特点提出了一种结构特征图生成方法，可从多维正态分布矩阵生成随机结构特征图。
+	\item 本研究提出了一种可从结构特征图和随机选择的病变标签中合成具有相应病变信息的配准多模态医学图像的方法。
+	\item 本研究通过多项合成数据可用性实验，验证合成数据可以用作多种智能医学图像处理任务的预训练数据或增强数据。
+\end{itemize}
+
+本研究中所采用的模型结构以经典的U-net和VGGNet为基础结构，并未进行模型结构上的创新也并未采用最新的优秀模型和应用当前最新的算子、微结构和模型设计的技巧。在未来具有充分时间的条件下，本研究可以继续在最新的优秀模型或算子的基础上进行应用、改进和创新，以验证本研究方案在其他模型中的鲁棒性、提升训练和推理的效率和探索更好的医学影像生成模型。
+
+
+\newpage
+\chead{参考文献}
+\addcontentsline{toc}{section}{参考文献}
+\bibliography{refer}
+\bibliographystyle{unsrt}
+%\bibliographystyle{gbt7714-2005}
+
+
+\newpage
+\chead{致谢}
+\section*{致谢}
+感谢卢宇彤导师、陈志广老师的悉心指导，感谢国家超级计算广州中心的支持，感谢郑馥丹师姐、苏琬棋师妹、邓楚富师弟等的无私帮助，感谢家人的理解和陪伴！
+
+\addcontentsline{toc}{section}{致谢}
+
+\begin{flushright}
+\begin{tabular}{c}
+  瞿毅力\\
+  二零二零年四月
+\end{tabular}
+\end{flushright}
+
+\newpage
+\chead{附录一 学术成果}
+\section*{附录一~学术成果}
+\textbf{发表的论文：}
+
+[1].Yili Qu, Yaobin Ke, Wei Yu. A Solution for Input Limit in CNN Due to Fully-Connected Layer[C]//2018 IEEE 9th International Conference on Software Engineering and Service Science (ICSESS). IEEE, 2018: 611-616.(第一作者,EI)
+
+[2].Yili Qu, Chufu Deng, Wanqi Su, Ying Wang, Yutong Lu and Zhiguang Chen, Nong Xiao. Multimodal Brain MRI Translation Focused on Lesions[C]//2020 12th International Conference on Machine Learning and Computing (ICMLC). ACM, 2020.(第一作者,已录用,EI)
+
+[3].Yili Qu, Wanqi Su and Chufu Deng,Ying Wang,Yutong Lu,Zhiguang Chen,Nong Xiao. Synthesis of Registered Brain Multimodal MRI with Lesions[C]//29th International Conference on Artificial Neural Networks (ICANN). Springer, 2020.(第一作者,已投稿)
+
+[4].Yu Wei, Qu Yili, Lu Yutong. A Hybrid MapReduce Implementation of PCA on Tianhe-2[C]//Journal of Physics: Conference Series. IOP Publishing, 2019, 1168(5): 052013.(第二作者,EI)
+
+
+\textbf{专利：}
+
+[1].基于条件生成对抗网络的多模态MRI转换方法、系统及介质,申请中发明专利,专利申请号201910765217.4,2019.08.19.瞿毅力,苏琬棋,邓楚富,王莹,卢宇彤,陈志广.(第一作者)
+
+[2].生成配准的带病灶分割标签的多模态MRI的方法、系统及介质,申请中发明专利,专利申请号201910764408.9,2019.08.19.瞿毅力,王莹,苏琬棋,邓楚富,卢宇彤,陈志广.(第一作者)
+
+[3].一种基于进化算法的卷积神经网络结构搜索方法及系统,已公开发明专利,专利公开号CN109299142A,2019.02.01.卢宇彤,瞿毅力,郑馥丹,陈志广.(除导师外第一作者)
+
+[4].可使具有全连接层的CNN接受不定形状输入的方法及系统,已公开发明专利,专利公开号CN109583584A,2019.04.05.卢宇彤,瞿毅力,陈志广.(除导师外第一作者)
+
+[5].基于GAN的多模态低剂量CT转换高剂量CT的方法、系统及介质,申请中发明专利,专利申请号201910832520.1,2019.09.04.苏琬棋,瞿毅力,邓楚富,王莹,陈志广,卢宇彤.(第二作者)
+
+[6].一种基于生成对抗网络的多域图像转换方法与系统,已公开发明专利,专利公开号CN110084863A,2019.08.02.苏琬棋, 陈志广,瞿毅力,邓楚富,卢宇彤,肖侬,王莹.(除导师外第二作者)
+
+[7].基于模块化GAN的多模态MRI与多模态CT的转换方法、系统及介质,申请中发明专利,专利申请号201910880585.3,2019.09.18.苏琬棋,瞿毅力,邓楚富,王莹,卢宇彤,陈志广,肖侬.(第二作者)
+
+[8].基于条件生成对抗网络的多域图像转换方法、系统及介质,申请中发明专利,专利申请号201910808016.8,2019.08.29.邓楚富,肖侬,卢宇彤,陈志广,瞿毅力,苏琬棋,王莹.(除导师外第二作者)
+
+
+\textbf{参与课题：}
+
+[1].基于超级计算机的大数据处理支撑平台研究.国家自然科学基金委员会项目.项目批准号: 61872392.负责人: 陈志广. 依托单位: 中山大学.(项目组主要成员
+)
+
+[2].面向典型应用的虚拟数据空间验证与优化.国家重点研发计划课题.课题编号: 2018YFB0203904.所属项目: 高性能计算虚拟数据空间. 课题负责人: 陈志广.课题承担单位: 中山大学.(其他研究
+人员)
+
+
+
+\end{CJK*}
+\end{document}
+
