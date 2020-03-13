@@ -822,13 +822,13 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 \begin{table}[thbp!]
 	\begin{center}
 		{\caption{肿瘤分割器对不同测试数据的分割结果}\label{label_test}}
-		\begin{tabular}{lcccc}
+		\begin{tabular}{cccccc}
 			\hline
-			Testing Dataset &MSE   &Dice Score
+			Training Dataset &Test Dataset &MSE   &Dice Score
 			\\
 			\hline
-			real 		&0.026 &0.915 \\						
-			synthetic  	&0.043 &0.838 \\
+			real 		&real 		&0.026 &0.915 \\						
+			real 		&synthetic  	&0.043 &0.838 \\
 			\hline
 		\end{tabular}
 	\end{center}
