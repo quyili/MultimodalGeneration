@@ -743,7 +743,7 @@ $z'$ÊÇ´Ó¾ùÔÈ·Ö²¼$\mathcal{U}(\alpha_1,\alpha_2)$²ÉÑùµÄËæ»úÔëÉùÇÒ$\alpha_1=0.5$¡¢
 			
 %			\multicolumn{2}{c|}{Evaluation}&\multicolumn{6}{c}{Method}\\
 %			\hline
-			Dataset &Metric &Ours &SkrGAN\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised} &ACGAN\cite{98odena2016conditional} &WGAN\cite{99arjovsky2017wasserstein} &PGGAN\cite{100karras2017progressive}\\
+			Dataset &Metric &Ours &SkrGAN\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:} &ACGAN\cite{98odena2016conditional,96zhang2019skrgan:} &WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:} &PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{Kaggle Chest}\\\textbf{X-ray}}}
 %			&SWD ¡ı &xxx &0.026 &0.118 &0.139 &0.196 &0.031 \\
@@ -985,7 +985,7 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊı¾İµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊı¾İµÄÎ¢µ÷ĞÔÄÜÓëÍêÕûÕæÊµÊı¾İµ
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/MRI_images}
-	\caption{ÄÔ²¿MRIºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼ÏñºÍÊäÈëµÄ½á¹¹ÌØÕ÷Í¼¡££¨a£©-£¨e£©ÎªÔÚNeuromorphometricsÄÔMRIÊı¾İ¼¯ÉÏÂú×ãÒ»Ğ©Î´ÖªÌõ¼şµÄÉ¸Ñ¡³öµÄÊı¾İÉÏ½øĞĞÑµÁ·µÄºÏ³ÉĞ§¹û£¬£¨f£© ÔÚBRATS2015ÉÏºÏ³ÉÑµÁ·¡£}
+	\caption{ÄÔ²¿MRIºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditiona,96zhang2019skrgan:l}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼ÏñºÍÊäÈëµÄ½á¹¹ÌØÕ÷Í¼¡££¨a£©-£¨e£©ÎªÔÚNeuromorphometricsÄÔMRIÊı¾İ¼¯ÉÏÂú×ãÒ»Ğ©Î´ÖªÌõ¼şµÄÉ¸Ñ¡³öµÄÊı¾İÉÏ½øĞĞÑµÁ·µÄºÏ³ÉĞ§¹û£¬£¨f£© ÔÚBRATS2015ÉÏºÏ³ÉÑµÁ·¡£}
 	\label{generated_MRI}
 \end{figure}
 Ç°Êö±í~\ref{evalu_on_all_dataset2}ÖĞÕ¹Ê¾ÁË±¾ÑĞ¾¿µÄ·½·¨ÓëÆäËû·½·¨ÔÚBRATS2015ÉÏµÄÁ¿»¯¶Ô±È½á¹û¡£Í¼~\ref{generated_MRI}ÖĞÕ¹Ê¾ÁËSkrGANÖĞÆäËû·½·¨ºÍ±¾ÑĞ¾¿µÄ·½·¨ºÏ³ÉµÄÄÔMRIµÄÊÓ¾õĞ§¹û£¬ÓÉÓÚSkrGANÖĞ£¬²ÉÓÃµÄNeuromorphometricsÄÔMRIÊı¾İ¼¯\footnote{http://www.neuromorphometrics.com/}ÉÏÉ¸Ñ¡Ìõ¼şµÄÎ´Öª£¬±¾ÑĞ¾¿²ÉÓÃÔÚBRATS2015ÉÏÑµÁ·µÄºÏ³ÉÄÔMRIÓëÖ®ÔÚºÏ³ÉÊÓ¾õĞ§¹ûÉÏ¼òµ¥±È½Ï¡£´ÓÍ¼~\ref{generated_MRI}ÖĞ£¨e£©ºÍ£¨f£©ÖĞ²»ÄÑ¿´³ö£¬±¾ÑĞ¾¿µÄ½á¹¹ÌØÕ÷Í¼¸ü¼Ó¼ò½àÇåÎú¡¢¸´ÔÓ¶ÈµÍºÍÏŞÖÆÉÙµÄÍ¬Ê±¸ù¾İºÏ³ÉÖ¸µ¼ĞÔ¡£´ÓºÏ³ÉMRIÀ´¿´£¬±¾ÑĞ¾¿µÄºÏ³ÉµÄÄÔMRI¸ü¼ÓÇåÎúÕæÊµ¡¢¸É¾»Õû½à£¬·ş´ÓÊäÈëµÄ½á¹¹ÌØÕ÷Í¼µÄºÏ³ÉÖ¸µ¼È´ÓĞ¸ü¶àÑùµÄºÏ³É¿Õ¼ä¡£
@@ -993,7 +993,7 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊı¾İµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊı¾İµÄÎ¢µ÷ĞÔÄÜÓëÍêÕûÕæÊµÊı¾İµ
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/SWM_images}
-	\caption{ÊÓÍøÄ¤ºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
+	\caption{ÊÓÍøÄ¤ºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
 	\label{generated_swm}
 \end{figure}
 Ç°Êö±í~\ref{evalu_on_all_dataset2}ÖĞÕ¹Ê¾ÁË±¾ÑĞ¾¿µÄ·½·¨ÓëÆäËû·½·¨ÔÚDRIVE+FIREÊı¾İ¼¯ÉÏµÄÁ¿»¯¶Ô±È½á¹û¡£´Ë´¦£¬Í¼~\ref{generated_swm}ÖĞÕ¹Ê¾ÁË±¾ÑĞ¾¿ÔÚDRIVE+FIREµÄ288ÕÅÑÛµ×ÊÓÍøÄ¤Êı¾İ¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍÊÓÍøÄ¤Ó°Ïñ£¬ºÍSkrGANÖĞÆäËû·½·¨ÔÚ×Ô½¨µÄ6432ÕÅÊÓÍøÄ¤Êı¾İ¼¯ÉÏµÄºÏ³ÉµÄÊÓÍøÄ¤Í¼Ïñ¶Ô±È£¬±¾ÑĞ¾¿²ÉÓÃ¸üÉÙµÄÑµÁ·Ñù±¾ºÏ³ÉµÄÊÓÍøÄ¤ÓëSkrGANĞ§¹û·Ç³£½Ó½ü£¬Ïà±ÈÆäËû·½·¨¸ü¼Ó±ÆÕæ£¬ÔÚÑª¹ÜºÍÉñ¾­½»»ãµãµÈÏ¸½ÚÉÏ¸ü¼ÓºÏÀíºÍÕæÊµ¡£ÆäÖĞ£¬£¨e£©ºÍ£¨f£©Õ¹Ê¾ÁË±¾ÑĞ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²İÍ¼µÄÇø±ğ£¬±¾ÑĞ¾¿µÄ½á¹¹ÌØÕ÷Í¼Ñª¹ÜÏßÌõ×ßÏò¸ü¼Ó×ÔÈ»ÕæÊµ¡¢ÔëÉù¸üÉÙ¡£
@@ -1001,7 +1001,7 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊı¾İµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊı¾İµÄÎ¢µ÷ĞÔÄÜÓëÍêÕûÕæÊµÊı¾İµ
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/XRAY_images}
-	\caption{X-rayºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
+	\caption{X-rayºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡£}
 	\label{generated_xray}
 \end{figure}
 Í¼~\ref{generated_xray}ÖĞÕ¹Ê¾ÁË±¾ÑĞ¾¿ÔÚX-rayÊı¾İ¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍX-rayÓ°Ïñ£¬ºÍÆäËû·½·¨ºÏ³ÉµÄ½á¹û¶Ô±È£¬±¾ÑĞ¾¿µÄºÏ³ÉX-ray¸ü¼Ó±ÆÕæ£¬Àß¹ÇºÍ¼¹ÖùµÈÏ¸½Ú¸ü¼Ó·á¸»ºÍ·ûºÏÉúÀíÂß¼­¡£ÆäÖĞ£¬£¨e£©ºÍ£¨f£©Õ¹Ê¾ÁË±¾ÑĞ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²İÍ¼µÄÇø±ğ£¬±¾ÑĞ¾¿µÄ½á¹¹ÌØÕ÷Í¼ÔÚ¼¹ÖùµÈ¹Ø¼üÉúÀí½á¹¹ÉÏÌáÈ¡³öµÄĞÅÏ¢¸üÍêÕû£¬Àß¹ÇµÈºËĞÄ²¿Î»µÄÔëÉù¸üÉÙ¡¢ÔÓÓàÏßÌõ¸üÉÙ¡¢ºËĞÄµÄ½á¹¹ĞÅÏ¢¸üÍ»³ö¡¢ÏßÌõÓëÏßÌõÖ®¼ä¸ü¼Ó¶ÀÁ¢ÇåÎúÎŞ¸ÉÈÅ£¬±¾ÑĞ¾¿µÄÃ¿ÌõÏßÌõ¶¼¸üË³»¬¾ùÔÈ£¬¶ÔÓ¦ºÏ³ÉµÄX-rayÔÚ½á¹¹ÉÏ¸ü¼Ó×ÔÈ»ÕæÊµ£¬¶øSkrGANÓÉÓÚÆä²İÍ¼¼¹Öù´¦Ï¸½ÚµÄÍ»Ø££¬ºÏ³ÉX-rayÔÚ¼¹Öù´¦Ò²ÓĞÃ÷ÏÔè¦´Ã¡£
@@ -1010,7 +1010,7 @@ NO.6-NO.8µÄ½á¹û±íÃ÷£¬´óÁ¿ºÏ³ÉÊı¾İµÄÔ¤ÑµÁ·ºÍÉÙÁ¿ÕæÊµÊı¾İµÄÎ¢µ÷ĞÔÄÜÓëÍêÕûÕæÊµÊı¾İµ
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/FBCT_images}
-	\caption{·Î²¿CTºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ÔÚKaggle Lung CTÊı¾İ¼¯ÉÏ£¬±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼£¬£¨g£© ÔÚÌì³Ø·Î²¿CTÊı¾İ¼¯ÉÏ£¬±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡££¨f£©-£¨g£©Êä³öµÄºÏ³ÉÍ¼ÏñËØÖµÔÚ0-1Ö®¼ä£¬ÊÓ¾õÉÏÓë£¨a£©-£¨e£©ÖĞ·Ç¹éÒ»»¯µÄºÏ³É½á¹ûÓĞÒ»Ğ©²îÒì¡£}
+	\caption{·Î²¿CTºÏ³ÉĞ§¹û¶Ô±È¡££¨a£© PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨b£© WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬ £¨c£© DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨d£© ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ£¬£¨e£© SkrGAN\cite{96zhang2019skrgan:}µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄ½á¹¹ÌØÕ÷Í¼ºÍ¶şÖµ·´×ªÍ¼Ïñ£¬£¨f£© ÔÚKaggle Lung CTÊı¾İ¼¯ÉÏ£¬±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼£¬£¨g£© ÔÚÌì³Ø·Î²¿CTÊı¾İ¼¯ÉÏ£¬±¾ÑĞ¾¿µÄ·½°¸µÄºÏ³ÉÍ¼Ïñ¡¢ÊäÈëµÄÈÚºÏÁËÔëÉùµÄ½á¹¹ÌØÕ÷Í¼ºÍÔ­Ê¼½á¹¹ÌØÕ÷Í¼¡££¨f£©-£¨g£©Êä³öµÄºÏ³ÉÍ¼ÏñËØÖµÔÚ0-1Ö®¼ä£¬ÊÓ¾õÉÏÓë£¨a£©-£¨e£©ÖĞ·Ç¹éÒ»»¯µÄºÏ³É½á¹ûÓĞÒ»Ğ©²îÒì¡£}
 	\label{generated_FBCT}
 \end{figure}
 Í¼~\ref{generated_FBCT}ÖĞ£¨f£©Õ¹Ê¾ÁË±¾ÑĞ¾¿ÔÚ·Î²¿CTÊı¾İ¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍCTÓ°Ïñ£¬ºÍÆäËû·½·¨ºÏ³ÉµÄ½á¹û¶Ô±È£¬±¾ÑĞ¾¿µÄºÏ³ÉCT¸ü¼ÓÇåÎúÕæÊµ¡£ÆäÖĞ£¬£¨e£©ºÍ£¨f£©Õ¹Ê¾ÁË±¾ÑĞ¾¿µÄ½á¹¹ÌØÕ÷Í¼ºÍSkrGANµÄ²İÍ¼µÄÇø±ğ£¬±¾ÑĞ¾¿ÌáÈ¡³öµÄ½á¹¹ÌØÕ÷Í¼¸´ÔÓ¶È¸üµÍ£¬½öÓÉ¹Ø¼ü½á¹¹µÄÂÖÀªÏßÌõ¹´»­¶ø³É£¬SkrGANµÄ²İÍ¼ÖĞ°üº¬ÁË´óÃæ»ıµÄÏñËØÇøÓò¡¢ºÚ°×½»´í½çÏŞ²»Ã÷ÇÒ³äÂúÔëÉùÔÓÂÒÎŞÕÂ£¬´ÓºÏ³ÉµÄCTÀ´¿´£¬SkrGANµÄºÏ³ÉµÄ·ÎÖĞÈ±·¦ÉúÀí½á¹¹ÄÚÈİ£¬¶ø±¾ÑĞ¾¿µÄºÏ³ÉµÄ·ÎÖĞ¾ßÓĞ·ûºÏÉúÀí½á¹¹µÄÆø¹ÜÑª¹ÜµÈ½á¹¹¡£Í¼~\ref{generated_FBCT}ÖĞ£¨g£©Õ¹Ê¾ÁË±¾ÑĞ¾¿ÔÚÌì³Ø·Î²¿CTÊı¾İ¼¯ÉÏºÏ³ÉµÄ½á¹¹ÌØÕ÷Í¼ºÍCTÓ°Ïñ£¬Ğ§¹û·Ç³£±ÆÕæ¡¢·ÎÖĞºÏ³ÉµÄ½á¹¹ĞÅÏ¢·á¸»ÏêÊµ¡£
