@@ -160,8 +160,7 @@
 	\begin{figure}[thbp!]
 		\centering
 		\includegraphics[width=0.85\linewidth]{figures/brats_f}
-		\caption{Structural map on BRATS2015.(a) Followed byfour modal (T1, T2, T1c, Flair) of MRI, 
-			mask extracted from Flair, horizontal and vertical edge detection figures extracted from Flair using Sobel operator, structural map extracted from Flair, structural map extracted from Flair using tumor segmentation label mask to remove tumor lesion structure information, binarization mask of tumor segmentation labels .
+		\caption{Structural map on BRATS2015.(a) Followed by four modal (T1, T2, T1c, Flair) of MRI, mask extracted from Flair, horizontal and vertical edge detection figures extracted from Flair using Sobel operator, structural map extracted from Flair, structural map extracted from Flair using tumor segmentation label mask to remove tumor lesion structure information, binarization mask of tumor segmentation labels .
 			(b) Randomly-synthesized structural map.(c) Synthesized structural map from sequence sampling on normal distribution.}
 		\label{generated_f}
 	\end{figure}
@@ -413,10 +412,7 @@
 	
 	Similarly in Table~\ref{DRIVE_availability_test}-\ref{TC_availability_test}, we performed other medical image processing tasks with the medical images synthesized on other datasets. The results show that our synthesized data can also improve the generalization ability of the model in these tasks, which indicates that our synthesized data are available and the synthesized lesions are effective in these synthesis.
 	\section{Conclustion}
-	In this paper, we propose a structural map extraction method to extract anatomical structure information directly from medical images without training or additional label data.
-	We also developed a novel method to generate structural maps from multidimensional normal distribution matrixes.
-	We implemented the synthesis of registered multimodal images from a random normal distribution matrix through unsupervised training, which can add the lesion information freely.
-	The efficacy of our synthesized lesions and the availability of the synthesized data were verified through sufficient experiments on multiple data sets. We also verify that synthetic images can be used as pre-training data or augmentation data for intelligent medical image processing tasks and can significantly improve the generalization ability of the model through lesion segmentation experiments.
+	In this paper, Sobel operator is used to propose a clearer extraction method of medical image structural map, which requires no training and additional labels, and using a VAE to learn the mapping between normal distribution and structure map distribution. The multimodal synthesis based on the structural map can synthesize the medical image that conforms to the physiological structure. The proposed lesion generation guidance loss and registration supervision loss ensure the synthesis of the specified lesion and multimodal registration. Experimental results on multiple datasets show that the synthetic lesions are effective, and the synthetic medical images can be used as enhancement data to enhance the performance of the model. In the future, we will further explore the direct synthesis of 3D images.
 	
 	%
 	% ---- Bibliography ----
