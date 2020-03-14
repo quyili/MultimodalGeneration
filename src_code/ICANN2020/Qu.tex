@@ -13,7 +13,6 @@
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
 
 \usepackage{times}
-\usepackage{graphicx}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{algorithm}
@@ -25,8 +24,8 @@
 \usepackage{threeparttable}
 \usepackage{multicol}
 \usepackage{setspace}
-\usepackage{algpseudocode}  
-
+\usepackage{algpseudocode} 
+\usepackage{soul}
 \begin{document}
 	%
 	\title{Synthesis of Registered Multimodal
@@ -36,103 +35,120 @@
 	% If the paper title is too long for the running head, you can set
 	% an abbreviated paper title here
 	%\inst{1}
-	\author{ Yili Qu \and Wanqi Su \and Chufu Deng \and Ying Wang \\
-		\and Yutong Lu \and Zhiguang Chen \and Nong Xiao}
+	\author{ Yili Qu \and Wanqi Su \and Xuan Lv \and Chufu Deng 
+		\and \\Yutong Lu \and Zhiguang Chen \and Nong Xiao}
 	%
-	\authorrunning{Yili, Wanqi et al.}
+	\authorrunning{Yili Qu et al.}
 	% First names are abbreviated in the running head.
 	% If there are more than two authors, 'et al.' is used.
 	%
-	\institute{Sun Yat-sen University,	China,\\
-		\email{quyli,suwq7,chufd3@mail2.sysu.edu.cn}}
+	\institute{Sun Yat-sen University, Guangzhou, China\\
+		\email{\{quyli,suwq7,chufd3\}@mail2.sysu.edu.cn}\\
+		National University of Defense Technology, Changsha, China\\
+		\email{lvxuan14@nudt.edu.cn}
+	}
+	
+	
 	%
-	\maketitle              % typeset the header of the contribution
+	\maketitle       % typeset the header of the contribution
 	%
 	\begin{abstract}
-		The collection and annotation of medical image data has always been difficult in many  data-driven medical image intelligent processing tasks, especially for registered multimodal medical image data. By using synthetic medical image data, we can alleviate the problem of insufficient data well. In this paper, we implemented a method for the synthesis of registered multimodal medical images from a random normal distribution matrix based on GAN. Besides, the corresponding lesion information can be efficiently generated based on the freely selected lesion label. Finally, We performed several validation experiments on multiple datasets to verify that our synthetic images can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and they can greatly improve the generalization ability of the model.
+		The collection and annotation of medical image data has always been difficult in many data-driven medical image intelligent processing tasks, especially for registered multimodal medical image data. Utilize the image synthesis technology, we can alleviate the problem of insufficient multimodal medical data well. In this paper, we propose a method for the synthesis of registered multimodal medical images from a random normal distribution matrix based on GAN. Besides, the corresponding lesion information can be generated efficiently based on the freely selected lesion label. Finally, We perform extensive validation experiments on multiple datasets to verify that our synthetic images can be used as pre-trained data or enhanced data in medical image intelligent processing tasks, and can greatly improve the generalization ability of the model.
 		
-		\keywords{Image Synthesis \and  Multimodal \and Medical Images \and  Lesions.}
+		\keywords{Image Synthesis \and Multimodal \and Medical Images \and Lesions.}
 	\end{abstract}
 	%
 	%
 	%
 	\section{Introduction}
-	In recent years, intelligent medical image processing has attracted enormous interest in the field of deep learning (DL) applications. Medical images used in medical treatment are obtained in forms of  different modalities by utilizing various imaging methods. The common modalities include magnetic resonance imaging (MRI), CT, X-ray, etc. Some of them are divided into different submodalities according to different settings during imaging, e.g. MRI including T1, T2, T1c and Flair.
-	More and more DL-based medical image researches have been devoted to obtaining a large number of medical images data. However, the collection and annotation of medical image data remain difficult tasks, especially for the registration of multi-mode data. With the development of image synthesis technology, it is possible to synthesize high-quality medical images, providing a  good choice to compensate the scarcity of medical images data.
-	However, medical images contain complex physiological structure information, and the usual way of synthesis is likely to produce unreasonable structure or contour. On the other hand, multimodal medical images are demanding for researchers to collect more information for diagnosis. It is also a challenge to ensure the registration of composite image when multimodal image is synthesized.
-	Most importantly, lesions information in medical images is an important basis for doctors to make diagnosis, and for reasoning and diagnosis of intelligent medical image processing model. Therefore, another big challenge in synthesizing medical images is to control the synthesis of lesions and generate corresponding lesion labels.
+	Intelligent medical image processing has attracted interest in the field of deep learning (DL) applications in recent years. Medical images used for diagnosis are obtained in forms of different modalities by utilizing various imaging techniques. The common modalities include magnetic resonance imaging (MRI), computed tomography (CT), Xray, etc. Some of them have different submodalities according to different settings during imaging, e.g. MRI has submodalities of T1, T2, etc. More and more DL-based medical image studies expect large amounts of medical image data. However, the collection and annotation of medical image data remain difficult tasks, especially for the registration of multimodal data. With the development of image synthesis technology, it becomes possible to synthesize high-quality medical images, which is a good choice to alleviate the scarcity of medical images data.
 	
-	With the development of GAN-based image synthesis, GAN as been intensively studied in medical image segmentation\cite{40kamnitsas2017unsupervised}, reconstruction\cite{61fan2018a,65anirudh2018lose}, synthesis \cite{41costa2017towards,4shin2018medical,43iglesias2013is,44shrivastava2017learning}, translation \cite{2zhang2018translating,20nie2017medical,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised,136yi2018sharpness-aware,137yang2018low-dose,138WolterinkGenerative} and super resolution \cite{14You2018CT,15lyu2018super-resolution}. 
-	Recently, some studies have attempted to relieve sample deficiency of medical image data by synthesizing more diverse data, such as the synthesis of brain MRI\cite{4shin2018medical},  retina \cite{41costa2017towards}, and  monomorphic medical images of many different parts and modes\cite{96zhang2019skrgan:}. Among them, the brain MRI synthesis \cite{4shin2018medical} employed GAN synthetic brain images to achieve the  image augmentation and anonymous with synthetic data. However, the input is extracted from real data structure division of the brain, making the method restricted by many factors since we need to collect additional labels for segmentation training and provide segmentation result in another data set.  In this study, tumor segmentation tags were firstly added to the input  to guide the synthesis of lesions. However, there were no additional constraints during the synthesis process, increaing the uncertainty of the synthesis of lesions. Retinal synthesis studies\cite{41costa2017towards} achieved the random generation of vascular annotation images by variational self-encoder (VAE) \cite{87kingma2014auto-encoding,88rezende2014stochastic}, and then the color retinal images were synthesized with the synthesized vascular annotation images. The latest SkrGAN\cite{96zhang2019skrgan:} made a monomodal image synthesis attempt, and in line with our research, whcin employing sobel operator to extract sketches containing structural information from medical images, and then further synthesizes medical images. However, similar to other studies, the medical images synthesized by SkrGAN did not consider the synthesis of lesion information or the production of corresponding lesion labels and thus most of the synthesized data is unavailable.
+	 Medical images contain complex physiological structure information, and the usual way of synthesis is likely to produce unreasonable structure or contour. Moreover, it is a challenge to ensure the registration when multimodal images are synthesized. In addition, lesion information in medical images is an important basis for doctors to make diagnosis and for reasoning and diagnosis of intelligent medical image processing model. Therefore, another big challenge in synthesizing medical images is to control the synthesis of lesions and generate corresponding lesion labels.
+
+	As GAN-based image synthesis advanced, GAN has been intensively studied in medical image segmentation\cite{40kamnitsas2017unsupervised}, reconstruction\cite{61fan2018a,65anirudh2018lose}, synthesis \cite{41costa2017towards,4shin2018medical,43iglesias2013is,44shrivastava2017learning}, translation \cite{2zhang2018translating,20nie2017medical,35osokin2017gans,36vannguyen2015crossdomain,40kamnitsas2017unsupervised,136yi2018sharpness-aware,137yang2018low-dose,138WolterinkGenerative} and super-resolution \cite{14You2018CT,15lyu2018super-resolution}.
+	Recently, some studies have attempted to relieve medical data deficiency by synthesizing more diverse data, such as the synthesis of brain MRI\cite{4shin2018medical}, retina \cite{41costa2017towards}, and monomorphic medical images of different body parts and modalities \cite{96zhang2019skrgan:}. Among them, the brain MRI synthesis \cite{4shin2018medical} utilized GAN to synthesize brain images and achieved image augmentation and anonymization. However, this method needs to collect additional labels for segmentation training and provide segmentation results in another dataset, which restricted the application. In this study, tumor segmentation labels were firstly added to guide the lesions synthesis. But there were no additional constraints during the synthesis process, which means high uncertainty of the lesions synthesis. The retinal synthesis \cite{41costa2017towards} achieved the random generation of vascular annotation images by variational self-encoder (VAE) \cite{87kingma2014auto-encoding,88rezende2014stochastic}, and the color retinal images were synthesized with the generated vascular annotation images. The latest SkrGAN\cite{96zhang2019skrgan:} made a monomodal image synthesis attempt, in line with our research, SkrGAN employed Sobel operator to extract sketches containing structural information from medical images, and further synthesized medical images. However, similar to other studies, SkrGAN did not consider lesion information synthesis or the production of corresponding lesion labels and thus most of the synthesized data is not available.
 	
-	To solve these problems, we design a multimodal medical image synthesis scheme, which accepts a random normal distribution matrix as input to synthesize a set of registered multimodal MRI images with specify lesions. We conducted synthesis experiments on several public datasets, which comprehensively verified the effectiveness of synthetic lesions and the availability of synthetic data. Our main work includes the following aspects:
+	To solve these problems, we design a multimodal medical image synthesis framework, which accepts a random normal distribution matrix as input to synthesize a set of registered multimodal MRI images with specify lesions. We conduct synthesis experiments on several public datasets, comprehensively verify the effectiveness of synthetic lesions and the availability of synthetic data. Our main work includes the following aspects:
 	\begin{itemize}
-		\item Compared with the state-of-the-art sketch extraction method, we proposed a more concise and clear structural map extraction method, which can directly extract anatomical structure information from medical images without training.
-		
-		\item We proposed a method based on VAE and GAN, which can synthesize any number of more diverse structural feature graphs from multi-dimensional normal distribution random sampling.
-		
-		\item We implemented a method for synthesizing multimodal medical images with lesions by adding lesion labels. The loss provided by the lesion processor constraint the lesion generation according to label, and the loss provided by the modality translation network constraint multimodal images to be registered.
-		
-		\item We employed synthetic data to train the intelligent medical image processing model and indirectly evaluated the performance and quality of synthetic images through the assessment of the processing capacity of the model.
+		\item Compared with the state-of-the-art sketch extraction method of SkrGAN, we propose a more concise and clear structural map extraction method, which can directly extract anatomical structure information from medical images without training.
+		\item We propose a method based on VAE, the method can random sampling from normal distribution and synthesize any number of structural feature maps more diversity.
+		\item We propose a method for synthesizing multimodal medical images with lesions by adding lesion labels. The loss provided by the lesion processor constraint the lesion generation according to label, and the loss provided by the modality translation network constraint multimodal images to be registered.
+		\item We employ synthetic data to train different intelligent medical image processing models. By evaluting the task performance of each model, we indirectly evaluate the quality of synthetic data and the effectiveness of synthetic lesions.
 	\end{itemize}
 	
 	\section{Method}
 	\label{method}
-	Our method includes two stages. In first stage, we obtain a structural map generator to generate structural maps from random normal distribution matrix. In second stage, we train a conditional generator with input of structural maps and lesion labels to synthesize MRI images of different modalities according to different conditionals.
+	Our method includes two stages. In the first stage, we extract structural maps from MRI and further generate structural maps from random normal distribution matrix. In second the stage, we train a conditional generator with input of structural maps and lesion labels to synthesize MRI images of different modalities according to different conditions.
 	
-	In the following chapters, $E_s $, $G_s$, $D_{z} $, $D_{s} $, $D $ and $D_{t}$ are tuned on VGG11\cite{102simonyan2014very}, $G_m $, $G$, $G_t$ are tuned on U-net\cite{6zhu2017unpaired}. $E_s$and the discriminators output two results in the last two layers. $G_s$ is a reverse VGG11. $E_s $ and $G_s$ form a group of VAE\cite{88rezende2014stochastic} structures.$G$and $D$ form a group of ACGAN\cite{98odena2016conditional} structures.$G_t$and $D_t $ constitute a group of CycleGAN. In these improved networks, all pooling are changed to the convolution with same stride, and all deconvolution up-sampling of are changed to the nearest neighbor interpolation up-sampling with a convolution. U-net, VGG11 and SSD\cite{109liu2016ssd:} were used for segmentation, classification and detection as the lesion processor $G_l$ .
-	\subsection{Structural map extraction and synthesis}
-	We define the image that provides basic contour and structure information as a structural map. Medical images generated directly from random noise by GAN are difficult to generate realistic structural information. Structural maps can provide necessary basic guidance for the synthesis of medical images. However, general structural features such as retinal vascular maps\cite{41costa2017towards} and brain segmentation labels \cite{4shin2018medical}require additional data and training before extracting from the original image. To solve these problems, we design a method for extracting structural maps directly from brain MRI images, which has the advantages of fast operation, no training, and no additional required data. Then, we can train a generator to generate structural maps from random normal distribution matrixes.
+%	In the following chapters, $E_s $, $G_s$, $D_{z} $, $D_{s} $, $D $ and $D_{t}$ are tuned on VGG11\cite{102simonyan2014very}, $G_m $, $G$, $G_t$ are tuned on U-net\cite{6zhu2017unpaired}. $E_s$and the discriminators output two results in the last two layers. $G_s$ is a reverse VGG11. $E_s $ and $G_s$ form a group of VAE\cite{88rezende2014stochastic} structures. $G$ and $D$ form a group of ACGAN\cite{98odena2016conditional} structures. $G_t$ and $D_t $ constitute a group of CycleGAN. In these improved networks, all pooling are changed to the convolution with same stride, and all deconvolution up-sampling of are changed to the nearest neighbor interpolation up-sampling with a convolution. U-net, VGG11 and SSD\cite{109liu2016ssd:} were used for segmentation, classification and detection as the lesion processor $G_l$ .
+	\begin{figure}[thbp!]
+		\centering
+		\includegraphics[width=0.9\linewidth]{figures/brats_f}
+		\caption{Structural map on BRATS2015. (a) The images producted in the process of structural map extraction. (b) Randomly-synthesized structural map. (c) Synthesized structural map from sequence sampling on normal distribution.}
+		\label{generated_f}
+	\end{figure}
+	\subsection{Structural map extraction and gereration}
+	We define the image that provides basic contour and structure information as a structural map. Medical images generated directly from random noise by GAN are lack of realistic structural information. And structural maps can provide basic guidance for the synthesis of medical images.
+	
+%	 To solve these problems, we design a algorithm (Alg.\ref{alg:1}) to extract structural maps directly from brain MRI images. 
+%	Then, we can train a generator to generate structural maps from random normal distribution matrixes.
+	\vspace{-0.2cm}
 	\begin{algorithm}[thbp!]
 		\caption{Structural map extraction}
-		\setstretch{0.85}
+		\setstretch{0.8}
 		\label{alg:1}
 		\begin{multicols}{2}
 			\begin{algorithmic}[1]
 				\State Input grayscale image $x$,
-				pixel threshold $alpha$ and $beta$ and $gama$,
-				gaussian kernel variance $sigma1$ and $sigma2$
+				pixel threshold $\alpha$ , $\beta$ and $\gamma$,
+				gaussian kernel variance $\sigma 1$ and $\sigma 2$
 				\State $s1 = reduce\_min(sobel(x))$
 				\State $s2 = reduce\_max(sobel(x))$
-				\State $s1 = gaussian\_blur(s1,sigma1)$
-				\State $s2 = gaussian\_blur(s2,sigma1)$
+				\State $s1 = gaussian\_blur(s1,\sigma 1)$
+				\State $s2 = gaussian\_blur(s2,\sigma 1)$
 				\State $s1 = mean(s1) - s1$
 				\State $s2 = s2 - mean(s2)$
-				\State $s1 = ones \times (s1 > alpha)$
-				\State $s2 = ones \times (s2 > alpha)$
+				\State $s1 = ones \times (s1 > \alpha)$
+				\State $s2 = ones \times (s2 > \alpha)$
 				\State $s = ones \times ((s1 + s2)> 0)$
-				\State $s = gaussian\_blur(s,sigma2)$
-				\State $s = ones \times ((s1 + s2)> beta)$
-				\State $s = medfilt(s)$
-				\State $s = s \times (x > gama)$
-			\end{algorithmic}  
+				\State $s = gaussian\_blur(s,\sigma 2)$
+				\State $s = ones \times ((s1 + s2)> \beta)$
+				\State $s = medfilt(s)\times (x > \gamma)$
+			\end{algorithmic} 
 		\end{multicols}
+	\vspace{-0.3cm}
 	\end{algorithm}
+	\vspace{-0.5cm}
+	\vspace{-0.5cm}
 	\begin{algorithm}[thbp!]
 	\caption{Mask extraction}
 	\label{alg:2}
-	\setstretch{0.85}
+	\setstretch{0.8}
 	\begin{multicols}{2}
 		\begin{algorithmic}[1]
-			\State Input grayscale image $x$, pixel threshold $alpha$, expanded pixel width $p$
-			\State $m = 1.0 - ones \times (x > alpha)$
+			\State Input grayscale image $x$, pixel threshold $\alpha$, expanded pixel width $p$
+			\State $m = 1.0 - ones \times (x > \alpha)$
 			\State $size=[x.width+p, x.length+p]$
 			\State $m = resize(m, size)$
 			\State $m = crop\_padding(m,p)$
 			\State $m = medfilt(m)$
-		\end{algorithmic}  
+		\end{algorithmic} 
 	\end{multicols}
+	\vspace{-0.3cm}
 	\end{algorithm}
+	\vspace{-0.5cm}
 	\subsubsection{Structural map extraction method}
-	In traditional digital image processing methods, Roberts operator\cite{145Roberts}, Prewitt operator\cite{146prewitt}, Sobel operator\cite{147Sobel} are widely used for excellent edge. Sobel operators are particularly applicable and are most commonly used to process medical images. Algorithm~\ref{alg:1} describes our feature graph extraction method based on Sobel operator, where  $gaussian\_blur()$ is 3$\times$3 gaussian blur and  $medfilt()$ is 3$\times$3 median filter function.
+	The general structural maps such as retinal vascular maps\cite{41costa2017towards} and brain segmentation labels \cite{4shin2018medical} require additional data and training before extraction. Considering that the Sobel operator\cite{147Sobel} in digital image processing field are widely used for edge extaction, we design a structural map extraction method based on Sobel operator. As shown in Algorithm~\ref{alg:1}, $gaussian\_blur(\cdot)$ is 3$\times$3 gaussian blur and $medfilt(\cdot)$ is 3$\times$3 median filter function. The method is advanced for fast operation, no training, and no additional required data. 
+	
+%	In traditional digital image processing methods, Roberts operator\cite{145Roberts}, Prewitt operator\cite{146prewitt}, Sobel operator\cite{147Sobel} are widely used for excellent edge. Sobel operators are particularly applicable and are most commonly used to process medical images. Algorithm~\ref{alg:1} describes our feature map extraction method based on Sobel operator, where $gaussian\_blur()$ is 3$\times$3 gaussian blur and $medfilt()$ is 3$\times$3 median filter function.
 	\subsubsection{Structural map generation training}
-	\begin{figure}
+	\begin{figure}[thbp!]
 		\centering
-		\includegraphics[width=0.98\columnwidth]{figures/feature_train}
-		\caption{Structural map generation training. $x$ is an input real image, $s$ is a structural map, $m$ is a mask. $E_s$ is a VAE encoder, which outputs the encode matrixs $f_{mean}$ and $f_{logvar}$. $z$ is a random noise sampling from multidimensional normal distribution $\mathcal{N}(0,1^2)$ and the $f$ is a approximate normal distribution matrix. $G_s$ is a VAE decoder, $s_r$ is a reconstructed structural map, and $s_g$ is a generated random structure feature map. $D_{s}$ and $D_{z}$ are the discriminators. $G_m$ is a mask generator and $m_r$ is a extracted mask. }
+		\includegraphics[width=0.95\columnwidth]{figures/feature_train}
+		\caption{Structural map generation training. $x$ is an input real image, $s$ is a structural map, $m$ is a mask extract by Algorithm~\ref{alg:2}. $E_s$ is a VAE encoder, which outputs the encode matrixs $f_{mean}$ and $f_{logvar}$. $z$ is a random noise sampling from normal distribution $\mathcal{N}(0,1^2)$ and $f$ is a approximate normal distribution matrix. $G_s$ is a VAE decoder, $s_r$ is a reconstructed structural map, and $s_g$ is a generated random structure feature map. $D_{s}$ and $D_{z}$ are the discriminators. $G_m$ is a mask generator and $m_r$ is a generated mask. }
 		\label{feature_train}
 	\end{figure}
-	The structural map traing as shown in Fig.~\ref{feature_train}, where $f=f_{mean}+exp(0.5\times f_{logvar})\times z$. Fig.~\ref{generated_f} shows examples of structural maps on BRATS2015. The training losses in Fig.~\ref{feature_train} are as follows, where $\mathbb{E}$ is the expectation operator,$m_r=G_m(s)$,$s_r=G_s(f)$,$s_g=G_s(z)$,$m_g=G_m(s_g)$: 
+	The structural map traing is shown in Fig.~\ref{feature_train}, where $f=f_{mean}+exp(0.5\times f_{logvar})\times z$. And Fig.~\ref{generated_f} shows examples of structural maps on BRATS2015. The training losses in Fig.~\ref{feature_train} are as follows, where $\mathbb{E}$ is the expectation operator, and $m_r=G_m(s)$, $s_r=G_s(f)$, $s_g=G_s(z)$, $m_g=G_m(s_g)$: 
 	\begin{itemize}
 		\item{Part B: Mask generation loss}
 		\begin{equation}
@@ -159,31 +175,25 @@
 	\end{itemize}
 	\begin{figure}[thbp!]
 		\centering
-		\includegraphics[width=0.85\linewidth]{figures/brats_f}
-		\caption{Structural map on BRATS2015.(a) Followed by four modal (T1, T2, T1c, Flair) of MRI, mask extracted from Flair, horizontal and vertical edge detection figures extracted from Flair using Sobel operator, structural map extracted from Flair, structural map extracted from Flair using tumor segmentation label mask to remove tumor lesion structure information, binarization mask of tumor segmentation labels .
-			(b) Randomly-synthesized structural map.(c) Synthesized structural map from sequence sampling on normal distribution.}
-		\label{generated_f}
-	\end{figure}
-	\begin{figure}[thbp!]
-		\centering
-		\includegraphics[width=0.85\linewidth]{figures/image_f_mask_newf}
-		\caption{Medical image and extraction structural map. (a) DRIVE retinal image . (b) Kaggle Chest X-ray. (c) Kaggle Lung CT. (d) TC Lung CT. From left to right are the original image, structural map, mask, and structural map fused noise.}
+		\includegraphics[width=0.9\linewidth]{figures/image_f_mask_newf}
+		\caption{Medical image and the corresponding maps. (a) DRIVE retinal image. (b) Kaggle Chest Xray. (c) Kaggle Lung CT. (d) TC Lung CT.}
+%			From left to right are the original image, structural map, mask extract from Alg, and fusion of Structural map and noise.}
 		\label{image_and_f}
 	\end{figure}	
-	\subsubsection{Structural map fusion noise}	
-	The structural map is a simple binary sparse matrix, which reduce the diversity and randomness when directly used.The equation $s'=s+z'\times(1-m)\times(1-s)$ is used to add random noise to the structural map in the region of organ generation,where, $z'\sim\mathcal{U}(\alpha_1,\alpha_2)$. The default values of $\alpha_1,\alpha_2$ are 0.5 and 0.6 respectively. $m$is a binary mask paired with the structual map $s$. As shown in the Fig.~\ref{image_and_f}, the final fusion structural map $s'$not only retains all the structure information, but also has rich random information. Moreover, it is closer to the expected medical image, which reduces the learning difficulty. 
+	\subsubsection{fusion of Structural map and noise}	
+	The structural map is a simple binary sparse matrix, which have less information and diversity. Therefore, we define the equation $s'=s+z'\times(1-m)\times(1-s)$ to fuse random noise into the organ contour of the structural map, where $z'\sim\mathcal{U}(\alpha_1,\alpha_2)$, $\alpha_1 =0.5,\alpha_2=0.6$ by default. $m$ is a binary mask paired with the structual map $s$. As shown in Fig.~\ref{image_and_f}, the final fusion structural map $s'$ not only retains all the structure information, but also has rich random information. Moreover, it is closer to the expected medical image, thus []has less learning difficulty. 
 	\subsection{Multimodal images synthesis}
-	\begin{figure}
+	\begin{figure}[thbp!]
 		\centering
-		\includegraphics[width=1\columnwidth]{figures/mm_mri_generate_train}
-		\caption{Synthesis of multimodal images. Purple box A is the fusion process of structural map and random noise, gray box B is the core process, and yellow box is the optional process. 
+		\includegraphics[width=0.95\columnwidth]{figures/mm_mri_generate_train}
+		\caption{Synthesis of multimodal images. Purple box A is the fusion process of structural map and random noise, gray box B is the core synthesis process, and yellow box is the optional refinement process. 
 			$x_{g,i}$ is the image of modality $i$ generated by generator $G$. 
 			$l_{g,i}$ is the lesion label of modality $i$ generated by lesion processor $G_{l,i}$.
 			$x_{gt,i,j}$ is the image of modality $j$ translated from modality $i$ by modality translation network $G_t$.
 		}
 		\label{mm_mri_generate}
 	\end{figure}
-	As shown in Fig.~\ref{mm_mri_generate}, we get $s_g$ through $G_s$ and fuse noise, then can concatenate the specified lesion label $l$. When selecting a lesion label, the randomly selected label may indicate a lesion that is not in the organ described in the structural map. We used the mask corresponding to the structural map to filter out these labels that the lesion. Nextly, $G$ accepts the onehot condition matrix $one_hot(i)$ after encoding the fusion input, and then decodes the input to generate the modality $i$ image $x_{g,i}$. The lesion processor $G_{l,i}$ and the modality translation network $G_t$ train completedly in advance to provide the lesions generation guidance loss and the registration guidance loss for $G$.
+	As shown in Fig.~\ref{mm_mri_generate}, we get $s_g$ through $G_s$ and fuse noise, then can concatenate the specified lesion label $l$. When selecting a lesion label, the randomly selected label may indicate a lesion that is not in the organ contour of the structural map. We used the mask corresponding to the structural map to filter out these labels that out of contour. Nextly, $G$ accepts the one-hot conditional matrix $one_hot(i)$ after encoding the fusion input, and then decodes the input to generate the modality $i$ image $x_{g,i}$. The lesion processor $G_{l,i}$ and the modality translation network $G_t$ train completedly in advance to provide the lesions generation guidance loss and the registration guidance loss for $G$.
 	
 	The loss items are as follows, where $d(x_{i})$ and $c(x_{i})$ are the true/false discrimination and category discrimination of the discriminator $D(x_i)$, $d(x_{g, i})$ and $c(x_{g,i})$ are the output of $D(x_{g,i})$, and $concat()$ is the concatenate function on feturemap channel. 
 	\begin{itemize}
@@ -210,79 +220,73 @@
 	\begin{equation}
 	\mathcal{L}_{p}(G)=\mathbb{E}_{s,l}[\sum\limits_{i=0}(\Vert{x_{g,i}-x_i}\Vert_{2}^{2}+\Vert{x_{g,i}\times m_i-x_{i}\times m_i}\Vert_{2}^{2})].
 	\end{equation}
-	In the training of SkrGAN\cite{96zhang2019skrgan:}, real sketch training and self-supervision loss are always adopted, which results in the lack of training samples and are more likely to over-fit and lack of adaptability to the composite sketch. This may eventually lead to the lack of diversity of the composite image. We used real structure diagrams for self-supervised pre-training and a large number of composite structure diagrams for adversarial training, which can not only accelerate the training process, but also enhance the generalization ability of model. Fig.~\ref{generated_mri} shows examples of images obtained from all stages on BRATS2015.
-	\begin{figure}
+	In SkrGAN\cite{96zhang2019skrgan:}, real sketch training and self-supervision loss are always adopted, which results in the lack of training samples and are more likely to over-fit and lack of adaptability to the composite sketch. This may eventually lead to the lack of diversity of the composite image. We used real structure diagrams for self-supervised pre-training and a large number of composite structure diagrams for adversarial training, which can not only accelerate the training process, but also enhance the generalization ability of model. Fig.~\ref{generated_mri} shows examples of images obtained from all stages on BRATS2015.
+	\begin{figure}[thbp!]
 		\centering
-		\includegraphics[width=0.6\linewidth]{figures/F_to_MRI}
+		\includegraphics[width=0.55\linewidth]{figures/F_to_MRI}
 		\caption{Multimodal images synthesis on BRATS2015.}
 		\label{generated_mri}
 	\end{figure}
 	\subsection{Translation and lesion processing training}
-	Before multimodal images synthesis, we need to perform lesion processing and translation training on real data. The losses of $G_t$,$D_t$ include adversarial loss same as  $G$,$D$ and cycle consistency loss in CycleGAN.
-	The losses of $G_{l,i}$ are 
-	\begin{equation}
-	\label{lesion segmentation loss}
-	\mathcal{L}_{seg}(G_{l,i})=\mathbb{E}_{l,x}[\Vert{l_i-G_{l,i}(x_{i})}\Vert_{2}^{2}].
-	\end{equation}
-	
+	Before multimodal images synthesis, we need to perform lesion processing and translation training on real data. The losses of $G_t$,$D_t$ include adversarial loss same as $G$,$D$ and cycle consistency loss in CycleGAN.
+	The loss of $G_{l,i}$ is same as in multimodal images synthesis stage, except that the real labels $l_i$ are used.
 	\section{Experiments}
 	\subsection{Datasets}
-	\textbf{BRATS2015\footnote{https://www.smir.ch/BRATS/Start2015}} includes registered T1,T2,T1c,Flair, 274 155$\times$240$\times$240 MRIs per modality with tumor segmentation labels. We divide the 3D MRIs to 2D.\textbf{Kaggle Chest X-Ray\footnote{https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia }} includes 5863 positive X-ray grayscale images of viral pneumonia, bacterial pneumonia and normal lungs from 384$\times$127 to 2772$\times$2304.\textbf{Kaggle Lung CT\footnote{https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/}} includes 267  CT grayscale images of transverse sections from chest to abdomen, with a size of 512$\times$512. \textbf{DRIVE\footnote{http://www.isi.uu.nl/Research/Databases/DRIVE/}} includes 20 565 $\times $584 color fundus retinal photos in both training set and test set and 20 corresponding retinal vascular annotations for training.\textbf{FIRE\footnote{https://projects.ics.forth.gr/cvrl/fire/}} includes 268 2912$\times$2912 color fundus retinal photos.\textbf{TC Lung CT\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}} includes 1470 512$\times$512 3D CT scans with detection label of 5 kinds of lesions. We only test for pulmonary nodules and using 3-channel image composed of three adjacent slices. All images are normalized and scaled to 512$\times$512.
+	\textbf{BRATS2015\footnote{https://www.smir.ch/BRATS/Start2015}} includes registered T1,T2,T1c,Flair, 274 155$\times$240$\times$240 MRIs per modality with tumor segmentation labels. We divide the 3D MRIs to 2D.\textbf{Kaggle Chest Xray\footnote{https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia }} includes 5863 positive Xray grayscale images from 384$\times$127 to 2772$\times$2304.\textbf{Kaggle Lung CT\footnote{https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/}} includes 267 CT grayscale images of transverse sections from chest to abdomen, with a size of 512$\times$512. \textbf{DRIVE\footnote{http://www.isi.uu.nl/Research/Databases/DRIVE/}} includes 20 565 $\times $584 color fundus retinal photos in both training set and test set and 20 corresponding retinal vascular annotations for training.\textbf{FIRE\footnote{https://projects.ics.forth.gr/cvrl/fire/}} includes 268 2912$\times$2912 color fundus retinal photos.\textbf{TC Lung CT\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}} includes 1470 512$\times$512 3D CT scans with detection label of 5 kinds of lesions. We only test for pulmonary nodules and using 3-channel image composed of three adjacent slices. All images are normalized and scaled to 512$\times$512.
 	
 	\subsection{Experiments settings}
 	Each experiment was comprehensively trained with more than 100 epochs. The learning rate is 1e-5 with 4 batch size. We use the Adam optimizer with beta1 of 0.5.
-	The state-of-the-art synthesis generated by SkrGAN\cite{96zhang2019skrgan:} was employed for benchmarking. We used multi-scale structural similarity (MS-SSIM) and FreshetInception distance (FID)\cite{148karras2017progressive} to assess the performance of synthetic medical images. Dice Score\cite {95dice1945measures} and mean square error (MSE) were used to evaluate the segmentation results. Sensitivity, Accuracy and area under the ROC curve (AUC) were used to assess vascular annotation results. Accuracy was used to evaluate the classification results of this study. The Average Precision (AP) was used to estimate the detection results. We averaged all the modal results on 2D images as our final result and kept the best results after at least four training sessions for each experiment.
+	The state-of-the-art synthesis generated by SkrGAN\cite{96zhang2019skrgan:} was employed for benchmarking. We used multi-scale structural similarity (MS-SSIM) and FreshetInception distance (FID)\cite{148karras2017progressive} to assess the performance of synthetic medical images. Dice Score\cite {95dice1945measures} and mean square error (MSE) were used to evaluate the segmentation results. Sensitivity, Accuracy and area under the ROC curve (AUC) were used to assess vascular annotation results. The Average Precision (AP) was used to estimate the detection results. We evaluated on  2D and kept the best results after at least four training.
 	
 	\subsection{Ablation experiments on BRATS2015}
-	\begin{table}[thbp!]
-		\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
-		\caption{Ablation experiments on BRATS2015}
-		\label{Ablation Experiment Setting on BRATS2015}
-		\centering
-		\resizebox{\textwidth}{15mm}{
-			\begin{tabular}{c|c|c|c|c|c|l}
-				%\toprule
-				\hline
-				Test		&\tabincell{c}{Input \\structural map} &\tabincell{c}{Fusion\\ noise} &\tabincell{c}{with $\mathcal{L}_{reg}$}   &\tabincell{c}{Input lesion \\label and with $\mathcal{L}_{les}$} &\tabincell{c}{Using mask select\\ lesion label} &MS-SSIM   \\
-				%\midrule
-				\hline
-				\tabincell{l}{A}	&$\times$	&$\times$	&$\times$	&$\times$	&$\times$ &0.504 \\
-				\tabincell{l}{B}	&$\surd$	&$\times$	&$\times$	&$\times$    &$\times$ &0.654\\
-				\tabincell{l}{C}	&$\surd$	&$\surd$	&$\times$	&$\times$	&$\times$ &0.671\\
-				\tabincell{l}{D}	&$\surd$	&$\surd$	&$\surd$	&$\times$	&$\times$ &0.674\\
-				\tabincell{l}{E}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\times$ &0.673\\
-				\tabincell{l}{F}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\surd$ &0.686\\
-				\hline
-				%\bottomrule
-			\end{tabular}
-		}
-	\end{table}
+	
 	Table~\ref{Ablation Experiment Setting on BRATS2015} shows the setting and results of the ablation experiments of our method.
 	Fig~\ref{ablation_and_seg} (a) shows examples of synthetic images generated in ablation experiments. 
 	\textbf{A} no contour from structural map, the generated image conforms to the features of MRI, but not to the structural features of the brain. 
 	\textbf{B} was poorly trained due to lack of a random sample.
 	\textbf{C} registration effect seems unsatisfactory, especially the edge details.
-	Lesions in \textbf{D} are random and exaggerated, which hardly match the input  label. 
+	Lesions in \textbf{D} are random and exaggerated, which hardly match the input label. 
 	Obviously, tumor in \textbf{E} is beyond the contours of the brain. 
 	\textbf{F} adopts the our complete scheme with best synthesis quality. The results show that our method is helpful to improve. However, the lesion labels need to be screened when they are added for lesion generation guidance.
-	\begin{figure}
+	\begin{table}[thbp!]
+		\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+		\caption{Ablation experiments on BRATS2015}
+		\label{Ablation Experiment Setting on BRATS2015}
 		\centering
-		\includegraphics[width=0.85\linewidth]{figures/ablation}
+		\resizebox{0.8\textwidth}{12mm}{
+			\begin{tabular}{c|c|c|c|c|c|l}
+				\hline
+				Test		&\tabincell{c}{Noise} &\tabincell{c}{Structural map} &\tabincell{c}{$\mathcal{L}_{reg}$}  &\tabincell{c}{ Lesion label, $\mathcal{L}_{les}$} &\tabincell{c}{Filter lesion label} &MS-SSIM  \\
+				\hline
+				\tabincell{l}{A}	&$\surd$	&$\times$	&$\times$	&$\times$	&$\times$ &0.504 \\
+				\tabincell{l}{B}	&$\times$	&$\surd$	&$\times$	&$\times$  &$\times$ &0.654\\
+				\tabincell{l}{C}	&$\surd$	&$\surd$	&$\times$	&$\times$	&$\times$ &0.671\\
+				\tabincell{l}{D}	&$\surd$	&$\surd$	&$\surd$	&$\times$	&$\times$ &0.674\\
+				\tabincell{l}{E}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\times$ &0.673\\
+				\tabincell{l}{F}	&$\surd$	&$\surd$	&$\surd$	&$\surd$	&$\surd$ &\textbf{0.686}\\
+				\hline
+			\end{tabular}
+		}
+	\end{table}
+	\begin{figure}[thbp!]
+		\centering
+		\includegraphics[width=0.75\linewidth]{figures/ablation}
 		\caption{(a) Synthetic MRIs of ablation experiments. (b) Segmentation results of synthetic MRI. }
 		\label{ablation_and_seg}
 	\end{figure}
-	\begin{table}
+	\begin{table}[thbp!]
 	\begin{center}
 		\caption{Lesion generation methods experiments.}
 		\label{label_test}
-		\begin{tabular}{llccc}
-			\hline	
-			Trainging Dataset &Test Dataset &MSE   &Dice score \\
-			\hline
-			real &real 	    &0.027          &0.915 \\							
-			real &synthetic	&\textbf{0.043} &\textbf{0.838} \\
-			\hline
-		\end{tabular}
+		\resizebox{0.48\textwidth}{6mm}{
+			\begin{tabular}{llccc}
+				\hline	
+				Trainging Dataset &Test Dataset &MSE  &Dice score \\
+				\hline
+				real &real 	  &0.027     &0.915 \\							
+				real &synthetic	&0.043 &0.838 \\
+				\hline
+		\end{tabular}}
 	\end{center}
 	\end{table}
 	\begin{table}[thbp!]
@@ -290,85 +294,80 @@
 	\begin{center}
 		\caption{Evaluation of synthetic images quality (A)}
 		\label{evalu_on_all_dataset1}
-		\resizebox{\textwidth}{10mm}{
+		\resizebox{0.95\textwidth}{8.5mm}{
 			\begin{tabular}{ll|llllll}
 				\hline
 				Dataset &Metric &Ours &SkrGAN\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:} &ACGAN\cite{98odena2016conditional,96zhang2019skrgan:} &WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:} &PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}\\
 				\hline
 				\multirow{2}*{\tabincell{l}{\textbf{Kaggle}\\\textbf{Chest Xray}}}
-				&MS-SSIM $\uparrow$ &0.597 &0.506 &0.269 &0.301 &0.401 &0.493 \\
-				&FID $\downarrow$ &102.5 &114.6 &260.3 &235.2 &300.7 &124.2\\
+				&MS-SSIM $\uparrow$ &\textbf{0.597} &0.506 &0.269 &0.301 &0.401 &0.493 \\
+				&FID $\downarrow$ &\textbf{102.5} &114.6 &260.3 &235.2 &300.7 &124.2\\
 				\hline
 				\multirow{2}*{\tabincell{l}{\textbf{Kaggle}\\\textbf{Lung CT}}}
-				&MS-SSIM $\uparrow$ &0.473 &0.359 &0.199 &0.235 &0.277 &0.328 \\
-				&FID $\downarrow$ &66.91 &79.97 &285.0 &222.5 &349.1 &91.89\\
+				&MS-SSIM $\uparrow$ &\textbf{0.473} &0.359 &0.199 &0.235 &0.277 &0.328 \\
+				&FID $\downarrow$ &\textbf{66.91} &79.97 &285.0 &222.5 &349.1 &91.89\\
 				\hline
 		\end{tabular}}
 	\end{center}
-	\end{table}
+\end{table}
+	\subsection{Evaluation of lesion effectiveness on BRATS2015}
+	\label{label gen methods tests}
+	As shown in Table~\ref{label_test} and Fig.~\ref{ablation_and_seg} (b), the splitter trained with real data can be used for the synthesized data, indicating that the synthesized data and the real data have a very high degree of similarity, and the synthesized lesions and the real lesions are similar enough for the splitter to recognize the synthetic lesions and non-focal parts,suggesting that synthetic lesions are effective.
 	\begin{table}[thbp!]
 		\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 		\begin{center}
 			\caption{Evaluation of synthetic images quality (B)}
 			\label{evalu_on_all_dataset2}
-			\begin{tabular}{ll|llll}
-				\hline
-				Dataset &Metric &Ours$^+$ &Ours &SkrGAN$^*$ &Basic GAN\\
-				\hline
-				\multirow{2}*{\tabincell{l}{\textbf{DRIVE+FIRE}\\\textbf{Color Fundus}}}
-				&MS-SSIM $\uparrow$  &-     &0.607 &0.584 &0.392\\
-				&FID $\downarrow$      &-     &30.13 &37.91 &227.41\\
-				\hline
-				\multirow{2}*{\tabincell{l}{\textbf{BRATS2015}\\\textbf{MRI}}}
-				&MS-SSIM $\uparrow$  &0.692 &0.686 &0.653 &0.504\\
-				&FID $\downarrow$      &20.15 &21.87 &28.76 &124.53\\
-				\hline
-				\multirow{2}*{\tabincell{l}{\textbf{TC Lung }\textbf{CT}}}
-				&MS-SSIM $\uparrow$  &-     &0.676 &0.667 &0.543\\
-				&FID $\downarrow$      &-     &27.40 &29.81 &113.65\\
-				\hline
-			\end{tabular}
+			\resizebox{0.6\textwidth}{12mm}{
+				\begin{tabular}{ll|llll}
+					\hline
+					Dataset &Metric &Our tumor &Ours &SkrGAN$^*$ &Basic GAN\\
+					\hline
+					\multirow{2}*{\tabincell{l}{\textbf{DRIVE+FIRE}\\\textbf{Color Fundus}}}
+					&MS-SSIM $\uparrow$ &-   &\textbf{0.607} &0.584 &0.392\\
+					&FID $\downarrow$   &-   &\textbf{30.13} &37.91 &227.41\\
+					\hline
+					\multirow{2}*{\tabincell{l}{\textbf{BRATS2015}\\\textbf{MRI}}}
+					&MS-SSIM $\uparrow$ &0.692 &\textbf{0.686} &0.653 &0.504\\
+					&FID $\downarrow$   &20.15 &\textbf{21.87} &28.76 &124.53\\
+					\hline
+					\multirow{2}*{\tabincell{l}{\textbf{TC Lung }\textbf{CT}}}
+					&MS-SSIM $\uparrow$ &-   &\textbf{0.676} &0.667 &0.543\\
+					&FID $\downarrow$   &-   &\textbf{27.40} &29.81 &113.65\\
+					\hline
+			\end{tabular}}
 			\footnotesize
-			\item[+] Evaluation of synthetic tumor segmented using label. 
 			\item[*] The result of reproduce SkrGAN using the inverse binary image of our structure map.
 		\end{center}
 	\end{table}
-	\subsection{Evaluation of lesion effectiveness on BRATS2015}
-	\label{label gen methods tests}
-	As shown in Table~\ref{label_test} and Fig.~\ref{ablation_and_seg} (b), the splitter trained with real data can be used for the synthesized data, indicating that the synthesized data and the real data have a very high degree of similarity, and the synthesized lesions and the real lesions are similar enough for the splitter to recognize the synthetic lesions and non-focal parts,suggesting that synthetic lesions are effective.
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.92\linewidth]{figures/evalu_compare}
-		\caption{Visual contrast of synthetic images.(a)-(d) are synthetic images of PGGAN\cite{100karras2017progressive,96zhang2019skrgan:},WGAN \cite{99arjovsky2017wasserstein,96zhang2019skrgan:},DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:},ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}.(e) Synthetic image of SkrGAN\cite{96zhang2019skrgan:}, the input sketch and the sketch binary inversion image.(f) Our synthetic image, the input structural map fusioned noise and the original structural map.}
-		\label{evalu_compare}
-	\end{figure}
 	\subsection{Evaluation of synthetic images quality }
 	As shown in Table~\ref{evalu_on_all_dataset1}-~\ref{evalu_on_all_dataset2}, our method was quantitatively evaluated on various datasets and compared with the state-of-the-art methods. Combined with the results in tables and the visual comparison in Fig.~\ref{evalu_compare}, the quality of the composite image input with structural feature diagram is much better than that of the composite image input with random noise. The model generalized better when the structure feature map is processed by fusion noise versus those processed without fusion noise or treated by binary inversion. Self-supervised pre-training can improve the quality of composite image obviously on small data sets. Compared with the sketch of SkrGAN and other random noise input, the structural feature map, self-supervised pre-training, lesion loss and other measures that we adopted by us make the synthetic medical image in this study of higher quality and closer to the real image.
-	\begin{table}
+	\begin{table}[thbp!]
 		\begin{center}
-			{\caption{Synthetic data availability verification on BRATS2015 tumor  segmentor.}\label{availability_test}}
+			{\caption{Synthetic data availability verification on BRATS2015 tumor segmentor.}\label{availability_test}}
+			\resizebox{0.5\textwidth}{24.5mm}{
 			\begin{tabular}{llllcc}
 				\hline
-				Real &Synthetic & Enhanced & Mix  & MSE &Dice score\\
+				Real &Synthetic & Enhanced & Mix & MSE &Dice score\\
 				\hline		
-				$\times$1      & 0 		&0 			&- &0.027 &0.915 \\
-				0 	 	        & $\times$1  	&0 			&- &0.205 &0.708 \\	
-				$\times$20\% 	& $\times$80\% 	&0  		&$\mathcal{M}$ &0.032 &0.903 \\
-				$\times$80\% 	& $\times$20\% 	&0  		&$\mathcal{M}$ &0.028 &0.913 \\
-				$\times$1 	 	& $\times$20\% &0  		&$\mathcal{M}$ &0.025 &0.921 \\
-				$\times$1 	 	& $\times$50\% &0  		&$\mathcal{M}$ &\textbf{0.021} &\textbf{0.939} \\
-				$\times$1 	 	& $\times$1    &0   		&$\mathcal{M}$ &0.022 &0.934 \\
-				$\times$1 	 	&0 		&  $\times$20\%	 	&$\mathcal{M}$ &0.027 &0.916 \\
-				$\times$1 	 	&0 		&  $\times$50\% 	&$\mathcal{M}$ &0.025 &0.920 \\
-				$\times$1 	 	&0 		&  $\times$1    &$\mathcal{M}$ &0.025 &0.919 \\
-				$\times$1 	 	& $\times$1 	&0  		&$\mathcal{R}$ &0.195 &0.795 \\
-				$\times$1 	 	& $\times$1 	&0  		&$\mathcal{S}$ &\textbf{0.021} &\textbf{0.940}
+				$\times$1   & 0 		&0 			&- &0.027 &0.915 \\
+				0 	 	    & $\times$1 	&0 			&- &0.205 &0.708 \\	
+				$\times$20\% 	& $\times$80\% 	&0 		&$\mathcal{M}$ &0.032 &0.903 \\
+				$\times$80\% 	& $\times$20\% 	&0 		&$\mathcal{M}$ &0.028 &0.913 \\
+				$\times$1 	 	& $\times$20\% &0 		&$\mathcal{M}$ &0.025 &0.921 \\
+				$\times$1 	 	& $\times$50\% &0 		&$\mathcal{M}$ &\textbf{0.021} &\textbf{0.939} \\
+				$\times$1 	 	& $\times$1  &0  		&$\mathcal{M}$ &0.022 &0.934 \\
+				$\times$1 	 	&0 		& $\times$20\%	 	&$\mathcal{M}$ &0.027 &0.916 \\
+				$\times$1 	 	&0 		& $\times$50\% 	&$\mathcal{M}$ &0.025 &0.920 \\
+				$\times$1 	 	&0 		& $\times$1  &$\mathcal{M}$ &0.025 &0.919 \\
+				$\times$1 	 	& $\times$1 	&0 		&$\mathcal{R}$ &0.195 &0.795 \\
+				$\times$1 	 	& $\times$1 	&0 		&$\mathcal{S}$ &\textbf{0.021} &\textbf{0.940}
 				\\
 				\hline
 				\multicolumn{6}{l}{$\mathcal{M}:$ random mixing\ \
 					$\mathcal{S}:$ synthetic first\ \
 					$\mathcal{R}:$ real first}
-			\end{tabular}
+			\end{tabular}}
 		\end{center}
 	\end{table}
 	\begin{table}[thbp!]
@@ -376,17 +375,18 @@
 	\begin{center}
 		\caption{Synthetic data availability verification on DRIVE vascular segmentor.}
 		\label{DRIVE_availability_test}
+		\resizebox{0.8\textwidth}{10mm}{
 		\begin{tabular}{clccc}
 			\hline
-			Train Data  &Test Data &Sensitivity &Accuracy &AUC\\
+			Train Data &Test Data &Sensitivity &Accuracy &AUC\\
 			\hline
-			\tabincell{c}{Training Set}  	 	&  Test Set 	&0.7781 &0.9477 &0.9705
+			\tabincell{c}{Training Set} 	 	& Test Set 	&0.7781 &0.9477 &0.9705
 			\\
-			\tabincell{c}{Training Set+2000 SkrGAN Synthetic Images}	 &   Test Set 	& 0.8464 &0.9513 &0.9762 \\
-			\tabincell{c}{Training Set+2000 SkrGAN$^*$ Synthetic Images}	 &  Test Set 	& 0.8297 &0.9428 &0.9732 \\
-			\tabincell{c}{Training Set+2000 Our Synthetic Images}	&  Test Set 	& 0.8416 &0.9518 &0.9749 \\	
+			\tabincell{c}{Training Set+2000 SkrGAN Synthetic Images}	 &  Test Set 	& \textbf{0.8464} &0.9513 &\textbf{0.9762} \\
+			\tabincell{c}{Training Set+2000 SkrGAN$^*$ Synthetic Images}	 & Test Set 	& 0.8297 &0.9428 &0.9732 \\
+			\tabincell{c}{Training Set+2000 Our Synthetic Images}	& Test Set 	&0.8416&\textbf{0.9518 }&0.9749 \\	
 			\hline
-		\end{tabular}
+		\end{tabular}}
 		\footnotesize
 		\item[*] The result of reproduce SkrGAN using the inverse binary image of our structure map.
 	\end{center}
@@ -396,23 +396,29 @@
 	\begin{center}
 		\caption{Synthetic data availability verification on TC Lung CT pulmonary nodule detector.}
 		\label{TC_availability_test}
+		\resizebox{0.85\textwidth}{6.4mm}{
 		\begin{tabular}{clllc}
 			\hline
-			Train Data  &Test Data & AP \\
+			Train Data &Test Data & AP \\
 			\hline
-			\tabincell{c}{TC Lung CT Training Set}  	 	&\tabincell{c}{TC Lung CT Test Set} 	&0.574 
+			\tabincell{c}{TC Lung CT Training Set} 	 	&\tabincell{c}{TC Lung CT Test Set} 	&0.574 
 			\\
-			\tabincell{c}{TC Lung CT Training Set + 20000 Synthetic Images}	&\tabincell{c}{TC Lung CT Test Set}  	& 0.592 \\	
+			\tabincell{c}{TC Lung CT Training Set + 20000 Synthetic Images}	&\tabincell{c}{TC Lung CT Test Set} 	&\textbf{ 0.592} \\	
 			\hline
-		\end{tabular}
+		\end{tabular}}
 	\end{center}
 	\end{table}
 	\subsection{Evaluation of synthetic data availability}
-	As shown in Table~\ref{availability_test}, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training with the same iterations, and finally evaluate the segmentation ability of the model on the real BRATS2015 test dataset. We set up three data mixing modes: random mixing, real data training first, and synthetic data training first. As reported in Table~\ref{availability_test}, the performance of our synthetic data augmentation is much better than the usual data augmentation. If there is a large quantity of real data, a small quantity of synthetic data can be used for augmentation. Alternatively, a large quantity of synthetic data can be used for pre-training and then training on real data. If there are fewer real data, a large number of synthetic data can be used for pre-training, and then, fine-tuning can be performed on a small quantity of real data, whose results can compete with the results on complete real data.  We do not recommend using synthetic data completely for training or using synthetic data for supplementary training.
-	
-	Similarly in Table~\ref{DRIVE_availability_test}-\ref{TC_availability_test}, we performed other medical image processing tasks with the medical images synthesized on other datasets. The results show that our synthesized data can also improve the generalization ability of the model in these tasks, which indicates that our synthesized data are available and the synthesized lesions are effective in these synthesis.
+	As shown in Table~\ref{availability_test}, we mixed real BRATS2015 training data with BRATS synthetic data in different amounts, then use the mixed dataset for segmentation training with the same iterations, and finally evaluate the segmentation ability of the model on the real BRATS2015 test dataset. We set up three data mixing modes: random mixing, real data training first, and synthetic data training first. As reported in Table~\ref{availability_test}, the performance of our synthetic data augmentation is much better than the usual data augmentation. If there is a large quantity of real data, a small quantity of synthetic data can be used for augmentation. Alternatively, a large quantity of synthetic data can be used for pre-training and then training on real data. If there are fewer real data, a large number of synthetic data can be used for pre-training, and then, fine-tuning can be performed on a small quantity of real data, whose results can compete with the results on complete real data. We do not recommend using synthetic data completely for training or using synthetic data for supplementary training.
+	\begin{figure}[thbp!]
+		\centering
+		\includegraphics[width=0.85\linewidth]{figures/evalu_compare}
+		\caption{Visual contrast of synthetic images.(a)-(d) are synthetic images of PGGAN\cite{100karras2017progressive,96zhang2019skrgan:},WGAN \cite{99arjovsky2017wasserstein,96zhang2019skrgan:},DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:},ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}.(e) Synthetic image of SkrGAN\cite{96zhang2019skrgan:}, the input sketch and the sketch binary inversion image.(f) Our synthetic image, the input structural map fusioned noise and the original structural map.}
+		\label{evalu_compare}
+	\end{figure}
+	Similarly in Table~\ref{DRIVE_availability_test}-\ref{TC_availability_test}, we performed other medical image processing tasks with the medical images synthesized on other datasets. The results show that our synthesized data can also improve the generalization ability of the model in these tasks, which indicates that our synthesized data are available and the synthesized lesions are effective.
 	\section{Conclustion}
-	In this paper, Sobel operator is used to propose a clearer extraction method of medical image structural map, which requires no training and additional labels, and using a VAE to learn the mapping between normal distribution and structure map distribution. The multimodal synthesis based on the structural map can synthesize the medical image that conforms to the physiological structure. The proposed lesion generation guidance loss and registration supervision loss ensure the synthesis of the specified lesion and multimodal registration. Experimental results on multiple datasets show that the synthetic lesions are effective, and the synthetic medical images can be used as enhancement data to enhance the performance of the model. In the future, we will further explore the direct synthesis of 3D images.
+	In this paper, a clearer extraction method of medical image structural map based Sobel operator is proposed, which requires no training or additional labels, and take advantage of VAE to learn the mapping between normal distribution and structure map distribution. The multimodal synthesis based on structural maps can synthesize the medical image that conforms to physiological structure. The well designed lesion generation guidance loss and registration supervision loss ensure the synthesis of the specified lesion and multimodal registration. Experimental results on multiple datasets show that the synthetic lesions are effective, and the synthetic medical images can be used as pre-trained data or enhanced data to improve the performance of the model. In the future, we will further explore the direct synthesis of 3D images.
 	
 	%
 	% ---- Bibliography ----
