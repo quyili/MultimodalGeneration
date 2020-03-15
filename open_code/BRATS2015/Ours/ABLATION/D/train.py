@@ -106,7 +106,7 @@ def train():
                         y_0 = tf.placeholder(tf.float32, shape=input_shape)
                         z_0 = tf.placeholder(tf.float32, shape=input_shape)
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_0 = gan.model(l_0, l_m_0, m_0,  x_0, y_0, z_0, w_0)
+                        loss_list_0 = gan.model(l_0, l_m_0, m_0, x_0, y_0, z_0, w_0)
                         tensor_name_dirct_0 = gan.tenaor_name
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
@@ -124,7 +124,7 @@ def train():
                         y_1 = tf.placeholder(tf.float32, shape=input_shape)
                         z_1 = tf.placeholder(tf.float32, shape=input_shape)
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_1 = gan.model(l_1, l_m_1, m_1,  x_1, y_1, z_1, w_1)
+                        loss_list_1 = gan.model(l_1, l_m_1, m_1, x_1, y_1, z_1, w_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -158,7 +158,7 @@ def train():
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_3 = gan.model(l_3, l_m_3, m_3,  x_3, y_3, z_3, w_3)
+                        loss_list_3 = gan.model(l_3, l_m_3, m_3, x_3, y_3, z_3, w_3)
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -199,7 +199,6 @@ def train():
             else:
                 sess.run(tf.global_variables_initializer())
                 step = 0
-
 
             sess.graph.finalize()
             logging.info("start step:" + str(step))

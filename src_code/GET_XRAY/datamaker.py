@@ -15,17 +15,19 @@ def mover(
     except os.error:
         pass
 
-    index_files =  os.listdir(SRC_PATH)
+    index_files = os.listdir(SRC_PATH)
     for file in index_files:
-        L=np.zeros([512,512])
+        L = np.zeros([512, 512])
         if "bacteria" in file:
             L = L + 1
         elif "virus" in file:
             L = L + 2
-        cmd='copy ' + SRC_PATH + file + ' ' + SAVE_X_PATH + file
+        cmd = 'copy ' + SRC_PATH + file + ' ' + SAVE_X_PATH + file
         print(cmd)
         os.system(cmd)
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(L.astype("float32")), SAVE_L_PATH + file.replace(".jpeg", ".tiff"))
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(L.astype("float32")),
+                             SAVE_L_PATH + file.replace(".jpeg", ".tiff"))
+
 
 if __name__ == '__main__':
     mover(

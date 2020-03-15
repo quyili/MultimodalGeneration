@@ -12,7 +12,7 @@ class GEncoder:
         self.is_training = is_training
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
-        self.units=units
+        self.units = units
 
     def __call__(self, EC_input):
         """
@@ -30,29 +30,29 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv0')
                 norm0 = ops._norm(conv0, self.is_training, self.norm)
                 relu0 = ops.relu(norm0)
             # pool1
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=relu0, filters= self.ngf, kernel_size=5,
+                conv1 = tf.layers.conv2d(inputs=relu0, filters=self.ngf, kernel_size=5,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
             # w/2,h/2
             with tf.variable_scope("conv2", reuse=self.reuse):
-                conv2 = tf.layers.conv2d(inputs=relu1, filters=2 * self.ngf, kernel_size=3, 
-                                         strides=1, 
+                conv2 = tf.layers.conv2d(inputs=relu1, filters=2 * self.ngf, kernel_size=3,
+                                         strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
@@ -63,7 +63,7 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv3')
                 norm3 = ops._norm(conv3, self.is_training, self.norm)
                 relu3 = ops.relu(norm3)
@@ -74,17 +74,17 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv4')
                 norm4 = ops._norm(conv4, self.is_training, self.norm)
                 relu4 = ops.relu(norm4)
             with tf.variable_scope("conv5", reuse=self.reuse):
-                conv5 = tf.layers.conv2d(inputs=relu4, filters=4 * self.ngf, kernel_size=3, 
+                conv5 = tf.layers.conv2d(inputs=relu4, filters=4 * self.ngf, kernel_size=3,
                                          strides=self.slice_stride,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv5')
                 norm5 = ops._norm(conv5, self.is_training, self.norm)
                 relu5 = ops.relu(norm5)
@@ -95,7 +95,7 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv6')
                 norm6 = ops._norm(conv6, self.is_training, self.norm)
                 relu6 = ops.relu(norm6)
@@ -106,7 +106,7 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv7')
                 norm7 = ops._norm(conv7, self.is_training, self.norm)
                 relu7 = ops.relu(norm7)
@@ -117,7 +117,7 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv8')
                 norm8 = ops._norm(conv8, self.is_training, self.norm)
                 relu8 = ops.relu(norm8)
@@ -128,18 +128,18 @@ class GEncoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv9')
                 norm9 = ops._norm(conv9, self.is_training, self.norm)
                 relu9 = ops.relu(norm9)
             # pool5
             with tf.variable_scope("conv10", reuse=self.reuse):
-                conv10 = tf.layers.conv2d(inputs=relu9, filters= 2 * self.ngf, kernel_size=3,
+                conv10 = tf.layers.conv2d(inputs=relu9, filters=2 * self.ngf, kernel_size=3,
                                           strides=1,
                                           padding="SAME",
                                           activation=None,
                                           kernel_initializer=tf.random_normal_initializer(
-                                              mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                              mean=0.0, stddev=0.02, dtype=tf.float32),
                                           bias_initializer=tf.constant_initializer(0.0), name='conv10')
                 norm10 = ops._norm(conv10, self.is_training, self.norm)
                 relu10 = ops.relu(norm10)

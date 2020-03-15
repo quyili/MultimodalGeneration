@@ -3,6 +3,7 @@ import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -127,7 +128,6 @@ class GAN:
         y_g_t_by_w = self.G_T(w_g, cy_code)
         z_g_t_by_w = self.G_T(w_g, cz_code)
 
-
         j_x_g, j_x_g_c = self.D_X(x_g)
         j_y_g, j_y_g_c = self.D_X(y_g)
         j_z_g, j_z_g_c = self.D_X(z_g)
@@ -165,7 +165,6 @@ class GAN:
         G_loss += self.mse_loss(j_y_g_c, cy) * 50 * 2
         G_loss += self.mse_loss(j_z_g_c, cz) * 50 * 2
         G_loss += self.mse_loss(j_w_g_c, cw) * 50 * 2
-
 
         G_loss += self.mse_loss(label_expand[:, :, :, 0],
                                 l_g_prob_by_x[:, :, :, 0]) * 0.5 * 5 \
@@ -211,7 +210,6 @@ class GAN:
                   + self.mse_loss(label_expand[:, :, :, 4],
                                   l_g_prob_by_w[:, :, :, 4]) * 25 * 5
 
-
         G_loss += self.mse_loss(x_g, x_g_t_by_y) * 20  # + self.ssim_loss(x_g, x_g_t_by_y) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_z) * 20  # + self.ssim_loss(x_g, x_g_t_by_z) * 2
         G_loss += self.mse_loss(x_g, x_g_t_by_w) * 20  # + self.ssim_loss(x_g, x_g_t_by_w) * 2
@@ -240,7 +238,6 @@ class GAN:
         G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z) * 5  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
         G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z) * 5  # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
 
-
         self.image_list["mask"] = mask
         self.image_list["f"] = f
         self.image_list["new_f"] = new_f
@@ -261,7 +258,6 @@ class GAN:
         self.image_list["l_g_by_y"] = l_g_by_y
         self.image_list["l_g_by_z"] = l_g_by_z
         self.image_list["l_g_by_w"] = l_g_by_w
-
 
         self.image_list["y_g_t_by_x"] = y_g_t_by_x
         self.image_list["z_g_t_by_x"] = z_g_t_by_x
@@ -298,12 +294,12 @@ class GAN:
             ,
                 self.D_X.variables
             ,
-                self.G_T.variables+
-                self.G_L_X.variables+
-                self.G_L_Y.variables+
-                self.G_L_Z.variables+
+                self.G_T.variables +
+                self.G_L_X.variables +
+                self.G_L_Y.variables +
+                self.G_L_Z.variables +
                 self.G_L_W.variables
-             ]
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):

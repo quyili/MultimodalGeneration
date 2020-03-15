@@ -4,7 +4,7 @@ import ops as ops
 
 
 class Discriminator:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0,output_channl=1):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
         self.is_training = is_training
         self.norm = norm
@@ -12,7 +12,7 @@ class Discriminator:
         self.ngf = ngf
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
-        self.output_channl=output_channl
+        self.output_channl = output_channl
 
     def __call__(self, D_input):
         """
@@ -76,12 +76,11 @@ class Discriminator:
                 relu4_1 = ops.relu(norm4_1)
             with tf.variable_scope("conv5_1", reuse=self.reuse):
                 output = tf.layers.conv2d(inputs=relu4_1, filters=self.output_channl, kernel_size=3, strides=1,
-                                            padding="SAME",
-                                            activation=None,
-                                            kernel_initializer=tf.random_normal_initializer(
-                                                mean=0.0, stddev=0.02, dtype=tf.float32),
-                                            bias_initializer=tf.constant_initializer(0.0), name='conv5_1')
-
+                                          padding="SAME",
+                                          activation=None,
+                                          kernel_initializer=tf.random_normal_initializer(
+                                              mean=0.0, stddev=0.02, dtype=tf.float32),
+                                          bias_initializer=tf.constant_initializer(0.0), name='conv5_1')
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)

@@ -9,9 +9,10 @@ from skimage import transform
 PATH = "E:/project/MultimodalGeneration/data/SWM/train/F"
 SAVE_F = "E:/project/MultimodalGeneration/data/SWM/train/NEW_F"
 NUM = "21_training"
-sigma=0.7
-alpha=0.3
-beta=1
+sigma = 0.7
+alpha = 0.3
+beta = 1
+
 
 def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     kernel = np.zeros([kernel_size, kernel_size])
@@ -29,10 +30,11 @@ def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     sum_val = 1 / sum_val
     return kernel * sum_val
 
+
 def gaussian_blur(image, kernel, kernel_size, cdim=3):
     # kernel as placeholder variable, so it can change
     outputs = []
-    pad_w = (kernel_size*kernel_size - 1) // 2
+    pad_w = (kernel_size * kernel_size - 1) // 2
     padded = tf.pad(image, [[0, 0], [pad_w, pad_w], [pad_w, pad_w], [0, 0]], mode='REFLECT')
     for channel_idx in range(cdim):
         data_c = padded[:, :, :, channel_idx:(channel_idx + 1)]
@@ -42,6 +44,7 @@ def gaussian_blur(image, kernel, kernel_size, cdim=3):
         data_c = tf.nn.conv2d(data_c, g, [1, 1, 1, 1], 'VALID')
         outputs.append(data_c)
     return tf.concat(outputs, axis=3)
+
 
 def norm(input):
     output = (input - tf.reduce_min(input, axis=[1, 2, 3])
@@ -61,9 +64,9 @@ with graph.as_default():
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(
-        SimpleITK.ReadImage(PATH+"/" + NUM + ".tif")).astype(
+        SimpleITK.ReadImage(PATH + "/" + NUM + ".tif")).astype(
         'float32')
     input_x = transform.resize(np.asarray(input_x), [512, 512, 1])
-    y_ = sess.run(y,feed_dict={x: np.asarray([input_x]) })
+    y_ = sess.run(y, feed_dict={x: np.asarray([input_x])})
     y_ = signal.medfilt2d(np.asarray(y_)[0, :, :, 0], kernel_size=beta)
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(y_), SAVE_F + "/" + NUM + ".tiff")

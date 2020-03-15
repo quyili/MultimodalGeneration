@@ -24,9 +24,9 @@ tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/train/M', 'Y
 tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/X', 'X files for training')
 tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/L', 'Y files for training')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/F', 'Y files for training')
-tf.flags.DEFINE_string('M_test',  '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/M', 'Y files for training')
+tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/M', 'Y files for training')
 
-tf.flags.DEFINE_string('load_model',None,
+tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
@@ -36,8 +36,8 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 17148, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
-tf.flags.DEFINE_string('load_lp_model',None,'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
-
+tf.flags.DEFINE_string('load_lp_model', None,
+                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 
 
 def mean(list):
@@ -57,13 +57,14 @@ def random(n, h, w, c):
 
 
 def mynorm(input):
-    if (np.max(input) - np.min(input))!=0:
+    if (np.max(input) - np.min(input)) != 0:
         output = (input - np.min(input)
                   ) / (np.max(input) - np.min(input))
     else:
         # print("单值图：",np.max(input))
-        output = (input-input) #+1.0
+        output = (input - input)  # +1.0
     return output
+
 
 def save_images(image_dirct, checkpoints_dir, file_index=""):
     for key in image_dirct:
@@ -78,27 +79,29 @@ def save_image(image, name, dir="./samples", form=".tiff"):
         pass
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image), dir + "/" + name + form)
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=True):
-    train_range = len(Label_train_files)
-    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
-    L_img = SimpleITK.ReadImage(file_name )
-    L_arr= SimpleITK.GetArrayFromImage(L_img)
 
-    if  len(L_arr.shape)==2 :
-        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
-    elif  L_arr.shape[2]==1 :
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
-    elif  L_arr.shape[2]==3:
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
-    if out_size== None:
-        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
+def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form="", norm=True):
+    train_range = len(Label_train_files)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, out_form)
+    L_img = SimpleITK.ReadImage(file_name)
+    L_arr = SimpleITK.GetArrayFromImage(L_img)
+
+    if len(L_arr.shape) == 2:
+        img = cv2.merge([L_arr[:, :], L_arr[:, :], L_arr[:, :]])
+    elif L_arr.shape[2] == 1:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 0], L_arr[:, :, 0]])
+    elif L_arr.shape[2] == 3:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 1], L_arr[:, :, 2]])
+    if out_size == None:
+        img = cv2.resize(img, (FLAGS.image_size[0], FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:FLAGS.image_size[2]].astype('float32')
     else:
-        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32')
-    if norm==True:
-        img=mynorm(img)
+        img = cv2.resize(img, (out_size[0], out_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:out_size[2]].astype('float32')
+    if norm == True:
+        img = mynorm(img)
     return img
+
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -161,10 +164,10 @@ def train():
                     f_0 = tf.placeholder(tf.float32, shape=input_shape)
                     m_0 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_0,image_list_0 = gan.model(
-                                                        l_0,
-                                                        f_0, m_0, x_0)
-                    j_list_0 =  gan.judge_list
+                    loss_list_0, image_list_0 = gan.model(
+                        l_0,
+                        f_0, m_0, x_0)
+                    j_list_0 = gan.judge_list
                     tensor_name_dirct_0 = gan.tenaor_name
                     variables_list_0 = gan.get_variables()
                     G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
@@ -178,9 +181,9 @@ def train():
                     f_1 = tf.placeholder(tf.float32, shape=input_shape)
                     m_1 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_1,image_list_1 = gan.model(
-                                                        l_1,
-                                                        f_1, m_1, x_1)
+                    loss_list_1, image_list_1 = gan.model(
+                        l_1,
+                        f_1, m_1, x_1)
                     variables_list_1 = gan.get_variables()
                     G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                     D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -193,9 +196,9 @@ def train():
                     f_2 = tf.placeholder(tf.float32, shape=input_shape)
                     m_2 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_2,image_list_2 = gan.model(
-                                                        l_2,
-                                                        f_2, m_2, x_2)
+                    loss_list_2, image_list_2 = gan.model(
+                        l_2,
+                        f_2, m_2, x_2)
                     variables_list_2 = gan.get_variables()
                     G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                     D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
@@ -208,9 +211,9 @@ def train():
                     f_3 = tf.placeholder(tf.float32, shape=input_shape)
                     m_3 = tf.placeholder(tf.float32, shape=input_shape)
 
-                    loss_list_3,image_list_3 = gan.model(
-                                                        l_3,
-                                                        f_3, m_3, x_3)
+                    loss_list_3, image_list_3 = gan.model(
+                        l_3,
+                        f_3, m_3, x_3)
                     variables_list_3 = gan.get_variables()
                     G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                     D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -234,7 +237,8 @@ def train():
         saver = tf.train.Saver()
         variables_list = gan.get_variables()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,
+                                                           gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
 
             sess.run(tf.global_variables_initializer())
             if FLAGS.load_model is not None:
@@ -259,7 +263,7 @@ def train():
                 step = 0
 
             if FLAGS.load_lp_model is not None:
-                seg_latest_checkpoint = tf.train.latest_checkpoint("checkpoints/" +FLAGS.load_lp_model)
+                seg_latest_checkpoint = tf.train.latest_checkpoint("checkpoints/" + FLAGS.load_lp_model)
                 seg_saver = tf.train.Saver(variables_list[2])
                 seg_saver.restore(sess, seg_latest_checkpoint)
 
@@ -284,7 +288,7 @@ def train():
                     for b in range(FLAGS.batch_size):
                         train_m_arr = read_file(FLAGS.M, f_train_files, index)
                         train_f_arr = read_file(FLAGS.F, f_train_files, index)
-                        train_l_arr = read_file(FLAGS.L, f_train_files, index,inpu_form=".mha",out_form=".tiff")
+                        train_l_arr = read_file(FLAGS.L, f_train_files, index, inpu_form=".mha", out_form=".tiff")
                         train_x_arr = read_file(FLAGS.X, f_train_files, index)
 
                         train_true_l.append(train_l_arr)
@@ -305,20 +309,32 @@ def train():
                             m_0: np.asarray(train_true_m)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
                             x_0: np.asarray(train_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
 
-                            l_1: np.asarray(train_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                            f_1: np.asarray(train_true_f)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                            m_1: np.asarray(train_true_m)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_1: np.asarray(train_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_1: np.asarray(train_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            f_1: np.asarray(train_true_f)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            m_1: np.asarray(train_true_m)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            x_1: np.asarray(train_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
 
-                            l_2: np.asarray(train_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                            f_2: np.asarray(train_true_f)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                            m_2: np.asarray(train_true_m)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_2: np.asarray(train_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_2: np.asarray(train_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            f_2: np.asarray(train_true_f)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            m_2: np.asarray(train_true_m)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            x_2: np.asarray(train_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
 
-                            l_3: np.asarray(train_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                            f_3: np.asarray(train_true_f)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                            m_3: np.asarray(train_true_m)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_3: np.asarray(train_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_3: np.asarray(train_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            f_3: np.asarray(train_true_f)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            m_3: np.asarray(train_true_m)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            x_3: np.asarray(train_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
                         })
                     train_loss_list.append(train_losses)
                     logging.info(
@@ -351,9 +367,10 @@ def train():
                             val_true_m = []
                             val_true_x = []
                             for b in range(FLAGS.batch_size):
-                                val_m_arr = read_file(FLAGS.M_test, f_val_files,val_index)
+                                val_m_arr = read_file(FLAGS.M_test, f_val_files, val_index)
                                 val_f_arr = read_file(FLAGS.F_test, f_val_files, val_index)
-                                val_l_arr = read_file(FLAGS.L_test, f_val_files, val_index,inpu_form=".mha",out_form=".tiff")
+                                val_l_arr = read_file(FLAGS.L_test, f_val_files, val_index, inpu_form=".mha",
+                                                      out_form=".tiff")
                                 val_x_arr = read_file(FLAGS.X_test, f_val_files, val_index)
 
                                 val_true_l.append(val_l_arr)
@@ -378,27 +395,39 @@ def train():
                                     m_0: np.asarray(val_true_m)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
                                     x_0: np.asarray(val_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
 
-                                    l_1: np.asarray(val_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    f_1: np.asarray(val_true_f)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_1: np.asarray(val_true_m)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_1: np.asarray(val_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_1: np.asarray(val_true_l)[
+                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    f_1: np.asarray(val_true_f)[
+                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    m_1: np.asarray(val_true_m)[
+                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    x_1: np.asarray(val_true_x)[
+                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
 
-                                    l_2: np.asarray(val_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    f_2: np.asarray(val_true_f)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_2: np.asarray(val_true_m)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_2: np.asarray(val_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_2: np.asarray(val_true_l)[
+                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    f_2: np.asarray(val_true_f)[
+                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    m_2: np.asarray(val_true_m)[
+                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    x_2: np.asarray(val_true_x)[
+                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
 
-                                    l_3: np.asarray(val_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    f_3: np.asarray(val_true_f)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_3: np.asarray(val_true_m)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_3: np.asarray(val_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_3: np.asarray(val_true_l)[
+                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    f_3: np.asarray(val_true_f)[
+                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    m_3: np.asarray(val_true_m)[
+                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    x_3: np.asarray(val_true_x)[
+                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
                                 })
                             val_loss_list.append(val_losses_0)
                             val_loss_list.append(val_losses_1)
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
 
-                            if j%1 == 0:
+                            if j % 1 == 0:
                                 save_images(val_image_list_0, checkpoints_dir, str(j) + "_0")
                                 save_images(val_image_list_1, checkpoints_dir, str(j) + "_1")
                                 save_images(val_image_list_2, checkpoints_dir, str(j) + "_2")

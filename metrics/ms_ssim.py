@@ -22,6 +22,7 @@ import numpy as np
 from scipy import signal
 from scipy.ndimage.filters import convolve
 
+
 def _FSpecialGauss(size, sigma):
     """Function to mimic the 'fspecial' gaussian MATLAB function."""
     radius = size // 2
@@ -32,8 +33,9 @@ def _FSpecialGauss(size, sigma):
         stop -= 1
     x, y = np.mgrid[offset + start:stop, offset + start:stop]
     assert len(x) == size
-    g = np.exp(-((x**2 + y**2)/(2.0 * sigma**2)))
+    g = np.exp(-((x ** 2 + y ** 2) / (2.0 * sigma ** 2)))
     return g / g.sum()
+
 
 def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11, filter_sigma=1.5, k1=0.01, k2=0.03):
     """Return the Structural Similarity Map between `img1` and `img2`.
@@ -103,12 +105,15 @@ def _SSIMForMultiScale(img1, img2, max_val=255, filter_size=11, filter_sigma=1.5
     c2 = (k2 * max_val) ** 2
     v1 = 2.0 * sigma12 + c2
     v2 = sigma11 + sigma22 + c2
-    ssim = np.mean((((2.0 * mu12 + c1) * v1) / ((mu11 + mu22 + c1) * v2)), axis=(1, 2, 3)) # Return for each image individually.
+    ssim = np.mean((((2.0 * mu12 + c1) * v1) / ((mu11 + mu22 + c1) * v2)),
+                   axis=(1, 2, 3))  # Return for each image individually.
     cs = np.mean(v1 / v2, axis=(1, 2, 3))
     return ssim, cs
 
+
 def _HoxDownsample(img):
     return (img[:, 0::2, 0::2, :] + img[:, 1::2, 0::2, :] + img[:, 0::2, 1::2, :] + img[:, 1::2, 1::2, :]) * 0.25
+
 
 def msssim(img1, img2, max_val=255, filter_size=11, filter_sigma=1.5, k1=0.01, k2=0.03, weights=None):
     """Return the MS-SSIM score between `img1` and `img2`.
@@ -157,8 +162,8 @@ def msssim(img1, img2, max_val=255, filter_size=11, filter_sigma=1.5, k1=0.01, k
     mcs = []
     for _ in range(levels):
         ssim, cs = _SSIMForMultiScale(
-                im1, im2, max_val=max_val, filter_size=filter_size,
-                filter_sigma=filter_sigma, k1=k1, k2=k2)
+            im1, im2, max_val=max_val, filter_size=filter_size,
+            filter_sigma=filter_sigma, k1=k1, k2=k2)
         mssim.append(ssim)
         mcs.append(cs)
         im1, im2 = [_HoxDownsample(x) for x in [im1, im2]]
@@ -170,7 +175,8 @@ def msssim(img1, img2, max_val=255, filter_size=11, filter_sigma=1.5, k1=0.01, k
     # Average over images only at the end.
     return np.mean(np.prod(mcs[:-1, :] ** weights[:-1, np.newaxis], axis=0) * (mssim[-1, :] ** weights[-1]))
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 # EDIT: added
 
 class API:
@@ -197,4 +203,4 @@ class API:
         avg = self.sum / self.num_pairs
         return [avg]
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------

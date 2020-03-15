@@ -3,6 +3,7 @@ import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -67,8 +68,6 @@ class GAN:
         return l_prob, l_f
 
     def model(self, x, y, z, w):
-
-
         x_g = self.G_X(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
         y_g = self.G_Y(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
         z_g = self.G_Z(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
@@ -127,16 +126,16 @@ class GAN:
         return loss_list
 
     def get_variables(self):
-        return [self.G_X.variables+
-                self.G_Y.variables+
-                self.G_Z.variables+
+        return [self.G_X.variables +
+                self.G_Y.variables +
+                self.G_Z.variables +
                 self.G_W.variables
             ,
-                self.D_X.variables+
-                self.D_Y.variables+
-                self.D_Z.variables+
+                self.D_X.variables +
+                self.D_Y.variables +
+                self.D_Z.variables +
                 self.D_W.variables
-            ]
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):

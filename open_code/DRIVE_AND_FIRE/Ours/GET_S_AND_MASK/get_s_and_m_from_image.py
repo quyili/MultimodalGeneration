@@ -7,14 +7,17 @@ import scipy.signal as signal
 import os
 from skimage import transform
 
+
 def np_norm(input):
     output = (input - np.min(input)) / (np.max(input) - np.min(input))
     return output
+
 
 def tf_norm(input):
     output = (input - tf.reduce_min(input, axis=[1, 2, 3])
               ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
     return output
+
 
 def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     kernel = np.zeros([kernel_size, kernel_size])
@@ -32,10 +35,11 @@ def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     sum_val = 1 / sum_val
     return kernel * sum_val
 
+
 def gaussian_blur_op(image, kernel, kernel_size, cdim=3):
     # kernel as placeholder variable, so it can change
     outputs = []
-    pad_w = (kernel_size*kernel_size - 1) // 2
+    pad_w = (kernel_size * kernel_size - 1) // 2
     padded = tf.pad(image, [[0, 0], [pad_w, pad_w], [pad_w, pad_w], [0, 0]], mode='REFLECT')
     for channel_idx in range(cdim):
         data_c = padded[:, :, :, channel_idx:(channel_idx + 1)]
@@ -46,20 +50,22 @@ def gaussian_blur_op(image, kernel, kernel_size, cdim=3):
         outputs.append(data_c)
     return tf.concat(outputs, axis=3)
 
-def gaussian_blur(x,sigma=0.5,alpha=0.15,bin=False):
+
+def gaussian_blur(x, sigma=0.5, alpha=0.15, bin=False):
     gauss_filter = gauss_2d_kernel(3, sigma)
     gauss_filter = gauss_filter.astype(dtype=np.float32)
     y = gaussian_blur_op(x, gauss_filter, 3, cdim=1)
-    if bin==True:
+    if bin == True:
         y = tf.ones(y.get_shape().as_list()) * tf.cast(y > alpha, dtype="float32")
     return y
+
 
 def get_f(x, j=0.1):
     x1 = tf_norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
     x2 = tf_norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
 
-    x1 =gaussian_blur(x1,sigma=0.4)
-    x2 =gaussian_blur(x2,sigma=0.4)
+    x1 = gaussian_blur(x1, sigma=0.4)
+    x2 = gaussian_blur(x2, sigma=0.4)
 
     x1 = tf.reduce_mean(x1, axis=[1, 2, 3]) - x1
     x2 = x2 - tf.reduce_mean(x2, axis=[1, 2, 3])
@@ -71,13 +77,15 @@ def get_f(x, j=0.1):
     x12 = tf.ones(x12.get_shape().as_list()) * tf.cast(x12 > 0.0, dtype="float32")
     return x12
 
-def get_mask(m, p=5,beta=0.0):
-    m=tf_norm(m)
+
+def get_mask(m, p=5, beta=0.0):
+    m = tf_norm(m)
     mask = 1.0 - tf.ones(m.get_shape().as_list()) * tf.cast(m > beta, dtype="float32")
     shape = m.get_shape().as_list()
     mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
     mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
     return mask
+
 
 graph = tf.Graph()
 with graph.as_default():
@@ -98,13 +106,12 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
 
     files = os.listdir(PATH)
     for file in files:
-        input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH+"/"+file))
+        input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file))
         input_x = transform.resize(np.asarray(input_x), [512, 512, 3])
         fx_, mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x])})
         fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=5)
         mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
-        new_file=file.replace(".jpg",".tiff")
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0-mask_x_)*fx_), SAVE_F+"/"+new_file)
+        new_file = file.replace(".jpg", ".tiff")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), SAVE_F + "/" + new_file)
         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
         print(file + "==>" + new_file)
-

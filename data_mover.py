@@ -41,32 +41,33 @@ def mover(
     except os.error:
         pass
 
-    index_files =  os.listdir(SRC_F2)
+    index_files = os.listdir(SRC_F2)
     # index_files=["323490_043.tiff","322897_054.tiff","322897_021.tiff",
     #              "366938_000.tiff","367880_023.tiff","367880_056.tiff","369542_113.tiff",
     #              "371756_024.tiff","387453_044.tiff"]
     for file in index_files:
-        arr_mean = np.mean(SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_F2 + file))[128:384,128:384])
+        arr_mean = np.mean(SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_F2 + file))[128:384, 128:384])
         mha_flie = file
         mha_flie = mha_flie.replace(".tiff", ".mha")
         txt_file = file
         txt_file = txt_file.replace(".tiff", ".txt")
 
-        if arr_mean>limit:
-        #     print(file,'MOVE')
-        # else:
-        #     print(file, 'NO MOVE')
+        if arr_mean > limit:
+            #     print(file,'MOVE')
+            # else:
+            #     print(file, 'NO MOVE')
             os.system('move ' + SRC_F1 + file + ' ' + SAVE_F1 + file)
             os.system('move ' + SRC_M1 + file + ' ' + SAVE_M1 + file)
             os.system('move ' + SRC_F2 + file + ' ' + SAVE_F2 + file)
             os.system('move ' + SRC_M2 + file + ' ' + SAVE_M2 + file)
             os.system('move ' + SRC_F3 + file + ' ' + SAVE_F3 + file)
-            os.system('move ' + SRC_M3 + file + ' '+ SAVE_M3 + file)
+            os.system('move ' + SRC_M3 + file + ' ' + SAVE_M3 + file)
 
             os.system('move ' + SRC_F + mha_flie + ' ' + SAVE_F + mha_flie)
             os.system('move ' + SRC_M + mha_flie + ' ' + SAVE_M + mha_flie)
 
             os.system('move ' + SRC_LABEL + txt_file + ' ' + SAVE_LABEL + txt_file)
+
 
 if __name__ == '__main__':
     mover(

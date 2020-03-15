@@ -24,6 +24,7 @@ tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
 tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
 
+
 def get_mask_from_f(imgfile):
     # imgfile = "full_x.jpg"
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
@@ -81,7 +82,8 @@ def train():
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
                 # 根据结构完整度过滤
-                if mae <= FLAGS.mae: break
+                if mae <= FLAGS.mae:
+                    break
                 elif mae < best_mae:
                     best_mae = mae
                     best_f = f
@@ -198,16 +200,16 @@ def train():
             # code4 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
             # code5 = np.random.normal(0.0, 1.0, (4096)).astype('float32')
 
-            codes=np.zeros((9, 9, 4096))
+            codes = np.zeros((9, 9, 4096))
             codes[0, 0, :] = code1[:]
             codes[0, 8, :] = code2[:]
             codes[8, 0, :] = code3[:]
             codes[8, 8, :] = code4[:]
             codes[4, 4, :] = code5[:]
 
-            code_lines12=code_line(code1, code2, 7)
+            code_lines12 = code_line(code1, code2, 7)
             for i in range(7):
-                codes[0,i+1,:]=code_lines12[i]
+                codes[0, i + 1, :] = code_lines12[i]
             code_lines13 = code_line(code1, code3, 7)
             for i in range(7):
                 codes[i + 1, 0, :] = code_lines13[i]
@@ -218,52 +220,52 @@ def train():
             for i in range(7):
                 codes[8, i + 1, :] = code_lines34[i]
 
-            code_lines512=code_line(code5, codes[0,4,:], 3)
+            code_lines512 = code_line(code5, codes[0, 4, :], 3)
             for i in range(3):
-                codes[4-(i+1), 4, :] = code_lines512[i]
+                codes[4 - (i + 1), 4, :] = code_lines512[i]
             code_lines513 = code_line(code5, codes[4, 0, :], 3)
             for i in range(3):
                 codes[4, 4 - (i + 1), :] = code_lines513[i]
             code_lines524 = code_line(code5, codes[4, 8, :], 3)
             for i in range(3):
                 codes[4, 4 + (i + 1), :] = code_lines524[i]
-            code_lines534 = code_line(code5, codes[8,4,  :], 3)
+            code_lines534 = code_line(code5, codes[8, 4, :], 3)
             for i in range(3):
                 codes[4 + (i + 1), 4, :] = code_lines534[i]
 
             code_lines51 = code_line(code5, code1, 3)
             for i in range(3):
-                codes[4 - (i + 1), 4- (i + 1), :] = code_lines51[i]
+                codes[4 - (i + 1), 4 - (i + 1), :] = code_lines51[i]
             code_lines52 = code_line(code5, code2, 3)
             for i in range(3):
                 codes[4 - (i + 1), 4 + (i + 1), :] = code_lines52[i]
             code_lines53 = code_line(code5, code3, 3)
             for i in range(3):
-                codes[4 + (i + 1), 4 -(i + 1), :] = code_lines53[i]
+                codes[4 + (i + 1), 4 - (i + 1), :] = code_lines53[i]
             code_lines54 = code_line(code5, code4, 3)
             for i in range(3):
                 codes[4 + (i + 1), 4 + (i + 1), :] = code_lines54[i]
 
-            code_lines1_12_5 = code_line(codes[3,4, :],codes[0,1, :],  2)
+            code_lines1_12_5 = code_line(codes[3, 4, :], codes[0, 1, :], 2)
             codes[1, 3, :] = code_line(codes[2, 4, :], codes[0, 2, :], 1)[0]
             for i in range(2):
                 codes[4 - (i + 2), 4 - (i + 1), :] = code_lines1_12_5[i]
-            code_lines1_13_5 = code_line( codes[4,3, :],codes[0, 1, :], 2)
-            codes[ 3, 1, :] = code_line(codes[4, 2, :], codes[ 2,0, :], 1)[0]
+            code_lines1_13_5 = code_line(codes[4, 3, :], codes[0, 1, :], 2)
+            codes[3, 1, :] = code_line(codes[4, 2, :], codes[2, 0, :], 1)[0]
             for i in range(2):
                 codes[4 - (i + 1), 4 - (i + 2), :] = code_lines1_13_5[i]
             code_lines2_12_5 = code_line(codes[3, 4, :], codes[0, 7, :], 2)
-            codes[1, 5, :] = code_line(codes[2, 4, :], codes[0,6, :], 1)[0]
+            codes[1, 5, :] = code_line(codes[2, 4, :], codes[0, 6, :], 1)[0]
             for i in range(2):
                 codes[4 - (i + 2), 4 + (i + 1), :] = code_lines2_12_5[i]
-            code_lines2_24_5 = code_line(codes[4, 5, :],codes[1, 8, :],  2)
+            code_lines2_24_5 = code_line(codes[4, 5, :], codes[1, 8, :], 2)
             codes[3, 7, :] = code_line(codes[4, 6, :], codes[2, 8, :], 1)[0]
             for i in range(2):
                 codes[4 - (i + 1), 4 + (i + 2), :] = code_lines2_24_5[i]
-            code_lines3_13_5 = code_line( codes[4, 3, :],codes[7, 0, :], 2)
+            code_lines3_13_5 = code_line(codes[4, 3, :], codes[7, 0, :], 2)
             codes[5, 1, :] = code_line(codes[4, 2, :], codes[7, 0, :], 1)[0]
             for i in range(2):
-                codes[4 + (i + 1) , 4 - (i + 2), :] = code_lines3_13_5[i]
+                codes[4 + (i + 1), 4 - (i + 2), :] = code_lines3_13_5[i]
             code_lines3_34_5 = code_line(codes[5, 4, :], codes[8, 1, :], 2)
             codes[7, 3, :] = code_line(codes[6, 4, :], codes[8, 2, :], 1)[0]
             for i in range(2):
@@ -273,15 +275,14 @@ def train():
             for i in range(2):
                 codes[4 + (i + 2), 4 + (i + 1), :] = code_lines4_34_5[i]
             code_lines4_24_5 = code_line(codes[4, 5, :], codes[7, 8, :], 2)
-            codes[ 5,7, :] = code_line(codes[4,6, :], codes[ 6,8, :], 1)[0]
+            codes[5, 7, :] = code_line(codes[4, 6, :], codes[6, 8, :], 1)[0]
             for i in range(2):
                 codes[4 + (i + 1), 4 + (i + 2), :] = code_lines4_24_5[i]
-
 
             figure = np.zeros((184 * 9, 144 * 9))
             for i in range(9):
                 for j in range(9):
-                    z_sample = codes[i,j,:]
+                    z_sample = codes[i, j, :]
                     z_sample = z_sample.reshape((1, 4096))
                     f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: z_sample})
                     figure[i * 184: (i + 1) * 184, j * 144: (j + 1) * 144] = np.asarray(f)[0, :, :, 0]
@@ -291,18 +292,20 @@ def train():
             print("image gen end:" + str(index))
             index += 1
 
-def code_line(code1,code2,N,L=4096):
-    code_line=[]
-    code=np.zeros((L))
+
+def code_line(code1, code2, N, L=4096):
+    code_line = []
+    code = np.zeros((L))
     code[:] = code1[:]
     for i in range(N):
         for j in range(L):
             if j % N == i:
-                code[j]=code2[j]
+                code[j] = code2[j]
         code_temp = np.zeros((L))
         code_temp[:] = code[:]
         code_line.append(code_temp)
     return code_line
+
 
 def main(unused_argv):
     train()

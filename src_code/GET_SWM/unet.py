@@ -4,7 +4,7 @@ import ops as ops
 
 
 class Unet:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0,output_channl=1):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
         self.reuse = False
         self.ngf = ngf
@@ -56,7 +56,7 @@ class Unet:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 *  self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv4')
                 norm4 = ops._norm(conv4, self.is_training, self.norm)
                 relu4 = ops.relu(norm4)
@@ -199,7 +199,7 @@ class Unet:
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 / (9.0 *  self.ngf), stddev=0.000001,
+                                                 mean=1.0 / (9.0 * self.ngf), stddev=0.000001,
                                                  dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv3_r')

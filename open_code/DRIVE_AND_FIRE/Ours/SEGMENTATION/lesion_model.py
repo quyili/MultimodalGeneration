@@ -2,6 +2,7 @@
 import tensorflow as tf
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -52,7 +53,6 @@ class GAN:
         self.prob_list["label_expand_x"] = label_expand_x
         self.prob_list["l_f_prob_by_x"] = l_f_prob_by_x
         self.image_list["l_f_by_x"] = l_f_by_x
-
 
         return G_loss
 

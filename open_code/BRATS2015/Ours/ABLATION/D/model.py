@@ -3,6 +3,7 @@ import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -138,7 +139,7 @@ class GAN:
         self.image_list["new_f"] = new_f
         self.prob_list["label_expand"] = label_expand
         self.prob_list["f_rm_expand"] = f_rm_expand
-        self.image_list["l"] = l*0.25
+        self.image_list["l"] = l * 0.25
 
         self.image_list["x_g"] = x_g
         self.image_list["y_g"] = y_g
@@ -163,7 +164,7 @@ class GAN:
         return [self.G_X.variables
             ,
                 self.D_X.variables
-            ]
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):

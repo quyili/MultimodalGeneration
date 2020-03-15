@@ -21,7 +21,7 @@ tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, d
 tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/train/F', 'X files for training')
 # tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/M', 'X files for training')
 tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/F', 'X files for training')
-tf.flags.DEFINE_string('load_model',None,
+tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
@@ -43,24 +43,25 @@ def mean_list(lists):
         out.append(mean(list))
     return out
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
-    train_range = len(Label_train_files)
-    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
-    L_img = SimpleITK.ReadImage(file_name )
-    L_arr= SimpleITK.GetArrayFromImage(L_img)
 
-    if  len(L_arr.shape)==2 :
-        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
-    elif  L_arr.shape[2]==1 :
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
-    elif  L_arr.shape[2]==3:
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
-    if out_size== None:
-        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]]
+def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form=""):
+    train_range = len(Label_train_files)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, out_form)
+    L_img = SimpleITK.ReadImage(file_name)
+    L_arr = SimpleITK.GetArrayFromImage(L_img)
+
+    if len(L_arr.shape) == 2:
+        img = cv2.merge([L_arr[:, :], L_arr[:, :], L_arr[:, :]])
+    elif L_arr.shape[2] == 1:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 0], L_arr[:, :, 0]])
+    elif L_arr.shape[2] == 3:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 1], L_arr[:, :, 2]])
+    if out_size == None:
+        img = cv2.resize(img, (FLAGS.image_size[0], FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:FLAGS.image_size[2]]
     else:
-        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]]
+        img = cv2.resize(img, (out_size[0], out_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:out_size[2]]
     return img.astype('float32')
 
 
@@ -217,7 +218,8 @@ def train():
             val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
             saver = tf.train.Saver()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,
+                                                           gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
             if FLAGS.load_model is not None:
                 logging.info("restore model:" + FLAGS.load_model)
                 if FLAGS.checkpoint is not None:
@@ -366,7 +368,7 @@ def train():
                             val_evaluation_code_list.append(val_evaluation_codes_2)
                             val_evaluation_code_list.append(val_evaluation_codes_3)
 
-                            if j%2 == 0:
+                            if j % 2 == 0:
                                 save_images(val_image_list_0, checkpoints_dir, str(0))
 
                         val_summary_op = sess.run(

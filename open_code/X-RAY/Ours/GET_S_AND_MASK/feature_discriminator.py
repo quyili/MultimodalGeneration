@@ -34,7 +34,7 @@ class FeatureDiscriminator:
                 norm0 = ops._norm(conv0, self.is_training, self.norm)
                 relu0 = ops.relu(norm0)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=relu0, filters= self.ngf, kernel_size=7, strides=1,
+                conv1 = tf.layers.conv2d(inputs=relu0, filters=self.ngf, kernel_size=7, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(

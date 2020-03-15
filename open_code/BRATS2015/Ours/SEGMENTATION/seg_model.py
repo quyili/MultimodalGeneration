@@ -2,6 +2,7 @@
 import tensorflow as tf
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -103,10 +104,10 @@ class GAN:
         l_f_by_w = tf.reshape(
             tf.cast(tf.argmax(l_f_prob_by_w, axis=-1), dtype=tf.float32),
             shape=self.input_shape)
-        self.image_list["l_x"] = l_x* 0.25
-        self.image_list["l_y"] = l_y* 0.25
-        self.image_list["l_z"] = l_z* 0.25
-        self.image_list["l_w"] = l_w* 0.25
+        self.image_list["l_x"] = l_x * 0.25
+        self.image_list["l_y"] = l_y * 0.25
+        self.image_list["l_z"] = l_z * 0.25
+        self.image_list["l_w"] = l_w * 0.25
         self.image_list["x"] = x
         self.image_list["y"] = y
         self.image_list["z"] = z
@@ -122,10 +123,10 @@ class GAN:
         self.prob_list["l_f_prob_by_z"] = l_f_prob_by_z
         self.prob_list["l_f_prob_by_w"] = l_f_prob_by_w
 
-        self.image_list["l_f_by_x"] = l_f_by_x* 0.25
-        self.image_list["l_f_by_y"] = l_f_by_y* 0.25
-        self.image_list["l_f_by_z"] = l_f_by_z* 0.25
-        self.image_list["l_f_by_w"] = l_f_by_w* 0.25
+        self.image_list["l_f_by_x"] = l_f_by_x * 0.25
+        self.image_list["l_f_by_y"] = l_f_by_y * 0.25
+        self.image_list["l_f_by_z"] = l_f_by_z * 0.25
+        self.image_list["l_f_by_w"] = l_f_by_w * 0.25
 
         return G_loss
 

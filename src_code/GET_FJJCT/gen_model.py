@@ -26,14 +26,14 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        #self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
+        # self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
 
-        self.EC_R = Encoder('EC_R', ngf=ngf,keep_prob=0.98)
-        self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=image_size[2],keep_prob=0.98)
+        self.EC_R = Encoder('EC_R', ngf=ngf, keep_prob=0.98)
+        self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=image_size[2], keep_prob=0.98)
 
-        self.D_M = Discriminator('D_M', ngf=ngf,keep_prob=0.95)
+        self.D_M = Discriminator('D_M', ngf=ngf, keep_prob=0.95)
 
-    def gauss_2d_kernel(self,kernel_size=3, sigma=0.0):
+    def gauss_2d_kernel(self, kernel_size=3, sigma=0.0):
         kernel = np.zeros([kernel_size, kernel_size])
         center = (kernel_size - 1) / 2
         if sigma == 0:
@@ -49,7 +49,7 @@ class GAN:
         sum_val = 1 / sum_val
         return kernel * sum_val
 
-    def gaussian_blur_op(self,image, kernel, kernel_size, cdim=3):
+    def gaussian_blur_op(self, image, kernel, kernel_size, cdim=3):
         # kernel as placeholder variable, so it can change
         outputs = []
         pad_w = (kernel_size * kernel_size - 1) // 2
@@ -63,7 +63,7 @@ class GAN:
             outputs.append(data_c)
         return tf.concat(outputs, axis=3)
 
-    def gaussian_blur(self,x, sigma=0.5, alpha=0.15):
+    def gaussian_blur(self, x, sigma=0.5, alpha=0.15):
         gauss_filter = self.gauss_2d_kernel(3, sigma)
         gauss_filter = gauss_filter.astype(dtype=np.float32)
         y = self.gaussian_blur_op(x, gauss_filter, 3, cdim=1)
@@ -75,7 +75,7 @@ class GAN:
                   ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output
 
-    def get_f(self,x, j=0.1):
+    def get_f(self, x, j=0.1):
         x1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
         x2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
 
@@ -89,16 +89,16 @@ class GAN:
         x12 = tf.ones(x12.get_shape().as_list()) * tf.cast(x12 > 0.0, dtype="float32")
         return x12
 
-    def denoise(self,y):
+    def denoise(self, y):
         y = self.gaussian_blur(y, sigma=0.8, alpha=0.3)
         y = self.get_f(y, j=0.4)
         y = self.gaussian_blur(y, sigma=0.85, alpha=0.2)
         return y
 
     def model(self,
-                    #l,
-                    f_org,mask,x):
-        #label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
+              # l,
+              f_org, mask, x):
+        # label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
         #                         shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
         f_org_1 = self.denoise(f_org[:, :, :, 0:1])
         f_org_2 = self.denoise(f_org[:, :, :, 1:2])
@@ -111,7 +111,7 @@ class GAN:
         code_rm = self.EC_R(new_f)
         x_g = self.DC_M(code_rm)
 
-        #l_g_prob = self.LESP(x_g)
+        # l_g_prob = self.LESP(x_g)
 
         j_x_g = self.D_M(x_g)
         j_x = self.D_M(x)
@@ -128,43 +128,43 @@ class GAN:
         G_loss += self.mse_loss(x_g * mask, x * mask) * 0.01
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        #L_loss += self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]),
+        # L_loss += self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]),
         #                                tf.reduce_mean(l_g_prob  ,axis=[1,2])) * 0.5
 
-        #l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
-        #l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
+        # l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
+        # l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
 
-        #L_acc=self.acc( l_r,l_g)
+        # L_acc=self.acc( l_r,l_g)
 
-        #self.tenaor_name["l"] = str(l)
+        # self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
         self.tenaor_name["mask"] = str(mask)
         self.tenaor_name["x"] = str(x)
         self.tenaor_name["x_g"] = str(x_g)
-        #self.tenaor_name["l_g"] = str(l_g)
+        # self.tenaor_name["l_g"] = str(l_g)
 
-        image_list={}
+        image_list = {}
 
-        image_list["mask"] = mask[:,:,:,1:2]
-        image_list["f"] = f[:,:,:,1:2]
-        image_list["new_f"] = new_f[:,:,:,1:2]
-        image_list["x"] = x[:,:,:,1:2]
-        image_list["x_g"] = x_g[:,:,:,1:2]
-        self.judge_list["j_x_g"]= j_x_g
+        image_list["mask"] = mask[:, :, :, 1:2]
+        image_list["f"] = f[:, :, :, 1:2]
+        image_list["new_f"] = new_f[:, :, :, 1:2]
+        image_list["x"] = x[:, :, :, 1:2]
+        image_list["x_g"] = x_g[:, :, :, 1:2]
+        self.judge_list["j_x_g"] = j_x_g
         self.judge_list["j_x"] = j_x
 
-        loss_list = [G_loss+L_loss, D_loss,
-                        #L_loss, L_acc,l_r,l_g
-                        ]
+        loss_list = [G_loss + L_loss, D_loss,
+                     # L_loss, L_acc,l_r,l_g
+                     ]
 
-        return loss_list,image_list
+        return loss_list, image_list
 
     def get_variables(self):
         return [self.EC_R.variables
                 + self.DC_M.variables
-                ,self.D_M.variables
-                #,self.LESP.variables
-                  ]
+            , self.D_M.variables
+                # ,self.LESP.variables
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -183,21 +183,21 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_loss, D_loss= loss_list[0], loss_list[1]
-        #L_loss,L_acc =  loss_list[2],loss_list[3]
+        G_loss, D_loss = loss_list[0], loss_list[1]
+        # L_loss,L_acc =  loss_list[2],loss_list[3]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
-        #tf.summary.scalar('loss/L_loss', L_loss)
-        #tf.summary.scalar('loss/L_acc', L_acc)
+        # tf.summary.scalar('loss/L_loss', L_loss)
+        # tf.summary.scalar('loss/L_acc', L_acc)
 
     def image_summary(self, image_dirct):
         for key in image_dirct:
             tf.summary.image('image/' + key, image_dirct[key])
 
-    def acc(self,x,y):
-         correct_prediction = tf.equal(x, y)
-         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-         return accuracy 
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)

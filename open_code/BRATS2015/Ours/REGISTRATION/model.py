@@ -3,6 +3,7 @@ import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -88,7 +89,6 @@ class GAN:
                                     shape=[self.input_shape[0], self.input_shape[1],
                                            self.input_shape[2], 5])
 
-
         l_g_prob_by_x = self.G_L_X(x)
         l_g_prob_by_y = self.G_L_Y(y)
         l_g_prob_by_z = self.G_L_Z(z)
@@ -150,7 +150,6 @@ class GAN:
         j_w_t_by_x, j_w_t_c_by_x = self.D_T(w_t_by_x)
         j_w_t_by_y, j_w_t_c_by_y = self.D_T(w_t_by_y)
         j_w_t_by_z, j_w_t_c_by_z = self.D_T(w_t_by_z)
-
 
         D_loss = 0.0
         G_loss = 0.0
@@ -280,10 +279,10 @@ class GAN:
                   + self.mse_loss(label_expand_w[:, :, :, 4],
                                   l_g_prob_by_w[:, :, :, 4]) * 25 * 5
 
-        self.image_list["l_x"] = l_x* 0.25
-        self.image_list["l_y"] = l_y* 0.25
-        self.image_list["l_z"] = l_z* 0.25
-        self.image_list["l_w"] = l_w* 0.25
+        self.image_list["l_x"] = l_x * 0.25
+        self.image_list["l_y"] = l_y * 0.25
+        self.image_list["l_z"] = l_z * 0.25
+        self.image_list["l_w"] = l_w * 0.25
         self.image_list["x"] = x
         self.image_list["y"] = y
         self.image_list["z"] = z
@@ -293,11 +292,10 @@ class GAN:
         self.prob_list["l_g_prob_by_y"] = l_g_prob_by_y
         self.prob_list["l_g_prob_by_z"] = l_g_prob_by_z
         self.prob_list["l_g_prob_by_w"] = l_g_prob_by_w
-        self.image_list["l_g_by_x"] = l_g_by_x* 0.25
-        self.image_list["l_g_by_y"] = l_g_by_y* 0.25
-        self.image_list["l_g_by_z"] = l_g_by_z* 0.25
-        self.image_list["l_g_by_w"] = l_g_by_w* 0.25
-
+        self.image_list["l_g_by_x"] = l_g_by_x * 0.25
+        self.image_list["l_g_by_y"] = l_g_by_y * 0.25
+        self.image_list["l_g_by_z"] = l_g_by_z * 0.25
+        self.image_list["l_g_by_w"] = l_g_by_w * 0.25
 
         self.image_list["y_t_by_x"] = y_t_by_x
         self.image_list["z_t_by_x"] = z_t_by_x
@@ -347,7 +345,6 @@ class GAN:
         self.image_list["w_r_c_by_y"] = w_r_c_by_y
         self.image_list["z_t_by_w"] = z_t_by_w
         self.image_list["w_r_c_by_z"] = w_r_c_by_z
-
 
         self.judge_list["j_x"], self.judge_list["j_x_c"] = j_x, j_x_c
         self.judge_list["j_y"], self.judge_list["j_y_c"] = j_y, j_y_c

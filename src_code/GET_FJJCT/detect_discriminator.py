@@ -4,7 +4,7 @@ import ops as ops
 
 
 class Discriminator:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0,output_channl=1):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
         self.is_training = is_training
         self.norm = norm
@@ -12,9 +12,9 @@ class Discriminator:
         self.ngf = ngf
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
-        self.output_channl=output_channl
+        self.output_channl = output_channl
 
-    def __call__(self, D_input,class_vt,location_vt):
+    def __call__(self, D_input, class_vt, location_vt):
         """
         Args:
           input: batch_size x image_size x image_size x 3
@@ -26,17 +26,17 @@ class Discriminator:
         with tf.variable_scope(self.name, reuse=self.reuse):
             D_input = tf.nn.dropout(D_input, keep_prob=self.keep_prob)
             with tf.variable_scope("class_vt_dense0", reuse=self.reuse):
-                class_vt= tf.layers.flatten(class_vt)
-                dense0 = tf.layers.dense(class_vt, units=1024,name="dense0")
+                class_vt = tf.layers.flatten(class_vt)
+                dense0 = tf.layers.dense(class_vt, units=1024, name="dense0")
                 dense0 = tf.reshape(dense0, shape=[-1, 32, 32, 1])
-                resize0 = tf.image.resize_images(dense0, [512,512], method=1)
+                resize0 = tf.image.resize_images(dense0, [512, 512], method=1)
             with tf.variable_scope("location_vt_dense0", reuse=self.reuse):
-                location_vt= tf.layers.flatten(location_vt)
+                location_vt = tf.layers.flatten(location_vt)
                 dense1 = tf.layers.dense(location_vt, units=1024, name="dense1")
-                dense1 = tf.reshape(dense1, shape=[-1, 32,32, 1])
-                resize1 = tf.image.resize_images(dense1, [512,512], method=1)
+                dense1 = tf.reshape(dense1, shape=[-1, 32, 32, 1])
+                resize1 = tf.image.resize_images(dense1, [512, 512], method=1)
             with tf.variable_scope("concat0", reuse=self.reuse):
-                concat0=tf.reshape(tf.concat([D_input,resize0,resize1],axis=-1),shape=[-1, 512, 512, 5])
+                concat0 = tf.reshape(tf.concat([D_input, resize0, resize1], axis=-1), shape=[-1, 512, 512, 5])
             with tf.variable_scope("conv0", reuse=self.reuse):
                 conv0 = tf.layers.conv2d(inputs=concat0, filters=self.ngf, kernel_size=5,
                                          strides=self.slice_stride,
@@ -78,7 +78,7 @@ class Discriminator:
                 norm3 = ops._norm(conv3, self.is_training, self.norm)
                 relu3 = ops.relu(norm3)
             with tf.variable_scope("conv4", reuse=self.reuse):
-                conv4_1 = tf.layers.conv2d(inputs=relu3, filters=self.ngf, kernel_size=3, 
+                conv4_1 = tf.layers.conv2d(inputs=relu3, filters=self.ngf, kernel_size=3,
                                            strides=self.slice_stride,
                                            padding="SAME",
                                            activation=None,
@@ -89,12 +89,11 @@ class Discriminator:
                 relu4_1 = ops.relu(norm4_1)
             with tf.variable_scope("conv5", reuse=self.reuse):
                 output = tf.layers.conv2d(inputs=relu4_1, filters=self.output_channl, kernel_size=3, strides=1,
-                                            padding="SAME",
-                                            activation=None,
-                                            kernel_initializer=tf.random_normal_initializer(
-                                                mean=0.0, stddev=0.02, dtype=tf.float32),
-                                            bias_initializer=tf.constant_initializer(0.0), name='conv5')
-
+                                          padding="SAME",
+                                          activation=None,
+                                          kernel_initializer=tf.random_normal_initializer(
+                                              mean=0.0, stddev=0.02, dtype=tf.float32),
+                                          bias_initializer=tf.constant_initializer(0.0), name='conv5')
 
         self.reuse = True
         self.variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)

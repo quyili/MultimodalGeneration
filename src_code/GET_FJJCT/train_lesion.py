@@ -258,7 +258,7 @@ def read_txt_file(l_path, Label_train_files, index, inpu_form=".mha"):
     file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, ".txt")
     with open(file_name) as f:
         for line in f.readlines():
-            line = line.replace("\n","").split(" ")
+            line = line.replace("\n", "").split(" ")
             actual_item.append([float(line[1]), float(line[2]), float(line[3]), float(line[4]), int(line[0])])
     return actual_item
 
@@ -285,7 +285,7 @@ def train():
             logging.info("%s\t:\t%s" % (attr, str(value)))
 
         graph = tf.get_default_graph()
-        gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, classes_size,FLAGS.ngf)
+        gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, classes_size, FLAGS.ngf)
         input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
         # G_optimizer,D_optimizer = gan.optimize()
         G_optimizer = gan.optimize()
@@ -454,7 +454,7 @@ def train():
                     train_true_x = []
                     for b in range(FLAGS.batch_size):
                         train_l_arr = read_txt_file(FLAGS.L, l_train_files, index)
-                        train_x_arr = read_file(FLAGS.X, l_train_files, index,inpu_form=".txt", out_form=".mha")
+                        train_x_arr = read_file(FLAGS.X, l_train_files, index, inpu_form=".txt", out_form=".mha")
 
                         train_true_l.append(train_l_arr)
                         train_true_x.append(train_x_arr)
@@ -526,7 +526,8 @@ def train():
                             val_true_x = []
                             for b in range(FLAGS.batch_size):
                                 val_l_arr = read_txt_file(FLAGS.L_test, l_val_files, val_index)
-                                val_x_arr = read_file(FLAGS.X_test, l_val_files, val_index,inpu_form=".txt", out_form=".mha")
+                                val_x_arr = read_file(FLAGS.X_test, l_val_files, val_index, inpu_form=".txt",
+                                                      out_form=".mha")
                                 logging.info(l_val_files[val_index % len(l_val_files)])
 
                                 val_true_l.append(val_l_arr)
@@ -578,8 +579,9 @@ def train():
                                  box_top_value_0],
                                 feed_dict={X_0: val_true_x[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)]}
                             )
-                            print("IN:",gt_class_0.shape, gt_location_0.shape,gt_positives_0.shape,gt_negatives_0.shape,)
-                            print("OUT:",f_class.shape, f_location.shape)
+                            print("IN:", gt_class_0.shape, gt_location_0.shape, gt_positives_0.shape,
+                                  gt_negatives_0.shape, )
+                            print("OUT:", f_class.shape, f_location.shape)
                             top_shape = np.shape(box_top_index)
                             pred_class = []
                             pred_class_val = []

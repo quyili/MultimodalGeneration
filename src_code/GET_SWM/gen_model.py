@@ -1,8 +1,8 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
 from discriminator import Discriminator
-from  encoder import Encoder
-from  decoder import Decoder
+from encoder import Encoder
+from decoder import Decoder
 
 
 class GAN:
@@ -28,16 +28,16 @@ class GAN:
         self.EC_R = Encoder('EC_R', ngf=ngf, keep_prob=0.98)
         self.DC_M = Decoder('DC_M', ngf=ngf, output_channl=3, keep_prob=0.97)
 
-        self.D_M = Discriminator('D_M',ngf=ngf, keep_prob=0.9)
+        self.D_M = Discriminator('D_M', ngf=ngf, keep_prob=0.9)
 
-    def model(self, f,mask,x):
+    def model(self, f, mask, x):
         self.tenaor_name["f"] = str(f)
         self.tenaor_name["mask"] = str(mask)
         self.tenaor_name["x"] = str(x)
 
-        new_f=f+tf.random_uniform([self.input_shape[0],self.input_shape[1],
-                                                    self.input_shape[2],1], minval=0.5,maxval=0.6,
-                                                   dtype=tf.float32)*(1.0-mask)*(1.0-f)
+        new_f = f + tf.random_uniform([self.input_shape[0], self.input_shape[1],
+                                       self.input_shape[2], 1], minval=0.5, maxval=0.6,
+                                      dtype=tf.float32) * (1.0 - mask) * (1.0 - f)
         code_rm = self.EC_R(new_f)
         x_g = self.DC_M(code_rm)
         self.tenaor_name["x_g"] = str(x_g)
@@ -53,20 +53,20 @@ class GAN:
         G_loss += self.mse_loss(j_x_g, 1.0) * 2
 
         G_loss += self.mse_loss(x_g, x) * 5
-        G_loss += self.mse_loss(x_g*mask, 0) * 0.001
+        G_loss += self.mse_loss(x_g * mask, 0) * 0.001
 
-        image_list={}
+        image_list = {}
         image_list["mask"] = mask
         image_list["f"] = f
-        image_list["new_f"] =new_f
+        image_list["new_f"] = new_f
         image_list["x"] = x
         image_list["x_g"] = x_g
-        self.judge_list["j_x_g"]= j_x_g
+        self.judge_list["j_x_g"] = j_x_g
         self.judge_list["j_x"] = j_x
 
         loss_list = [G_loss, D_loss]
 
-        return loss_list,image_list
+        return loss_list, image_list
 
     def get_variables(self):
         return [self.EC_R.variables
@@ -91,7 +91,7 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_loss, D_loss= loss_list[0], loss_list[1]
+        G_loss, D_loss = loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
 
@@ -99,10 +99,10 @@ class GAN:
         for key in image_dirct:
             tf.summary.image('image/' + key, image_dirct[key])
 
-    def acc(self,x,y):
-         correct_prediction = tf.equal(x, y)
-         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-         return accuracy 
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)

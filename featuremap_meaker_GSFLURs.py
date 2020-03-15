@@ -11,7 +11,8 @@ PATH = "E:/project/MultimodalGeneration/data/chest_xray/test/F_"
 SAVE_F = "E:/project/MultimodalGeneration/data/chest_xray/test/F2_"
 # sigma=0.4
 # alpha=0.2
-beta=1
+beta = 1
+
 
 def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     kernel = np.zeros([kernel_size, kernel_size])
@@ -29,10 +30,11 @@ def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     sum_val = 1 / sum_val
     return kernel * sum_val
 
+
 def gaussian_blur_op(image, kernel, kernel_size, cdim=3):
     # kernel as placeholder variable, so it can change
     outputs = []
-    pad_w = (kernel_size*kernel_size - 1) // 2
+    pad_w = (kernel_size * kernel_size - 1) // 2
     padded = tf.pad(image, [[0, 0], [pad_w, pad_w], [pad_w, pad_w], [0, 0]], mode='REFLECT')
     for channel_idx in range(cdim):
         data_c = padded[:, :, :, channel_idx:(channel_idx + 1)]
@@ -43,17 +45,20 @@ def gaussian_blur_op(image, kernel, kernel_size, cdim=3):
         outputs.append(data_c)
     return tf.concat(outputs, axis=3)
 
-def gaussian_blur(x,sigma=0.5,alpha=0.15):
+
+def gaussian_blur(x, sigma=0.5, alpha=0.15):
     gauss_filter = gauss_2d_kernel(3, sigma)
     gauss_filter = gauss_filter.astype(dtype=np.float32)
     y = gaussian_blur_op(x, gauss_filter, 3, cdim=1)
     y = tf.ones(y.get_shape().as_list()) * tf.cast(y > alpha, dtype="float32")
     return y
 
+
 def norm(input):
     output = (input - tf.reduce_min(input, axis=[1, 2, 3])
               ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
     return output
+
 
 def get_f(x, j=0.1):
     x1 = norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
@@ -69,6 +74,7 @@ def get_f(x, j=0.1):
     x12 = tf.ones(x12.get_shape().as_list()) * tf.cast(x12 > 0.0, dtype="float32")
     return x12
 
+
 graph = tf.Graph()
 with graph.as_default():
     x = tf.placeholder(tf.float32, shape=[1, 512, 512, 1])
@@ -82,7 +88,7 @@ with graph.as_default():
     #
     # y=tf.concat([y1,y2,y3],axis=-1)
 
-    y=x
+    y = x
 
     # y =gaussian_blur(y,sigma=0.5, alpha=0.15)
 
@@ -90,9 +96,7 @@ with graph.as_default():
     #
     # y = gaussian_blur(y, sigma=0.7, alpha=0.3)
 
-    y = gaussian_blur(y,sigma=0.01,alpha=0.005)
-
-
+    y = gaussian_blur(y, sigma=0.01, alpha=0.005)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     try:
@@ -105,8 +109,8 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
         file = files[i]
         input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file)).astype('float32')
         input_x = transform.resize(np.asarray(input_x), [512, 512, 1])
-        y_ = sess.run(y,feed_dict={x: np.asarray([input_x]) })
+        y_ = sess.run(y, feed_dict={x: np.asarray([input_x])})
         y_ = np.asarray(y_)[0, :, :, 0]
-        y_ = signal.medfilt2d( y_ , kernel_size=beta)
+        y_ = signal.medfilt2d(y_, kernel_size=beta)
         # print(np.asarray(y_).shape)
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray( y_ ), SAVE_F + "/" + file )
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(y_), SAVE_F + "/" + file)

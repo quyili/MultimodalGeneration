@@ -4,7 +4,8 @@ import ops as ops
 
 
 class GDecoder:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1, units=8192):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1,
+                 units=8192):
         self.name = name
         self.reuse = False
         self.ngf = ngf
@@ -13,7 +14,7 @@ class GDecoder:
         self.slice_stride = slice_stride
         self.keep_prob = keep_prob
         self.output_channl = output_channl
-        self.units=units
+        self.units = units
 
     def __call__(self, DC_input):
         """
@@ -24,28 +25,28 @@ class GDecoder:
         """
         with tf.variable_scope(self.name, reuse=self.reuse):
             with tf.variable_scope("dense0", reuse=self.reuse):
-                dense0 = tf.layers.dense(DC_input, units=self.units,name="dense0")
+                dense0 = tf.layers.dense(DC_input, units=self.units, name="dense0")
             with tf.variable_scope("dense1", reuse=self.reuse):
                 dense1 = tf.layers.dense(dense0, units=self.units, name="dense1")
-                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 8, 8,  -1])
+                dense1 = tf.reshape(dense1, shape=[DC_input.get_shape().as_list()[0], 8, 8, -1])
             # 6,5
             with tf.variable_scope("conv0_1", reuse=self.reuse):
                 conv0_1 = tf.layers.conv2d(inputs=dense1, filters=8 * self.ngf, kernel_size=3, strides=1,
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                             mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                               mean=0.0, stddev=0.02, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_1')
                 norm0_1 = ops._norm(conv0_1, self.is_training, self.norm)
                 relu0_1 = ops.relu(norm0_1)
             # 6,5
             with tf.variable_scope("deconv0_1_r", reuse=self.reuse):
-                resize0_1 = ops.uk_resize(relu0_1, reuse=self.reuse,name='resize')
+                resize0_1 = ops.uk_resize(relu0_1, reuse=self.reuse, name='resize')
                 deconv0_1_r = tf.layers.conv2d(inputs=resize0_1, filters=4 * self.ngf, kernel_size=3, strides=1,
                                                padding="SAME",
                                                activation=None,
                                                kernel_initializer=tf.random_normal_initializer(
-                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                   mean=0.0, stddev=0.02, dtype=tf.float32),
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_1_r')
                 deconv0_1_norm1_r = ops._norm(deconv0_1_r, self.is_training, self.norm)
@@ -56,18 +57,18 @@ class GDecoder:
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                            mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                               mean=0.0, stddev=0.02, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_2')
                 norm0_2 = ops._norm(conv0_2, self.is_training, self.norm)
                 relu0_2 = ops.relu(norm0_2)
             # 12,9
             with tf.variable_scope("deconv0_2_r", reuse=self.reuse):
-                resize0_2 = ops.uk_resize(relu0_2, reuse=self.reuse,name='resize')
+                resize0_2 = ops.uk_resize(relu0_2, reuse=self.reuse, name='resize')
                 deconv0_2_r = tf.layers.conv2d(inputs=resize0_2, filters=4 * self.ngf, kernel_size=3, strides=1,
                                                padding="SAME",
                                                activation=None,
                                                kernel_initializer=tf.random_normal_initializer(
-                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                   mean=0.0, stddev=0.02, dtype=tf.float32),
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_2_r')
                 deconv0_2_norm1_r = ops._norm(deconv0_2_r, self.is_training, self.norm)
@@ -78,7 +79,7 @@ class GDecoder:
                                            padding="SAME",
                                            activation=None,
                                            kernel_initializer=tf.random_normal_initializer(
-                                               mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                               mean=0.0, stddev=0.02, dtype=tf.float32),
                                            bias_initializer=tf.constant_initializer(0.0), name='conv0_3')
                 norm0_3 = ops._norm(conv0_3, self.is_training, self.norm)
                 relu0_3 = ops.relu(norm0_3)
@@ -89,7 +90,7 @@ class GDecoder:
                                                padding="SAME",
                                                activation=None,
                                                kernel_initializer=tf.random_normal_initializer(
-                                                mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                   mean=0.0, stddev=0.02, dtype=tf.float32),
                                                bias_initializer=tf.constant_initializer(0.0),
                                                name='deconv0_3_r')
                 deconv0_3_norm1_r = ops._norm(deconv0_3_r, self.is_training, self.norm)
@@ -100,7 +101,7 @@ class GDecoder:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                           mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv1')
                 norm1 = ops._norm(conv1, self.is_training, self.norm)
                 relu1 = ops.relu(norm1)
@@ -110,7 +111,7 @@ class GDecoder:
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0, stddev=0.02, dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv1_r')
                 deconv1_norm1_r = ops._norm(deconv1_r, self.is_training, self.norm)
@@ -121,50 +122,50 @@ class GDecoder:
                                               padding="SAME",
                                               activation=None,
                                               kernel_initializer=tf.random_normal_initializer(
-                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                  mean=0.0, stddev=0.02, dtype=tf.float32),
                                               bias_initializer=tf.constant_initializer(0.0),
                                               name='add1_conv1')
                 add1_norm1 = ops._norm(add1_conv1, self.is_training, self.norm)
                 add1_relu1 = ops.relu(add1_norm1)
             with tf.variable_scope("deconv2_r", reuse=self.reuse):
                 resize2 = ops.uk_resize(add1_relu1, reuse=self.reuse, name='resize')
-                deconv2_r = tf.layers.conv2d(inputs=resize2, filters= self.ngf, kernel_size=3, strides=1,
+                deconv2_r = tf.layers.conv2d(inputs=resize2, filters=self.ngf, kernel_size=3, strides=1,
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                 mean=0.0, stddev=0.02, dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv2_r')
                 deconv2_norm1_r = ops._norm(deconv2_r, self.is_training, self.norm)
                 add2 = ops.relu(deconv2_norm1_r)
             with tf.variable_scope("add2_conv1", reuse=self.reuse):
-                add2_conv1 = tf.layers.conv2d(inputs=add2, filters= self.ngf, kernel_size=3,
+                add2_conv1 = tf.layers.conv2d(inputs=add2, filters=self.ngf, kernel_size=3,
                                               strides=1,
                                               padding="SAME",
                                               activation=None,
                                               kernel_initializer=tf.random_normal_initializer(
-                                                mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                  mean=0.0, stddev=0.02, dtype=tf.float32),
                                               bias_initializer=tf.constant_initializer(0.0),
                                               name='add2_conv1')
                 add2_norm1 = ops._norm(add2_conv1, self.is_training, self.norm)
                 add2_relu1 = ops.relu(add2_norm1)
             with tf.variable_scope("conv2", reuse=self.reuse):
                 resize3 = ops.uk_resize(add2_relu1, reuse=self.reuse, name='resize')
-                conv2 = tf.layers.conv2d(inputs=resize3 , filters=self.ngf, kernel_size=3, strides=1,
+                conv2 = tf.layers.conv2d(inputs=resize3, filters=self.ngf, kernel_size=3, strides=1,
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                             mean=0.0, stddev=0.02, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv2')
                 norm2 = ops._norm(conv2, self.is_training, self.norm)
                 relu2 = ops.relu(norm2)
             with tf.variable_scope("add3_conv1", reuse=self.reuse):
-                add3_conv1 = tf.layers.conv2d(inputs=relu2 , filters= self.ngf, kernel_size=3,
+                add3_conv1 = tf.layers.conv2d(inputs=relu2, filters=self.ngf, kernel_size=3,
                                               strides=1,
                                               padding="SAME",
                                               activation=None,
                                               kernel_initializer=tf.random_normal_initializer(
-                                                  mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                  mean=0.0, stddev=0.02, dtype=tf.float32),
                                               bias_initializer=tf.constant_initializer(0.0),
                                               name='add3_conv1')
                 add3_norm1 = ops._norm(add3_conv1, self.is_training, self.norm)
@@ -174,7 +175,7 @@ class GDecoder:
                                             padding="SAME",
                                             activation=None,
                                             kernel_initializer=tf.random_normal_initializer(
-                                               mean=0.0 , stddev=0.02, dtype=tf.float32),
+                                                mean=0.0, stddev=0.02, dtype=tf.float32),
                                             bias_initializer=tf.constant_initializer(0.0), name='lastconv')
                 lastnorm = ops._norm(lastconv, self.is_training, self.norm)
                 output = tf.nn.sigmoid(lastnorm)

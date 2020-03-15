@@ -3,6 +3,7 @@ import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -113,7 +114,6 @@ class GAN:
         y_g_t_by_w = self.G_T(w_g, cy_code)
         z_g_t_by_w = self.G_T(w_g, cz_code)
 
-
         j_x_g, j_x_g_c = self.D_X(x_g)
         j_y_g, j_y_g_c = self.D_X(y_g)
         j_z_g, j_z_g_c = self.D_X(z_g)
@@ -180,13 +180,12 @@ class GAN:
         G_loss += self.mse_loss(w_g_t_by_x, w_g_t_by_z) * 5  # + self.ssim_loss(w_g_t_by_x, w_g_t_by_z) * 2
         G_loss += self.mse_loss(w_g_t_by_y, w_g_t_by_z) * 5  # + self.ssim_loss(w_g_t_by_y, w_g_t_by_z) * 2
 
-
         self.image_list["mask"] = mask
         self.image_list["f"] = f
         self.image_list["new_f"] = new_f
         self.prob_list["label_expand"] = label_expand
         self.prob_list["f_rm_expand"] = f_rm_expand
-        self.image_list["l"] = l*0.25
+        self.image_list["l"] = l * 0.25
 
         self.image_list["x_g"] = x_g
         self.image_list["y_g"] = y_g
@@ -229,7 +228,7 @@ class GAN:
                 self.D_X.variables
             ,
                 self.G_T.variables
-             ]
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):

@@ -26,22 +26,22 @@ class GAN:
     def model(self, l, x):
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        
-        l_g_prob = self.LESP(x)
-        
-        L_loss = self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]), 
-                                         tf.reduce_mean(l_g_prob  ,axis=[1,2])) 
 
-        l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
+        l_g_prob = self.LESP(x)
+
+        L_loss = self.mse_loss(tf.reduce_mean(label_expand, axis=[1, 2]),
+                               tf.reduce_mean(l_g_prob, axis=[1, 2]))
+
+        l_r = tf.argmax(tf.reduce_mean(label_expand, axis=[1, 2]), axis=-1)
+        l_g = tf.argmax(tf.reduce_mean(l_g_prob, axis=[1, 2]), axis=-1)
 
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["x"] = str(x)
         self.tenaor_name["l_g"] = str(l_g)
 
-        L_acc=self.acc( l_r,l_g)
+        L_acc = self.acc(l_r, l_g)
 
-        return [L_loss,L_acc, l_r,l_g]
+        return [L_loss, L_acc, l_r, l_g]
 
     def get_variables(self):
         return self.LESP.variables
@@ -52,18 +52,19 @@ class GAN:
                 tf.train.AdamOptimizer(self.learning_rate, beta1=0.5, name=name)
             )
             return learning_step
+
         D_optimizer = make_optimizer(name='Adam_D')
 
-        return  D_optimizer
+        return D_optimizer
 
     def loss_summary(self, L_loss):
         tf.summary.scalar('loss/L_loss', L_loss[0])
         tf.summary.scalar('loss/L_acc', L_loss[1])
 
-    def acc(self,x,y):
-         correct_prediction = tf.equal(x, y)
-         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-         return accuracy 
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)

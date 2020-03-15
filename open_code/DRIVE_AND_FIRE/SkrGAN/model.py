@@ -3,6 +3,7 @@ import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
 
+
 class GAN:
     def __init__(self,
                  image_size,
@@ -64,7 +65,7 @@ class GAN:
         mask = self.get_mask(m)
         f = self.get_f(m)  # M->F
         f = self.remove_l(l_m, f)
-        x_g = self.G_X(1.0-f)
+        x_g = self.G_X(1.0 - f)
         self.tenaor_name["x_g"] = str(x_g)
 
         j_x_g = self.D_X(x_g)
@@ -90,7 +91,7 @@ class GAN:
         return [self.G_X.variables
             ,
                 self.D_X.variables
-            ]
+                ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):

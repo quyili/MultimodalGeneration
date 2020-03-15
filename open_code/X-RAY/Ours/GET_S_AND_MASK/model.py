@@ -44,7 +44,7 @@ class VAE_GAN:
                                shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2],
                                       2 * self.input_shape[3]])
 
-        code_f_mean, code_f_logvar = self.EC_F(f*0.1 + 0.9)
+        code_f_mean, code_f_logvar = self.EC_F(f * 0.1 + 0.9)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)

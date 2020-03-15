@@ -43,25 +43,27 @@ def mean_list(lists):
         out.append(mean(list))
     return out
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form=""):
-    train_range = len(Label_train_files)
-    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
-    L_img = SimpleITK.ReadImage(file_name )
-    L_arr= SimpleITK.GetArrayFromImage(L_img)
 
-    if  len(L_arr.shape)==2 :
-        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
-    elif  L_arr.shape[2]==1 :
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
-    elif  L_arr.shape[2]==3:
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
-    if out_size== None:
-        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]]
+def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form=""):
+    train_range = len(Label_train_files)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, out_form)
+    L_img = SimpleITK.ReadImage(file_name)
+    L_arr = SimpleITK.GetArrayFromImage(L_img)
+
+    if len(L_arr.shape) == 2:
+        img = cv2.merge([L_arr[:, :], L_arr[:, :], L_arr[:, :]])
+    elif L_arr.shape[2] == 1:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 0], L_arr[:, :, 0]])
+    elif L_arr.shape[2] == 3:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 1], L_arr[:, :, 2]])
+    if out_size == None:
+        img = cv2.resize(img, (FLAGS.image_size[0], FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:FLAGS.image_size[2]]
     else:
-        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]]
+        img = cv2.resize(img, (out_size[0], out_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:out_size[2]]
     return img.astype('float32')
+
 
 def save_images(image_list, checkpoints_dir, file_index):
     val_f, val_f_rm, val_f_one_hot, val_f_rm_prob = image_list
@@ -71,7 +73,7 @@ def save_images(image_list, checkpoints_dir, file_index):
                          checkpoints_dir + "/samples/fake_f_rm_" + str(file_index) + ".tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_one_hot)[0, :, :, :]),
                          checkpoints_dir + "/samples/true_f_one_hot_" + str(file_index) + ".mha")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_rm_prob )[0, :, :, :]),
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(val_f_rm_prob)[0, :, :, :]),
                          checkpoints_dir + "/samples/fake_f_rm_prob_" + str(file_index) + ".mha")
 
 
@@ -135,7 +137,7 @@ def train():
                     with tf.name_scope("GPU_0"):
                         # m_0 = tf.placeholder(tf.float32, shape=input_shape)
                         F_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_0,  j_list_0, loss_list_0 = gan.model(F_0)
+                        image_list_0, j_list_0, loss_list_0 = gan.model(F_0)
                         tensor_name_dirct_0 = gan.tenaor_name
                         variables_list_0 = gan.get_variables()
                         FG_grad_0 = FG_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
@@ -148,7 +150,7 @@ def train():
                     with tf.name_scope("GPU_1"):
                         # m_1 = tf.placeholder(tf.float32, shape=input_shape)
                         F_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_1,  j_list_1, loss_list_1 = gan.model(F_1)
+                        image_list_1, j_list_1, loss_list_1 = gan.model(F_1)
                         tensor_name_dirct_1 = gan.tenaor_name
                         variables_list_1 = gan.get_variables()
                         FG_grad_1 = FG_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
@@ -161,7 +163,7 @@ def train():
                     with tf.name_scope("GPU_2"):
                         # m_2 = tf.placeholder(tf.float32, shape=input_shape)
                         F_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_2,  j_list_2, loss_list_2 = gan.model(F_2)
+                        image_list_2, j_list_2, loss_list_2 = gan.model(F_2)
                         tensor_name_dirct_2 = gan.tenaor_name
                         variables_list_2 = gan.get_variables()
                         FG_grad_2 = FG_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
@@ -174,7 +176,7 @@ def train():
                     with tf.name_scope("GPU_3"):
                         # m_3 = tf.placeholder(tf.float32, shape=input_shape)
                         F_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        image_list_3,  j_list_3, loss_list_3 = gan.model(F_3)
+                        image_list_3, j_list_3, loss_list_3 = gan.model(F_3)
                         tensor_name_dirct_3 = gan.tenaor_name
                         variables_list_3 = gan.get_variables()
                         FG_grad_3 = FG_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
@@ -205,7 +207,8 @@ def train():
             val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
             saver = tf.train.Saver()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,
+                                                           gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
             if FLAGS.load_model is not None:
                 logging.info("restore model:" + FLAGS.load_model)
                 if FLAGS.checkpoint is not None:
@@ -251,7 +254,7 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses= sess.run(
+                    _, train_image_summary_op, train_losses = sess.run(
                         [optimizers, image_summary_op, loss_list_0],
                         feed_dict={
                             # m_0: np.asarray(train_true_m)[0*int(FLAGS.batch_size/4):1*int(FLAGS.batch_size/4), :, :, :],
@@ -267,7 +270,7 @@ def train():
                                  :, :, :],
                             F_3: np.asarray(train_true_f)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
                                  :, :, :],
-                            gan.keep_prob: [1.0,1.0]
+                            gan.keep_prob: [1.0, 1.0]
                         })
                     train_loss_list.append(train_losses)
                     logging.info(
@@ -305,10 +308,10 @@ def train():
                                 val_true_f.append(val_f_arr)
                                 val_index += 1
 
-                            val_losses_0,\
-                            val_losses_1,\
-                            val_losses_2,\
-                            val_losses_3,\
+                            val_losses_0, \
+                            val_losses_1, \
+                            val_losses_2, \
+                            val_losses_3, \
                             val_image_summary_op, \
                             val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
                                 [loss_list_0,
@@ -340,7 +343,7 @@ def train():
                             val_loss_list.append(val_losses_1)
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
-                            if j %2== 0:
+                            if j % 2 == 0:
                                 save_images(val_image_list_0, checkpoints_dir, str(j))
 
                         val_summary_op = sess.run(

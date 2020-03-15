@@ -53,11 +53,13 @@ class InvalidFIDException(Exception):
 def create_inception_graph(pth):
     """Creates a graph from saved GraphDef file."""
     # Creates graph from saved graph_def.pb.
-    with tf.gfile.FastGFile( pth, 'rb') as f:
+    with tf.gfile.FastGFile(pth, 'rb') as f:
         graph_def = tf.GraphDef()
-        graph_def.ParseFromString( f.read())
-        _ = tf.import_graph_def( graph_def, name='FID_Inception_Net')
-#-------------------------------------------------------------------------------
+        graph_def.ParseFromString(f.read())
+        _ = tf.import_graph_def(graph_def, name='FID_Inception_Net')
+
+
+# -------------------------------------------------------------------------------
 
 
 # code for handling inception net derived from
@@ -71,19 +73,21 @@ def _get_inception_layer(sess):
         for o in op.outputs:
             shape = o.get_shape()
             if shape._dims is not None:
-              shape = [s.value for s in shape]
-              new_shape = []
-              for j, s in enumerate(shape):
-                if s == 1 and j == 0:
-                  new_shape.append(None)
-                else:
-                  new_shape.append(s)
-              try:
-                o._shape = tf.TensorShape(new_shape)
-              except ValueError:
-                o._shape_val = tf.TensorShape(new_shape) # EDIT: added for compatibility with tensorflow 1.6.0
+                shape = [s.value for s in shape]
+                new_shape = []
+                for j, s in enumerate(shape):
+                    if s == 1 and j == 0:
+                        new_shape.append(None)
+                    else:
+                        new_shape.append(s)
+                try:
+                    o._shape = tf.TensorShape(new_shape)
+                except ValueError:
+                    o._shape_val = tf.TensorShape(new_shape)  # EDIT: added for compatibility with tensorflow 1.6.0
     return pool3
-#-------------------------------------------------------------------------------
+
+
+# -------------------------------------------------------------------------------
 
 
 def get_activations(images, sess, batch_size=50, verbose=False):
@@ -106,21 +110,23 @@ def get_activations(images, sess, batch_size=50, verbose=False):
     if batch_size > d0:
         print("warning: batch size is bigger than the data size. setting batch size to data size")
         batch_size = d0
-    n_batches = d0//batch_size
-    n_used_imgs = n_batches*batch_size
-    pred_arr = np.empty((n_used_imgs,2048))
+    n_batches = d0 // batch_size
+    n_used_imgs = n_batches * batch_size
+    pred_arr = np.empty((n_used_imgs, 2048))
     for i in range(n_batches):
         if verbose:
-            print("\rPropagating batch %d/%d" % (i+1, n_batches), end="", flush=True)
-        start = i*batch_size
+            print("\rPropagating batch %d/%d" % (i + 1, n_batches), end="", flush=True)
+        start = i * batch_size
         end = start + batch_size
         batch = images[start:end]
         pred = sess.run(inception_layer, {'FID_Inception_Net/ExpandDims:0': batch})
-        pred_arr[start:end] = pred.reshape(batch_size,-1)
+        pred_arr[start:end] = pred.reshape(batch_size, -1)
     if verbose:
         print(" done")
     return pred_arr
-#-------------------------------------------------------------------------------
+
+
+# -------------------------------------------------------------------------------
 
 
 def calculate_frechet_distance(mu1, sigma1, mu2, sigma2):
@@ -144,14 +150,16 @@ def calculate_frechet_distance(mu1, sigma1, mu2, sigma2):
     -- InvalidFIDException if nan occures.
     """
     m = np.square(mu1 - mu2).sum()
-    #s = sp.linalg.sqrtm(np.dot(sigma1, sigma2)) # EDIT: commented out
-    s, _ = sp.linalg.sqrtm(np.dot(sigma1, sigma2), disp=False) # EDIT: added
-    dist = m + np.trace(sigma1+sigma2 - 2*s)
-    #if np.isnan(dist): # EDIT: commented out
+    # s = sp.linalg.sqrtm(np.dot(sigma1, sigma2)) # EDIT: commented out
+    s, _ = sp.linalg.sqrtm(np.dot(sigma1, sigma2), disp=False)  # EDIT: added
+    dist = m + np.trace(sigma1 + sigma2 - 2 * s)
+    # if np.isnan(dist): # EDIT: commented out
     #    raise InvalidFIDException("nan occured in distance calculation.") # EDIT: commented out
-    #return dist # EDIT: commented out
-    return np.real(dist) # EDIT: added
-#-------------------------------------------------------------------------------
+    # return dist # EDIT: commented out
+    return np.real(dist)  # EDIT: added
+
+
+# -------------------------------------------------------------------------------
 
 
 def calculate_activation_statistics(images, sess, batch_size=1, verbose=False):
@@ -174,14 +182,16 @@ def calculate_activation_statistics(images, sess, batch_size=1, verbose=False):
     mu = np.mean(act, axis=0)
     sigma = np.cov(act, rowvar=False)
     return mu, sigma
-#-------------------------------------------------------------------------------
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
+
+# -------------------------------------------------------------------------------
 # The following functions aren't needed for calculating the FID
 # they're just here to make this module work as a stand-alone script
 # for calculating FID scores
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 def check_or_download_inception(inception_path):
     ''' Checks if the path to the inception file is valid, or downloads
         the file if it is not present. '''
@@ -217,15 +227,16 @@ def mynorm(input):
               ) / (np.max(input) - np.min(input))
     return output
 
-def _handle_path(path,sess):
-    images=[]
+
+def _handle_path(path, sess):
+    images = []
     for file in os.listdir(path):
         x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(path + "/" + file)).astype('float32')
-        x = (mynorm(x)*255).astype(np.uint8)
+        x = (mynorm(x) * 255).astype(np.uint8)
         h, w = x.shape[0], x.shape[1]
         if len(x.shape) == 2:
-            x = np.tile(x.reshape([h,w,1]),(1,1,3))
-            assert list(x.shape)==[h,w,3]
+            x = np.tile(x.reshape([h, w, 1]), (1, 1, 3))
+            assert list(x.shape) == [h, w, 3]
         elif x.shape[2] == 1:
             x = np.tile(x, (1, 1, 3))
             assert list(x.shape) == [h, w, 3]
@@ -254,16 +265,15 @@ def calculate_fid_given_paths(paths, inception_path):
 
 if __name__ == "__main__":
     from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument("path", type=str, nargs=2,
-        help='Path to the generated images or to .npz statistic files')
+                        help='Path to the generated images or to .npz statistic files')
     parser.add_argument("-i", "--inception", type=str, default=None,
-        help='Path to Inception model (will be downloaded if not provided)')
+                        help='Path to Inception model (will be downloaded if not provided)')
     parser.add_argument("--gpu", default="", type=str,
-        help='GPU to use (leave blank for CPU only)')
+                        help='GPU to use (leave blank for CPU only)')
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     fid_value = calculate_fid_given_paths(args.path, args.inception)
     print("FID: ", fid_value)
-
-

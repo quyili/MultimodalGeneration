@@ -10,8 +10,9 @@ PATH = "E:/project/MultimodalGeneration/data/SWM/train/X"
 SAVE_F = "E:/project/MultimodalGeneration/data/SWM/train/F"
 SAVE_M = "E:/project/MultimodalGeneration/data/SWM/train/M"
 NUM = "21_training"
-alpha=0.01
-beta=5
+alpha = 0.01
+beta = 5
+
 
 def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     kernel = np.zeros([kernel_size, kernel_size])
@@ -29,10 +30,11 @@ def gauss_2d_kernel(kernel_size=3, sigma=0.0):
     sum_val = 1 / sum_val
     return kernel * sum_val
 
+
 def gaussian_blur(image, kernel, kernel_size, cdim=3):
     # kernel as placeholder variable, so it can change
     outputs = []
-    pad_w = (kernel_size*kernel_size - 1) // 2
+    pad_w = (kernel_size * kernel_size - 1) // 2
     padded = tf.pad(image, [[0, 0], [pad_w, pad_w], [pad_w, pad_w], [0, 0]], mode='REFLECT')
     for channel_idx in range(cdim):
         data_c = padded[:, :, :, channel_idx:(channel_idx + 1)]
@@ -43,10 +45,12 @@ def gaussian_blur(image, kernel, kernel_size, cdim=3):
         outputs.append(data_c)
     return tf.concat(outputs, axis=3)
 
+
 def norm(input):
     output = (input - tf.reduce_min(input, axis=[1, 2, 3])
               ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
     return output
+
 
 def get_f(x, j=0.1):
     x1 = norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
@@ -71,8 +75,8 @@ def get_f(x, j=0.1):
     return x12
 
 
-def get_mask(m, p=5,beta=0.0):
-    m=norm(m)
+def get_mask(m, p=5, beta=0.0):
+    m = norm(m)
     mask = 1.0 - tf.ones(m.get_shape().as_list()) * tf.cast(m > beta, dtype="float32")
     shape = m.get_shape().as_list()
     mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
@@ -90,10 +94,10 @@ with graph.as_default():
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(
-        SimpleITK.ReadImage(PATH+"/" + NUM + ".tif")).astype(
+        SimpleITK.ReadImage(PATH + "/" + NUM + ".tif")).astype(
         'float32')
     input_x = transform.resize(np.asarray(input_x), [512, 512, 3])
-    fx_,mask_x_ = sess.run([fx, mask_x],feed_dict={x: np.asarray([input_x]) })
+    fx_, mask_x_ = sess.run([fx, mask_x], feed_dict={x: np.asarray([input_x])})
     fx_ = signal.medfilt2d(np.asarray(fx_)[0, :, :, 0, ], kernel_size=beta)
     mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + NUM + ".tiff")

@@ -13,25 +13,26 @@ SAVE_M1 = "D:/BaiduYunDownload/TC19/new_images_M1"
 SAVE_F2 = "D:/BaiduYunDownload/TC19/new_images_F2"
 SAVE_M2 = "D:/BaiduYunDownload/TC19/new_images_M2"
 NUM = "318818_002"
-alpha=0.01
-k_size1=5
+alpha = 0.01
+k_size1 = 5
 # alpha=0.04
 # k_size1=7
 
-p=2
-beta=0.48
-k_size2=3
+p = 2
+beta = 0.48
+k_size2 = 3
 # beta=0.22
 # k_size2=5
 
-IF_SAVE_F=True
-IF_SAVE_M=True
+IF_SAVE_F = True
+IF_SAVE_M = True
 
 
 def norm(input):
     output = (input - tf.reduce_min(input, axis=[1, 2, 3])
               ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
     return output
+
 
 def get_f(x, j=0.1):
     x1 = norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
@@ -48,8 +49,8 @@ def get_f(x, j=0.1):
     return x12
 
 
-def get_mask(m, p=5,beta=0.0):
-    m=norm(m)
+def get_mask(m, p=5, beta=0.0):
+    m = norm(m)
     mask = 1.0 - tf.ones(m.get_shape().as_list()) * tf.cast(m > beta, dtype="float32")
     shape = m.get_shape().as_list()
     mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
@@ -68,7 +69,6 @@ with graph.as_default():
     fx = get_f(x, j=alpha)
     mask_x = get_mask(x, p=p, beta=beta)
 
-
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + NUM + ".mha"))
     input_x = input_x.reshape([512, 512, 3])
@@ -77,7 +77,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=k_size2)
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(fx_), "X0.tiff")
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), "X1.tiff")
-    SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_),  "X2.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * fx_), "X2.tiff")
     # if IF_SAVE_M==True:
     #     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + NUM + ".tiff")
     # if IF_SAVE_F==True:

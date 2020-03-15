@@ -7,7 +7,6 @@ from VAE_decoder import VDecoder
 from unet import Unet
 
 
-
 class VAE_GAN:
     def __init__(self,
                  image_size,
@@ -28,37 +27,42 @@ class VAE_GAN:
         self.ones = tf.ones(self.input_shape, name="ones")
         self.tenaor_name = {}
 
-        self.EC_F = VEncoder('EC_F', ngf=ngf,units=units,keep_prob=0.98)
-        self.DC_F = VDecoder('DC_F', ngf=ngf, output_channl=2*image_size[2],units=units)
+        self.EC_F = VEncoder('EC_F', ngf=ngf, units=units, keep_prob=0.98)
+        self.DC_F = VDecoder('DC_F', ngf=ngf, output_channl=2 * image_size[2], units=units)
 
         self.G_M = Unet('G_M', ngf=ngf / 2, keep_prob=0.9, output_channl=2)
 
-        self.D_F = Discriminator('D_F', ngf=ngf,keep_prob=0.85)
+        self.D_F = Discriminator('D_F', ngf=ngf, keep_prob=0.85)
         self.FD_F = FeatureDiscriminator('FD_F', ngf=ngf)
 
-    def model(self, f,mask):
+    def model(self, f, mask):
         # F -> F_R VAE
-        f_1=f[:,:,:,0:1]
-        f_2=f[:,:,:,1:2]
-        f_3=f[:,:,:,2:3]
-        f_one_hot_1 = tf.reshape(tf.one_hot(tf.cast(f_1, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
-        f_one_hot_2 = tf.reshape(tf.one_hot(tf.cast(f_2, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
-        f_one_hot_3 = tf.reshape(tf.one_hot(tf.cast(f_3, dtype=tf.int32), depth=2, axis=-1),shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2])
-        f_one_hot = tf.reshape(tf.concat([f_one_hot_1 ,f_one_hot_2 ,f_one_hot_3 ],axis=-1), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],2*self.input_shape[3]])
+        f_1 = f[:, :, :, 0:1]
+        f_2 = f[:, :, :, 1:2]
+        f_3 = f[:, :, :, 2:3]
+        f_one_hot_1 = tf.reshape(tf.one_hot(tf.cast(f_1, dtype=tf.int32), depth=2, axis=-1),
+                                 shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
+        f_one_hot_2 = tf.reshape(tf.one_hot(tf.cast(f_2, dtype=tf.int32), depth=2, axis=-1),
+                                 shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
+        f_one_hot_3 = tf.reshape(tf.one_hot(tf.cast(f_3, dtype=tf.int32), depth=2, axis=-1),
+                                 shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
+        f_one_hot = tf.reshape(tf.concat([f_one_hot_1, f_one_hot_2, f_one_hot_3], axis=-1),
+                               shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2],
+                                      2 * self.input_shape[3]])
         mask_1 = mask[:, :, :, 0:1]
         mask_2 = mask[:, :, :, 1:2]
         mask_3 = mask[:, :, :, 2:3]
         mask_one_hot_1 = tf.reshape(tf.one_hot(tf.cast(mask_1, dtype=tf.int32), depth=2, axis=-1),
-                                 shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
         mask_one_hot_2 = tf.reshape(tf.one_hot(tf.cast(mask_2, dtype=tf.int32), depth=2, axis=-1),
-                                 shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
         mask_one_hot_3 = tf.reshape(tf.one_hot(tf.cast(mask_3, dtype=tf.int32), depth=2, axis=-1),
-                                 shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
+                                    shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 2])
         m_one_hot = tf.reshape(tf.concat([mask_one_hot_1, mask_one_hot_2, mask_one_hot_3], axis=-1),
                                shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2],
                                       2 * self.input_shape[3]])
 
-        code_f_mean, code_f_logvar = self.EC_F(f*0.1 + 0.9)
+        code_f_mean, code_f_logvar = self.EC_F(f * 0.1 + 0.9)
         shape = code_f_logvar.get_shape().as_list()
         code_f_std = tf.exp(0.5 * code_f_logvar)
         code_f_epsilon = tf.random_normal(shape, mean=0., stddev=1., dtype=tf.float32)
@@ -72,7 +76,7 @@ class VAE_GAN:
         # D,FD
         j_f = self.D_F(f_one_hot)
         j_f_rm = self.D_F(f_rm_prob)
-        
+
         code_f = tf.reshape(code_f, shape=[-1, 64, 64, 1])
         code_f_rm = tf.reshape(code_f_rm, shape=[-1, 64, 64, 1])
         j_code_f_rm = self.FD_F(code_f_rm)
@@ -100,35 +104,41 @@ class VAE_GAN:
         # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 55
 
-        FG_loss += tf.reduce_mean(tf.abs(f_one_hot-f_r_prob)) * 10
+        FG_loss += tf.reduce_mean(tf.abs(f_one_hot - f_r_prob)) * 10
 
         FG_loss += self.mse_loss(0.0, m_one_hot * f_r_prob) * 1
         FG_loss += self.mse_loss(0.0, mask_rm_prob * f_rm_prob) * 1
 
         MG_loss += self.mse_loss(m_one_hot, mask_r_prob) * 15
 
-        f_r_1 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,0:2], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
-        f_r_2 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,2:4], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
-        f_r_3 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:,:,:,4:6], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
-        f_r = tf.reshape(tf.concat([f_r_1 ,f_r_2 ,f_r_3 ],axis=-1), shape=self.input_shape)
-        f_rm_1 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:,:,:,0:2], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
-        f_rm_2 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:,:,:,2:4], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
-        f_rm_3 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:,:,:,4:6], axis=-1), dtype=tf.float32), shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
-        f_rm = tf.reshape(tf.concat([f_rm_1 ,f_rm_2 ,f_rm_3 ],axis=-1), shape=self.input_shape)
+        f_r_1 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:, :, :, 0:2], axis=-1), dtype=tf.float32),
+                           shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+        f_r_2 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:, :, :, 2:4], axis=-1), dtype=tf.float32),
+                           shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+        f_r_3 = tf.reshape(tf.cast(tf.argmax(f_r_prob[:, :, :, 4:6], axis=-1), dtype=tf.float32),
+                           shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+        f_r = tf.reshape(tf.concat([f_r_1, f_r_2, f_r_3], axis=-1), shape=self.input_shape)
+        f_rm_1 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:, :, :, 0:2], axis=-1), dtype=tf.float32),
+                            shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+        f_rm_2 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:, :, :, 2:4], axis=-1), dtype=tf.float32),
+                            shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+        f_rm_3 = tf.reshape(tf.cast(tf.argmax(f_rm_prob[:, :, :, 4:6], axis=-1), dtype=tf.float32),
+                            shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+        f_rm = tf.reshape(tf.concat([f_rm_1, f_rm_2, f_rm_3], axis=-1), shape=self.input_shape)
 
         mask_r_1 = tf.reshape(tf.cast(tf.argmax(mask_r_prob[:, :, :, 0:2], axis=-1), dtype=tf.float32),
-                           shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+                              shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
         mask_r_2 = tf.reshape(tf.cast(tf.argmax(mask_r_prob[:, :, :, 2:4], axis=-1), dtype=tf.float32),
-                           shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+                              shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
         mask_r_3 = tf.reshape(tf.cast(tf.argmax(mask_r_prob[:, :, :, 4:6], axis=-1), dtype=tf.float32),
-                           shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+                              shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
         mask_r = tf.reshape(tf.concat([mask_r_1, mask_r_2, mask_r_3], axis=-1), shape=self.input_shape)
         mask_rm_1 = tf.reshape(tf.cast(tf.argmax(mask_rm_prob[:, :, :, 0:2], axis=-1), dtype=tf.float32),
-                            shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+                               shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
         mask_rm_2 = tf.reshape(tf.cast(tf.argmax(mask_rm_prob[:, :, :, 2:4], axis=-1), dtype=tf.float32),
-                            shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+                               shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
         mask_rm_3 = tf.reshape(tf.cast(tf.argmax(mask_rm_prob[:, :, :, 4:6], axis=-1), dtype=tf.float32),
-                            shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
+                               shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 1])
         mask_rm = tf.reshape(tf.concat([mask_rm_1, mask_rm_2, mask_rm_3], axis=-1), shape=self.input_shape)
 
         self.tenaor_name["code_f_rm"] = str(code_f_rm)
@@ -160,7 +170,7 @@ class VAE_GAN:
         G_optimizer = make_optimizer(name='Adam_G')
         D_optimizer = make_optimizer(name='Adam_D')
 
-        return G_optimizer,  D_optimizer
+        return G_optimizer, D_optimizer
 
     def evaluation_code(self, code_list):
         code_f, code_f_rm = \
@@ -194,7 +204,7 @@ class VAE_GAN:
         tf.summary.histogram('discriminator/FALSE/j_f_rm', j_f_rm)
 
     def loss_summary(self, loss_list):
-        G_loss,  D_loss = loss_list[0], loss_list[1]
+        G_loss, D_loss = loss_list[0], loss_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
 
@@ -207,6 +217,7 @@ class VAE_GAN:
         tf.summary.image('image/mask', mask)
         tf.summary.image('image/mask_rm', mask_rm)
         tf.summary.image('image/mask_r', mask_r)
+
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
         """

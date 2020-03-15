@@ -14,10 +14,11 @@ def mover(
     except os.error:
         pass
 
-    index_files =  os.listdir(INDEX_PATH)
+    index_files = os.listdir(INDEX_PATH)
     for file in index_files:
         input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH + file.replace(".txt", ".png")))
         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_x), SAVE_PATH + file.replace(".txt", ".mha"))
+
 
 if __name__ == '__main__':
     mover(

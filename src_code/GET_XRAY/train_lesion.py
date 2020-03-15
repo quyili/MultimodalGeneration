@@ -31,6 +31,7 @@ tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
 tf.flags.DEFINE_integer('epoch_steps', 5224, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 
+
 def mean(list):
     return sum(list) / float(len(list))
 
@@ -46,31 +47,33 @@ def mean_list(lists):
 def random(n, h, w, c):
     return np.random.uniform(0., 1., size=[n, h, w, c])
 
+
 def mynorm(input):
     output = (input - np.min(input)
               ) / (np.max(input) - np.min(input))
     return output
 
-def read_file(l_path, Label_train_files, index, out_size=None,inpu_form="",out_form="",norm=False):
-    train_range = len(Label_train_files)
-    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form,out_form)
-    L_img = SimpleITK.ReadImage(file_name )
-    L_arr= SimpleITK.GetArrayFromImage(L_img)
 
-    if  len(L_arr.shape)==2 :
-        img = cv2.merge([L_arr [:,:], L_arr [:,:], L_arr [:,:]])
-    elif  L_arr.shape[2]==1 :
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,0], L_arr [:,:,0]])
-    elif  L_arr.shape[2]==3:
-        img = cv2.merge([L_arr [:,:,0], L_arr [:,:,1], L_arr [:,:,2]])
-    if out_size== None:
-        img = cv2.resize(img, (FLAGS.image_size[0],FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
-        img = np.asarray(img)[:,:,0:FLAGS.image_size[2]].astype('float32')
+def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form="", norm=False):
+    train_range = len(Label_train_files)
+    file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, out_form)
+    L_img = SimpleITK.ReadImage(file_name)
+    L_arr = SimpleITK.GetArrayFromImage(L_img)
+
+    if len(L_arr.shape) == 2:
+        img = cv2.merge([L_arr[:, :], L_arr[:, :], L_arr[:, :]])
+    elif L_arr.shape[2] == 1:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 0], L_arr[:, :, 0]])
+    elif L_arr.shape[2] == 3:
+        img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 1], L_arr[:, :, 2]])
+    if out_size == None:
+        img = cv2.resize(img, (FLAGS.image_size[0], FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:FLAGS.image_size[2]].astype('float32')
     else:
-        img = cv2.resize(img, (out_size[0],out_size[1]), interpolation=cv2.INTER_NEAREST)  
-        img = np.asarray(img)[:,:,0:out_size[2]].astype('float32')
-    if norm==True:
-        img=mynorm(img)
+        img = cv2.resize(img, (out_size[0], out_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = np.asarray(img)[:, :, 0:out_size[2]].astype('float32')
+    if norm == True:
+        img = mynorm(img)
     return img
 
 
@@ -140,7 +143,7 @@ def train():
                 with tf.name_scope("GPU_1"):
                     l_1 = tf.placeholder(tf.float32, shape=input_shape)
                     x_1 = tf.placeholder(tf.float32, shape=input_shape)
-                    loss_list_1 = gan.model(l_1,  x_1)
+                    loss_list_1 = gan.model(l_1, x_1)
                     tensor_name_dirct_1 = gan.tenaor_name
                     variables_list_1 = gan.get_variables()
                     D_grad_1 = D_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1)
@@ -149,7 +152,7 @@ def train():
                 with tf.name_scope("GPU_2"):
                     l_2 = tf.placeholder(tf.float32, shape=input_shape)
                     x_2 = tf.placeholder(tf.float32, shape=input_shape)
-                    loss_list_2 = gan.model(l_2,x_2)
+                    loss_list_2 = gan.model(l_2, x_2)
                     tensor_name_dirct_2 = gan.tenaor_name
                     variables_list_2 = gan.get_variables()
                     D_grad_2 = D_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2)
@@ -174,7 +177,8 @@ def train():
         val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
         saver = tf.train.Saver()
 
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,
+                                                           gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
 
             sess.run(tf.global_variables_initializer())
             if FLAGS.load_model is not None:
@@ -214,7 +218,7 @@ def train():
                     train_true_l = []
                     train_true_x = []
                     for b in range(FLAGS.batch_size):
-                        train_l_arr = read_file(FLAGS.L, x_train_files, index,inpu_form=".jpeg",out_form=".tiff")
+                        train_l_arr = read_file(FLAGS.L, x_train_files, index, inpu_form=".jpeg", out_form=".tiff")
                         train_x_arr = read_file(FLAGS.X, x_train_files, index)
 
                         train_true_l.append(train_l_arr)
@@ -225,20 +229,26 @@ def train():
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _,  train_losses = sess.run(
+                    _, train_losses = sess.run(
                         [optimizers, loss_list_0],
                         feed_dict={
                             l_0: np.asarray(train_true_l)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
                             x_0: np.asarray(train_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
 
-                            l_1: np.asarray(train_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_1: np.asarray(train_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_1: np.asarray(train_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            x_1: np.asarray(train_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
 
-                            l_2: np.asarray(train_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_2: np.asarray(train_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_2: np.asarray(train_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            x_2: np.asarray(train_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
 
-                            l_3: np.asarray(train_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_3: np.asarray(train_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                            l_3: np.asarray(train_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
+                            x_3: np.asarray(train_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
+                                 :, :, :],
                         })
                     train_loss_list.append(train_losses)
                     logging.info(
@@ -268,9 +278,10 @@ def train():
                             val_true_l = []
                             val_true_x = []
                             for b in range(FLAGS.batch_size):
-                                val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index,inpu_form=".jpeg",out_form=".tiff")
+                                val_l_arr = read_file(FLAGS.L_test, x_val_files, val_index, inpu_form=".jpeg",
+                                                      out_form=".tiff")
                                 val_x_arr = read_file(FLAGS.X_test, x_val_files, val_index)
-                                logging.info(x_val_files[val_index%len(x_val_files)])
+                                logging.info(x_val_files[val_index % len(x_val_files)])
 
                                 val_true_l.append(val_l_arr)
                                 val_true_x.append(val_x_arr)
@@ -283,29 +294,35 @@ def train():
                                 [loss_list_0,
                                  loss_list_1,
                                  loss_list_2,
-                                 loss_list_3,],
+                                 loss_list_3, ],
                                 feed_dict={
                                     l_0: np.asarray(val_true_l)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
                                     x_0: np.asarray(val_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
 
-                                    l_1: np.asarray(val_true_l)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_1: np.asarray(val_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_1: np.asarray(val_true_l)[
+                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                    x_1: np.asarray(val_true_x)[
+                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
 
-                                    l_2: np.asarray(val_true_l)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_2: np.asarray(val_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_2: np.asarray(val_true_l)[
+                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                    x_2: np.asarray(val_true_x)[
+                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
 
-                                    l_3: np.asarray(val_true_l)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_3: np.asarray(val_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    l_3: np.asarray(val_true_l)[
+                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                    x_3: np.asarray(val_true_x)[
+                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
                                 })
                             val_loss_list.append(val_losses_0)
                             val_loss_list.append(val_losses_1)
                             val_loss_list.append(val_losses_2)
                             val_loss_list.append(val_losses_3)
-                            logging.info("TRUETH"+ str(val_losses_0[2]) +"PRED:"+ str(val_losses_0[3]))
-                            logging.info("TRUETH"+ str(val_losses_1[2]) +"PRED:"+ str(val_losses_1[3]))
-                            logging.info("TRUETH"+ str(val_losses_2[2]) +"PRED:"+ str(val_losses_2[3]))
-                            logging.info("TRUETH"+ str(val_losses_3[2]) +"PRED:"+ str(val_losses_3[3]))
-                            
+                            logging.info("TRUETH" + str(val_losses_0[2]) + "PRED:" + str(val_losses_0[3]))
+                            logging.info("TRUETH" + str(val_losses_1[2]) + "PRED:" + str(val_losses_1[3]))
+                            logging.info("TRUETH" + str(val_losses_2[2]) + "PRED:" + str(val_losses_2[3]))
+                            logging.info("TRUETH" + str(val_losses_3[2]) + "PRED:" + str(val_losses_3[3]))
+
                         val_summary_op = sess.run(
                             summary_op,
                             feed_dict={loss_list_summary: mean_list(val_loss_list)})

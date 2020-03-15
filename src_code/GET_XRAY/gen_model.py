@@ -32,15 +32,14 @@ class GAN:
 
         self.D_M = Discriminator('D_M', ngf=ngf, keep_prob=0.9)
 
-
-    def model(self, l,f,mask,x):
+    def model(self, l, f, mask, x):
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        new_f=(f+tf.random_uniform([self.input_shape[0],self.input_shape[1],
-                                                        self.input_shape[2],1], minval=0.5,maxval=0.6,
-                                                       dtype=tf.float32)*(1.0 - mask)*(1.0- f))
+        new_f = (f + tf.random_uniform([self.input_shape[0], self.input_shape[1],
+                                        self.input_shape[2], 1], minval=0.5, maxval=0.6,
+                                       dtype=tf.float32) * (1.0 - mask) * (1.0 - f))
         f_rm_expand = tf.concat([new_f,
-                                 label_expand*0.9+0.1],
+                                 label_expand * 0.9 + 0.1],
                                 axis=-1)
 
         code_rm = self.EC_R(f_rm_expand)
@@ -60,16 +59,16 @@ class GAN:
         G_loss += self.mse_loss(j_x_g, 1.0) * 1
 
         G_loss += self.mse_loss(x_g, x) * 5
-        G_loss += self.mse_loss(x_g*mask, 0.0) * 0.001
+        G_loss += self.mse_loss(x_g * mask, 0.0) * 0.001
 
         # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
-        L_loss += self.mse_loss(tf.reduce_mean(label_expand , axis=[1, 2]), 
-                                         tf.reduce_mean(l_g_prob  ,axis=[1,2])) * 0.001
-       
-        l_r = tf.argmax(tf.reduce_mean(label_expand,axis=[1,2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob  ,axis=[1,2]), axis=-1)
+        L_loss += self.mse_loss(tf.reduce_mean(label_expand, axis=[1, 2]),
+                                tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.001
 
-        L_acc=self.acc( l_r,l_g)
+        l_r = tf.argmax(tf.reduce_mean(label_expand, axis=[1, 2]), axis=-1)
+        l_g = tf.argmax(tf.reduce_mean(l_g_prob, axis=[1, 2]), axis=-1)
+
+        L_acc = self.acc(l_r, l_g)
 
         self.tenaor_name["l"] = str(l)
         self.tenaor_name["f"] = str(f)
@@ -78,19 +77,19 @@ class GAN:
         self.tenaor_name["x_g"] = str(x_g)
         self.tenaor_name["l_g"] = str(l_g)
 
-        image_list={}
+        image_list = {}
         image_list["mask"] = mask
         # image_list["f_rm_expand"] = f_rm_expand
         image_list["f"] = f
         image_list["new_f"] = new_f
         image_list["x"] = x
         image_list["x_g"] = x_g
-        self.judge_list["j_x_g"]= j_x_g
+        self.judge_list["j_x_g"] = j_x_g
         self.judge_list["j_x"] = j_x
 
-        loss_list = [G_loss+L_loss, D_loss, L_loss, L_acc,G_loss]
+        loss_list = [G_loss + L_loss, D_loss, L_loss, L_acc, G_loss]
 
-        return loss_list,image_list
+        return loss_list, image_list
 
     def get_variables(self):
         return [self.EC_R.variables
@@ -117,7 +116,8 @@ class GAN:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
     def loss_summary(self, loss_list):
-        G_and_L_loss, D_loss,L_loss,L_acc,G_loss = loss_list[0], loss_list[1],loss_list[2],loss_list[3],loss_list[4]
+        G_and_L_loss, D_loss, L_loss, L_acc, G_loss = loss_list[0], loss_list[1], loss_list[2], loss_list[3], loss_list[
+            4]
         tf.summary.scalar('loss/G_and_L_loss', G_and_L_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
         tf.summary.scalar('loss/L_loss', L_loss)
@@ -126,12 +126,12 @@ class GAN:
 
     def image_summary(self, image_dirct):
         for key in image_dirct:
-            tf.summary.image('image/' + key, image_dirct[key][:,:,:,0:1])
+            tf.summary.image('image/' + key, image_dirct[key][:, :, :, 0:1])
 
-    def acc(self,x,y):
-         correct_prediction = tf.equal(x, y)
-         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-         return accuracy 
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)

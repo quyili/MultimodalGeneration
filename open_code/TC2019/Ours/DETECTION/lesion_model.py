@@ -22,11 +22,11 @@ class GAN:
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
-        self.classes_size=classes_size
+        self.classes_size = classes_size
 
-        #病灶检测器
-        self.LESP = Detector('LESP', ngf,classes_size=classes_size,keep_prob=0.99)
-        #鉴别器
+        # 病灶检测器
+        self.LESP = Detector('LESP', ngf, classes_size=classes_size, keep_prob=0.99)
+        # 鉴别器
         # self.D_LESP = Discriminator('D_LESP', ngf,keep_prob=0.99)
 
     def pred(self, classes_size, feature_class, background_classes_val, all_default_boxs_len):

@@ -254,7 +254,7 @@ def read_txt_file(l_path, Label_train_files, index, inpu_form=".mha"):
     file_name = l_path + "/" + Label_train_files[index % train_range].replace(inpu_form, ".txt")
     with open(file_name) as f:
         for line in f.readlines():
-            line = line.replace("\n","").split(" ")
+            line = line.replace("\n", "").split(" ")
             actual_item.append([float(line[1]), float(line[2]), float(line[3]), float(line[4]), int(line[0])])
     return actual_item
 
@@ -281,7 +281,7 @@ def train():
             logging.info("%s\t:\t%s" % (attr, str(value)))
 
         graph = tf.get_default_graph()
-        gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, classes_size,FLAGS.ngf)
+        gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, classes_size, FLAGS.ngf)
         input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
         # G_optimizer,D_optimizer = gan.optimize()
         G_optimizer = gan.optimize()
@@ -574,8 +574,9 @@ def train():
                                  box_top_value_0],
                                 feed_dict={X_0: val_true_x[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)]}
                             )
-                            print("IN:",gt_class_0.shape, gt_location_0.shape,gt_positives_0.shape,gt_negatives_0.shape,)
-                            print("OUT:",f_class.shape, f_location.shape)
+                            print("IN:", gt_class_0.shape, gt_location_0.shape, gt_positives_0.shape,
+                                  gt_negatives_0.shape, )
+                            print("OUT:", f_class.shape, f_location.shape)
                             top_shape = np.shape(box_top_index)
                             pred_class = []
                             pred_class_val = []

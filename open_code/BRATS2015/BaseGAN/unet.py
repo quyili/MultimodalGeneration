@@ -4,7 +4,7 @@ import ops as ops
 
 
 class Unet:
-    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0,output_channl=1):
+    def __init__(self, name, ngf=64, is_training=True, norm='instance', slice_stride=2, keep_prob=1.0, output_channl=1):
         self.name = name
         self.reuse = False
         self.ngf = ngf
@@ -14,10 +14,10 @@ class Unet:
         self.keep_prob = keep_prob
         self.output_channl = output_channl
 
-    def __call__(self, input1,input2=None):
+    def __call__(self, input1, input2=None):
         """
         Args:
-          input: batch_size x width x height x 3
+          input: batch_size x width x height x c
         Returns:
           output: same size as input
         """
@@ -56,7 +56,7 @@ class Unet:
                                          padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
-                                             mean=1.0 / (9.0 *  self.ngf), stddev=0.000001, dtype=tf.float32),
+                                             mean=1.0 / (9.0 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv4')
                 norm4 = ops._norm(conv4, self.is_training, self.norm)
                 relu4 = ops.relu(norm4)
@@ -108,8 +108,8 @@ class Unet:
                                              mean=1.0 / (9.0 * 4 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv9')
             # DC
-            if input2!=None:
-                conv9=tf.concat([conv9,input2],axis=-1)
+            if input2 != None:
+                conv9 = tf.concat([conv9, input2], axis=-1)
             with tf.variable_scope("conv10", reuse=self.reuse):
                 conv10 = tf.layers.conv2d(inputs=conv9, filters=4 * self.ngf, kernel_size=3, strides=1,
                                           padding="SAME",
@@ -201,7 +201,7 @@ class Unet:
                                              padding="SAME",
                                              activation=None,
                                              kernel_initializer=tf.random_normal_initializer(
-                                                 mean=1.0 / (9.0 *  self.ngf), stddev=0.000001,
+                                                 mean=1.0 / (9.0 * self.ngf), stddev=0.000001,
                                                  dtype=tf.float32),
                                              bias_initializer=tf.constant_initializer(0.0),
                                              name='deconv3_r')

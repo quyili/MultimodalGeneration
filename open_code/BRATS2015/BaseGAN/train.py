@@ -16,7 +16,15 @@ tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 1e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '../../mydata/BRATS2015/trainT1', 'files path')
+tf.flags.DEFINE_string('Y', '../../mydata/BRATS2015/trainT2', 'files path')
+tf.flags.DEFINE_string('Z', '../../mydata/BRATS2015/trainT1c', 'files path')
+tf.flags.DEFINE_string('W', '../../mydata/BRATS2015/trainFlair', 'files path')
+tf.flags.DEFINE_string('L', '../../mydata/BRATS2015/trainLabel', 'files path')
 tf.flags.DEFINE_string('X_test', '../../mydata/BRATS2015/testT1', 'files path')
+tf.flags.DEFINE_string('Y_test', '../../mydata/BRATS2015/testT2', 'files path')
+tf.flags.DEFINE_string('Z_test', '../../mydata/BRATS2015/testT1c', 'files path')
+tf.flags.DEFINE_string('W_test', '../../mydata/BRATS2015/testFlair', 'files path')
+tf.flags.DEFINE_string('L_test', '../../mydata/BRATS2015/testLabel', 'files path')
 tf.flags.DEFINE_string('load_model', "20190822-2137",
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
@@ -110,7 +118,7 @@ def train():
                         y_1 = tf.placeholder(tf.float32, shape=input_shape)
                         z_1 = tf.placeholder(tf.float32, shape=input_shape)
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_1 = gan.model( x_1, y_1, z_1, w_1)
+                        loss_list_1 = gan.model(x_1, y_1, z_1, w_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -138,7 +146,7 @@ def train():
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_3 = gan.model(  x_3, y_3, z_3, w_3)
+                        loss_list_3 = gan.model(x_3, y_3, z_3, w_3)
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -156,7 +164,6 @@ def train():
             optimizers = [G_optimizer_op, D_optimizer_op, S_optimizer_op]
 
             saver = tf.train.Saver()
-            variables_list = gan.get_variables()
 
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
             if FLAGS.load_model is not None:
@@ -200,7 +207,6 @@ def train():
                     train_true_z = []
                     train_true_w = []
                     for b in range(FLAGS.batch_size):
-
                         train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
                         train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
                         train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
