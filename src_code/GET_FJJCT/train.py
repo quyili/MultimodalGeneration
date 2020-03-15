@@ -159,7 +159,7 @@ def train():
         with tf.variable_scope(tf.get_variable_scope()):
             with tf.device("/gpu:0"):
                 with tf.name_scope("GPU_0"):
-                    # l_0 = tf.placeholder(tf.float32, shape=input_shape)
+                    l_0 = tf.placeholder(tf.float32, shape=input_shape)
                     x_0 = tf.placeholder(tf.float32, shape=input_shape)
                     f_0 = tf.placeholder(tf.float32, shape=input_shape)
                     m_0 = tf.placeholder(tf.float32, shape=input_shape)

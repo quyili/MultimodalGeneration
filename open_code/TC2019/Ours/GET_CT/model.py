@@ -1,8 +1,9 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
+from ssd import Detector
 from discriminator import Discriminator
 from unet import Unet
-from ssd import Detector
+import numpy as np
 
 
 class GAN:
@@ -10,6 +11,7 @@ class GAN:
                  image_size,
                  learning_rate=2e-5,
                  batch_size=1,
+                 classes_size=5,
                  ngf=64,
                  ):
         """
@@ -21,77 +23,78 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.image_list = {}
-        self.judge_list = {}
         self.tenaor_name = {}
+        self.judge_list = {}
+        self.classes_size = classes_size
 
-        self.G_L = Detector('G_L', ngf=ngf, output_channl=3)
-        self.G_X = Unet('G_X', ngf=ngf, output_channl=image_size[2], keep_prob=0.98)
-        self.D_X = Discriminator('D_X', ngf=ngf, keep_prob=0.95)
+        self.G_X = Unet('G_X', ngf=ngf, output_channl=3, keep_prob=0.97)
+        self.D_X = Discriminator('D_X', ngf=ngf, keep_prob=0.9)
+        self.LESP = Detector('LESP', ngf, classes_size=classes_size, keep_prob=0.99, input_channl=image_size[2])
 
-    def model(self,
-              l,
-              f_org, mask, x):
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
-                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        f_org_1 = f_org[:, :, :, 0:1]
-        f_org_2 = f_org[:, :, :, 1:2]
-        f_org_3 = f_org[:, :, :, 2:3]
-        f = tf.reshape(tf.concat([f_org_1, f_org_2, f_org_3], axis=-1), shape=self.input_shape)
+    def pred(self, classes_size, feature_class, background_classes_val, all_default_boxs_len):
+        feature_class_softmax = tf.nn.softmax(logits=feature_class, dim=-1)
+        background_filter = np.ones(classes_size, dtype=np.float32)
+        background_filter[background_classes_val] = 0
+        background_filter = tf.constant(background_filter)
+        feature_class_softmax = tf.multiply(feature_class_softmax, background_filter)
+        feature_class_softmax = tf.reduce_max(feature_class_softmax, 2)
+        box_top_set = tf.nn.top_k(feature_class_softmax, int(all_default_boxs_len / 20))
+        box_top_index = box_top_set.indices
+        box_top_value = box_top_set.values
+        return feature_class_softmax, box_top_index, box_top_value
+
+    def model(self, l, f, mask, x, groundtruth_class, groundtruth_location,
+              groundtruth_positives, groundtruth_negatives):
         new_f = f + tf.random_uniform([self.input_shape[0], self.input_shape[1],
-                                       self.input_shape[2], 3], minval=0.5, maxval=0.6,
+                                       self.input_shape[2], 1], minval=0.5, maxval=0.6,
                                       dtype=tf.float32) * (1.0 - mask) * (1.0 - f)
-        x_g = self.G_X(new_f)
-        l_g_prob = self.G_L(x_g)
+        f_rm_expand = tf.concat([new_f,l + 0.1],axis=-1)
+        x_g = self.G_X(f_rm_expand)
+        self.tenaor_name["x_g"] = str(x_g)
+
         j_x_g = self.D_X(x_g)
         j_x = self.D_X(x)
 
         D_loss = 0.0
         G_loss = 0.0
-        L_loss = 0.0
         D_loss += self.mse_loss(j_x, 1.0) * 2
         D_loss += self.mse_loss(j_x_g, 0.0) * 2
-        G_loss += self.mse_loss(j_x_g, 1.0) * 1
+        G_loss += self.mse_loss(j_x_g, 1.0) * 2
 
         G_loss += self.mse_loss(x_g, x) * 5
-        G_loss += self.mse_loss(x_g * mask, x * mask) * 0.01
+        G_loss += self.mse_loss(x_g * mask, x * mask) * 0.001
 
-        L_loss += self.mse_loss(tf.reduce_mean(label_expand, axis=[1, 2]),
-                                tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.5
-
-        l_r = tf.argmax(tf.reduce_mean(label_expand, axis=[1, 2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob, axis=[1, 2]), axis=-1)
-
-        L_acc = self.acc(l_r, l_g)
-
-        self.tenaor_name["l"] = str(l)
-        self.tenaor_name["f"] = str(f)
-        self.tenaor_name["mask"] = str(mask)
-        self.tenaor_name["x"] = str(x)
-        self.tenaor_name["x_g"] = str(x_g)
-        self.tenaor_name["l_g"] = str(l_g)
+        feature_class, feature_location = self.LESP(x_g)
+        groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
+        softmax_cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=feature_class,
+                                                                               labels=groundtruth_class)
+        loss_location = tf.div(tf.reduce_sum(tf.multiply(
+            tf.reduce_sum(self.smooth_L1(tf.subtract(groundtruth_location, feature_location)),
+                          reduction_indices=2), groundtruth_positives), reduction_indices=1),
+            tf.reduce_sum(groundtruth_positives, reduction_indices=1))
+        loss_class = tf.div(
+            tf.reduce_sum(tf.multiply(softmax_cross_entropy, groundtruth_count), reduction_indices=1),
+            tf.reduce_sum(groundtruth_count, reduction_indices=1))
+        loss_all = tf.reduce_sum(tf.add(loss_class, loss_location))
 
         image_list = {}
-
-        image_list["mask"] = mask[:, :, :, 1:2]
-        image_list["f"] = f[:, :, :, 1:2]
-        image_list["new_f"] = new_f[:, :, :, 1:2]
-        image_list["x"] = x[:, :, :, 1:2]
-        image_list["x_g"] = x_g[:, :, :, 1:2]
+        image_list["mask"] = mask
+        image_list["f"] = f
+        image_list["new_f"] = new_f
+        image_list["x"] = x
+        image_list["x_g"] = x_g
         self.judge_list["j_x_g"] = j_x_g
         self.judge_list["j_x"] = j_x
 
-        loss_list = [G_loss + L_loss, D_loss,
-                     L_loss, L_acc, l_r, l_g
-                     ]
+        loss_list = [G_loss, D_loss]
+        detect_loss_list = [loss_all, loss_class, loss_location]
 
-        return loss_list, image_list
+        return loss_list, image_list, detect_loss_list, feature_class, feature_location
 
     def get_variables(self):
-        return [self.G_X.variables
-            ,
-                self.D_X.variables
-                ]
+        return [self.G_X.variables,
+                self.D_X.variables,
+                self.LESP.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -109,13 +112,11 @@ class GAN:
         for key in judge_dirct:
             tf.summary.image('discriminator/' + key, judge_dirct[key])
 
-    def loss_summary(self, loss_list):
+    def loss_summary(self, loss_list, detect_loss_list):
         G_loss, D_loss = loss_list[0], loss_list[1]
-        L_loss, L_acc = loss_list[2], loss_list[3]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
-        tf.summary.scalar('loss/L_loss', L_loss)
-        tf.summary.scalar('loss/L_acc', L_acc)
+        tf.summary.scalar('loss/detect_loss', detect_loss_list[0])
 
     def image_summary(self, image_dirct):
         for key in image_dirct:
@@ -150,3 +151,7 @@ class GAN:
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])
                   ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output
+
+    def smooth_L1(self, x):
+        return tf.where(tf.less_equal(tf.abs(x), 1.0), tf.multiply(0.5, tf.pow(x, 2.0)),
+                        tf.subtract(tf.abs(x), 0.5))

@@ -2,7 +2,6 @@
 import tensorflow as tf
 import numpy as np
 import SimpleITK
-import cv2
 import os
 
 

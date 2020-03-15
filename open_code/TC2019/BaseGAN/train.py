@@ -12,12 +12,12 @@ FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
-tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size,')
+tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 1e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '../../mydata/BRATS2015/trainT1', 'files path')
-tf.flags.DEFINE_string('X_test', '../../mydata/BRATS2015/testT1', 'files path')
-tf.flags.DEFINE_string('load_model', "20190822-2137",
+tf.flags.DEFINE_string('X', './trainT1', 'files path')
+tf.flags.DEFINE_string('X_test', './testT1', 'files path')
+tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,

@@ -12,60 +12,29 @@ class GAN:
                  ngf=64,
                  ):
         """
-           Args:
-             input_size：list [N, H, W, C]
-             batch_size: integer, batch size
-             learning_rate: float, initial learning rate for Adam
-             ngf: number of base gen filters in conv layer
+        Args:
+          input_size：list [H, W, C]
+          batch_size: integer, batch size
+          learning_rate: float, initial learning rate for Adam
+          ngf: number of gen filters in first conv layer
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.code_shape = [int(batch_size / 4), int(image_size[0] / 4), int(image_size[1] / 4), 4]
-        self.ones = tf.ones(self.input_shape, name="ones")
-        self.ones_code = tf.ones(self.code_shape, name="ones_code")
         self.image_list = {}
-        self.prob_list = {}
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.G_X = Unet('G_X', ngf=ngf)
-        self.D_X = Discriminator('D_X', ngf=ngf)
+        self.G_X = Unet('G_X', ngf=ngf, output_channl=3, keep_prob=0.97)
 
-    def get_f(self, x, beta=0.12):
-        f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
-        f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
-        f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
+        self.D_X = Discriminator('D_X', ngf=ngf, keep_prob=0.9)
 
-        f1 = self.ones * tf.cast(f1 > beta, dtype="float32")
-        f2 = self.ones * tf.cast(f2 > beta, dtype="float32")
+    def model(self, f, mask, x):
+        self.tenaor_name["f"] = str(f)
+        self.tenaor_name["mask"] = str(mask)
+        self.tenaor_name["x"] = str(x)
 
-        f = f1 + f2
-        f = self.ones * tf.cast(f > 0.0, dtype="float32")
-        return f
-
-    def get_mask(self, m, p=5):
-        mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
-        shape = m.get_shape().as_list()
-        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
-        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
-        return mask
-
-    def remove_l(self, l, f):
-        l_mask = self.get_mask(l, p=0)
-        f = f * l_mask
-        return f
-
-    def segmentation(self, x, EC_L, DC_L):
-        l_prob = DC_L(EC_L(x))
-        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        return l_prob, l_f
-
-    def model(self, l_m, m, x, y, z, w):
-        mask = self.get_mask(m)
-        f = self.get_f(m)  # M->F
-        f = self.remove_l(l_m, f)
-        x_g = self.G_X(1.0 - f)
+        new_f = 1.0-f
+        x_g = self.G_X(1.0-f)
         self.tenaor_name["x_g"] = str(x_g)
 
         j_x_g = self.D_X(x_g)
@@ -73,25 +42,31 @@ class GAN:
 
         D_loss = 0.0
         G_loss = 0.0
-        D_loss += self.mse_loss(j_x, 1.0) * 50 * 2
-        D_loss += self.mse_loss(j_x_g, 0.0) * 35 * 2
-        G_loss += self.mse_loss(j_x_g, 1.0) * 35 * 2
-        G_loss += self.mse_loss(x_g, x) * 2
+        # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
+        D_loss += self.mse_loss(j_x, 1.0) * 2
+        D_loss += self.mse_loss(j_x_g, 0.0) * 2
+        G_loss += self.mse_loss(j_x_g, 1.0) * 2
 
-        self.image_list["mask"] = mask
-        self.image_list["f"] = f
-        self.image_list["x_g"] = x_g
+        G_loss += self.mse_loss(x_g, x) * 5
+        G_loss += self.mse_loss(x_g * mask, 0) * 0.001
+
+        image_list = {}
+        image_list["mask"] = mask
+        image_list["f"] = f
+        image_list["new_f"] = new_f
+        image_list["x"] = x
+        image_list["x_g"] = x_g
         self.judge_list["j_x_g"] = j_x_g
         self.judge_list["j_x"] = j_x
+
         loss_list = [G_loss, D_loss]
 
-        return loss_list
+        return loss_list, image_list
 
     def get_variables(self):
         return [self.G_X.variables
             ,
-                self.D_X.variables
-                ]
+                self.D_X.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -105,11 +80,33 @@ class GAN:
 
         return G_optimizer, D_optimizer
 
+    def histogram_summary(self, judge_dirct):
+        for key in judge_dirct:
+            tf.summary.image('discriminator/' + key, judge_dirct[key])
+
+    def loss_summary(self, loss_list):
+        G_loss, D_loss = loss_list[0], loss_list[1]
+        tf.summary.scalar('loss/G_loss', G_loss)
+        tf.summary.scalar('loss/D_loss', D_loss)
+
+    def image_summary(self, image_dirct):
+        for key in image_dirct:
+            tf.summary.image('image/' + key, image_dirct[key])
+
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
+
     def mse_loss(self, x, y):
+        """ supervised loss (L2 norm)
+        """
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
     def ssim_loss(self, x, y):
+        """ supervised loss (L2 norm)
+        """
         loss = (1.0 - self.SSIM(x, y)) * 20
         return loss
 
