@@ -17,7 +17,7 @@ class Unet:
     def __call__(self, input1, input2=None):
         """
         Args:
-          input: batch_size x width x height x c
+          input: batch_size x width x height x 3
         Returns:
           output: same size as input
         """

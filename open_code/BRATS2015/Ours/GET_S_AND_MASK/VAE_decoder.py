@@ -14,7 +14,7 @@ class GDecoder:
     def __call__(self, DC_input):
         """
         Args:
-          input: batch_size x width x height x N
+          input: batch_size x width x height x c
         Returns:
           output: same size as input
         """

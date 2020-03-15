@@ -99,7 +99,6 @@ class VAE_GAN:
         D_loss = 0.0
         FG_loss = 0.0
         MG_loss = 0.0
-        # 使得结构特征图编码服从正态分布的对抗性损失
         D_loss += self.mse_loss(j_code_f_rm, 1.0) * 10
         D_loss += self.mse_loss(j_code_f, 0.0) * 10
         FG_loss += self.mse_loss(j_code_f, 1.0) * 0.001
@@ -107,12 +106,10 @@ class VAE_GAN:
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_mean), 0.0) * 0.001
         FG_loss += self.mse_loss(tf.reduce_mean(code_f_std), 1.0) * 0.001
 
-        # 使得随机正态分布矩阵解码出结构特征图更逼真的对抗性损失
         D_loss += self.mse_loss(j_f, 1.0) * 25
         D_loss += self.mse_loss(j_f_rm, 0.0) * 25
         FG_loss += self.mse_loss(j_f_rm, 1.0) * 0.1
 
-        # 结构特征图两次重建融合后与原始结构特征图的两两自监督一致性损失
         FG_loss += self.mse_loss(f_one_hot, f_r_prob) * 25
 
         FG_loss += tf.reduce_mean(tf.abs(f_one_hot - f_r_prob)) * 10
@@ -174,8 +171,8 @@ class VAE_GAN:
         tf.summary.scalar('evaluation_code/PSNR/code_f__VS__code_f_rm', evluation_list[0])
 
     def evaluation(self, image_list):
-        f, f_r, f_rm, mask, mask_r, mask_rm = image_list[0], image_list[1], image_list[2], image_list[3], image_list[4], \
-                                              image_list[5]
+        f, f_r, f_rm, mask, mask_r, mask_rm = image_list[0], image_list[1], image_list[2], \
+                                              image_list[3], image_list[4], image_list[5]
         list = [self.PSNR(f, f_r),
                 self.SSIM(f, f_r),
                 self.PSNR(mask, mask_r),

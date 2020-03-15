@@ -14,18 +14,18 @@ class Unet:
         self.keep_prob = keep_prob
         self.output_channl = output_channl
 
-    def __call__(self, EC_input):
+    def __call__(self, input1, input2=None):
         """
         Args:
-          input: batch_size x width x height x 3
+          input: batch_size x width x height x c
         Returns:
           output: same size as input
         """
 
         with tf.variable_scope(self.name):
-            EC_input = tf.nn.dropout(EC_input, keep_prob=self.keep_prob)
+            input1 = tf.nn.dropout(input1, keep_prob=self.keep_prob)
             with tf.variable_scope("conv1", reuse=self.reuse):
-                conv1 = tf.layers.conv2d(inputs=EC_input, filters=self.ngf, kernel_size=3, strides=1, padding="SAME",
+                conv1 = tf.layers.conv2d(inputs=input1, filters=self.ngf, kernel_size=3, strides=1, padding="SAME",
                                          activation=None,
                                          kernel_initializer=tf.random_normal_initializer(
                                              mean=1.0 / (9.0 * 1), stddev=0.000001, dtype=tf.float32),
@@ -108,6 +108,8 @@ class Unet:
                                              mean=1.0 / (9.0 * 4 * self.ngf), stddev=0.000001, dtype=tf.float32),
                                          bias_initializer=tf.constant_initializer(0.0), name='conv9')
             # DC
+            if input2 != None:
+                conv9 = tf.concat([conv9, input2], axis=-1)
             with tf.variable_scope("conv10", reuse=self.reuse):
                 conv10 = tf.layers.conv2d(inputs=conv9, filters=4 * self.ngf, kernel_size=3, strides=1,
                                           padding="SAME",
