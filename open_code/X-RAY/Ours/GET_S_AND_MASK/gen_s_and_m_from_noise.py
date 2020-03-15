@@ -26,14 +26,12 @@ tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
 
 
 def get_mask_from_f(imgfile):
-    # imgfile = "full_x.jpg"
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
     gray = cv2.GaussianBlur(img, (3, 3), 0)
     ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
     c_list = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours, hierarchy = c_list[-2], c_list[-1]
     cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
-    # savefile="mask.tiff"
     return np.asarray(1.0 - img / 255.0, dtype="float32")
 
 
@@ -79,7 +77,6 @@ def train():
                 j_f = np.mean(np.asarray(j_f))
                 print(count, "j_f: ", j_f)
 
-                # 根据置信度过滤
                 if j_f >= FLAGS.min_j_f: break
 
                 jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
@@ -92,7 +89,6 @@ def train():
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
                 print(count, "mae: ", mae)
 
-                # 根据结构完整度过滤
                 if mae <= FLAGS.mae: break
 
                 if j_f > best_j_f:
@@ -100,7 +96,6 @@ def train():
                     best_f = f
                     best_m = m
 
-                # 根据生成次数过滤
                 if count >= FLAGS.max_count:
                     f = best_f
                     m = best_m

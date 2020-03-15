@@ -44,7 +44,6 @@ class GAN:
 
         D_loss = 0.0
         G_loss = 0.0
-        # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_x, 1.0) * 2
         D_loss += self.mse_loss(j_x_g, 0.0) * 2
         G_loss += self.mse_loss(j_x_g, 1.0) * 2

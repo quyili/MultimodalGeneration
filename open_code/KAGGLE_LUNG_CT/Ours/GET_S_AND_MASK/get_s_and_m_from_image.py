@@ -37,7 +37,6 @@ def gauss_2d_kernel(kernel_size=3, sigma=0.0):
 
 
 def gaussian_blur_op(image, kernel, kernel_size, cdim=3):
-    # kernel as placeholder variable, so it can change
     outputs = []
     pad_w = (kernel_size * kernel_size - 1) // 2
     padded = tf.pad(image, [[0, 0], [pad_w, pad_w], [pad_w, pad_w], [0, 0]], mode='REFLECT')

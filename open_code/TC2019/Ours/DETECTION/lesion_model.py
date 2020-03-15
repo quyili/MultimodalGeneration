@@ -24,59 +24,39 @@ class GAN:
         self.tenaor_name = {}
         self.classes_size = classes_size
 
-        # 病灶检测器
-        self.LESP = Detector('LESP', ngf, classes_size=classes_size, keep_prob=0.99)
-        # 鉴别器
-        # self.D_LESP = Discriminator('D_LESP', ngf,keep_prob=0.99)
+        self.LESP = Detector('LESP', ngf, classes_size=classes_size, keep_prob=0.99, input_channl=image_size[2])
 
     def pred(self, classes_size, feature_class, background_classes_val, all_default_boxs_len):
-        # softmax归一化预测结果
         feature_class_softmax = tf.nn.softmax(logits=feature_class, dim=-1)
-        # 过滤background的预测值
         background_filter = np.ones(classes_size, dtype=np.float32)
         background_filter[background_classes_val] = 0
         background_filter = tf.constant(background_filter)
         feature_class_softmax = tf.multiply(feature_class_softmax, background_filter)
-        # 计算每个box的最大预测值
         feature_class_softmax = tf.reduce_max(feature_class_softmax, 2)
-        # 过滤冗余的预测结果
         box_top_set = tf.nn.top_k(feature_class_softmax, int(all_default_boxs_len / 20))
         box_top_index = box_top_set.indices
         box_top_value = box_top_set.values
         return feature_class_softmax, box_top_index, box_top_value
 
-    def model(self, input, groundtruth_class, groundtruth_location, groundtruth_positives, groundtruth_negatives):
-        feature_class, feature_location = self.LESP(input)
-
-        # j_true = self.D_LESP(input,tf.one_hot(groundtruth_class,depth=self.classes_size), groundtruth_location)
-        # j_pred = self.D_LESP(input, feature_class, feature_location)
-
-        # 损失函数
-        # D_adv_loss=self.mse_loss(j_true,1.0)+self.mse_loss(j_pred,0.0)
-        # G_adv_loss=self.mse_loss(j_true,0.0)
-        self.groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
-        self.softmax_cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=feature_class,
-                                                                                    labels=groundtruth_class)
-        self.loss_location = tf.div(tf.reduce_sum(tf.multiply(
+    def model(self, X, groundtruth_class, groundtruth_location,
+              groundtruth_positives, groundtruth_negatives):
+        feature_class, feature_location = self.LESP(X)
+        groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
+        softmax_cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=feature_class,
+                                                                               labels=groundtruth_class)
+        loss_location = tf.div(tf.reduce_sum(tf.multiply(
             tf.reduce_sum(self.smooth_L1(tf.subtract(groundtruth_location, feature_location)),
                           reduction_indices=2), groundtruth_positives), reduction_indices=1),
             tf.reduce_sum(groundtruth_positives, reduction_indices=1))
-        self.loss_class = tf.div(
-            tf.reduce_sum(tf.multiply(self.softmax_cross_entropy, self.groundtruth_count), reduction_indices=1),
-            tf.reduce_sum(self.groundtruth_count, reduction_indices=1))
-        self.loss_all = tf.reduce_sum(tf.add(self.loss_class, self.loss_location)
-                                      # +G_adv_loss
-                                      )
+        loss_class = tf.div(
+            tf.reduce_sum(tf.multiply(softmax_cross_entropy, groundtruth_count), reduction_indices=1),
+            tf.reduce_sum(groundtruth_count, reduction_indices=1))
+        loss_all = tf.reduce_sum(tf.add(loss_class, loss_location))
 
-        return [self.loss_all,
-                # D_adv_loss
-                ], \
-               feature_class, feature_location
+        return [loss_all, loss_class, loss_location], feature_class, feature_location
 
     def get_variables(self):
-        return [self.LESP.variables,
-                # self.D_LESP.variables
-                ]
+        return [self.LESP.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -86,14 +66,12 @@ class GAN:
             return learning_step
 
         G_optimizer = make_optimizer(name='Adam_G')
-        # D_optimizer = make_optimizer(name='Adam_D')
-
-        # return [G_optimizer,D_optimizer]
         return G_optimizer
 
     def loss_summary(self, L_loss):
-        tf.summary.scalar('loss/L_loss', L_loss[0])
-        # tf.summary.scalar('loss/D_loss', L_loss[1])
+        tf.summary.scalar('loss/loss_all', L_loss[0])
+        tf.summary.scalar('loss/loss_class', L_loss[1])
+        tf.summary.scalar('loss/loss_location', L_loss[2])
 
     def acc(self, x, y):
         correct_prediction = tf.equal(x, y)
@@ -125,7 +103,6 @@ class GAN:
                   ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output
 
-    # smooth_L1 算法
     def smooth_L1(self, x):
         return tf.where(tf.less_equal(tf.abs(x), 1.0), tf.multiply(0.5, tf.pow(x, 2.0)),
                         tf.subtract(tf.abs(x), 0.5))

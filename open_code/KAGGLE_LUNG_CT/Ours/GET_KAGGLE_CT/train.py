@@ -17,17 +17,17 @@ tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 2e-4')
 tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/X',
+tf.flags.DEFINE_string('X', './DATA/finding-lungs-in-ct-data/train/X',
                        'X files for training')
-tf.flags.DEFINE_string('F', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/NEW_F',
+tf.flags.DEFINE_string('F', './DATA/finding-lungs-in-ct-data/train/NEW_F',
                        'Y files for training')
-tf.flags.DEFINE_string('M', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/train/M',
+tf.flags.DEFINE_string('M', './DATA/finding-lungs-in-ct-data/train/M',
                        'Y files for training')
-tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/test/X',
+tf.flags.DEFINE_string('X_test', './DATA/finding-lungs-in-ct-data/test/X',
                        'Y files for training')
-tf.flags.DEFINE_string('F_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/test/NEW_F',
+tf.flags.DEFINE_string('F_test', './DATA/finding-lungs-in-ct-data/test/NEW_F',
                        'Y files for training')
-tf.flags.DEFINE_string('M_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/finding-lungs-in-ct-data/test/M',
+tf.flags.DEFINE_string('M_test', './DATA/finding-lungs-in-ct-data/test/M',
                        'Y files for training')
 
 tf.flags.DEFINE_string('load_model', None,

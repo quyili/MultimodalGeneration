@@ -49,7 +49,6 @@ class GAN:
         D_loss = 0.0
         G_loss = 0.0
         L_loss = 0.0
-        # 使得通过随机结构特征图生成的X模态图更逼真的对抗性损失
         D_loss += self.mse_loss(j_x, 1.0) * 2
         D_loss += self.mse_loss(j_x_g, 0.0) * 2
         G_loss += self.mse_loss(j_x_g, 1.0) * 1
@@ -57,7 +56,6 @@ class GAN:
         G_loss += self.mse_loss(x_g, x) * 5
         G_loss += self.mse_loss(x_g * mask, 0.0) * 0.001
 
-        # 与输入的结构特征图融合后输入的肿瘤分割标签图的重建自监督损失
         L_loss += self.mse_loss(tf.reduce_mean(label_expand, axis=[1, 2]),
                                 tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.001
 
