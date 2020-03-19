@@ -27,8 +27,8 @@ def binary_run(
 
 
 def run(
-        SRC_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/figures/SWM_SkrGAN_F.png",
-        SAVE_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/figures/new_SWM_SkrGAN_F.tiff",
+        SRC_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/bib/SkrGAN/CT/PGGAN.jpg",
+        SAVE_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/bib/SkrGAN/CT/PGGAN_.tiff",
 ):
     input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH))
     input_x = (input_x[:, :, 0] + input_x[:, :, 1] + input_x[:, :, 2]) / 3.0
@@ -97,4 +97,4 @@ def mask_fesion(
 
 
 if __name__ == '__main__':
-    mask_fesion()
+    run()
