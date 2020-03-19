@@ -9,23 +9,21 @@ from scipy.stats import norm
 
 FLAGS = tf.flags.FLAGS
 
-tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
+tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_string('load_model', "20190719-1738",
-                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_string('load_model', "20190719-1738",'e.g. 20170602-1936, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_string('code_tensor_name', "GPU_0/random_normal_1:0", "default: None")
-tf.flags.DEFINE_string('f_tensor_name', "GPU_0/Reshape_4:0", "default: None")
-tf.flags.DEFINE_string('m_tensor_name', "GPU_0/Reshape_5:0", "default: None")
-tf.flags.DEFINE_string('j_f_tensor_name', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
-tf.flags.DEFINE_integer('epoch_steps', 1650, ' default: 15070')
-tf.flags.DEFINE_integer('epochs', 1, ' default: 1')
-tf.flags.DEFINE_float('min_j_f', 0.6, 'default: 0.6')
+tf.flags.DEFINE_string('code_f_g', "GPU_0/random_normal_1:0", "default: None")
+tf.flags.DEFINE_string('s_g', "GPU_0/Reshape_4:0", "default: None")
+tf.flags.DEFINE_string('m_g', "GPU_0/Reshape_5:0", "default: None")
+tf.flags.DEFINE_string('j_s_g', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
+tf.flags.DEFINE_integer('num', 2000, ' default: 2000')
+tf.flags.DEFINE_float('min_j_s', 0.55, 'default: 0.55')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
 tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
 
 
-def get_mask_from_f(imgfile):
+def get_mask_from_s(imgfile):
     img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
     gray = cv2.GaussianBlur(img, (3, 3), 0)
     ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
@@ -58,57 +56,49 @@ def train():
     saver = tf.train.import_meta_graph(meta_graph_path)
 
     graph = tf.get_default_graph()
-    code_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.code_tensor_name)
-    f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.f_tensor_name)
-    mask_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.m_tensor_name)
-    j_f_rm = tf.get_default_graph().get_tensor_by_name(FLAGS.j_f_tensor_name)
+    code_f_g = tf.get_default_graph().get_tensor_by_name(FLAGS.code_f_g)
+    s_g = tf.get_default_graph().get_tensor_by_name(FLAGS.s_g)
+    m_g = tf.get_default_graph().get_tensor_by_name(FLAGS.m_g)
+    j_s_g = tf.get_default_graph().get_tensor_by_name(FLAGS.j_s_g)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
         index = 0
-        while index <= FLAGS.epoch_steps * FLAGS.epochs:
+        while index <= FLAGS.num:
             print("image gen start:" + str(index))
-
             count = 0
-            best_j_f = -1000.0
+            best_j_s = -1000.0
             while True:
-                code = sess.run(code_rm)
-                f, m, j_f = sess.run([f_rm, mask_rm, j_f_rm], feed_dict={code_rm: code})
-                j_f = np.mean(np.asarray(j_f))
-                print(count, "j_f: ", j_f)
+                code_f = sess.run(code_f_g)
+                s, m, j_s = sess.run([s_g, m_g, j_s_g], feed_dict={code_f_g: code_f})
+                j_s = np.mean(np.asarray(j_s))
 
-                if j_f >= FLAGS.min_j_f: break
+                if j_s >= FLAGS.min_j_s: break
 
-                jpg_f = np.concatenate([np.asarray(f)[0, :, :, 0:1] * 255, np.asarray(f)[0, :, :, 0:1] * 255,
-                                        np.asarray(f)[0, :, :, 0:1] * 255], axis=-1)
-                cv2.imwrite("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_f)
-
-                m_arr_1 = get_mask_from_f("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg")
+                jpg_s = np.concatenate([np.asarray(s)[0, :, :, 0:1] * 255, np.asarray(s)[0, :, :, 0:1] * 255,
+                                        np.asarray(s)[0, :, :, 0:1] * 255], axis=-1)
+                cv2.imwrite("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_s)
+                m_arr_1 = get_mask_from_s("./test_images/Temp/s_" + str(index) + "_" + str(count) + ".jpg")
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
-
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
-                print(count, "mae: ", mae)
-
                 if mae <= FLAGS.mae: break
-
-                if j_f > best_j_f:
-                    best_j_f = j_f
-                    best_f = f
+                if j_s > best_j_s:
+                    best_j_s = j_s
+                    best_s = s
                     best_m = m
 
                 if count >= FLAGS.max_count:
-                    f = best_f
+                    f = best_s
                     m = best_m
                     break
 
                 count = count + 1
 
-            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(f)[0, :, :, 0]),
-                                 "./test_images/F/" + str(index) + ".tiff")
+            SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(s)[0, :, :, 0]),
+                                 "./test_images/S/" + str(index) + ".tiff")
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(m)[0, :, :, 0]),
                                  "./test_images/M/" + str(index) + ".tiff")
             print("image gen end:" + str(index))
-
             index += 1
 
 

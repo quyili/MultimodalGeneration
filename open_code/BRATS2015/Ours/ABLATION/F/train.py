@@ -109,7 +109,7 @@ def train():
                         s_0 = tf.placeholder(tf.float32, shape=input_shape)
                         m_0 = tf.placeholder(tf.float32, shape=input_shape)
                         l_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_0,image_list_0,judge_list_0 = gan.model(l_1,m_0,s_0,x_0, y_0, z_0, w_0)
+                        loss_list_0,image_list_0,judge_list_0 = gan.model(l_0,m_0,s_0,x_0, y_0, z_0, w_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
