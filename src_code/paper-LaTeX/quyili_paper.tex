@@ -210,7 +210,7 @@ To solve these problems, this study proposed a multimodal medical image synthesi
 \item \textbf{深度学习}
 深度学习（Deep Learning）是机器学习（ Machine Learning）领域中一个新的研究方向，它的出现使得机器学习更接近于最初的目标——人工智能（ Artificial Intelligence）。在实现上，深度学习一般指基于深层人工神经网络模型、采用随机梯度下降等最优化方法对给定样本数据的内在规律和表示层次进行训练学习和推理的过程。深度学习中常见的神经网络模型包括卷积神经网络（CNN）模型\cite{86krizhevsky2012imagenet}、循环神经网络（RNN）模型\cite{143zaremba2014recurrent}、生成对抗网络（GAN）模型\cite{25goodfellow2014generative}等。深度学习可以处理图像、文本、语音等多种形式的信息，在搜索推荐、机器翻译、语音合成、人像识别、图像识别等诸多领域应用广泛。深度学习同样广泛应用于多种医学影像处理任务，如医学影像模态转换、医学图像分割、病灶检测、医学图像分类等。深度学习在医学影像处理的相关研究中具有十分广阔的前景\cite{16litjens2017a,17lee2017deep,18shen2017deep}。
 \item \textbf{医学影像及其模态}
-医学影像是指为了医疗或医学研究，对人体或人体某部分，以非侵入方式取得的内部组织影像，其中不同的成像方式得到的医学影像被称为不同的模态（Modality），常见的医学影像模态有核磁共振成像（MRI，Magnetic Resonance Imaging）、CT成像、PET成像、B超成像、X射线成像等。有的模态在成像时设置不同的参数将得到具有视觉差异的不同的子模态，例如CT根据辐射剂量的不同分为低剂量CT（Low-Dose CT）和高剂量CT（Normal -Dose CT ）、MRI根据成像时长和造影剂及射频方向等不同分为T1、T2、T1c、Flair等子模态。不同的模态对医生具有不同的参考价值，医生往往需要多个模态的影像互相对照才能做出准确的判断。在采用CNN或GAN等深度学习方法进行的医学影像的智能处理任务的训练和学习中，研究者们也期望获得更多模态的影像来提升模型的诊断能力。
+医学影像是指为了医疗或医学研究，对人体或人体某部分，以非侵入方式取得的内部组织影像，其中不同的成像方式得到的医学影像被称为不同的模态（Modality），常见的医学影像模态有核磁共振成像（MRI，Magnetic Resonance Imaging）、CT成像、PET成像、B超成像、X射线（X-Ray）成像等。有的模态在成像时设置不同的参数将得到具有视觉差异的不同的子模态，例如CT根据辐射剂量的不同分为低剂量CT（Low-Dose CT）和高剂量CT（Normal -Dose CT ）、MRI根据成像时长和造影剂及射频方向等不同分为T1、T2、T1c、Flair等子模态。不同的模态对医生具有不同的参考价值，医生往往需要多个模态的影像互相对照才能做出准确的判断。在采用CNN或GAN等深度学习方法进行的医学影像的智能处理任务的训练和学习中，研究者们也期望获得更多模态的影像来提升模型的诊断能力。
 \item \textbf{多模态医学影像的配准}
 同一个病人的同一个部位通过不同的成像技术或参数得到的一组不同的模态被称为多模态（Multimodal），如果成像位置和视角是一致的，那么得到的多模态影像就是对齐的，这些模态之间的这种对齐关系被称之为配准（Registration）。相较于未配准多模态数据，配准后的多模态影像数据，对于医生来说可以更直观的对比关键部位在不同模态中的状态来加以诊断，对于智能医学影像处理任务来说则可以满足一些处理复杂任务的深度神经网络对多模态训练数据的要求以提供更加高效可靠的智能诊断服务。在采集时，获取不同模态的配准影像需要花费更长的时间并且需要患者的耐心配合，同时还需要额外的伴随失真的配准计算。
 \item \textbf{病灶和标注}
@@ -330,14 +330,14 @@ CANet\cite{128zhang2019canet}
 \section{基础方法}
 本文在前两个章节中简要介绍了研究的技术路线和相关研究基础，在本章节中，将对本文使用的基础方法进行介绍，本文后续章节中提出的方法将对本章提到的方法进行调用、改进和扩展。本章将对基于CNN的图像分类、生成对抗网络、变分自动编码器、语义分割、目标检测进行依次介绍。
 \subsection{基于CNN的图像分类}
-图像分类是指采用设计的算法和模型用给定的一组每张图像都被标记了对应的类别的图像集作为训练集进行训练和学习，然后再对另一组新的测试图像集预测其标签类别的任务。卷积是传统数字图像处理中对图像进行的一种基本操作，也被称为滤波。卷积神经网络（CNN）是在传统神经网络的基础上应用了卷积操作，卷积操作与激活函数、批归一化、池化操作、全连接操作等多层复合就得到了一个复杂的神经网络，再通过神经网络的基于随机梯度下降（SGD）算法的反向传播机制，CNN中卷积核的参数和其他可学习的参数就能不断地根据梯度更新实现自动学习，从而能学会处理十分复杂的图像处理任务。深度学习正是从基于CNN的图像分类开始发展。1998年首个CNN模型LeNet\cite{103lecun1998gradient}提出，但直到2012年ILSVRC（ImageNet Large Scale Visual Recognition Challenge）\cite{144russakovsky2015imagenet}中CNN模型AlexNet\cite{114krizhevsky2017imagenet}以高出10\%的正确率力压第二名取得冠军，卷积神经网络的巨大优势才广为人知。此后CNN模型进入了飞速发展期，VGGNet\cite{102simonyan2014very}、GoogleNet\cite{115szegedy2015going}、ResNet\cite{116he2015deep}等经典网络相继提出，图像分类任务也随之快速发展。
+图像分类是指采用设计的算法和模型用给定的一组每张图像都被标记了对应的类别的图像集作为训练集进行训练和学习，然后再对另一组新的测试图像集预测其标签类别的任务。卷积是传统数字图像处理中对图像进行的一种基本操作，也被称为滤波。卷积神经网络（CNN，Convolutional Neural Networks）是在传统神经网络的基础上应用了卷积操作，卷积操作与激活函数、批归一化、池化操作、全连接操作等多层复合就得到了一个复杂的神经网络，再通过神经网络的基于随机梯度下降（SGD）算法的反向传播机制，CNN中卷积核的参数和其他可学习的参数就能不断地根据梯度更新实现自动学习，从而能学会处理十分复杂的图像处理任务。深度学习正是从基于CNN的图像分类开始发展。1998年首个CNN模型LeNet\cite{103lecun1998gradient}提出，但直到2012年ILSVRC（ImageNet Large Scale Visual Recognition Challenge）\cite{144russakovsky2015imagenet}中CNN模型AlexNet\cite{114krizhevsky2017imagenet}以高出10\%的正确率力压第二名取得冠军，卷积神经网络的巨大优势才广为人知。此后CNN模型进入了飞速发展期，VGGNet\cite{102simonyan2014very}、GoogleNet\cite{115szegedy2015going}、ResNet\cite{116he2015deep}等经典网络相继提出，图像分类任务也随之快速发展。
 \begin{figure*}[thbp!]
 	\centering
 	\includegraphics[width=0.95\textwidth]{figures/VGG}
 	\caption{VGGNet模型结构设置\cite{102simonyan2014very}。随着添加更多的层（添加的层以粗体显示），配置的深度从左（A）到右（E）逐渐增加。卷积层参数标记格式为“conv$\langle$ receptive field size$\rangle$-$\langle$ number of channels$\rangle$”。为了简单起见，没有显示ReLU激活函数。}
 	\label{VGG}
 \end{figure*}
-如图所示，类似于VGGNet的CNN分类模型，接收图像作为输入，输入一个类别概率向量，该向量与输入的类别标签通过损失函数求得损失，再对损失函数求导，即可反向传播得到全部模型参数的梯度，再对模型参数执行梯度更新，即可使得模型参数得到学习和训练，通过这样不断地学习，模型参数最终收敛。使用训练好的VGGNet模型分类时，通过$agrmax()$函数对预测的类别概率向量进行处理即可得到预测的图像类别。
+如图所示，类似于VGGNet的CNN分类模型，接收图像作为输入，输入一个类别概率向量，该向量与输入的类别标签通过损失函数求得损失，再对损失函数求导，即可反向传播得到全部模型参数的梯度，再对模型参数执行梯度更新，即可使得模型参数得到学习和训练，通过这样不断地学习，模型参数最终收敛。使用训练好的VGGNet模型分类时，通过最大概率类标取值函数$agrmax()$函数对预测的类别概率向量进行处理即可得到预测的图像类别。
 \subsection{生成对抗网络}
 生成对抗网络（GAN，Generative Adversarial Networks）\cite{25goodfellow2014generative}提出后，与卷积神经网络结合成为一种无监督学习的深度学习模型\cite{97radford2015unsupervised}。GAN主要包括了两个部分，即生成器网络$G$（Generator）和鉴别器网络$D$（Discriminator），两者不断博弈，进而使$G$学习到数据的分布，如果用到图片生成上，则训练完成后，$G$可以从一段随机数中生成逼真的图像。$G$接收一个随机的噪声$z$，通过这个噪声生成图像$x$；$D$输入图片$x$，输出该图片为真实图片的概率$D(x)$，如果为1，就代表100\%是真实的图片，而输出为0，就代表是完全不真实的图片。训练过程中，生成网络$G$的目标就是尽量生成真实的图片去欺骗鉴别器$D$。而$D$的目标就是尽量辨别出$G$生成的假图像和真实的图像。这样，$G$和络$D$构成了一个动态的“博弈”过程，最终的平衡点即纳什均衡点（Nash Equilibrium Point）。训练时通过损失函数使二者形成对抗，最终两个网络达到动态均衡的标志是生成器生成的图像接近于真实图像分布，而判别器识别不出真假图像，对于给定图像的预测为真的概率基本接近 0.5（处于随机猜测水平）。GAN的一个典型损失函数如下：
 \begin{equation}
@@ -420,7 +420,7 @@ VAE\cite{106kingma2013auto-encoding}文中对此进行了详细的推导和展开，由此推导得到
 最后，合成数据可用性验证阶段，对合成数据在智能医学影像处理任务中的可用性进行评估验证（评估阶段见下一章）。
 
 \begin{algorithm}
-	\caption{Structural feature map extraction}
+	\caption{Structural Map Extraction}
 	\label{alg:1}
 	\begin{algorithmic}[1]
 		\State Input a real grayscale image $x$,
@@ -495,19 +495,19 @@ $E_s$、$G_s$、$D_{z}$和$D_{s}$均在VGG11模型结构的基础上进行了调整适配，$G_m$在U-
 
 	\item{阶段D:特征图分布对抗训练损失} 
 	\begin{equation}
-		\mathcal{L}_{d1}(D_{z})=\mathbb{E}_{s,z}[\Vert{D_{z}(z)-1}\Vert_{2}^{2}+\Vert{D_{z}(f)}\Vert_{2}^{2}],
+		\mathcal{L}_{d,z}(D_{z})=\mathbb{E}_{s,z}[\Vert{D_{z}(z)-1}\Vert_{2}^{2}+\Vert{D_{z}(f)}\Vert_{2}^{2}],
 	\end{equation}
 	\begin{equation}
-		\mathcal{L}_{g1}(E_s)=\mathbb{E}_{z}[\Vert{D_{z}(f)-1}\Vert_{2}^{2}],	
+		\mathcal{L}_{g,z}(E_s)=\mathbb{E}_{z}[\Vert{D_{z}(f)-1}\Vert_{2}^{2}],	
 	\end{equation}
 	其中 $f=f_{mean}+exp(0.5\times f_{logvar})\times z$，$[f_{mean},f_{logvar}]=E_s(s)$.
 
 	\item{阶段E: 结构特征图对抗训练损失} 
 	\begin{equation}
-		\mathcal{L}_{d2}(D_{s})=\mathbb{E}_{s,z}[\Vert{D_{s}(s)-1}\Vert_{2}^{2}+\Vert{D_{s}(s_g)}\Vert_{2}^{2}],
+		\mathcal{L}_{d,s}(D_{s})=\mathbb{E}_{s,z}[\Vert{D_{s}(s)-1}\Vert_{2}^{2}+\Vert{D_{s}(s_g)}\Vert_{2}^{2}],
 	\end{equation}
 	\begin{equation}
-		\mathcal{L}_{g2}(G_s)=\mathbb{E}_{z}[\Vert{D_{s}(s_g)-1}\Vert_{2}^{2}++\Vert{m_g\times s_g}\Vert_{2}^{2}],	
+		\mathcal{L}_{g,s}(G_s)=\mathbb{E}_{z}[\Vert{D_{s}(s_g)-1}\Vert_{2}^{2}++\Vert{m_g\times s_g}\Vert_{2}^{2}],	
 	\end{equation}
 	其中 $s_g=G_s(z)$，$m_g=G_m(s_g)$。
 \end{itemize}
@@ -537,7 +537,7 @@ $D$在VGG11\cite{102simonyan2014very}模型结构的基础上进行了调整适配，$G$在U-net的
 	\item{多模态合成影像对抗性训练损失}
 	\begin{equation}
 		\begin{split}
-			\mathcal{L}_{d2}(D)=\mathbb{E}_{x,s_g,l}[\sum\limits_{i=0}(\Vert{d(x_i)-1}\Vert_{2}^{2}+\Vert{d(x_{g,i})}\Vert_{2}^{2}+\\
+			\mathcal{L}_{d}(D)=\mathbb{E}_{x,s_g,l}[\sum\limits_{i=0}(\Vert{d(x_i)-1}\Vert_{2}^{2}+\Vert{d(x_{g,i})}\Vert_{2}^{2}+\\
 			\Vert{c(x_i)-i}\Vert_{2}^{2}+\Vert{c(x_{g,i})-i}\Vert_{2}^{2})],
 		\end{split}
 	\end{equation}
@@ -594,12 +594,12 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 	\item{模态转换合成影像对抗性训练损失}
 	\begin{equation}
 	\begin{split}
-	\mathcal{L}_{d3}(D_t)=\mathbb{E}_{x,s,l}[\sum\limits_{i=0}(\Vert{d(x_i)-1}\Vert_{2}^{2}+\Vert{d(x_{t,i,j})}\Vert_{2}^{2}+\\
+	\mathcal{L}_{d,t}(D_t)=\mathbb{E}_{x,s,l}[\sum\limits_{i=0}(\Vert{d(x_i)-1}\Vert_{2}^{2}+\Vert{d(x_{t,i,j})}\Vert_{2}^{2}+\\
 	\Vert{c(x_i)-i}\Vert_{2}^{2}+\Vert{c(x_{t,i,j})-i}\Vert_{2}^{2})],
 	\end{split}
 	\end{equation}
 	\begin{equation}
-	\mathcal{L}_{g3}(G_t)=\mathbb{E}_{s,l}[\sum\limits_{i=0}(\Vert{d(x_{t,i,j})-1}\Vert_{2}^{2}+\Vert{c(x_{t,i,j})-i}\Vert_{2}^{2})].
+	\mathcal{L}_{g,t}(G_t)=\mathbb{E}_{s,l}[\sum\limits_{i=0}(\Vert{d(x_{t,i,j})-1}\Vert_{2}^{2}+\Vert{c(x_{t,i,j})-i}\Vert_{2}^{2})].
 	\end{equation}
 	其中$[d(x_{i}),c(x_{i})]=D_t(x_{i})$，$[d(x_{t,i,j}),c(x_{t,i,j})]=D_t(x_{t,i,j})$。
 \end{itemize}
@@ -644,7 +644,7 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 	\item \textbf{Kaggle Lung CT数据集\footnote{https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/}}该数据集包含267个胸部至腹部横向截面的2D CT灰度图，尺寸为512$\times$512。在数据预处理时，对每个图像都进行标准化。
 	\item \textbf{DRIVE视网膜图像数据集\footnote{http://www.isi.uu.nl/Research/Databases/DRIVE/}}该数据集的训练集和测试集各包含20张2D彩色眼底视网膜照片，尺寸均为565$\times$584，训练集还有20张对应的视网膜血管主视图。在数据预处理时，对每个图像都进行标准化，尺寸统一插值为512$\times$512。
 	\item \textbf{FIRE视网膜图像数据集\footnote{https://projects.ics.forth.gr/cvrl/fire/}}该数据集包含268张2912$\times$2912的2D彩色眼底视网膜照片。在数据预处理时，对每个图像都进行标准化，尺寸缩放为512$\times$512。
-	\item \textbf{天池全球数据智能大赛(2019)数据集\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}}该数据集包含肺部3D CT扫描共1837张，训练集1470张，测试集145张。训练集提供的标注信息为：中心坐标+直径（单位为mm）+类别（1-结节，2-肺密度增高影，3-肺气肿或肺大泡，5-索条，31-动脉硬化或钙化，32-淋巴结钙化，33-胸膜增厚）。本文实验中仅考虑其中肺结节病灶的生成和检测。在数据预处理时，根据标注信息切取有标注的切片及其前后切片组成的3通道图，再对每个图像都进行标准化，尺寸缩放为512$\times$512。这样得到的数据集包含17156张512$\times$512$\times$3的CT，新的标签为中间通道对应的原始标签中肺结节的位置标签。将检测标签可视化为检测框图片后，对检测框进行填充，可得到用于与结构特征图融合输入的检测标签图。
+	\item \textbf{天池全球数据智能大赛(2019)数据集（TC Lung CT）\footnote{https://tianchi.aliyun.com/competition/entrance/231724/information}}该数据集包含肺部3D CT扫描共1837张，训练集1470张，测试集145张。训练集提供的标注信息为：中心坐标+直径（单位为mm）+类别（1-结节，2-肺密度增高影，3-肺气肿或肺大泡，5-索条，31-动脉硬化或钙化，32-淋巴结钙化，33-胸膜增厚）。本文实验中仅考虑其中肺结节病灶的生成和检测。在数据预处理时，根据标注信息切取有标注的切片及其前后切片组成的3通道图，再对每个图像都进行标准化，尺寸缩放为512$\times$512。这样得到的数据集包含17156张512$\times$512$\times$3的CT，新的标签为中间通道对应的原始标签中肺结节的位置标签。将检测标签可视化为检测框图片后，对检测框进行填充，可得到用于与结构特征图融合输入的检测标签图。
 \end{itemize}
 
 图~\ref{brats_m_f}中展示了BRATS2015数据集中医学图像的四个模态、提取出的掩膜和结构特征图。图~\ref{image_and_f}中展示了DRIVE视网膜图像数据集、Kaggle Chest X-Ray数据集、Kaggle Lung CT数据集和天池全球数据智能大赛(2019)数据集中医学图像、提取出的掩膜和结构特征图以及融合噪声后的结构特征图。
@@ -725,7 +725,7 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 	\begin{center}
 		{\caption{不同数据集上合成图像质量的量化评估（一）}\label{evalu_on_all_dataset1}}
-		\resizebox{\textwidth}{17.5mm}{
+		\resizebox{\textwidth}{17mm}{
 			\begin{tabular}{ll|llllll}
 			\hline
 			Dataset &Metric &Ours &SkrGAN\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:} &ACGAN\cite{98odena2016conditional,96zhang2019skrgan:} &WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:} &PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}\\
