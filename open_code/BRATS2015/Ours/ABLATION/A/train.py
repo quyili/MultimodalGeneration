@@ -9,28 +9,27 @@ import SimpleITK
 
 FLAGS = tf.flags.FLAGS
 
-tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
+tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size,')
-tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 1e-4')
-tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '../../mydata/BRATS2015/trainT1', 'files path')
-tf.flags.DEFINE_string('Y', '../../mydata/BRATS2015/trainT2', 'files path')
-tf.flags.DEFINE_string('Z', '../../mydata/BRATS2015/trainT1c', 'files path')
-tf.flags.DEFINE_string('W', '../../mydata/BRATS2015/trainFlair', 'files path')
-tf.flags.DEFINE_string('L', '../../mydata/BRATS2015/trainLabel', 'files path')
-tf.flags.DEFINE_string('X_test', '../../mydata/BRATS2015/testT1', 'files path')
-tf.flags.DEFINE_string('Y_test', '../../mydata/BRATS2015/testT2', 'files path')
-tf.flags.DEFINE_string('Z_test', '../../mydata/BRATS2015/testT1c', 'files path')
-tf.flags.DEFINE_string('W_test', '../../mydata/BRATS2015/testFlair', 'files path')
-tf.flags.DEFINE_string('L_test', '../../mydata/BRATS2015/testLabel', 'files path')
-tf.flags.DEFINE_string('load_model', "20190822-2137",
-                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
+tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', '../../data/BRATS2015/test/T1', 'files path')
+tf.flags.DEFINE_string('Y', '../../data/BRATS2015/test/T1', 'files path')
+tf.flags.DEFINE_string('Z', '../../data/BRATS2015/test/T1c', 'files path')
+tf.flags.DEFINE_string('W', '../../data/BRATS2015/test/T1c', 'files path')
+tf.flags.DEFINE_string('L', '../../data/BRATS2015/test/T1c', 'files path')
+tf.flags.DEFINE_string('X_test', '../../data/BRATS2015/test/T1', 'files path')
+tf.flags.DEFINE_string('Y_test', '../../data/BRATS2015/test/T1', 'files path')
+tf.flags.DEFINE_string('Z_test', '../../data/BRATS2015/test/T1c', 'files path')
+tf.flags.DEFINE_string('W_test', '../../data/BRATS2015/test/T1c', 'files path')
+tf.flags.DEFINE_string('L_test', '../../data/BRATS2015/test/T1c', 'files path')
+tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_bool('step_clear', False,
-                     'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 10, 'default: 100')
+tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
+tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
+
 
 
 def read_file(l_path, Label_train_files, index):

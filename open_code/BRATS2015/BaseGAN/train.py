@@ -28,7 +28,7 @@ tf.flags.DEFINE_string('L_test', '../../data/BRATS2015/test/T1c', 'files path')
 tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
 
 
 def read_file(l_path, Label_train_files, index):
@@ -101,7 +101,6 @@ def train():
                         z_0 = tf.placeholder(tf.float32, shape=input_shape)
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_0,image_list_0,judge_list_0 = gan.model(x_0, y_0, z_0, w_0)
-                        tensor_name_dirct_0 = gan.tenaor_name
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
@@ -138,6 +137,7 @@ def train():
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
                         loss_list_3,image_list_3,judge_list_3 = gan.model(x_3, y_3, z_3, w_3)
+                        tensor_name_dirct = gan.tenaor_name
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                         D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
@@ -178,7 +178,7 @@ def train():
             logging.info("start step:" + str(step))
 
             try:
-                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
+                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct))
                 l_x_train_files = read_filename(FLAGS.L)
                 l_y_train_files = read_filename(FLAGS.L)
                 l_z_train_files = read_filename(FLAGS.L)
