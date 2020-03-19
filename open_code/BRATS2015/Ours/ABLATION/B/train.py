@@ -100,8 +100,8 @@ def train():
                         y_0 = tf.placeholder(tf.float32, shape=input_shape)
                         z_0 = tf.placeholder(tf.float32, shape=input_shape)
                         w_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        f_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_0,image_list_0,judge_list_0 = gan.model(f_0,x_0, y_0, z_0, w_0)
+                        s_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_0,image_list_0,judge_list_0 = gan.model(s_0,x_0, y_0, z_0, w_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
@@ -113,8 +113,8 @@ def train():
                         y_1 = tf.placeholder(tf.float32, shape=input_shape)
                         z_1 = tf.placeholder(tf.float32, shape=input_shape)
                         w_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        f_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_1,image_list_1,judge_list_1 = gan.model(f_1,x_1, y_1, z_1, w_1)
+                        s_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_1,image_list_1,judge_list_1 = gan.model(s_1,x_1, y_1, z_1, w_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
                         D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
@@ -126,8 +126,8 @@ def train():
                         y_2 = tf.placeholder(tf.float32, shape=input_shape)
                         z_2 = tf.placeholder(tf.float32, shape=input_shape)
                         w_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        f_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_2,image_list_2,judge_list_2  = gan.model(f_2,x_2, y_2, z_2, w_2)
+                        s_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_2,image_list_2,judge_list_2  = gan.model(s_2,x_2, y_2, z_2, w_2)
                         variables_list_2= gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
                         D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
@@ -139,8 +139,8 @@ def train():
                         y_3 = tf.placeholder(tf.float32, shape=input_shape)
                         z_3 = tf.placeholder(tf.float32, shape=input_shape)
                         w_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        f_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        loss_list_3,image_list_3,judge_list_3 = gan.model(f_3,x_3, y_3, z_3, w_3)
+                        s_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_3,image_list_3,judge_list_3 = gan.model(s_3,x_3, y_3, z_3, w_3)
                         tensor_name_dirct = gan.tenaor_name
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
@@ -192,19 +192,19 @@ def train():
                     train_true_y = []
                     train_true_z = []
                     train_true_w = []
-                    train_true_f = []
+                    train_true_s = []
                     for b in range(FLAGS.batch_size):
                         train_x_arr = read_file(FLAGS.X, s_train_files, index).reshape(FLAGS.image_size)
                         train_y_arr = read_file(FLAGS.Y, s_train_files, index).reshape(FLAGS.image_size)
                         train_z_arr = read_file(FLAGS.Z, s_train_files, index).reshape(FLAGS.image_size)
                         train_w_arr = read_file(FLAGS.W, s_train_files, index).reshape(FLAGS.image_size)
-                        train_f_arr = read_file(FLAGS.S, s_train_files, index).reshape(FLAGS.image_size)
+                        train_s_arr = read_file(FLAGS.S, s_train_files, index).reshape(FLAGS.image_size)
 
                         train_true_x.append(train_x_arr)
                         train_true_y.append(train_y_arr)
                         train_true_z.append(train_z_arr)
                         train_true_w.append(train_w_arr)
-                        train_true_f.append(train_f_arr)
+                        train_true_s.append(train_s_arr)
 
                         epoch = int(index / len(s_train_files))
                         index = index + 1
@@ -217,25 +217,25 @@ def train():
                                  y_0: np.asarray(train_true_y)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
                                  z_0: np.asarray(train_true_z)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
                                  w_0: np.asarray(train_true_w)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
-                                 f_0: np.asarray(train_true_w)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_0: np.asarray(train_true_s)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
 
                                  x_1: np.asarray(train_true_x)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
                                  y_1: np.asarray(train_true_y)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
                                  z_1: np.asarray(train_true_z)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
                                  w_1: np.asarray(train_true_w)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
-                                 f_1: np.asarray(train_true_w)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_1: np.asarray(train_true_s)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
 
                                  x_2: np.asarray(train_true_x)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
                                  y_2: np.asarray(train_true_y)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
                                  z_2: np.asarray(train_true_z)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
                                  w_2: np.asarray(train_true_w)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
-                                 f_2: np.asarray(train_true_w)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_2: np.asarray(train_true_s)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
 
                                  x_3: np.asarray(train_true_x)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
                                  y_3: np.asarray(train_true_y)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
                                  z_3: np.asarray(train_true_z)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
                                  w_3: np.asarray(train_true_w)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
-                                 f_3: np.asarray(train_true_w)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_3: np.asarray(train_true_s)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
                              })
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
