@@ -15,11 +15,8 @@ class Discriminator:
         """
         Args:
           input: batch_size x image_size x image_size x c
-        Returns:
-          output: 4D tensor batch_size x out_size x out_size x 1 (default 1x5x5x1)
-                  filled with 0.9 if real, 0.0 if fake
-        """
 
+        """
         with tf.variable_scope(self.name, reuse=self.reuse):
             D_input = tf.nn.dropout(D_input, keep_prob=self.keep_prob)
             with tf.variable_scope("conv0", reuse=self.reuse):

@@ -2,7 +2,6 @@
 import tensorflow as tf
 from discriminator import Discriminator
 from unet import Unet
-from vgg11 import VGG
 
 
 class GAN:
@@ -25,7 +24,7 @@ class GAN:
         self.judge_list = {}
         self.tenaor_name = {}
 
-        self.LESP = VGG('LESP', ngf=ngf, output_channl=3)
+        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
         self.G_X = Unet('G_X', ngf=ngf, keep_prob=0.98)
         self.D_X = Discriminator('D_X', ngf=ngf, keep_prob=0.9)
 

@@ -23,9 +23,6 @@ class GAN:
         self.code_shape = [int(batch_size / 4), int(image_size[0] / 4), int(image_size[1] / 4), 4]
         self.ones = tf.ones(self.input_shape, name="ones")
         self.ones_code = tf.ones(self.code_shape, name="ones_code")
-        self.image_list = {}
-        self.prob_list = {}
-        self.judge_list = {}
         self.tenaor_name = {}
 
         self.G_X = Unet('G_X', ngf=ngf)
@@ -36,36 +33,6 @@ class GAN:
         self.D_Z = Discriminator('D_Z', ngf=ngf)
         self.G_W = Unet('G_W', ngf=ngf)
         self.D_W = Discriminator('D_W', ngf=ngf)
-
-    def get_f(self, x, beta=0.12):
-        f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
-        f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
-        f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
-
-        f1 = self.ones * tf.cast(f1 > beta, dtype="float32")
-        f2 = self.ones * tf.cast(f2 > beta, dtype="float32")
-
-        f = f1 + f2
-        f = self.ones * tf.cast(f > 0.0, dtype="float32")
-        return f
-
-    def get_mask(self, m, p=5):
-        mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
-        shape = m.get_shape().as_list()
-        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
-        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
-        return mask
-
-    def remove_l(self, l, f):
-        l_mask = self.get_mask(l, p=0)
-        f = f * l_mask
-        return f
-
-    def segmentation(self, x, EC_L, DC_L):
-        l_prob = DC_L(EC_L(x))
-        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        return l_prob, l_f
 
     def model(self, x, y, z, w):
         x_g = self.G_X(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
@@ -106,24 +73,26 @@ class GAN:
         D_loss += self.mse_loss(j_w_g, 0.0) * 35 * 2
         G_loss += self.mse_loss(j_w_g, 1.0) * 35 * 2
 
-        self.image_list["x_g"] = x_g
-        self.image_list["y_g"] = y_g
-        self.image_list["z_g"] = z_g
-        self.image_list["w_g"] = w_g
+        image_list={}
+        image_list["x_g"] = x_g
+        image_list["y_g"] = y_g
+        image_list["z_g"] = z_g
+        image_list["w_g"] = w_g
 
-        self.judge_list["j_x_g"] = j_x_g
-        self.judge_list["j_y_g"] = j_y_g
-        self.judge_list["j_z_g"] = j_z_g
-        self.judge_list["j_w_g"] = j_w_g
+        judge_list={}
+        judge_list["j_x_g"] = j_x_g
+        judge_list["j_y_g"] = j_y_g
+        judge_list["j_z_g"] = j_z_g
+        judge_list["j_w_g"] = j_w_g
 
-        self.judge_list["j_x"] = j_x
-        self.judge_list["j_y"] = j_y
-        self.judge_list["j_z"] = j_z
-        self.judge_list["j_w"] = j_w
+        judge_list["j_x"] = j_x
+        judge_list["j_y"] = j_y
+        judge_list["j_z"] = j_z
+        judge_list["j_w"] = j_w
 
         loss_list = [G_loss, D_loss]
 
-        return loss_list
+        return loss_list,image_list,judge_list
 
     def get_variables(self):
         return [self.G_X.variables +

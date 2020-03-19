@@ -1,6 +1,6 @@
 # _*_ coding:utf-8 _*_
 import tensorflow as tf
-from vgg11 import VGG
+from discriminator import Discriminator
 
 
 class GAN:
@@ -21,7 +21,7 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
 
-        self.LESP = VGG('LESP', ngf=ngf, output_channl=3, keep_prob=0.55)
+        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3, keep_prob=0.55)
 
     def model(self, l, x):
         label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
