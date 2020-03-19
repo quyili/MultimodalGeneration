@@ -16,7 +16,7 @@ tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('code_f_g', "GPU_0/random_normal_1:0", "default: None")
 tf.flags.DEFINE_string('s_g', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_g', "GPU_0/Reshape_5:0", "default: None")
-tf.flags.DEFINE_string('j_s_g', "GPU_3/D_F_1/conv5/conv5/BiasAdd:0", "default: None")
+tf.flags.DEFINE_string('j_s_g', "GPU_3/D_S_1/conv5/conv5/BiasAdd:0", "default: None")
 tf.flags.DEFINE_integer('num', 2000, ' default: 2000')
 tf.flags.DEFINE_float('min_j_s', 0.55, 'default: 0.55')
 tf.flags.DEFINE_float('max_count', 50, 'default: 50')
@@ -45,7 +45,7 @@ def train():
         return
     try:
         os.makedirs("./test_images/Temp")
-        os.makedirs("./test_images/F")
+        os.makedirs("./test_images/S")
         os.makedirs("./test_images/M")
     except os.error:
         pass
@@ -77,7 +77,7 @@ def train():
 
                 jpg_s = np.concatenate([np.asarray(s)[0, :, :, 0:1] * 255, np.asarray(s)[0, :, :, 0:1] * 255,
                                         np.asarray(s)[0, :, :, 0:1] * 255], axis=-1)
-                cv2.imwrite("./test_images/Temp/f_" + str(index) + "_" + str(count) + ".jpg", jpg_s)
+                cv2.imwrite("./test_images/Temp/s_" + str(index) + "_" + str(count) + ".jpg", jpg_s)
                 m_arr_1 = get_mask_from_s("./test_images/Temp/s_" + str(index) + "_" + str(count) + ".jpg")
                 m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
                 mae = np.mean(np.abs(m_arr_1 - m_arr_2))
