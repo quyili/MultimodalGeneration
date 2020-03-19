@@ -187,7 +187,7 @@ def train():
                 step = 0
 
             if FLAGS.load_GT_model is not None:
-                trans_latest_checkpoint = tf.train.latest_checkpoint("checkpoints/" + FLAGS.load_T_model)
+                trans_latest_checkpoint = tf.train.latest_checkpoint("checkpoints/" + FLAGS.load_GT_model)
                 trans_saver = tf.train.Saver(variables_list[2])
                 trans_saver.restore(sess, trans_latest_checkpoint)
 
