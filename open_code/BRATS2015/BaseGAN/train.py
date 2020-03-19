@@ -14,21 +14,19 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
-tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('X', '../../data/BRATS2015/test/T1', 'files path')
 tf.flags.DEFINE_string('Y', '../../data/BRATS2015/test/T1', 'files path')
 tf.flags.DEFINE_string('Z', '../../data/BRATS2015/test/T1c', 'files path')
 tf.flags.DEFINE_string('W', '../../data/BRATS2015/test/T1c', 'files path')
-tf.flags.DEFINE_string('L', '../../data/BRATS2015/test/T1c', 'files path')
 tf.flags.DEFINE_string('X_test', '../../data/BRATS2015/test/T1', 'files path')
 tf.flags.DEFINE_string('Y_test', '../../data/BRATS2015/test/T1', 'files path')
 tf.flags.DEFINE_string('Z_test', '../../data/BRATS2015/test/T1c', 'files path')
 tf.flags.DEFINE_string('W_test', '../../data/BRATS2015/test/T1c', 'files path')
-tf.flags.DEFINE_string('L_test', '../../data/BRATS2015/test/T1c', 'files path')
 tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
 
 
 def read_file(l_path, Label_train_files, index):
@@ -179,10 +177,7 @@ def train():
 
             try:
                 logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct))
-                l_x_train_files = read_filename(FLAGS.L)
-                l_y_train_files = read_filename(FLAGS.L)
-                l_z_train_files = read_filename(FLAGS.L)
-                l_w_train_files = read_filename(FLAGS.L)
+                x_train_files = read_filename(FLAGS.X)
                 index = 0
                 epoch = 0
                 while epoch <= FLAGS.epoch:
@@ -192,17 +187,17 @@ def train():
                     train_true_z = []
                     train_true_w = []
                     for b in range(FLAGS.batch_size):
-                        train_x_arr = read_file(FLAGS.X, l_x_train_files, index).reshape(FLAGS.image_size)
-                        train_y_arr = read_file(FLAGS.Y, l_y_train_files, index).reshape(FLAGS.image_size)
-                        train_z_arr = read_file(FLAGS.Z, l_z_train_files, index).reshape(FLAGS.image_size)
-                        train_w_arr = read_file(FLAGS.W, l_w_train_files, index).reshape(FLAGS.image_size)
+                        train_x_arr = read_file(FLAGS.X, x_train_files, index).reshape(FLAGS.image_size)
+                        train_y_arr = read_file(FLAGS.Y, x_train_files, index).reshape(FLAGS.image_size)
+                        train_z_arr = read_file(FLAGS.Z, x_train_files, index).reshape(FLAGS.image_size)
+                        train_w_arr = read_file(FLAGS.W, x_train_files, index).reshape(FLAGS.image_size)
 
                         train_true_x.append(train_x_arr)
                         train_true_y.append(train_y_arr)
                         train_true_z.append(train_z_arr)
                         train_true_w.append(train_w_arr)
 
-                        epoch = int(index / len(l_x_train_files))
+                        epoch = int(index / len(x_train_files))
                         index = index + 1
 
                     logging.info(
@@ -234,7 +229,7 @@ def train():
 
                     step += 1
             except Exception as e:
-                logging.info(str(e))
+                logging.info("ERROR:" + str(e))
                 save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
                 logging.info("Model saved in file: %s" % save_path)
             finally:

@@ -17,7 +17,7 @@ tf.flags.DEFINE_string('y_g', "GPU_3/G_X/lastconv/Sigmoid:0", "tensor name")
 tf.flags.DEFINE_string('z_g', "GPU_3/G_X/lastconv/Sigmoid:0", "tensor name")
 tf.flags.DEFINE_string('w_g', "GPU_3/G_X/lastconv/Sigmoid:0", "tensor name")
 tf.flags.DEFINE_string('save_path', "./test_images/", "default: ./test_images/")
-tf.flags.DEFINE_integer('num', 2, 'default: 2000')
+tf.flags.DEFINE_integer('num', 2000, 'default: 2000')
 
 
 def train():

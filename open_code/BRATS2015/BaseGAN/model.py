@@ -20,9 +20,6 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.code_shape = [int(batch_size / 4), int(image_size[0] / 4), int(image_size[1] / 4), 4]
-        self.ones = tf.ones(self.input_shape, name="ones")
-        self.ones_code = tf.ones(self.code_shape, name="ones_code")
         self.tenaor_name = {}
 
         self.G_X = Unet('G_X', ngf=ngf)
