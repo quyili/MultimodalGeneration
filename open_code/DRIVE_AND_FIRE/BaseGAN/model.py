@@ -26,7 +26,9 @@ class GAN:
         self.D_X = Discriminator('D_X', ngf=ngf)
 
     def model(self, x):
-        x_g = self.G_X(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
+        x_g = self.G_X(tf.random_normal(
+            [self.input_shape[0],self.input_shape[1],self.input_shape[2],1],
+            mean=0., stddev=1., dtype=tf.float32))
         self.tenaor_name["x_g"] = str(x_g)
 
         j_x_g = self.D_X(x_g)

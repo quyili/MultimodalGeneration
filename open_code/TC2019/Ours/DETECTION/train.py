@@ -11,25 +11,20 @@ import cv2
 
 FLAGS = tf.flags.FLAGS
 
-tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
+tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
-tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_float('learning_rate', 2e-4, 'initial learning rate for Adam, default: 2e-4')
+tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size')
+tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
 tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', './data/TC19/test/X', 'X files for training')
-tf.flags.DEFINE_string('L', './data/TC19/test/L', 'Y files for training')
-tf.flags.DEFINE_string('X_test', './data/TC19/test/X', 'X files for training')
-tf.flags.DEFINE_string('L_test', './TC19/test/L', 'Y files for training')
-tf.flags.DEFINE_string('load_model', None,
-                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_string('X', './data/TC19/test/X', 'files path')
+tf.flags.DEFINE_string('L', './data/TC19/test/L', 'files path')
+tf.flags.DEFINE_string('X_test', './data/TC19/test/X','files path')
+tf.flags.DEFINE_string('L_test', './data/TC19/test/L', 'files path')
+tf.flags.DEFINE_string('load_model', None,'e.g. 20170602-1936, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_bool('step_clear', False,
-                     'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 100')
-tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
-tf.flags.DEFINE_integer('epoch_steps', 8, '463 or 5480, default: 5480')
-tf.flags.DEFINE_string('stage', "train", 'default: train')
+tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: True')
+tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
 
 default_box_size = [4, 6, 6, 6, 4, 4]
 min_box_scale = 0.05
@@ -288,7 +283,6 @@ def train():
                         classes_size, feature_class_0,
                         background_classes_val,
                         all_default_boxs_len)
-                    tensor_name_dirct_0 = gan.tenaor_name
                     variables_list_0 = gan.get_variables()
                     G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
                     G_grad_list.append(G_grad_0)
@@ -358,6 +352,7 @@ def train():
                                                                                  GT_location_3,
                                                                                  GT_positives_3,
                                                                                  GT_negatives_3)
+                    tensor_name_dirct = gan.tenaor_name
                     variables_list_3 = gan.get_variables()
                     G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
                     G_grad_list.append(G_grad_3)
@@ -365,13 +360,6 @@ def train():
         G_ave_grad = average_gradients(G_grad_list)
         G_optimizer_op = G_optimizer.apply_gradients(G_ave_grad)
         optimizers = [G_optimizer_op]
-
-        loss_list_summary = tf.placeholder(tf.float32)
-
-        gan.loss_summary(loss_list_summary)
-        summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
-        train_writer = tf.summary.FileWriter(checkpoints_dir + "/train", graph)
-        val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
         saver = tf.train.Saver()
 
         with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -399,16 +387,12 @@ def train():
 
             sess.graph.finalize()
             logging.info("start step:" + str(step))
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
             try:
-                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
+                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct))
                 l_train_files = read_filename(FLAGS.L)
                 index = 0
                 epoch = 0
-                train_loss_list = []
-                while not coord.should_stop() and epoch <= FLAGS.epoch:
+                while  epoch <= FLAGS.epoch:
 
                     train_true_l = []
                     train_true_x = []
@@ -417,7 +401,7 @@ def train():
                         train_x_arr = read_file(FLAGS.X, l_train_files, index, out_size=[512, 512, 3],
                                                 inpu_form=".txt", out_form=".mha")
                         train_true_l.append(train_l_arr)
-                        train_true_x.append(train_x_arr[:, :, 1:2])
+                        train_true_x.append(train_x_arr)
                         epoch = int(index / len(l_train_files))
                         index = index + 1
 
@@ -432,8 +416,7 @@ def train():
                     gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(
                         train_true_l[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)])
 
-                    _, train_losses = sess.run(
-                        [optimizers, loss_list_0], feed_dict={
+                    sess.run(optimizers, feed_dict={
                             X_0: train_true_x[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)],
                             GT_class_0: gt_class_0,
                             GT_location_0: gt_location_0,
@@ -455,150 +438,16 @@ def train():
                             GT_positives_3: gt_positives_3,
                             GT_negatives_3: gt_negatives_3
                         })
-
-                    train_loss_list.append(train_losses)
-
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
-
-                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
-                            FLAGS.epoch_steps * FLAGS.epoch / 4):
-                        logging.info('-----------Train summary start-------------')
-                        train_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(train_loss_list)})
-                        train_writer.add_summary(train_summary_op, step)
-                        train_writer.flush()
-                        train_loss_list = []
-                        logging.info('-----------Train summary end-------------')
-
-                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                        logging.info("Model saved in file: %s" % save_path)
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        val_loss_list = []
-                        val_index = 0
-
-                        l_val_files = read_filename(FLAGS.L_test)
-                        for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
-                            val_true_l = []
-                            val_true_x = []
-                            for b in range(FLAGS.batch_size):
-                                val_l_arr = read_txt_file(FLAGS.L_test, l_val_files, val_index)
-                                val_x_arr = read_file(FLAGS.X_test, l_val_files, val_index, out_size=[512, 512, 3],
-                                                      inpu_form=".txt", out_form=".mha")
-                                logging.info(l_val_files[val_index % len(l_val_files)])
-                                val_true_l.append(val_l_arr)
-                                val_true_x.append(val_x_arr[:, :, 1:2])
-                                val_index += 1
-
-                            gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(
-                                val_true_l[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)])
-                            gt_class_1, gt_location_1, gt_positives_1, gt_negatives_1 = generate_groundtruth_data(
-                                val_true_l[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4)])
-                            gt_class_2, gt_location_2, gt_positives_2, gt_negatives_2 = generate_groundtruth_data(
-                                val_true_l[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4)])
-                            gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(
-                                val_true_l[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)])
-
-                            val_losses_0, \
-                            val_losses_1, \
-                            val_losses_2, \
-                            val_losses_3, \
-                            f_class, f_location, f_class_softmax, box_top_index, box_top_value = sess.run([
-                                loss_list_0, loss_list_1, loss_list_2, loss_list_3,
-                                feature_class_0, feature_location_0, feature_class_softmax_0, box_top_index_0,
-                                box_top_value_0], feed_dict={
-                                X_0: val_true_x[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)],
-                                GT_class_0: gt_class_0,
-                                GT_location_0: gt_location_0,
-                                GT_positives_0: gt_positives_0,
-                                GT_negatives_0: gt_negatives_0,
-                                X_1: val_true_x[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4)],
-                                GT_class_1: gt_class_1,
-                                GT_location_1: gt_location_1,
-                                GT_positives_1: gt_positives_1,
-                                GT_negatives_1: gt_negatives_1,
-                                X_2: val_true_x[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4)],
-                                GT_class_2: gt_class_2,
-                                GT_location_2: gt_location_2,
-                                GT_positives_2: gt_positives_2,
-                                GT_negatives_2: gt_negatives_2,
-                                X_3: val_true_x[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)],
-                                GT_class_3: gt_class_3,
-                                GT_location_3: gt_location_3,
-                                GT_positives_3: gt_positives_3,
-                                GT_negatives_3: gt_negatives_3,
-                            })
-
-                            val_loss_list.append(val_losses_0)
-                            val_loss_list.append(val_losses_1)
-                            val_loss_list.append(val_losses_2)
-                            val_loss_list.append(val_losses_3)
-
-                            print("IN:", gt_class_0.shape, gt_location_0.shape, gt_positives_0.shape,
-                                  gt_negatives_0.shape, )
-                            print("OUT:", f_class.shape, f_location.shape)
-                            top_shape = np.shape(box_top_index)
-                            pred_class = []
-                            pred_class_val = []
-                            pred_location = []
-                            for i in range(top_shape[0]):
-                                item_img_class = []
-                                item_img_class_val = []
-                                item_img_location = []
-                                for j in range(top_shape[1]):
-                                    p_class_val = f_class_softmax[i][box_top_index[i][j]]
-                                    if p_class_val < 0.5:
-                                        continue
-                                    p_class = np.argmax(f_class[i][box_top_index[i][j]])
-                                    if p_class == background_classes_val:
-                                        continue
-                                    p_location = f_location[i][box_top_index[i][j]]
-                                    if p_location[0] < 0 or p_location[1] < 0 or p_location[2] < 0 or p_location[
-                                        3] < 0 or p_location[
-                                        2] == 0 or p_location[3] == 0:
-                                        continue
-                                    is_box_filter = False
-                                    for f_index in range(len(item_img_class)):
-                                        if jaccard(p_location, item_img_location[f_index]) > 0.3 and p_class == \
-                                                item_img_class[
-                                                    f_index]:
-                                            is_box_filter = True
-                                            break
-                                    if is_box_filter == False:
-                                        item_img_class.append(p_class)
-                                        item_img_class_val.append(p_class_val)
-                                        item_img_location.append(p_location)
-                                pred_class.append(item_img_class)
-                                pred_class_val.append(item_img_class_val)
-                                pred_location.append(item_img_location)
-                            # print('pred_class:' + str(pred_class))
-                            # print('pred_class_val:' + str(pred_class_val))
-                            # print('pred_location:' + str(pred_location))
-                            # print('Labels:' + str(
-                            #     val_true_l[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)]))
-
-                        val_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(val_loss_list)})
-                        val_writer.add_summary(val_summary_op, step)
-                        val_writer.flush()
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                     step += 1
-            except KeyboardInterrupt:
-                logging.info('Interrupted')
-                coord.request_stop()
             except Exception as e:
-                coord.request_stop(e)
+                logging.info("ERROR:" + str(e))
+                save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+                logging.info("Model saved in file: %s" % save_path)
             finally:
                 save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
                 logging.info("Model saved in file: %s" % save_path)
-                coord.request_stop()
-                coord.join(threads)
 
 
 def main(unused_argv):

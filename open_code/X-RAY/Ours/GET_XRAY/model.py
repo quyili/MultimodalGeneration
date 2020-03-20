@@ -90,6 +90,9 @@ class GAN:
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         return accuracy
 
+    def accuracy(self, labels, predictions):
+        return tf.metrics.accuracy(labels, predictions)
+
     def auc(self, x, y):
         return tf.metrics.auc(x, y)
 

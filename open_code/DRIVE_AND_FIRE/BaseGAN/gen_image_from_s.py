@@ -47,8 +47,8 @@ def train():
             x_g_= sess.run(x_g)
 
             for b in range(int(FLAGS.batch_size/4)):
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     FLAGS.save_path + "x_g/" + str(index)+".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, :]),
+                                     FLAGS.save_path + "x_g/" + str(index)+".tif")
             index += 1
 
 

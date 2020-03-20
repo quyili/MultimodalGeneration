@@ -11,8 +11,8 @@ tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_string('load_model', "20200319-1717", "default: None")
-tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size')
-tf.flags.DEFINE_string('S', '../../../../data/BRATS2015/test/S', 'files path')
+tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size')
+tf.flags.DEFINE_string('S', '../../../../data/DRIVE_FIRE/test/S', 'files path')
 tf.flags.DEFINE_string('x_g', "GPU_3/G_X/lastconv/Sigmoid:0", "tensor name")
 tf.flags.DEFINE_string('s', "GPU_3/Placeholder_4:0", "tensor name")
 tf.flags.DEFINE_string('save_path', "./test_images/", "default: ./test_images/")
@@ -75,8 +75,8 @@ def train():
             x_g_ = sess.run(x_g,feed_dict={s: np.asarray(train_true_s)})
 
             for b in range(int(FLAGS.batch_size/4)):
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     FLAGS.save_path + "x_g/" + str(index)+".tiff")
+                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, :]),
+                                     FLAGS.save_path + "x_g/" + str(index)+".tif")
             index += 1
 
 

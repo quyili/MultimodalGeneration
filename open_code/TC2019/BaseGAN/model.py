@@ -20,54 +20,16 @@ class GAN:
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.code_shape = [int(batch_size / 4), int(image_size[0] / 4), int(image_size[1] / 4), 4]
-        self.ones = tf.ones(self.input_shape, name="ones")
-        self.ones_code = tf.ones(self.code_shape, name="ones_code")
-        self.image_list = {}
-        self.prob_list = {}
-        self.judge_list = {}
         self.tenaor_name = {}
 
-        self.G_X = Unet('G_X', ngf=ngf)
+        self.G_X = Unet('G_X', ngf=ngf, output_channl=3)
         self.D_X = Discriminator('D_X', ngf=ngf)
 
-    def get_f(self, x, beta=0.12):
-        f1 = self.norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
-        f2 = self.norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
-        f1 = tf.reduce_mean(f1, axis=[1, 2, 3]) - f1
-        f2 = f2 - tf.reduce_mean(f2, axis=[1, 2, 3])
-
-        f1 = self.ones * tf.cast(f1 > beta, dtype="float32")
-        f2 = self.ones * tf.cast(f2 > beta, dtype="float32")
-
-        f = f1 + f2
-        f = self.ones * tf.cast(f > 0.0, dtype="float32")
-        return f
-
-    def get_mask(self, m, p=5):
-        mask = 1.0 - self.ones * tf.cast(m > 0.0, dtype="float32")
-        shape = m.get_shape().as_list()
-        mask = tf.image.resize_images(mask, size=[shape[1] + p, shape[2] + p], method=1)
-        mask = tf.image.resize_image_with_crop_or_pad(mask, shape[1], shape[2])
-        return mask
-
-    def remove_l(self, l, f):
-        l_mask = self.get_mask(l, p=0)
-        f = f * l_mask
-        return f
-
-    def segmentation(self, x, EC_L, DC_L):
-        l_prob = DC_L(EC_L(x))
-        l_f = tf.reshape(tf.cast(tf.argmax(l_prob, axis=-1), dtype=tf.float32) * 0.25, shape=self.input_shape)
-        return l_prob, l_f
-
-    def model(self, x, y, z, w):
+    def model(self, x):
         x_g = self.G_X(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
-
         self.tenaor_name["x_g"] = str(x_g)
 
         j_x_g = self.D_X(x_g)
-
         j_x = self.D_X(x)
 
         D_loss = 0.0
@@ -76,21 +38,20 @@ class GAN:
         D_loss += self.mse_loss(j_x_g, 0.0) * 35 * 2
         G_loss += self.mse_loss(j_x_g, 1.0) * 35 * 2
 
-        self.image_list["x_g"] = x_g
+        image_list={}
+        image_list["x_g"] = x_g
 
-        self.judge_list["j_x_g"] = j_x_g
-
-        self.judge_list["j_x"] = j_x
+        judge_list={}
+        judge_list["j_x_g"] = j_x_g
+        judge_list["j_x"] = j_x
 
         loss_list = [G_loss, D_loss]
 
-        return loss_list
+        return loss_list,image_list,judge_list
 
     def get_variables(self):
-        return [self.G_X.variables
-            ,
-                self.D_X.variables
-                ]
+        return [self.G_X.variables ,
+                self.D_X.variables ]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -103,6 +64,63 @@ class GAN:
         D_optimizer = make_optimizer(name='Adam_D')
 
         return G_optimizer, D_optimizer
+
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
+
+    def auc(self, x, y):
+        return tf.metrics.auc(x, y)
+
+    def sensitivity(self, labels,  predictions, specificity):
+        return tf.metrics.sensitivity_at_specificity(labels,  predictions, specificity)
+
+    def precision(self, labels, predictions):
+        return tf.metrics.precision( labels, predictions)
+    def precision_at_k(self, labels, predictions,k):
+        return tf.metrics.precision_at_k( labels, predictions,k)
+
+    def recall(self, labels, predictions):
+        return tf.metrics.recall( labels, predictions)
+    def recall_at_k(self, labels, predictions,k):
+        return tf.metrics.recall_at_k( labels, predictions,k)
+
+    def iou(self, labels, predictions, num_classes):
+        return tf.metrics.mean_iou( labels, predictions,num_classes)
+
+    def dice_score(self, output, target, loss_type='jaccard', axis=(1, 2, 3, 4), smooth=1e-5):
+        inse = tf.reduce_sum(output * target, axis=axis)
+        if loss_type == 'jaccard':
+            l = tf.reduce_sum(output * output, axis=axis)
+            r = tf.reduce_sum(target * target, axis=axis)
+        elif loss_type == 'sorensen':
+            l = tf.reduce_sum(output, axis=axis)
+            r = tf.reduce_sum(target, axis=axis)
+        else:
+            raise Exception("Unknow loss_type")
+        dice = (2. * inse + smooth) / (l + r + smooth)
+        dice = tf.reduce_mean(dice)
+        return dice
+
+    def cos_score(self, output, target, axis=(1, 2, 3, 4), smooth=1e-5):
+        pooled_len_1 = tf.sqrt(tf.reduce_sum(tf.square(output), axis))
+        pooled_len_2 = tf.sqrt(tf.reduce_sum(tf.square(target), axis))
+        pooled_mul_12 = tf.reduce_sum(tf.multiply(output, target), axis)
+        score = tf.reduce_mean(tf.div(pooled_mul_12, pooled_len_1 * pooled_len_2 + smooth))
+        return score
+
+    def euclidean_distance(self, output, target, axis=(1, 2, 3, 4)):
+        euclidean = tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.square(output - target), axis)))
+        return euclidean
+
+    def MSE(self, output, target):
+        mse = tf.reduce_mean(tf.square(output - target))
+        return mse
+
+    def MAE(self, output, target):
+        mae = tf.reduce_mean(tf.abs(output - target))
+        return mae
 
     def mse_loss(self, x, y):
         loss = tf.reduce_mean(tf.square(x - y))

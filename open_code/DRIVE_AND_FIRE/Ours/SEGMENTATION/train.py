@@ -6,6 +6,7 @@ import os
 import logging
 import numpy as np
 import SimpleITK
+import cv2
 
 FLAGS = tf.flags.FLAGS
 

@@ -28,7 +28,8 @@ class GAN:
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 5])
 
         l_g_prob_by_x = self.G_L_X(x)
-        l_g_by_x = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_x, axis=-1), dtype=tf.float32), shape=self.input_shape)
+        l_g_by_x = tf.reshape(tf.cast(tf.argmax(l_g_prob_by_x, axis=-1), dtype=tf.float32),
+                              shape=[self.input_shape[0],self.input_shape[1],self.input_shape[2],1])
 
         G_loss = 0.0
 
