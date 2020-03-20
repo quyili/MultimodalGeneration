@@ -1,82 +1,39 @@
 ﻿# _*_ coding:utf-8 _*_
 import tensorflow as tf
-from src_code.GET_SWM.gen_model import GAN
+from model import GAN
 from datetime import datetime
 import os
 import logging
 import numpy as np
 import SimpleITK
-import math
 import cv2
-from PIL import Image
 
 FLAGS = tf.flags.FLAGS
 
-tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
+tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
-tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 2e-4')
-tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', './DATA/SWM/train/NEW_X', 'X files for training')
-tf.flags.DEFINE_string('F', '/./DATA/SWM/train/NEW_F', 'Y files for training')
-tf.flags.DEFINE_string('M', './DATA/SWM/train/NEW_M', 'Y files for training')
-tf.flags.DEFINE_string('X_test', './DATA/SWM/test/X', 'Y files for training')
-tf.flags.DEFINE_string('F_test', './DATA/SWM/test/NEW_F', 'Y files for training')
-tf.flags.DEFINE_string('M_test', './DATA/SWM/test/M', 'Y files for training')
-
-tf.flags.DEFINE_string('load_model', None,
-                       'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
+tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
+tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size,')
+tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
+tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', '../../../../data/DRIVE_FIRE/test/X', 'files path')
+tf.flags.DEFINE_string('S', '../../../../data/DRIVE_FIRE/test/S', 'files path')
+tf.flags.DEFINE_string('M', '../../../../data/DRIVE_FIRE/test/M', 'files path')
+tf.flags.DEFINE_string('X_test', '../../../../data/DRIVE_FIRE/test/X', 'files path')
+tf.flags.DEFINE_string('S_test', '../../../../data/DRIVE_FIRE/test/S', 'files path')
+tf.flags.DEFINE_string('M_test', '../../../../data/DRIVE_FIRE/test/M', 'files path')
+tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
-tf.flags.DEFINE_bool('step_clear', False,
-                     'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 2000, 'default: 100')
-tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
-tf.flags.DEFINE_integer('epoch_steps', 288, '463 or 5480, default: 5480')
-tf.flags.DEFINE_string('stage', "train", 'default: train')
-
-
-def mean(list):
-    return sum(list) / float(len(list))
-
-
-def mean_list(lists):
-    out = []
-    lists = np.asarray(lists).transpose([1, 0])
-    for list in lists:
-        out.append(mean(list))
-    return out
-
-
-def random(n, h, w, c):
-    return np.random.uniform(0., 1., size=[n, h, w, c])
-
+tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
+tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
 
 def mynorm(input):
     if (np.max(input) - np.min(input)) != 0:
         output = (input - np.min(input)
                   ) / (np.max(input) - np.min(input))
     else:
-        # print("单值图：",np.max(input))
         output = (input - input)  # +1.0
     return output
-
-
-def save_images(image_dirct, checkpoints_dir, file_index=""):
-    for key in image_dirct:
-        save_image(np.asarray(image_dirct[key])[0, :, :, :], key + "_" + file_index,
-                   dir=checkpoints_dir + "/samples", form=".tif")
-
-
-def save_image(image, name, dir="./samples", form=".tiff"):
-    try:
-        os.makedirs(dir)
-    except os.error:
-        pass
-    if image.shape[2] == 1:
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(image[:, :, 0]), dir + "/" + name + ".tiff")
-    else:
-        Image.fromarray((image * 255).astype(np.uint8)).save(dir + "/" + name + form)
 
 
 def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form="", norm=True):
@@ -100,7 +57,6 @@ def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out
     if norm == True:
         img = mynorm(img)
     return img
-
 
 def read_filename(path, shuffle=True):
     files = os.listdir(path)
@@ -148,84 +104,70 @@ def train():
         for attr, value in FLAGS.flag_values_dict().items():
             logging.info("%s\t:\t%s" % (attr, str(value)))
 
-        graph = tf.get_default_graph()
-        gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
-        input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
-        G_optimizer, D_optimizer = gan.optimize()
+        graph = tf.Graph()
+        with graph.as_default():
+            gan = GAN(FLAGS.image_size, FLAGS.learning_rate, FLAGS.batch_size, FLAGS.ngf)
+            input_shape = [int(FLAGS.batch_size / 4), FLAGS.image_size[0], FLAGS.image_size[1], FLAGS.image_size[2]]
+            G_optimizer, D_optimizer = gan.optimize()
 
-        G_grad_list = []
-        D_grad_list = []
-        with tf.variable_scope(tf.get_variable_scope()):
-            with tf.device("/gpu:0"):
-                with tf.name_scope("GPU_0"):
-                    x_0 = tf.placeholder(tf.float32, shape=input_shape)
-                    f_0 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
-                    m_0 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
+            G_grad_list = []
+            D_grad_list = []
+            with tf.variable_scope(tf.get_variable_scope()):
+                with tf.device("/gpu:0"):
+                    with tf.name_scope("GPU_0"):
+                        x_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_0,image_list_0,judge_list_0 = gan.model(m_0,s_0,x_0)
+                        variables_list_0 = gan.get_variables()
+                        G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
+                        D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
+                        G_grad_list.append(G_grad_0)
+                        D_grad_list.append(D_grad_0)
+                with tf.device("/gpu:1"):
+                    with tf.name_scope("GPU_1"):
+                        x_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_1,image_list_1,judge_list_1 = gan.model(m_1,s_1,x_1)
+                        variables_list_1 = gan.get_variables()
+                        G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
+                        D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
+                        G_grad_list.append(G_grad_1)
+                        D_grad_list.append(D_grad_1)
+                with tf.device("/gpu:2"):
+                    with tf.name_scope("GPU_2"):
+                        x_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_2,image_list_2,judge_list_2  = gan.model(m_2,s_2,x_2)
+                        variables_list_2= gan.get_variables()
+                        G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
+                        D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
+                        G_grad_list.append(G_grad_2)
+                        D_grad_list.append(D_grad_2)
+                with tf.device("/gpu:3"):
+                    with tf.name_scope("GPU_3"):
+                        x_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        m_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        loss_list_3,image_list_3,judge_list_3 = gan.model(m_3,s_3,x_3)
+                        tensor_name_dirct = gan.tenaor_name
+                        variables_list_3 = gan.get_variables()
+                        G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
+                        D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
+                        G_grad_list.append(G_grad_3)
+                        D_grad_list.append(D_grad_3)
 
-                    loss_list_0, image_list_0 = gan.model(f_0, m_0, x_0)
-                    j_list_0 = gan.judge_list
-                    tensor_name_dirct_0 = gan.tenaor_name
-                    variables_list_0 = gan.get_variables()
-                    G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
-                    D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1], var_list=variables_list_0[1])
-                    G_grad_list.append(G_grad_0)
-                    D_grad_list.append(D_grad_0)
-            with tf.device("/gpu:1"):
-                with tf.name_scope("GPU_1"):
-                    x_1 = tf.placeholder(tf.float32, shape=input_shape)
-                    f_1 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
-                    m_1 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
+            G_ave_grad = average_gradients(G_grad_list)
+            D_ave_grad = average_gradients(D_grad_list)
+            G_optimizer_op = G_optimizer.apply_gradients(G_ave_grad)
+            D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
+            optimizers = [G_optimizer_op, D_optimizer_op]
 
-                    loss_list_1, image_list_1 = gan.model(f_1, m_1, x_1)
-                    variables_list_1 = gan.get_variables()
-                    G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
-                    D_grad_1 = D_optimizer.compute_gradients(loss_list_1[1], var_list=variables_list_1[1])
-                    G_grad_list.append(G_grad_1)
-                    D_grad_list.append(D_grad_1)
-            with tf.device("/gpu:2"):
-                with tf.name_scope("GPU_2"):
-                    x_2 = tf.placeholder(tf.float32, shape=input_shape)
-                    f_2 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
-                    m_2 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
+            saver = tf.train.Saver()
 
-                    loss_list_2, image_list_2 = gan.model(f_2, m_2, x_2)
-                    variables_list_2 = gan.get_variables()
-                    G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
-                    D_grad_2 = D_optimizer.compute_gradients(loss_list_2[1], var_list=variables_list_2[1])
-                    G_grad_list.append(G_grad_2)
-                    D_grad_list.append(D_grad_2)
-            with tf.device("/gpu:3"):
-                with tf.name_scope("GPU_3"):
-                    x_3 = tf.placeholder(tf.float32, shape=input_shape)
-                    f_3 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
-                    m_3 = tf.placeholder(tf.float32, shape=[input_shape[0], input_shape[1], input_shape[2], 1])
-
-                    loss_list_3, image_list_3 = gan.model(f_3, m_3, x_3)
-                    variables_list_3 = gan.get_variables()
-                    G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0], var_list=variables_list_3[0])
-                    D_grad_3 = D_optimizer.compute_gradients(loss_list_3[1], var_list=variables_list_3[1])
-                    G_grad_list.append(G_grad_3)
-                    D_grad_list.append(D_grad_3)
-
-        G_ave_grad = average_gradients(G_grad_list)
-        D_ave_grad = average_gradients(D_grad_list)
-        G_optimizer_op = G_optimizer.apply_gradients(G_ave_grad)
-        D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
-        optimizers = [G_optimizer_op, D_optimizer_op]
-
-        gan.image_summary(image_list_0)
-        gan.histogram_summary(j_list_0)
-        image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image')])
-        loss_list_summary = tf.placeholder(tf.float32)
-        gan.loss_summary(loss_list_summary)
-        summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'loss')])
-        train_writer = tf.summary.FileWriter(checkpoints_dir + "/train", graph)
-        val_writer = tf.summary.FileWriter(checkpoints_dir + "/val", graph)
-        saver = tf.train.Saver()
-
-        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True,
-                                                           gpu_options=tf.GPUOptions(allow_growth=True))) as sess:
-            sess.run(tf.global_variables_initializer())
+        with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
             if FLAGS.load_model is not None:
                 logging.info("restore model:" + FLAGS.load_model)
                 if FLAGS.checkpoint is not None:
@@ -249,170 +191,60 @@ def train():
 
             sess.graph.finalize()
             logging.info("start step:" + str(step))
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
             try:
-                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct_0))
-                f_train_files = read_filename(FLAGS.F)
-                # x_train_files = read_filename(FLAGS.X)
+                logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct))
+                s_train_files = read_filename(FLAGS.S)
                 index = 0
                 epoch = 0
-                train_loss_list = []
-                while not coord.should_stop() and epoch <= FLAGS.epoch:
+                while epoch <= FLAGS.epoch:
 
-                    train_true_f = []
-                    train_true_m = []
                     train_true_x = []
+                    train_true_s = []
+                    train_true_m = []
                     for b in range(FLAGS.batch_size):
-                        train_m_arr = read_file(FLAGS.M, f_train_files, index, out_size=[512, 512, 1])
-                        train_f_arr = read_file(FLAGS.F, f_train_files, index, out_size=[512, 512, 1])
-                        train_x_arr = read_file(FLAGS.X, f_train_files, index, inpu_form=".tiff", out_form=".tif")
+                        train_x_arr = read_file(FLAGS.X, s_train_files, index,out_size=[512,512,3],inpu_form=".tiff",out_form=".tif")
+                        train_s_arr = read_file(FLAGS.S, s_train_files, index,out_size=[512,512,1])
+                        train_m_arr = read_file(FLAGS.M, s_train_files, index,out_size=[512,512,1])
 
-                        train_true_f.append(train_f_arr)
-                        train_true_m.append(train_m_arr)
                         train_true_x.append(train_x_arr)
+                        train_true_s.append(train_s_arr)
+                        train_true_m.append(train_m_arr)
 
-                        epoch = int(index / len(f_train_files))
+                        epoch = int(index / len(s_train_files))
                         index = index + 1
 
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                    _, train_image_summary_op, train_losses, train_image_list_0 = sess.run(
-                        [optimizers, image_summary_op, loss_list_0, image_list_0],
-                        feed_dict={
-                            f_0: np.asarray(train_true_f)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                            m_0: np.asarray(train_true_m)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                            x_0: np.asarray(train_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                    sess.run(optimizers,
+                             feed_dict={
+                                 x_0: np.asarray(train_true_x)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_0: np.asarray(train_true_s)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
+                                 m_0: np.asarray(train_true_m)[0*int(FLAGS.batch_size / 4):1*int(FLAGS.batch_size / 4), :, :, :],
 
-                            f_1: np.asarray(train_true_f)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                            m_1: np.asarray(train_true_m)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                            x_1: np.asarray(train_true_x)[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
+                                 x_1: np.asarray(train_true_x)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_1: np.asarray(train_true_s)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
+                                 m_1: np.asarray(train_true_m)[1*int(FLAGS.batch_size / 4):2*int(FLAGS.batch_size / 4), :, :, :],
 
-                            f_2: np.asarray(train_true_f)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                            m_2: np.asarray(train_true_m)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                            x_2: np.asarray(train_true_x)[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
+                                 x_2: np.asarray(train_true_x)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_2: np.asarray(train_true_s)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
+                                 m_2: np.asarray(train_true_m)[2*int(FLAGS.batch_size / 4):3*int(FLAGS.batch_size / 4), :, :, :],
 
-                            f_3: np.asarray(train_true_f)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                            m_3: np.asarray(train_true_m)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                            x_3: np.asarray(train_true_x)[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4),
-                                 :, :, :],
-                        })
-                    train_loss_list.append(train_losses)
+                                 x_3: np.asarray(train_true_x)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
+                                 s_3: np.asarray(train_true_s)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
+                                 m_3: np.asarray(train_true_m)[3*int(FLAGS.batch_size / 4):4*int(FLAGS.batch_size / 4), :, :, :],
+                             })
                     logging.info(
                         "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
 
-                    if step == 0 or step % int(FLAGS.epoch_steps / 2 - 1) == 0 or step == int(
-                            FLAGS.epoch_steps * FLAGS.epoch / 4):
-                        logging.info('-----------Train summary start-------------')
-                        train_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(train_loss_list)})
-                        train_writer.add_summary(train_image_summary_op, step)
-                        train_writer.add_summary(train_summary_op, step)
-                        train_writer.flush()
-                        save_images(train_image_list_0, checkpoints_dir, 'train_' + str(step))
-                        logging.info('-----------Train summary end-------------')
-
-                        save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                        logging.info("Model saved in file: %s" % save_path)
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        val_loss_list = []
-                        val_index = 0
-
-                        f_val_files = read_filename(FLAGS.F_test)
-                        # x_val_files = read_filename(FLAGS.X_test)
-                        for j in range(int(math.ceil(len(f_val_files) / FLAGS.batch_size))):
-                            val_true_f = []
-                            val_true_m = []
-                            val_true_x = []
-                            for b in range(FLAGS.batch_size):
-                                val_m_arr = read_file(FLAGS.M_test, f_val_files, val_index, out_size=[512, 512, 1])
-                                val_f_arr = read_file(FLAGS.F_test, f_val_files, val_index, out_size=[512, 512, 1])
-                                val_x_arr = read_file(FLAGS.X_test, f_val_files, val_index, inpu_form=".tiff",
-                                                      out_form=".tif")
-
-                                val_true_f.append(val_f_arr)
-                                val_true_m.append(val_m_arr)
-                                val_true_x.append(val_x_arr)
-                                val_index += 1
-
-                            val_losses_0, \
-                            val_losses_1, \
-                            val_losses_2, \
-                            val_losses_3, \
-                            val_image_summary_op, val_image_list_0, val_image_list_1, val_image_list_2, val_image_list_3 = sess.run(
-                                [loss_list_0,
-                                 loss_list_1,
-                                 loss_list_2,
-                                 loss_list_3,
-                                 image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
-                                feed_dict={
-                                    f_0: np.asarray(val_true_f)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_0: np.asarray(val_true_m)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_0: np.asarray(val_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-
-                                    f_1: np.asarray(val_true_f)[
-                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_1: np.asarray(val_true_m)[
-                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_1: np.asarray(val_true_x)[
-                                         1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-
-                                    f_2: np.asarray(val_true_f)[
-                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_2: np.asarray(val_true_m)[
-                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_2: np.asarray(val_true_x)[
-                                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-
-                                    f_3: np.asarray(val_true_f)[
-                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    m_3: np.asarray(val_true_m)[
-                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                    x_3: np.asarray(val_true_x)[
-                                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                })
-                            val_loss_list.append(val_losses_0)
-                            val_loss_list.append(val_losses_1)
-                            val_loss_list.append(val_losses_2)
-                            val_loss_list.append(val_losses_3)
-
-                            if j % 1 == 0:
-                                save_images(val_image_list_0, checkpoints_dir, str(j) + "_0")
-                                save_images(val_image_list_1, checkpoints_dir, str(j) + "_1")
-                                save_images(val_image_list_2, checkpoints_dir, str(j) + "_2")
-                                save_images(val_image_list_3, checkpoints_dir, str(j) + "_3")
-                        val_summary_op = sess.run(
-                            summary_op,
-                            feed_dict={loss_list_summary: mean_list(val_loss_list)})
-                        val_writer.add_summary(val_image_summary_op, step)
-                        val_writer.add_summary(val_summary_op, step)
-                        val_writer.flush()
-
-                        logging.info(
-                            "-----------val epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
                     step += 1
-            except KeyboardInterrupt:
-                logging.info('Interrupted')
-                coord.request_stop()
             except Exception as e:
-                coord.request_stop(e)
+                logging.info("ERROR:"+str(e))
+                save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+                logging.info("Model saved in file: %s" % save_path)
             finally:
                 save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
                 logging.info("Model saved in file: %s" % save_path)
-                coord.request_stop()
-                coord.join(threads)
 
 
 def main(unused_argv):
