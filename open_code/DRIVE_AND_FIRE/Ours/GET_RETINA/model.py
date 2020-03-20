@@ -22,7 +22,7 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
 
-        self.G_X = Unet('G_X', ngf=ngf)
+        self.G_X = Unet('G_X', ngf=ngf, output_channl=3)
         self.D_X = Discriminator('D_X', ngf=ngf)
 
     def model(self, m, s, x):

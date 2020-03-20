@@ -16,11 +16,7 @@ tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_string('code_f_g', "GPU_0/random_normal_1:0", "default: None")
 tf.flags.DEFINE_string('s_g', "GPU_0/Reshape_4:0", "default: None")
 tf.flags.DEFINE_string('m_g', "GPU_0/Reshape_5:0", "default: None")
-tf.flags.DEFINE_string('j_s_g', "GPU_3/D_S_1/conv5/conv5/BiasAdd:0", "default: None")
 tf.flags.DEFINE_integer('num', 2000, ' default: 2000')
-tf.flags.DEFINE_float('min_j_s', 0.55, 'default: 0.55')
-tf.flags.DEFINE_float('max_count', 50, 'default: 50')
-tf.flags.DEFINE_float('mae', 0.05, 'default: 0.05')
 
 
 def get_mask_from_s(imgfile):
@@ -44,7 +40,6 @@ def train():
         print("<load_model> is None.")
         return
     try:
-        os.makedirs("./test_images/Temp")
         os.makedirs("./test_images/S")
         os.makedirs("./test_images/M")
     except os.error:
@@ -59,40 +54,14 @@ def train():
     code_f_g = tf.get_default_graph().get_tensor_by_name(FLAGS.code_f_g)
     s_g = tf.get_default_graph().get_tensor_by_name(FLAGS.s_g)
     m_g = tf.get_default_graph().get_tensor_by_name(FLAGS.m_g)
-    j_s_g = tf.get_default_graph().get_tensor_by_name(FLAGS.j_s_g)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
         index = 0
         while index <= FLAGS.num:
             print("image gen start:" + str(index))
-            count = 0
-            best_j_s = -1000.0
-            while True:
-                code_f = sess.run(code_f_g)
-                s, m, j_s = sess.run([s_g, m_g, j_s_g], feed_dict={code_f_g: code_f})
-                j_s = np.mean(np.asarray(j_s))
-
-                if j_s >= FLAGS.min_j_s: break
-
-                jpg_s = np.concatenate([np.asarray(s)[0, :, :, 0:1] * 255, np.asarray(s)[0, :, :, 0:1] * 255,
-                                        np.asarray(s)[0, :, :, 0:1] * 255], axis=-1)
-                cv2.imwrite("./test_images/Temp/s_" + str(index) + "_" + str(count) + ".jpg", jpg_s)
-                m_arr_1 = get_mask_from_s("./test_images/Temp/s_" + str(index) + "_" + str(count) + ".jpg")
-                m_arr_2 = np.asarray(m)[0, :, :, 0].astype('float32')
-                mae = np.mean(np.abs(m_arr_1 - m_arr_2))
-                if mae <= FLAGS.mae: break
-                if j_s > best_j_s:
-                    best_j_s = j_s
-                    best_s = s
-                    best_m = m
-
-                if count >= FLAGS.max_count:
-                    f = best_s
-                    m = best_m
-                    break
-
-                count = count + 1
+            code_f = sess.run(code_f_g)
+            s, m = sess.run([s_g, m_g], feed_dict={code_f_g: code_f})
 
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(s)[0, :, :, 0]),
                                  "./test_images/S/" + str(index) + ".tiff")
@@ -104,7 +73,6 @@ def train():
 
 def main(unused_argv):
     train()
-    os.system("rm -r " + "./test_images/Temp")
 
 
 if __name__ == '__main__':

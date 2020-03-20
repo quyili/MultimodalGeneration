@@ -66,6 +66,9 @@ def train():
         index = 0
         while index <= FLAGS.num:
             print("image gen start:" + str(index))
+
+            ###########################################################
+            #Filter out incomplete map to fix the influence of removing tumor
             count = 0
             best_j_s = -1000.0
             while True:
@@ -88,11 +91,12 @@ def train():
                     best_m = m
 
                 if count >= FLAGS.max_count:
-                    f = best_s
+                    s = best_s
                     m = best_m
                     break
 
                 count = count + 1
+            ###############################################################
 
             SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(s)[0, :, :, 0]),
                                  "./test_images/S/" + str(index) + ".tiff")
