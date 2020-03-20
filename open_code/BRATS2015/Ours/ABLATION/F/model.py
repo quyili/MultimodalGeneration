@@ -200,6 +200,10 @@ class GAN:
         # G_loss += self.mse_loss(y_g, y) * 5
         # G_loss += self.mse_loss(z_g, z) * 5
         # G_loss += self.mse_loss(w_g, w) * 5
+        # G_loss += self.mse_loss(x_g*m, x*m) * 5
+        # G_loss += self.mse_loss(y_g*m, y*m) * 5
+        # G_loss += self.mse_loss(z_g*m, z*m) * 5
+        # G_loss += self.mse_loss(w_g*m, w*m) * 5
 
         image_list={}
         judge_list={}

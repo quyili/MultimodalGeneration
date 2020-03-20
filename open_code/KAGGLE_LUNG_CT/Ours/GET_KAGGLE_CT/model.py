@@ -47,6 +47,7 @@ class GAN:
 
         # just for pre-training
         # G_loss += self.mse_loss(x_g, x) * 5
+        # G_loss += self.mse_loss(x_g * m, x * m) * 0.1
 
         image_list={}
         judge_list={}

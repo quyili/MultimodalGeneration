@@ -38,7 +38,9 @@ class GAN:
                                     self.input_shape[2], 1], minval=0.5, maxval=0.6,
                                     dtype=tf.float32) * (1.0 - m) * (1.0 - s)
 
-        x_g = self.G_X(new_s)
+        s_expand = tf.concat([new_s, l_onehot + 0.1], axis=-1)
+
+        x_g = self.G_X(s_expand)
         self.tenaor_name["x_g"] = str(x_g)
 
         l_g_prob = self.G_L_X(x_g)
@@ -57,6 +59,7 @@ class GAN:
                                 tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.5
         # just for pre-training
         # G_loss += self.mse_loss(x_g, x) * 5
+        # G_loss += self.mse_loss(x_g * m, x * m) * 0.1
 
         image_list={}
         judge_list={}
