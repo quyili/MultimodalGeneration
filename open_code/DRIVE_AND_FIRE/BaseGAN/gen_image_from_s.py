@@ -7,34 +7,14 @@ import SimpleITK
 
 FLAGS = tf.flags.FLAGS
 
-tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir')
+tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
-tf.flags.DEFINE_integer('batch_size', 1, 'batch size, default: 1')
-tf.flags.DEFINE_string('load_model', "20190822-2137", "default: None")
-tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size, default: [155,240,240]')
-tf.flags.DEFINE_string('F_test', './F', 'files path')
-tf.flags.DEFINE_string('M_test', './M', 'files path')
-tf.flags.DEFINE_string('x_g', "GPU_0/DC_M/lastconv/Sigmoid:0", "tensor name")
-tf.flags.DEFINE_string('f_input', "GPU_0/mul_9:0", "tensor name")
+tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
+tf.flags.DEFINE_string('load_model', "20200319-1620", "default: None")
+tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size')
+tf.flags.DEFINE_string('x_g', "GPU_3/G_X/lastconv/Sigmoid:0", "tensor name")
 tf.flags.DEFINE_string('save_path', "./test_images/", "default: ./test_images/")
-
-
-def read_filename(path, shuffle=True):
-    files = os.listdir(path)
-    files_ = np.asarray(files)
-    if shuffle == True:
-        index_arr = np.arange(len(files_))
-        np.random.shuffle(index_arr)
-        files_ = files_[index_arr]
-    return files_
-
-
-def read_file(l_path, Label_train_files, index):
-    train_range = len(Label_train_files)
-    L_img = SimpleITK.ReadImage(l_path + "/" + Label_train_files[index % train_range])
-    L_arr_ = SimpleITK.GetArrayFromImage(L_img)
-    L_arr_ = L_arr_.astype('float32')
-    return L_arr_
+tf.flags.DEFINE_integer('num', 2000, 'default: 2000')
 
 
 def train():
@@ -54,41 +34,22 @@ def train():
     saver = tf.train.import_meta_graph(meta_graph_path)
 
     graph = tf.get_default_graph()
-    f_input = graph.get_tensor_by_name(FLAGS.f_input)
-
     x_g = tf.get_default_graph().get_tensor_by_name(FLAGS.x_g)
 
     with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         saver.restore(sess, latest_checkpoint)
         try:
-            os.makedirs(FLAGS.save_path + "F")
-            os.makedirs(FLAGS.save_path + "M")
-            os.makedirs(FLAGS.save_path + "X")
+            os.makedirs(FLAGS.save_path + "x_g")
         except os.error:
             pass
-
-        F_train_files = read_filename(FLAGS.F_test, shuffle=False)
         index = 0
-        while index <= len(F_train_files):
-            train_true_f = []
-            for b in range(FLAGS.batch_size):
-                train_F_arr_ = read_file(FLAGS.F_test, F_train_files, index).reshape(FLAGS.image_size)
-                train_true_f.append(train_F_arr_)
-                index = index + 1
+        while index <= FLAGS.num:
+            x_g_= sess.run(x_g)
 
-            x_g_ = sess.run([x_g],feed_dict={f_input: np.asarray(train_true_f)})
-
-            for b in range(FLAGS.batch_size):
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(
-                    read_file(FLAGS.F_test, F_train_files, index - b - 1)
-                        .reshape(FLAGS.image_size)[:, :, 0]),
-                    FLAGS.save_path + "F/" + F_train_files[index - b - 1])
-                SimpleITK.WriteImage(SimpleITK.GetImageFromArray(
-                    read_file(FLAGS.M_test, F_train_files, index - b - 1)
-                        .reshape(FLAGS.image_size)[:, :, 0]),
-                    FLAGS.save_path + "M/" + F_train_files[index - b - 1])
+            for b in range(int(FLAGS.batch_size/4)):
                 SimpleITK.WriteImage(SimpleITK.GetImageFromArray(np.asarray(x_g_)[b, :, :, 0]),
-                                     FLAGS.save_path + "X/" + F_train_files[index - b - 1])
+                                     FLAGS.save_path + "x_g/" + str(index)+".tiff")
+            index += 1
 
 
 def main(unused_argv):
