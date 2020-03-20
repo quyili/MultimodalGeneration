@@ -64,6 +64,63 @@ class GAN:
 
         return G_optimizer
 
+    def acc(self, x, y):
+        correct_prediction = tf.equal(x, y)
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        return accuracy
+
+    def auc(self, x, y):
+        return tf.metrics.auc(x, y)
+
+    def sensitivity(self, labels,  predictions, specificity):
+        return tf.metrics.sensitivity_at_specificity(labels,  predictions, specificity)
+
+    def precision(self, labels, predictions):
+        return tf.metrics.precision( labels, predictions)
+    def precision_at_k(self, labels, predictions,k):
+        return tf.metrics.precision_at_k( labels, predictions,k)
+
+    def recall(self, labels, predictions):
+        return tf.metrics.recall( labels, predictions)
+    def recall_at_k(self, labels, predictions,k):
+        return tf.metrics.recall_at_k( labels, predictions,k)
+
+    def iou(self, labels, predictions, num_classes):
+        return tf.metrics.mean_iou( labels, predictions,num_classes)
+
+    def dice_score(self, output, target, loss_type='jaccard', axis=(1, 2, 3, 4), smooth=1e-5):
+        inse = tf.reduce_sum(output * target, axis=axis)
+        if loss_type == 'jaccard':
+            l = tf.reduce_sum(output * output, axis=axis)
+            r = tf.reduce_sum(target * target, axis=axis)
+        elif loss_type == 'sorensen':
+            l = tf.reduce_sum(output, axis=axis)
+            r = tf.reduce_sum(target, axis=axis)
+        else:
+            raise Exception("Unknow loss_type")
+        dice = (2. * inse + smooth) / (l + r + smooth)
+        dice = tf.reduce_mean(dice)
+        return dice
+
+    def cos_score(self, output, target, axis=(1, 2, 3, 4), smooth=1e-5):
+        pooled_len_1 = tf.sqrt(tf.reduce_sum(tf.square(output), axis))
+        pooled_len_2 = tf.sqrt(tf.reduce_sum(tf.square(target), axis))
+        pooled_mul_12 = tf.reduce_sum(tf.multiply(output, target), axis)
+        score = tf.reduce_mean(tf.div(pooled_mul_12, pooled_len_1 * pooled_len_2 + smooth))
+        return score
+
+    def euclidean_distance(self, output, target, axis=(1, 2, 3, 4)):
+        euclidean = tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.square(output - target), axis)))
+        return euclidean
+
+    def MSE(self, output, target):
+        mse = tf.reduce_mean(tf.square(output - target))
+        return mse
+
+    def MAE(self, output, target):
+        mae = tf.reduce_mean(tf.abs(output - target))
+        return mae
+
     def mse_loss(self, x, y):
         loss = tf.reduce_mean(tf.square(x - y))
         return loss

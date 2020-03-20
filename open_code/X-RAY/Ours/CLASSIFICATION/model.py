@@ -22,86 +22,29 @@ class GAN:
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.tenaor_name = {}
 
-        self.G_X = Unet('G_X', ngf=ngf)
-        self.D_X = Discriminator('D_X', ngf=ngf)
-        self.G_Y = Unet('G_Y', ngf=ngf)
-        self.D_Y = Discriminator('D_Y', ngf=ngf)
-        self.G_Z = Unet('G_Z', ngf=ngf)
-        self.D_Z = Discriminator('D_Z', ngf=ngf)
-        self.G_W = Unet('G_W', ngf=ngf)
-        self.D_W = Discriminator('D_W', ngf=ngf)
+        self.G_L_X = Discriminator('G_L_X', ngf=ngf, output_channl=3)
 
-    def model(self, x, y, z, w):
-        x_g = self.G_X(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
-        y_g = self.G_Y(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
-        z_g = self.G_Z(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
-        w_g = self.G_W(tf.random_normal(self.input_shape, mean=0., stddev=1., dtype=tf.float32))
+    def model(self, l, x):
 
-        self.tenaor_name["x_g"] = str(x_g)
-        self.tenaor_name["y_g"] = str(y_g)
-        self.tenaor_name["z_g"] = str(z_g)
-        self.tenaor_name["w_g"] = str(w_g)
+        l_onehot = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
+                                  shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
 
-        j_x_g = self.D_X(x_g)
-        j_y_g = self.D_Y(y_g)
-        j_z_g = self.D_Z(z_g)
-        j_w_g = self.D_W(w_g)
+        l_g_prob = self.G_L_X(x)
+        l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
 
-        j_x = self.D_X(x)
-        j_y = self.D_Y(y)
-        j_z = self.D_Z(z)
-        j_w = self.D_W(w)
 
-        D_loss = 0.0
         G_loss = 0.0
-        D_loss += self.mse_loss(j_x, 1.0) * 50 * 2
-        D_loss += self.mse_loss(j_x_g, 0.0) * 35 * 2
-        G_loss += self.mse_loss(j_x_g, 1.0) * 35 * 2
+        G_loss += self.mse_loss(tf.reduce_mean(l_onehot, axis=[1, 2]),
+                                tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.5
 
-        D_loss += self.mse_loss(j_y, 1.0) * 50 * 2
-        D_loss += self.mse_loss(j_y_g, 0.0) * 35 * 2
-        G_loss += self.mse_loss(j_y_g, 1.0) * 35 * 2
+        G_acc = self.acc(l, l_g)
 
-        D_loss += self.mse_loss(j_z, 1.0) * 50 * 2
-        D_loss += self.mse_loss(j_z_g, 0.0) * 35 * 2
-        G_loss += self.mse_loss(j_z_g, 1.0) * 35 * 2
+        loss_list = [G_loss,G_acc]
 
-        D_loss += self.mse_loss(j_w, 1.0) * 50 * 2
-        D_loss += self.mse_loss(j_w_g, 0.0) * 35 * 2
-        G_loss += self.mse_loss(j_w_g, 1.0) * 35 * 2
-
-        image_list={}
-        image_list["x_g"] = x_g
-        image_list["y_g"] = y_g
-        image_list["z_g"] = z_g
-        image_list["w_g"] = w_g
-
-        judge_list={}
-        judge_list["j_x_g"] = j_x_g
-        judge_list["j_y_g"] = j_y_g
-        judge_list["j_z_g"] = j_z_g
-        judge_list["j_w_g"] = j_w_g
-
-        judge_list["j_x"] = j_x
-        judge_list["j_y"] = j_y
-        judge_list["j_z"] = j_z
-        judge_list["j_w"] = j_w
-
-        loss_list = [G_loss, D_loss]
-
-        return loss_list,image_list,judge_list
+        return loss_list
 
     def get_variables(self):
-        return [self.G_X.variables +
-                self.G_Y.variables +
-                self.G_Z.variables +
-                self.G_W.variables
-            ,
-                self.D_X.variables +
-                self.D_Y.variables +
-                self.D_Z.variables +
-                self.D_W.variables
-                ]
+        return [self.G_L_X.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -111,9 +54,8 @@ class GAN:
             return learning_step
 
         G_optimizer = make_optimizer(name='Adam_G')
-        D_optimizer = make_optimizer(name='Adam_D')
 
-        return G_optimizer, D_optimizer
+        return G_optimizer
 
     def acc(self, x, y):
         correct_prediction = tf.equal(x, y)

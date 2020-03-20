@@ -12,81 +12,66 @@ class GAN:
                  ngf=64,
                  ):
         """
-        Args:
-          input_size：list [H, W, C]
-          batch_size: integer, batch size
-          learning_rate: float, initial learning rate for Adam
-          ngf: number of gen filters in first conv layer
+           Args:
+             input_size：list [N, H, W, C]
+             batch_size: integer, batch size
+             learning_rate: float, initial learning rate for Adam
+             ngf: number of base gen filters in conv layer
         """
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
-        self.image_list = {}
-        self.judge_list = {}
         self.tenaor_name = {}
 
-        self.LESP = Discriminator('LESP', ngf=ngf, output_channl=3)
-        self.G_X = Unet('G_X', ngf=ngf, keep_prob=0.98)
-        self.D_X = Discriminator('D_X', ngf=ngf, keep_prob=0.9)
+        self.G_X = Unet('G_X', ngf=ngf)
+        self.G_L_X = Discriminator('G_L_X', ngf=ngf, output_channl=3)
+        self.D_X = Discriminator('D_X', ngf=ngf)
 
-    def model(self, l, f, mask, x):
-        label_expand = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
+    def model(self, l, m, s, x):
+        self.tenaor_name["s"] = str(s)
+        self.tenaor_name["m"] = str(m)
+        self.tenaor_name["l"] = str(l)
+
+        l_onehot = tf.reshape(tf.one_hot(tf.cast(l, dtype=tf.int32), axis=-1, depth=3),
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
-        new_f = (f + tf.random_uniform([self.input_shape[0], self.input_shape[1],
-                                        self.input_shape[2], 1], minval=0.5, maxval=0.6,
-                                       dtype=tf.float32) * (1.0 - mask) * (1.0 - f))
-        f_rm_expand = tf.concat([new_f,
-                                 label_expand * 0.9 + 0.1],
-                                axis=-1)
 
-        x_g = self.G_X(f_rm_expand)
+        new_s= s + tf.random_uniform([self.input_shape[0], self.input_shape[1],
+                                    self.input_shape[2], 1], minval=0.5, maxval=0.6,
+                                    dtype=tf.float32) * (1.0 - m) * (1.0 - s)
 
-        l_g_prob = self.LESP(x_g)
+        x_g = self.G_X(new_s)
+        self.tenaor_name["x_g"] = str(x_g)
+
+        l_g_prob = self.G_L_X(x_g)
+        l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
 
         j_x_g = self.D_X(x_g)
         j_x = self.D_X(x)
 
         D_loss = 0.0
         G_loss = 0.0
-        L_loss = 0.0
-        D_loss += self.mse_loss(j_x, 1.0) * 2
-        D_loss += self.mse_loss(j_x_g, 0.0) * 2
-        G_loss += self.mse_loss(j_x_g, 1.0) * 1
+        D_loss += self.mse_loss(j_x, 1.0) * 5
+        D_loss += self.mse_loss(j_x_g, 0.0) * 3
+        G_loss += self.mse_loss(j_x_g, 1.0) * 3
 
-        G_loss += self.mse_loss(x_g, x) * 5
-        G_loss += self.mse_loss(x_g * mask, 0.0) * 0.001
+        G_loss += self.mse_loss(tf.reduce_mean(l_onehot, axis=[1, 2]),
+                                tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.5
+        # just for pre-training
+        # G_loss += self.mse_loss(x_g, x) * 5
 
-        L_loss += self.mse_loss(tf.reduce_mean(label_expand, axis=[1, 2]),
-                                tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.001
-
-        l_r = tf.argmax(tf.reduce_mean(label_expand, axis=[1, 2]), axis=-1)
-        l_g = tf.argmax(tf.reduce_mean(l_g_prob, axis=[1, 2]), axis=-1)
-
-        L_acc = self.acc(l_r, l_g)
-
-        self.tenaor_name["l"] = str(l)
-        self.tenaor_name["f"] = str(f)
-        self.tenaor_name["mask"] = str(mask)
-        self.tenaor_name["x"] = str(x)
-        self.tenaor_name["x_g"] = str(x_g)
-        self.tenaor_name["l_g"] = str(l_g)
-
-        image_list = {}
-        image_list["mask"] = mask
-        image_list["f"] = f
-        image_list["new_f"] = new_f
-        image_list["x"] = x
+        image_list={}
+        judge_list={}
         image_list["x_g"] = x_g
-        self.judge_list["j_x_g"] = j_x_g
-        self.judge_list["j_x"] = j_x
+        judge_list["j_x_g"]= j_x_g
+        judge_list["j_x"] = j_x
 
-        loss_list = [G_loss + L_loss, D_loss, L_loss, L_acc, G_loss]
+        loss_list = [G_loss, D_loss]
 
-        return loss_list, image_list
+        return loss_list,image_list,judge_list
 
     def get_variables(self):
-        return [self.G_X.variables
-            ,
-                self.D_X.variables]
+        return [self.G_X.variables ,
+                self.D_X.variables ,
+                self.G_L_X.variables]
 
     def optimize(self):
         def make_optimizer(name='Adam'):
@@ -100,37 +85,68 @@ class GAN:
 
         return G_optimizer, D_optimizer
 
-    def histogram_summary(self, judge_dirct):
-        for key in judge_dirct:
-            tf.summary.image('discriminator/' + key, judge_dirct[key])
-
-    def loss_summary(self, loss_list):
-        G_and_L_loss, D_loss, L_loss, L_acc, G_loss = loss_list[0], loss_list[1], loss_list[2], loss_list[3], loss_list[
-            4]
-        tf.summary.scalar('loss/G_and_L_loss', G_and_L_loss)
-        tf.summary.scalar('loss/D_loss', D_loss)
-        tf.summary.scalar('loss/L_loss', L_loss)
-        tf.summary.scalar('loss/L_acc', L_acc)
-        tf.summary.scalar('loss/G_loss', G_loss)
-
-    def image_summary(self, image_dirct):
-        for key in image_dirct:
-            tf.summary.image('image/' + key, image_dirct[key][:, :, :, 0:1])
-
     def acc(self, x, y):
         correct_prediction = tf.equal(x, y)
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         return accuracy
 
+    def auc(self, x, y):
+        return tf.metrics.auc(x, y)
+
+    def sensitivity(self, labels,  predictions, specificity):
+        return tf.metrics.sensitivity_at_specificity(labels,  predictions, specificity)
+
+    def precision(self, labels, predictions):
+        return tf.metrics.precision( labels, predictions)
+    def precision_at_k(self, labels, predictions,k):
+        return tf.metrics.precision_at_k( labels, predictions,k)
+
+    def recall(self, labels, predictions):
+        return tf.metrics.recall( labels, predictions)
+    def recall_at_k(self, labels, predictions,k):
+        return tf.metrics.recall_at_k( labels, predictions,k)
+
+    def iou(self, labels, predictions, num_classes):
+        return tf.metrics.mean_iou( labels, predictions,num_classes)
+
+    def dice_score(self, output, target, loss_type='jaccard', axis=(1, 2, 3, 4), smooth=1e-5):
+        inse = tf.reduce_sum(output * target, axis=axis)
+        if loss_type == 'jaccard':
+            l = tf.reduce_sum(output * output, axis=axis)
+            r = tf.reduce_sum(target * target, axis=axis)
+        elif loss_type == 'sorensen':
+            l = tf.reduce_sum(output, axis=axis)
+            r = tf.reduce_sum(target, axis=axis)
+        else:
+            raise Exception("Unknow loss_type")
+        dice = (2. * inse + smooth) / (l + r + smooth)
+        dice = tf.reduce_mean(dice)
+        return dice
+
+    def cos_score(self, output, target, axis=(1, 2, 3, 4), smooth=1e-5):
+        pooled_len_1 = tf.sqrt(tf.reduce_sum(tf.square(output), axis))
+        pooled_len_2 = tf.sqrt(tf.reduce_sum(tf.square(target), axis))
+        pooled_mul_12 = tf.reduce_sum(tf.multiply(output, target), axis)
+        score = tf.reduce_mean(tf.div(pooled_mul_12, pooled_len_1 * pooled_len_2 + smooth))
+        return score
+
+    def euclidean_distance(self, output, target, axis=(1, 2, 3, 4)):
+        euclidean = tf.reduce_mean(tf.sqrt(tf.reduce_sum(tf.square(output - target), axis)))
+        return euclidean
+
+    def MSE(self, output, target):
+        mse = tf.reduce_mean(tf.square(output - target))
+        return mse
+
+    def MAE(self, output, target):
+        mae = tf.reduce_mean(tf.abs(output - target))
+        return mae
+
     def mse_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
     def ssim_loss(self, x, y):
-        """ supervised loss (L2 norm)
-        """
         loss = (1.0 - self.SSIM(x, y)) * 20
         return loss
 

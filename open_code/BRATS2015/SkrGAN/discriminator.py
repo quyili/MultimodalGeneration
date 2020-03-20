@@ -4,12 +4,13 @@ import ops as ops
 
 
 class Discriminator:
-    def __init__(self, name, ngf=64, keep_prob=1.0, output=1):
+    def __init__(self, name, ngf=64, keep_prob=1.0, output=1,output_channl=1):
         self.name = name
         self.reuse = False
         self.ngf = ngf
         self.keep_prob = keep_prob
         self.output = output
+        self.output_channl =output_channl
 
     def __call__(self, D_input):
         """
@@ -69,7 +70,7 @@ class Discriminator:
                 norm4_1 = ops.norm(conv4_1)
                 relu4_1 = ops.relu(norm4_1)
             with tf.variable_scope("conv5_1", reuse=self.reuse):
-                output_1 = tf.layers.conv2d(inputs=relu4_1, filters=1, kernel_size=3, strides=1,
+                output_1 = tf.layers.conv2d(inputs=relu4_1, filters=self.output_channl, kernel_size=3, strides=1,
                                             padding="SAME",
                                             activation=None,
                                             kernel_initializer=tf.random_normal_initializer(
@@ -86,7 +87,7 @@ class Discriminator:
                     norm4_2 = ops.norm(conv4_2)
                     relu4_2 = ops.relu(norm4_2)
                 with tf.variable_scope("conv5_2", reuse=self.reuse):
-                    output_2 = tf.layers.conv2d(inputs=relu4_2, filters=1, kernel_size=3, strides=1,
+                    output_2 = tf.layers.conv2d(inputs=relu4_2, filters=self.output_channl, kernel_size=3, strides=1,
                                                 padding="SAME",
                                                 activation=None,
                                                 kernel_initializer=tf.random_normal_initializer(
