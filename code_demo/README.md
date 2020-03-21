@@ -12,11 +12,13 @@ Kaggle Chest Xray(https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
 
 Kaggle Lung CT(https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/) includes 267 CT of transverse from lung, with a size of [512\*512].
 
-DRIVE(http://www.isi.uu.nl/Research/Databases/DRIVE/) includes 20 [565$\times $584] color fundus retinal photos in both training set and test set and 20 corresponding retinal vascular annotations for training.
+DRIVE(http://www.isi.uu.nl/Research/Databases/DRIVE/) includes 20 [565\*584] color fundus retinal photos in both training set and test set and 20 corresponding retinal vascular annotations for training.
 
 FIRE(https://projects.ics.forth.gr/cvrl/fire/)includes 268 [2912\*2912] color fundus retinal photos.
 
-TC Lung CT(https://tianchi.aliyun.com/competition/entrance/231724/information) includes 1470 [512\*512] 3D CT with detection label of 5 kinds of lesions. We only examined for pulmonary nodules. We divided all 3D images to 2D sildes. All images are normalized and scaled to [512\*512].
+TC Lung CT(https://tianchi.aliyun.com/competition/entrance/231724/information) includes 1470 [512\*512] 3D CT with detection label of 5 kinds of lesions. We only examined for pulmonary nodules.
+
+We divided all 3D images to 2D sildes. All images are normalized and scaled to [512\*512].
 ### Requirements
 The training  software environments require Python3.6, CUDA10.0, cudnn7.4.1 and TensorFlow1.13.2+.
 The hardware environment requires a Four-card GPU cluster, e.g. NVIDIA Tesla V100GPU cluster.
