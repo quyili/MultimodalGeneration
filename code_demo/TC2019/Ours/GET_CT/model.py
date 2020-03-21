@@ -26,7 +26,7 @@ class GAN:
         self.tenaor_name = {}
         self.classes_size = classes_size
 
-        self.G_X = Unet('G_X', ngf=ngf, output_channl=3, keep_prob=0.97)
+        self.G_X = Unet('G_X', ngf=ngf, output_channl=image_size[2], keep_prob=0.97)
         self.D_X = Discriminator('D_X', ngf=ngf, keep_prob=0.9)
         self.G_L_X = Detector('G_L_X', ngf, classes_size=classes_size, keep_prob=0.99, input_channl=image_size[2])
 

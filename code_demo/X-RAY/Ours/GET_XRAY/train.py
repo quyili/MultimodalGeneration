@@ -15,20 +15,20 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
-tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '../../../../data/chest_xray/test/X', 'files path')
-tf.flags.DEFINE_string('S', '../../../../data/chest_xray/test/S', 'files path')
-tf.flags.DEFINE_string('M', '../../../../data/chest_xray/test/M', 'files path')
-tf.flags.DEFINE_string('L', '../../../../data/chest_xray/test/L', 'files path')
-tf.flags.DEFINE_string('X_test', '../../../../data/chest_xray/test/X', 'files path')
-tf.flags.DEFINE_string('S_test', '../../../../data/chest_xray/test/S', 'files path')
-tf.flags.DEFINE_string('M_test', '../../../../data/chest_xray/test/M', 'files path')
-tf.flags.DEFINE_string('L_test', '../../../../data/chest_xray/test/L', 'files path')
+tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', './data/chest_xray/train/X', 'files path')
+tf.flags.DEFINE_string('S', './data/chest_xray/train/S', 'files path')
+tf.flags.DEFINE_string('M', './data/chest_xray/train/M', 'files path')
+tf.flags.DEFINE_string('L', './data/chest_xray/train/L', 'files path')
+tf.flags.DEFINE_string('X_test', './data/chest_xray/test/X', 'files path')
+tf.flags.DEFINE_string('S_test', './data/chest_xray/test/S', 'files path')
+tf.flags.DEFINE_string('M_test', './data/chest_xray/test/M', 'files path')
+tf.flags.DEFINE_string('L_test', './data/chest_xray/test/L', 'files path')
 tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
-tf.flags.DEFINE_string('load_GL_model', "20200101-2020", 'e.g. 20170602-1936, default: None')
+tf.flags.DEFINE_string('load_GL_model', None, 'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
 
 def mynorm(input):
     if (np.max(input) - np.min(input)) != 0:
@@ -218,7 +218,7 @@ def train():
                     train_true_m = []
                     train_true_l = []
                     for b in range(FLAGS.batch_size):
-                        train_x_arr = read_file(FLAGS.X, s_train_files, index)
+                        train_x_arr = read_file(FLAGS.X, s_train_files, index,inpu_form=".tiff",out_form=".jpeg")
                         train_s_arr = read_file(FLAGS.S, s_train_files, index)
                         train_m_arr = read_file(FLAGS.M, s_train_files, index)
                         train_l_arr = read_file(FLAGS.L, l_train_files,np.random.randint(len(l_train_files)), norm=False)

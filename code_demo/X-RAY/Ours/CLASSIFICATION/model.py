@@ -30,14 +30,13 @@ class GAN:
                                   shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2], 3])
 
         l_g_prob = self.G_L_X(x)
-        l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-
+        l_g = tf.cast(tf.argmax(tf.reduce_mean(l_g_prob, axis=[1, 2]), axis=-1), dtype=tf.int64)
 
         G_loss = 0.0
         G_loss += self.mse_loss(tf.reduce_mean(l_onehot, axis=[1, 2]),
                                 tf.reduce_mean(l_g_prob, axis=[1, 2])) * 0.5
 
-        G_acc = self.acc(l, l_g)
+        G_acc = self.acc(tf.cast(tf.reduce_mean(l, axis=[1, 2]), dtype=tf.int64), l_g)
 
         loss_list = [G_loss,G_acc]
 

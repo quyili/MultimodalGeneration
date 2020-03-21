@@ -10,7 +10,7 @@ FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string('savefile', None, 'Checkpoint save dir, default: None')
 tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,INFO = 20,DEBUG = 10,NOTSET = 0')
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
-tf.flags.DEFINE_string('load_model', "20200319-1717", "default: None")
+tf.flags.DEFINE_string('load_model',  "20200101-2020", "default: None")
 tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size')
 tf.flags.DEFINE_string('S', '../../../../data/DRIVE_FIRE/test/S', 'files path')
 tf.flags.DEFINE_string('x_g', "GPU_3/G_X/lastconv/Sigmoid:0", "tensor name")

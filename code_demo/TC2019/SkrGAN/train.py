@@ -15,15 +15,15 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
-tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '../../../../data/TC19/test/X', 'files path')
-tf.flags.DEFINE_string('S', '../../../../data/TC19/test/S', 'files path')
+tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', '../../../../data/TC19/train/X', 'files path')
+tf.flags.DEFINE_string('S', '../../../../data/TC19/train/S', 'files path')
 tf.flags.DEFINE_string('X_test', '../../../../data/TC19/test/X', 'files path')
 tf.flags.DEFINE_string('S_test', '../../../../data/TC19/test/S', 'files path')
 tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
 
 def mynorm(input):
     if (np.max(input) - np.min(input)) != 0:

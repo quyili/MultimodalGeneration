@@ -44,7 +44,7 @@ class GAN:
         self.tenaor_name["x_g"] = str(x_g)
 
         l_g_prob = self.G_L_X(x_g)
-        l_g = tf.reshape(tf.cast(tf.argmax(l_g_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
+        l_g = tf.cast(tf.argmax(tf.reduce_mean(l_g_prob, axis=[1, 2]), axis=-1),dtype=tf.int64)
 
         j_x_g = self.D_X(x_g)
         j_x = self.D_X(x)
@@ -61,13 +61,15 @@ class GAN:
         # G_loss += self.mse_loss(x_g, x) * 5
         # G_loss += self.mse_loss(x_g * m, x * m) * 0.1
 
+        G_acc = self.acc(tf.cast(tf.reduce_mean(l, axis=[1, 2]),dtype=tf.int64), l_g)
+
         image_list={}
         judge_list={}
         image_list["x_g"] = x_g
         judge_list["j_x_g"]= j_x_g
         judge_list["j_x"] = j_x
 
-        loss_list = [G_loss, D_loss]
+        loss_list = [G_loss, D_loss, G_acc]
 
         return loss_list,image_list,judge_list
 

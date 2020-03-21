@@ -15,7 +15,7 @@ class VEncoder:
     def __call__(self, EC_input):
         """
         Args:
-          input: batch_size x width x height x 3
+          input: batch_size x width x height x C
         Returns:
           output: same size as input
         """

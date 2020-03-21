@@ -15,15 +15,15 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
-tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', '../../../../data/DRIVE_FIRE/test/X', 'files path')
-tf.flags.DEFINE_string('S', '../../../../data/DRIVE_FIRE/test/S', 'files path')
+tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', '../../../../data/DRIVE_FIRE/train/X', 'files path')
+tf.flags.DEFINE_string('S', '../../../../data/DRIVE_FIRE/train/S', 'files path')
 tf.flags.DEFINE_string('X_test', '../../../../data/DRIVE_FIRE/test/X', 'files path')
 tf.flags.DEFINE_string('S_test', '../../../../data/DRIVE_FIRE/test/S', 'files path')
 tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
 
 def mynorm(input):
     if (np.max(input) - np.min(input)) != 0:
@@ -114,7 +114,7 @@ def train():
                 with tf.device("/gpu:0"):
                     with tf.name_scope("GPU_0"):
                         x_0 = tf.placeholder(tf.float32, shape=input_shape)
-                        s_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_0 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         loss_list_0,image_list_0,judge_list_0 = gan.model(s_0,x_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0], var_list=variables_list_0[0])
@@ -124,7 +124,7 @@ def train():
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
                         x_1 = tf.placeholder(tf.float32, shape=input_shape)
-                        s_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_1 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         loss_list_1,image_list_1,judge_list_1 = gan.model(s_1,x_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0], var_list=variables_list_1[0])
@@ -134,7 +134,7 @@ def train():
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
                         x_2 = tf.placeholder(tf.float32, shape=input_shape)
-                        s_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_2 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         loss_list_2,image_list_2,judge_list_2  = gan.model(s_2,x_2)
                         variables_list_2= gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0], var_list=variables_list_2[0])
@@ -144,7 +144,7 @@ def train():
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
                         x_3 = tf.placeholder(tf.float32, shape=input_shape)
-                        s_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        s_3 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         loss_list_3,image_list_3,judge_list_3 = gan.model(s_3,x_3)
                         tensor_name_dirct = gan.tenaor_name
                         variables_list_3 = gan.get_variables()

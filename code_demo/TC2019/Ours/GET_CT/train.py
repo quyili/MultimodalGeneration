@@ -16,22 +16,22 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [512, 512, 3], 'image size,')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
-tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
-tf.flags.DEFINE_string('X', './DATA/TC19/train/X', 'X files for training')
-tf.flags.DEFINE_string('S', './DATA/TC19/train/S', 'Y files for training')
-tf.flags.DEFINE_string('M', './DATA/TC19/train/M', 'Y files for training')
-tf.flags.DEFINE_string('L_image', './DATA/TC19/train/L_image', 'Y files for training')
-tf.flags.DEFINE_string('L_text', './DATA/TC19/train/L', 'Y files for training')
-tf.flags.DEFINE_string('X_test', './DATA/TC19/test/X', 'X files for training')
-tf.flags.DEFINE_string('S_test', './DATA/TC19/test/S', 'Y files for training')
-tf.flags.DEFINE_string('M_test', './DATA/TC19/test/M', 'Y files for training')
-tf.flags.DEFINE_string('L_test_image', './DATA/TC19/test/L_image', 'Y files for training')
-tf.flags.DEFINE_string('L_test_txt', './DATA/TC19/test/L', 'Y files for training')
+tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_string('X', './data/TC19/train/X', 'files path')
+tf.flags.DEFINE_string('S', './data/TC19/train/S', 'files path')
+tf.flags.DEFINE_string('M', './data/TC19/train/M', 'files path')
+tf.flags.DEFINE_string('L_image', './data/TC19/train/L_image', 'files path')
+tf.flags.DEFINE_string('L_text', './data/TC19/train/L', 'files path')
+tf.flags.DEFINE_string('X_test', './data/TC19/test/X', 'files path')
+tf.flags.DEFINE_string('S_test', './data/TC19/test/S', 'files path')
+tf.flags.DEFINE_string('M_test', './data/TC19/test/M', 'files path')
+tf.flags.DEFINE_string('L_test_image', './data/TC19/test/L_image','files path')
+tf.flags.DEFINE_string('L_test_txt', './data/TC19/test/L', 'files path')
 tf.flags.DEFINE_string('load_model', None,'e.g. 20200101-2020, default: None')
-tf.flags.DEFINE_string('load_GL_model', "20200101-2020", 'e.g. 20170602-1936, default: None')
+tf.flags.DEFINE_string('load_GL_model', None, 'e.g. 20200101-2020, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False, 'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
 
 default_box_size = [4, 6, 6, 6, 4, 4]
 min_box_scale = 0.05
@@ -302,7 +302,7 @@ def train():
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.device("/gpu:0"):
                     with tf.name_scope("GPU_0"):
-                        l_0 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_0 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         x_0 = tf.placeholder(tf.float32, shape=input_shape)
                         s_0 = tf.placeholder(tf.float32, shape=input_shape)
                         m_0 = tf.placeholder(tf.float32, shape=input_shape)
@@ -331,7 +331,7 @@ def train():
                         D_grad_list.append(D_grad_0)
                 with tf.device("/gpu:1"):
                     with tf.name_scope("GPU_1"):
-                        l_1 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_1 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         x_1 = tf.placeholder(tf.float32, shape=input_shape)
                         s_1 = tf.placeholder(tf.float32, shape=input_shape)
                         m_1 = tf.placeholder(tf.float32, shape=input_shape)
@@ -360,7 +360,7 @@ def train():
                         D_grad_list.append(D_grad_1)
                 with tf.device("/gpu:2"):
                     with tf.name_scope("GPU_2"):
-                        l_2 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_2 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         x_2 = tf.placeholder(tf.float32, shape=input_shape)
                         s_2 = tf.placeholder(tf.float32, shape=input_shape)
                         m_2 = tf.placeholder(tf.float32, shape=input_shape)
@@ -389,7 +389,7 @@ def train():
                         D_grad_list.append(D_grad_2)
                 with tf.device("/gpu:3"):
                     with tf.name_scope("GPU_3"):
-                        l_3 = tf.placeholder(tf.float32, shape=input_shape)
+                        l_3 = tf.placeholder(tf.float32, shape=[input_shape[0],input_shape[1],input_shape[2],1])
                         x_3 = tf.placeholder(tf.float32, shape=input_shape)
                         s_3 = tf.placeholder(tf.float32, shape=input_shape)
                         m_3 = tf.placeholder(tf.float32, shape=input_shape)
@@ -456,103 +456,102 @@ def train():
 
             sess.graph.finalize()
             logging.info("start step:" + str(step))
-            try:
-                if FLAGS.stage == 'train':
-                    logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct))
-                    s_train_files = read_filename(FLAGS.S)
-                    l_train_files = read_filename(FLAGS.L)
-                    index = 0
-                    epoch = 0
-                    while epoch <= FLAGS.epoch:
-                        train_true_l = []
-                        train_true_l_image = []
-                        train_true_x = []
-                        train_true_f = []
-                        train_true_m = []
-                        for b in range(FLAGS.batch_size):
-                            train_l_arr = read_txt_file(FLAGS.L_text, l_train_files, index)
-                            train_l_image_arr = read_file(FLAGS.L_image, l_train_files, index, out_size=[512, 512, 3],
-                                                    inpu_form=".txt", out_form=".mha")
-                            train_s_arr = read_txt_file(FLAGS.S, s_train_files, index)
-                            train_m_arr = read_txt_file(FLAGS.M, s_train_files, index)
-                            train_x_arr = read_txt_file(FLAGS.X, s_train_files, index)
-                            
-                            train_true_l.append(train_l_arr)
-                            train_true_l_image.append(train_l_image_arr)
-                            train_true_x.append(train_x_arr)
-                            train_true_f.append(train_s_arr)
-                            train_true_m.append(train_m_arr)
-                            epoch = int(index / len(s_train_files))
-                            index = index + 1
+            # try:
+            logging.info("tensor_name_dirct:\n" + str(tensor_name_dirct))
+            s_train_files = read_filename(FLAGS.S)
+            l_train_files = read_filename(FLAGS.L_text)
+            index = 0
+            epoch = 0
+            while epoch <= FLAGS.epoch:
+                train_true_l = []
+                train_true_l_image = []
+                train_true_x = []
+                train_true_f = []
+                train_true_m = []
+                for b in range(FLAGS.batch_size):
+                    train_l_arr = read_txt_file(FLAGS.L_text, l_train_files, index)
+                    train_l_image_arr = read_file(FLAGS.L_image, l_train_files, index, out_size=[512, 512, 1],
+                                            inpu_form=".txt", out_form=".tiff")
+                    train_s_arr = read_file(FLAGS.S, s_train_files, index)
+                    train_m_arr = read_file(FLAGS.M, s_train_files, index)
+                    train_x_arr = read_file(FLAGS.X, s_train_files, index)
 
-                        gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(
-                            train_true_l[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)])
-                        gt_class_1, gt_location_1, gt_positives_1, gt_negatives_1 = generate_groundtruth_data(
-                            train_true_l[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4)])
-                        gt_class_2, gt_location_2, gt_positives_2, gt_negatives_2 = generate_groundtruth_data(
-                            train_true_l[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4)])
-                        gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(
-                            train_true_l[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)])
+                    train_true_l.append(train_l_arr)
+                    train_true_l_image.append(train_l_image_arr)
+                    train_true_x.append(train_x_arr)
+                    train_true_f.append(train_s_arr)
+                    train_true_m.append(train_m_arr)
+                    epoch = int(index / len(s_train_files))
+                    index = index + 1
 
-                        logging.info(
-                            "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        sess.run(optimizers,feed_dict={
-                                l_0: np.asarray(train_true_l_image)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                x_0: np.asarray(train_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                s_0: np.asarray(train_true_f)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                m_0: np.asarray(train_true_m)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
-                                GT_class_0: gt_class_0,
-                                GT_location_0: gt_location_0,
-                                GT_positives_0: gt_positives_0,
-                                GT_negatives_0: gt_negatives_0,
-                                l_1: np.asarray(train_true_l_image)[
-                                      1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                x_1: np.asarray(train_true_x)[
-                                      1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                s_1: np.asarray(train_true_f)[
-                                      1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                m_1: np.asarray(train_true_m)[
-                                      1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
-                                GT_class_1: gt_class_1,
-                                GT_location_1: gt_location_1,
-                                GT_positives_1: gt_positives_1,
-                                GT_negatives_1: gt_negatives_1,
-                                l_2: np.asarray(train_true_l_image)[
-                                     2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                x_2: np.asarray(train_true_x)[
-                                     2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                s_2: np.asarray(train_true_f)[
-                                      2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                m_2: np.asarray(train_true_m)[
-                                      2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
-                                GT_class_2: gt_class_2,
-                                GT_location_2: gt_location_2,
-                                GT_positives_2: gt_positives_2,
-                                GT_negatives_2: gt_negatives_2,
-                                l_3: np.asarray(train_true_l_image)[
-                                     3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                x_3: np.asarray(train_true_x)[
-                                     3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                s_3: np.asarray(train_true_f)[
-                                      3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                m_3: np.asarray(train_true_m)[
-                                      3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
-                                GT_class_3: gt_class_3,
-                                GT_location_3: gt_location_3,
-                                GT_positives_3: gt_positives_3,
-                                GT_negatives_3: gt_negatives_3
-                            })
+                gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(
+                    train_true_l[0 * int(FLAGS.batch_size / 4):1 * int(FLAGS.batch_size / 4)])
+                gt_class_1, gt_location_1, gt_positives_1, gt_negatives_1 = generate_groundtruth_data(
+                    train_true_l[1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4)])
+                gt_class_2, gt_location_2, gt_positives_2, gt_negatives_2 = generate_groundtruth_data(
+                    train_true_l[2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4)])
+                gt_class_3, gt_location_3, gt_positives_3, gt_negatives_3 = generate_groundtruth_data(
+                    train_true_l[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)])
 
-                        logging.info(
-                            "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
-                        step += 1
-            except Exception as e:
-                logging.info("ERROR:" + str(e))
-                save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                logging.info("Model saved in file: %s" % save_path)
-            finally:
-                save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
-                logging.info("Model saved in file: %s" % save_path)
+                logging.info(
+                    "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
+                sess.run(optimizers,feed_dict={
+                    l_0: np.asarray(train_true_l_image)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                    x_0: np.asarray(train_true_x)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                    s_0: np.asarray(train_true_f)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                    m_0: np.asarray(train_true_m)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                    GT_class_0: gt_class_0,
+                    GT_location_0: gt_location_0,
+                    GT_positives_0: gt_positives_0,
+                    GT_negatives_0: gt_negatives_0,
+                    l_1: np.asarray(train_true_l_image)[
+                          1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                    x_1: np.asarray(train_true_x)[
+                          1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                    s_1: np.asarray(train_true_f)[
+                          1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                    m_1: np.asarray(train_true_m)[
+                          1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                    GT_class_1: gt_class_1,
+                    GT_location_1: gt_location_1,
+                    GT_positives_1: gt_positives_1,
+                    GT_negatives_1: gt_negatives_1,
+                    l_2: np.asarray(train_true_l_image)[
+                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                    x_2: np.asarray(train_true_x)[
+                         2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                    s_2: np.asarray(train_true_f)[
+                          2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                    m_2: np.asarray(train_true_m)[
+                          2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                    GT_class_2: gt_class_2,
+                    GT_location_2: gt_location_2,
+                    GT_positives_2: gt_positives_2,
+                    GT_negatives_2: gt_negatives_2,
+                    l_3: np.asarray(train_true_l_image)[
+                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                    x_3: np.asarray(train_true_x)[
+                         3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                    s_3: np.asarray(train_true_f)[
+                          3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                    m_3: np.asarray(train_true_m)[
+                          3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                    GT_class_3: gt_class_3,
+                    GT_location_3: gt_location_3,
+                    GT_positives_3: gt_positives_3,
+                    GT_negatives_3: gt_negatives_3
+                    })
+
+                logging.info(
+                    "-----------train epoch " + str(epoch) + ", step " + str(step) + ": end-------------")
+                step += 1
+            # except Exception as e:
+            #     logging.info("ERROR:" + str(e))
+            #     save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+            #     logging.info("Model saved in file: %s" % save_path)
+            # finally:
+            #     save_path = saver.save(sess, checkpoints_dir + "/model.ckpt", global_step=step)
+            #     logging.info("Model saved in file: %s" % save_path)
 
 
 def main(unused_argv):

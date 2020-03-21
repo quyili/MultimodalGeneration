@@ -30,7 +30,7 @@ class VAE_GAN:
         self.EC_S = VEncoder('EC_S', ngf=ngf, units=units, keep_prob=0.85)
         self.DC_S = VDecoder('DC_S', ngf=ngf, output_channl=2 * image_size[2], units=units)
 
-        self.G_M = Unet('G_M', ngf=ngf / 2, keep_prob=0.9, output_channl=2)
+        self.G_M = Unet('G_M', ngf=ngf / 2, keep_prob=0.9, output_channl=2 * image_size[2])
 
         self.D_S = Discriminator('D_S', ngf=ngf, keep_prob=0.85)
         self.FD_Z = FeatureDiscriminator('FD_Z', ngf=ngf)
