@@ -16,7 +16,7 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 4')
 tf.flags.DEFINE_list('image_size', [184, 144, 1], 'image size')
 tf.flags.DEFINE_float('learning_rate', 1e-5, 'initial learning rate for Adam, default: 1e-5')
-tf.flags.DEFINE_integer('ngf', 64, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_integer('ngf', 2, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('S', '../../../../data/BRATS2015/test/S', 'files path')
 tf.flags.DEFINE_string('M', '../../../../data/BRATS2015/test/M', 'files path')
 tf.flags.DEFINE_string('S_test', '../../../../data/BRATS2015/test/S', 'files path')
@@ -24,7 +24,7 @@ tf.flags.DEFINE_string('M_test', '../../../../data/BRATS2015/test/M', 'files pat
 tf.flags.DEFINE_string('load_model',None,'e.g. 20170602-1936, default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,'if continue training, step clear, default: False')
-tf.flags.DEFINE_integer('epoch', 200, 'default: 200')
+tf.flags.DEFINE_integer('epoch', 1, 'default: 200')
 
 
 def mean(list):
@@ -52,10 +52,10 @@ def read_sile(l_path, Label_train_siles, index, out_size=None, inpu_sorm="", out
     elif L_arr.shape[2] == 3:
         img = cv2.merge([L_arr[:, :, 0], L_arr[:, :, 1], L_arr[:, :, 2]])
     if out_size == None:
-        img = cv2.resize(img, (FLAGS.image_size[0], FLAGS.image_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = cv2.resize(img, (FLAGS.image_size[1], FLAGS.image_size[0]), interpolation=cv2.INTER_NEAREST)
         img = np.asarray(img)[:, :, 0:FLAGS.image_size[2]]
     else:
-        img = cv2.resize(img, (out_size[0], out_size[1]), interpolation=cv2.INTER_NEAREST)
+        img = cv2.resize(img, (out_size[1], out_size[0]), interpolation=cv2.INTER_NEAREST)
         img = np.asarray(img)[:, :, 0:out_size[2]]
     return img.astype('float32')
 

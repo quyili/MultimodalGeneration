@@ -36,11 +36,13 @@ class VAE_GAN:
         self.FD_Z = FeatureDiscriminator('FD_Z', ngf=ngf)
 
     def model(self, s, m):
+        s = tf.image.resize_images(s, [512, 512], method=1)
+        m = tf.image.resize_images(m, [512, 512], method=1)
         s_one_hot = tf.reshape(tf.one_hot(tf.cast(s, dtype=tf.int32), depth=2, axis=-1),
-                               shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2],
+                               shape=[self.input_shape[0], 512, 512,
                                       2 * self.input_shape[3]])
         m_one_hot = tf.reshape(tf.one_hot(tf.cast(m, dtype=tf.int32), depth=2, axis=-1),
-                               shape=[self.input_shape[0], self.input_shape[1], self.input_shape[2],
+                               shape=[self.input_shape[0],512, 512,
                                       2 * self.input_shape[3]])
 
         # VAE
@@ -92,10 +94,14 @@ class VAE_GAN:
 
         GM_loss += self.mse_loss(m_one_hot, m_r_prob) * 15
 
-        s_r = tf.reshape(tf.cast(tf.argmax(s_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        s_g = tf.reshape(tf.cast(tf.argmax(s_g_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        m_r = tf.reshape(tf.cast(tf.argmax(m_r_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
-        m_g = tf.reshape(tf.cast(tf.argmax(m_g_prob, axis=-1), dtype=tf.float32), shape=self.input_shape)
+        s_r = tf.reshape(tf.cast(tf.argmax(s_r_prob, axis=-1), dtype=tf.float32), shape=[self.input_shape[0],512, 512,self.input_shape[3]])
+        s_g = tf.reshape(tf.cast(tf.argmax(s_g_prob, axis=-1), dtype=tf.float32), shape=[self.input_shape[0],512, 512,self.input_shape[3]])
+        m_r = tf.reshape(tf.cast(tf.argmax(m_r_prob, axis=-1), dtype=tf.float32), shape=[self.input_shape[0],512, 512,self.input_shape[3]])
+        m_g = tf.reshape(tf.cast(tf.argmax(m_g_prob, axis=-1), dtype=tf.float32), shape=[self.input_shape[0],512, 512,self.input_shape[3]])
+        s_r = tf.image.resize_images(s_r, [self.input_shape[1], self.input_shape[2]], method=1)
+        s_g = tf.image.resize_images(s_g, [self.input_shape[1], self.input_shape[2]], method=1)
+        m_r = tf.image.resize_images(m_r, [self.input_shape[1], self.input_shape[2]], method=1)
+        m_g = tf.image.resize_images(m_g, [self.input_shape[1], self.input_shape[2]], method=1)
         self.tenaor_name["code_f_g"] = str(code_f_g)
         self.tenaor_name["s_g"] = str(s_g)
         self.tenaor_name["m_g"] = str(m_g)

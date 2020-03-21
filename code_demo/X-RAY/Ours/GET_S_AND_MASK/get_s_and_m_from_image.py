@@ -88,10 +88,10 @@ def get_mask(m, p=5, beta=0.0):
 
 graph = tf.Graph()
 with graph.as_default():
-    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 3])
-    sx = get_s(x, j=0.014)
-    sx = gaussian_blur(sx, sigma=0.3, alpha=0.05, bin=True)
-    mask_x = get_mask(x, p=10, beta=0.3)
+    x = tf.placeholder(tf.float32, shape=[1, 1500, 1500, 1])
+    sx = get_s(x, j=0.009)
+    sx = gaussian_blur(sx, sigma=0.5, alpha=0.05, bin=True)
+    mask_x = get_mask(x, p=2, beta=0.15)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
     PATH = "./X"
@@ -106,11 +106,11 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     files = os.listdir(PATH)
     for file in files:
         input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file))
-        input_x = transform.resize(np.asarray(input_x), [512, 512, 3])
+        input_x = transform.resize(np.asarray(input_x), [1500, 1500]).reshape([1500, 1500, 1])
         sx_, mask_x_ = sess.run([sx, mask_x], feed_dict={x: np.asarray([input_x])})
-        sx_ = signal.medfilt2d(np.asarray(sx_)[0, :, :, 0, ], kernel_size=5)
+        sx_ = signal.medfilt2d(np.asarray(sx_)[0, :, :, 0, ], kernel_size=3)
         mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
-        new_file = file.replace(".jpg", ".tiff")
+        new_file = file.replace(".jpeg", ".tiff")
         SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * sx_), SAVE_F + "/" + new_file)
         SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
         print(file + "==>" + new_file)

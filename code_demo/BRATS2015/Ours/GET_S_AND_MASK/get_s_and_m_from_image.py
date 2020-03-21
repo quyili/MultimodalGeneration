@@ -59,12 +59,12 @@ def gaussian_blur(x, sigma=0.5, alpha=0.15, bin=False):
     return y
 
 
-def get_s(x, j=0.1):
+def get_s(x,sigma=0.4, j=0.1):
     x1 = tf_norm(tf.reduce_min(tf.image.sobel_edges(x), axis=-1))
     x2 = tf_norm(tf.reduce_max(tf.image.sobel_edges(x), axis=-1))
 
-    x1 = gaussian_blur(x1, sigma=0.4)
-    x2 = gaussian_blur(x2, sigma=0.4)
+    x1 = gaussian_blur(x1, sigma=sigma)
+    x2 = gaussian_blur(x2, sigma=sigma)
 
     x1 = tf.reduce_mean(x1, axis=[1, 2, 3]) - x1
     x2 = x2 - tf.reduce_mean(x2, axis=[1, 2, 3])
@@ -88,13 +88,13 @@ def get_mask(m, p=5, beta=0.0):
 
 graph = tf.Graph()
 with graph.as_default():
-    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 1])
-    sx = get_s(x, j=0.014)
-    sx = gaussian_blur(sx, sigma=0.3, alpha=0.05, bin=True)
+    x = tf.placeholder(tf.float32, shape=[1,184, 144, 1])
+    sx = get_s(x,sigma=0.01, j=0.035)
+    sx = gaussian_blur(sx, sigma=0.01, alpha=0.00, bin=True)
     mask_x = get_mask(x, p=10, beta=0.3)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    PATH = "./X"
+    PATH = "./T1"
     SAVE_F = "./S"
     SAVE_M = "./M"
     try:
@@ -106,11 +106,9 @@ with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) a
     files = os.listdir(PATH)
     for file in files:
         input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file))
-        input_x = transform.resize(np.asarray(input_x), [512, 512, 1])
+        input_x = transform.resize(np.asarray(input_x), [184, 144,  1])
         sx_, mask_x_ = sess.run([sx, mask_x], feed_dict={x: np.asarray([input_x])})
-        sx_ = signal.medfilt2d(np.asarray(sx_)[0, :, :, 0, ], kernel_size=3)
+        sx_ = signal.medfilt2d(np.asarray(sx_)[0, :, :, 0, ], kernel_size=5)
         mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=5)
-        new_file = file.replace(".jpg", ".tiff")
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * sx_), SAVE_F + "/" + new_file)
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
-        print(file + "==>" + new_file)
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * sx_), SAVE_F + "/" + file)
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + file)

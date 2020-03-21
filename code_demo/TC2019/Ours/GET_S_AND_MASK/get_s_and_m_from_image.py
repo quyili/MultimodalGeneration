@@ -7,6 +7,20 @@ import scipy.signal as signal
 import os
 from skimage import transform
 
+PATH = "./X"
+SAVE_F1 = "./F1"
+SAVE_M1 = "./M1"
+SAVE_F2 = "./F2"
+SAVE_M2 = "./M2"
+SAVE_F3 = "./F3"
+SAVE_M3 = "./M3"
+SAVE_F = "./F"
+SAVE_M = "./M"
+alpha = 0.0125
+k_size1 = 5
+p = 2
+beta = 0.48
+k_size2 = 3
 
 def np_norm(input):
     output = (input - np.min(input)) / (np.max(input) - np.min(input))
@@ -88,29 +102,61 @@ def get_mask(m, p=5, beta=0.0):
 
 graph = tf.Graph()
 with graph.as_default():
-    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 3])
-    sx = get_s(x, j=0.014)
+    x = tf.placeholder(tf.float32, shape=[1, 512, 512, 1])
+    sx = get_s(x, j=alpha)
     sx = gaussian_blur(sx, sigma=0.3, alpha=0.05, bin=True)
-    mask_x = get_mask(x, p=10, beta=0.3)
+    mask_x = get_mask(x, p=2, beta=beta)
 
 with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-    PATH = "./X"
-    SAVE_F = "./F"
-    SAVE_M = "./M"
     try:
+        os.makedirs(SAVE_F1)
+        os.makedirs(SAVE_M1)
+        os.makedirs(SAVE_F2)
+        os.makedirs(SAVE_M2)
+        os.makedirs(SAVE_F3)
+        os.makedirs(SAVE_M3)
         os.makedirs(SAVE_F)
         os.makedirs(SAVE_M)
     except os.error:
         pass
 
     files = os.listdir(PATH)
-    for file in files:
+    for i in range(len(files)):
+        file = files[i]
         input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(PATH + "/" + file))
-        input_x = transform.resize(np.asarray(input_x), [512, 512, 3])
-        sx_, mask_x_ = sess.run([sx, mask_x], feed_dict={x: np.asarray([input_x])})
-        sx_ = signal.medfilt2d(np.asarray(sx_)[0, :, :, 0, ], kernel_size=5)
-        mask_x_ = signal.medfilt2d(np.asarray(mask_x_)[0, :, :, 0, ], kernel_size=17)
-        new_file = file.replace(".jpg", ".tiff")
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * sx_), SAVE_F + "/" + new_file)
-        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + new_file)
-        print(file + "==>" + new_file)
+        input_x = np.asarray(input_x).reshape([512, 512, 3])
+
+        sx1_, mask_x1_ = sess.run([sx, mask_x], feed_dict={x: np.asarray([input_x[:, :, 0:1]]).astype('float32')})
+        sx1_ = signal.medfilt2d(np.asarray(sx1_)[0, :, :, 0, ], kernel_size=k_size1)
+        mask_x1_ = signal.medfilt2d(np.asarray(mask_x1_)[0, :, :, 0, ], kernel_size=k_size2)
+
+        sx2_, mask_x2_ = sess.run([sx, mask_x], feed_dict={x: np.asarray([input_x[:, :, 1:2]]).astype('float32')})
+        sx2_ = signal.medfilt2d(np.asarray(sx2_)[0, :, :, 0, ], kernel_size=k_size1)
+        mask_x2_ = signal.medfilt2d(np.asarray(mask_x2_)[0, :, :, 0, ], kernel_size=k_size2)
+
+        sx3_, mask_x3_ = sess.run([sx, mask_x], feed_dict={x: np.asarray([input_x[:, :, 2:3]]).astype('float32')})
+        sx3_ = signal.medfilt2d(np.asarray(sx3_)[0, :, :, 0, ], kernel_size=k_size1)
+        mask_x3_ = signal.medfilt2d(np.asarray(mask_x3_)[0, :, :, 0, ], kernel_size=k_size2)
+
+        sx_ = np.zeros([512, 512, 3])
+        mask_x_ = np.zeros([512, 512, 3])
+        sx_[:, :, 0] = (1.0 - mask_x1_) * sx1_
+        sx_[:, :, 1] = (1.0 - mask_x2_) * sx2_
+        sx_[:, :, 2] = (1.0 - mask_x3_) * sx3_
+        mask_x_[:, :, 0] = mask_x1_
+        mask_x_[:, :, 1] = mask_x2_
+        mask_x_[:, :, 2] = mask_x3_
+
+        NUM = file.replace(".mha", "")
+
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x1_) * sx1_), SAVE_F1 + "/" + NUM + ".tiff")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x1_), SAVE_M1 + "/" + NUM + ".tiff")
+
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x2_) * sx2_), SAVE_F2 + "/" + NUM + ".tiff")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x2_), SAVE_M2 + "/" + NUM + ".tiff")
+
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x3_) * sx3_), SAVE_F3 + "/" + NUM + ".tiff")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x3_), SAVE_M3 + "/" + NUM + ".tiff")
+
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray((1.0 - mask_x_) * sx_), SAVE_F + "/" + NUM + ".mha")
+        SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask_x_), SAVE_M + "/" + NUM + ".mha")
