@@ -945,7 +945,7 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/MRI_images}
-	\caption{脑部MRI合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。 （c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像，（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图的二值反转图像，（f） 本文方法的合成图像和输入的结构特征图。（a）-（e）为在Neuromorphometrics脑MRI数据集上满足一些未知条件筛选出的数据上进行训练的合成效果，（f） 为在BRATS2015上合成训练。}
+	\caption{脑部MRI合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。 （c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像，（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反色图。（f） 本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。（a）-（e）为在Neuromorphometrics脑MRI数据集上满足一些未知条件筛选出的数据上进行训练的合成效果，（f） 为在BRATS2015上合成训练。}
 	\label{generated_MRI}
 \end{figure}
 前述表~\ref{evalu_on_all_dataset2}中展示了本文的方法与其他方法在BRATS2015上的量化对比结果。图~\ref{generated_MRI}中展示了SkrGAN中其他方法和本文的方法合成的脑MRI的视觉效果，由于SkrGAN中，采用的Neuromorphometrics脑MRI数据集\footnote{http://www.neuromorphometrics.com/}上筛选条件的未知，本研究采用在BRATS2015上训练的合成脑MRI与之在合成视觉效果上简单比较。从图~\ref{generated_MRI}中（e）和（f）中不难看出，本文方法的结构特征图更加简洁清晰、复杂度低和限制少的同时根据合成指导性。从合成MRI来看，本文方法的合成的脑MRI更加清晰真实、干净整洁，服从输入的结构特征图的合成指导却有更多样的合成空间。
@@ -953,7 +953,7 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/SWM_images}
-	\caption{视网膜合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。 （c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像。（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反转图像。（f） 本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。}
+	\caption{视网膜合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。 （c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像。（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反色图。（f） 本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。}
 	\label{generated_swm}
 \end{figure}
 前述表~\ref{evalu_on_all_dataset2}中展示了本文的方法与其他方法在DRIVE+FIRE数据集上的量化对比结果。此处，图~\ref{generated_swm}中展示了本文方法在DRIVE+FIRE的288张眼底视网膜数据集上合成的结构特征图和视网膜影像，和SkrGAN中其他方法在自建的6432张视网膜数据集上的合成的视网膜图像对比，本文方法采用更少的训练样本合成的视网膜与SkrGAN效果非常接近，相比其他方法更加逼真，在血管和神经交汇点等细节上更加合理和真实。其中，（e）和（f）展示了本文方法的结构特征图和SkrGAN的草图的区别，本文方法的结构特征图血管线条走向更加自然真实、噪声更少。
@@ -961,7 +961,7 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/XRAY_images}
-	\caption{X-ray合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。 （c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像。（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反转图像。（f） 本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。}
+	\caption{X-ray合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。 （c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像。（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反色图。（f） 本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。}
 	\label{generated_xray}
 \end{figure}
 图~\ref{generated_xray}中展示了本文方法在X-ray数据集上合成的结构特征图和X-ray影像，和其他方法合成的结果对比，本文方法的合成X-ray更加逼真，肋骨和脊柱等细节更加丰富和符合生理逻辑。其中，（e）和（f）展示了本文方法的结构特征图和SkrGAN的草图的区别，本文方法的结构特征图在脊柱等关键生理结构上提取出的信息更完整，肋骨等核心部位的噪声更少、杂余线条更少、核心的结构信息更突出、线条与线条之间更加独立清晰无干扰，其中每条线条都更顺滑均匀，对应合成的X-ray在结构上更加自然真实，而SkrGAN由于其草图脊柱处细节的突兀，合成X-ray在脊柱处也有明显瑕疵。
@@ -970,7 +970,7 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 \begin{figure}[thbp!]
 	\centering
 	\includegraphics[width=0.98\linewidth]{figures/FBCT_images}
-	\caption{肺部CT合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。（c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像。（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反转图像。（f） 在Kaggle Lung CT数据集上，本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。（g） 在天池肺部CT数据集上，本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。（f）-（g）输出的合成图像素值在0-1之间，视觉上与（a）-（e）中未处理的合成结果有一些差异。}
+	\caption{肺部CT合成效果对比。（a） PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}的合成图像。（b） WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:}的合成图像。（c） DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:}的合成图像。（d） ACGAN\cite{98odena2016conditional,96zhang2019skrgan:}的合成图像。（e） SkrGAN\cite{96zhang2019skrgan:}的合成图像、输入的结构特征图和二值反色图。（f） 在Kaggle Lung CT数据集上，本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。（g） 在天池肺部CT数据集上，本文方法的合成图像、输入的融合了噪声的结构特征图和原始结构特征图。（f）-（g）输出的合成图像素值在0-1之间，视觉上与（a）-（e）中未处理的合成结果有一些差异。}
 	\label{generated_FBCT}
 \end{figure}
 图~\ref{generated_FBCT}中（f）展示了本文方法在肺部CT数据集上合成的结构特征图和CT影像，和其他方法合成的结果对比，本文方法的合成CT更加清晰真实。其中，（e）和（f）展示了本文方法的结构特征图和SkrGAN的草图的区别，本文方法提取出的结构特征图复杂度更低，仅由关键结构的轮廓线条勾画而成，SkrGAN的草图中包含了大面积的像素区域、黑白交错界限不明且充满噪声杂乱无章，从合成的CT来看，SkrGAN的合成的肺中缺乏合理的生理结构内容，而本文方法的合成的肺中具有符合生理结构的气管血管等结构。图~\ref{generated_FBCT}中（g）展示了本文方法在天池肺部CT数据集上合成的结构特征图和CT影像，效果非常逼真、肺中合成的结构信息丰富详实。
