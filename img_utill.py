@@ -2,7 +2,10 @@
 import os
 import numpy as np
 import SimpleITK
-
+import cv2
+import scipy.signal as signal
+import os
+from skimage import transform
 
 def mynorm(input):
     output = (input - np.min(input)
@@ -79,6 +82,44 @@ def noise_fesion(
 
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(new_f.astype("float32")), SAVE_PATH)
 
+def x_noise_fesion(
+        SRC_PATH1="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/BRATS/1584786325.jpg",
+        SRC_PATH2="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/BRATS/1584786435.jpg",
+        SAVE_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/BRATS/",
+):
+    f = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH1))
+    f = np.asarray(mynorm(f[:,:,0]) > 0.5).astype("float32")
+
+    mask = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH2))
+    mask = 1.0-np.asarray(mynorm(mask[:, :, 0]) > 0.08).astype("float32")
+    mask = signal.medfilt2d(mask, kernel_size=17)
+    # mask=mask[:,:,0]
+    # print(f.shape)
+    # print(mask.shape)
+
+    new_f = f + np.random.uniform(0.5, 0.6, f.shape) * (1.0 - mask) * (1.0 - f)
+
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask.astype("float32")), SAVE_PATH+"mask.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(new_f.astype("float32")), SAVE_PATH+"fusion.tiff")
+
+def m_noise_fesion(
+        SRC_PATH1="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/BRATS/f7.jpg",
+        SRC_PATH2="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/BRATS/m7.jpg",
+        SAVE_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/samples/BRATS/",
+):
+    f = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH1))
+    f = np.asarray(mynorm(f[:,:,0]) > 0.5).astype("float32")
+
+    mask = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH2))
+    mask = np.asarray(mynorm(mask[:,:,0]) > 0.5).astype("float32")
+    # mask = signal.medfilt2d(mask, kernel_size=17)
+
+    new_f = f + np.random.uniform(0.5, 0.6, f.shape) * (1.0 - mask) * (1.0 - f)
+
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(f.astype("float32")), SAVE_PATH+"new_f7.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(mask.astype("float32")), SAVE_PATH+"new_m7.tiff")
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(new_f.astype("float32")), SAVE_PATH+"fusion7.tiff")
+
 
 def mask_fesion(
         SRC_PATH1="E:/project/MultimodalGeneration/src_code/samples/fxyzw_.tiff",
@@ -97,4 +138,4 @@ def mask_fesion(
 
 
 if __name__ == '__main__':
-    run()
+    m_noise_fesion()
