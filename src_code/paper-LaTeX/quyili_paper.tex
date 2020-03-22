@@ -300,7 +300,7 @@ CANet\cite{128zhang2019canet}
 等，这些模型在CNN模型结构上一步步发展，许多通用的模型结构设计方法和训练方法被提出和不断发展。
 在以语义分割为主的图像合成任务中，CNN图像生成模型也在发展过程中从结构上被模式化成一个编码器和一个解码器连接起来的生成器结构。采用CNN合成图像的大多数研究是有监督训练，且与其他多数CNN任务一样，任务中CNN起到的作用是提取输入的某种特征或对输入的特征进行转换而不是对输入添加更加丰富的细节，例如图像转换任务\cite{139gatys2016image,140johnson2016perceptual,66miao2018dilated,36vannguyen2015crossdomain}或前述的一系列语义分割任务。CNN对训练标签的要求限制了CNN在图像合成领域的应用场景。
 
-相反，GAN天生是采用无监督训练的方法，同时也可添加有监督损失进行有监督训练\cite{4shin2018medical,42huo2018adversarial,44shrivastava2017learning}。因此，最近越来越多的研究采用GAN来进行图像合成任务。由于编解码结构在CNN上的有效性，在采用GAN的图像合成的发展中，图像合成任务也被模式化为使用编码器和解码器组成的生成器进行的像素到像素的映射\cite{27isola2017image-to-image,28liu2017unsupervised,29kim2017learning,30zhu2017imagine,31zhang2018densely,32gong2018learning}，其中编码器实现对输入进行特征提取和融合，解码器实现对特征进行填充还原和添加细节。GAN在图像生成任务中的惊人表现和相关数据集的发展逐步催生了图像合成领域中一些研究方向的火热，例如人像合成\cite{1zhao2018modular,5liang2018generative,13choi2018stargan:,27isola2017image-to-image}、风格迁移\cite{6zhu2017unpaired,141azadi2018multi}和草图补全\cite{27isola2017image-to-image,81xian2018texturegan:}等。在结构设计和训练方法上，DCGAN\cite{97radford2015unsupervised}通过采用更深层和复杂的CNN作为生成器和鉴别器使得合成质量在原生GAN的基础上有了很大的提升，展现了GAN的巨大潜力。随后ACGAN\cite{98odena2016conditional}在GAN最重要的变体CGAN\cite{70mirza2014conditional}的基础上提出了多类别图像合成方法，为GAN的应用展现了一个更加广阔的前景。之后CycleGAN\cite{6zhu2017unpaired}的出现，为GAN在多域图像转换中的应用开辟了一条广阔的大路，在此基础上，IcGAN\cite{71perarnau2016invertible}、StarGAN\cite{13choi2018stargan:}、ContrastGAN\cite{5liang2018generative}等可实现图像到图像的多域转换方案或模型被陆续提出，最近的ModularGAN\cite{1zhao2018modular}、ComboGAN\cite{74anoosheh2018combogan:}和XGAN\cite{75royer2018xgan:}将网络模块化为多个部件又开启了另一种思路。
+相反，GAN天生是采用无监督训练的方法，同时也可添加有监督损失进行有监督训练\cite{4shin2018medical,42huo2018adversarial,44shrivastava2017learning}。因此，最近越来越多的研究采用GAN来进行图像合成任务。由于编解码结构在CNN上的有效性，在采用GAN的图像合成的发展中，图像合成任务也被模式化为使用编码器和解码器组成的生成器进行的像素到像素的映射\cite{27isola2017image-to-image,28liu2017unsupervised,29kim2017learning,30zhu2017imagine,31zhang2018densely,32gong2018learning}，其中编码器实现对输入进行特征提取和融合，解码器实现对特征进行填充还原和添加细节。GAN在图像生成任务中的惊人表现和相关数据集的发展逐步催生了图像合成领域中一些研究方向的火热，例如人像合成\cite{1zhao2018modular,5liang2018generative,13choi2018stargan:,27isola2017image-to-image}、风格迁移\cite{6zhu2017unpaired,141azadi2018multi}和草图补全\cite{27isola2017image-to-image,81xian2018texturegan:}等。在结构设计和训练方法上，DCGAN\cite{97radford2015unsupervised}通过采用更深层和复杂的CNN作为生成器和鉴别器使得合成质量在原生GAN的基础上有了很大的提升，展现了GAN的巨大潜力。随后ACGAN\cite{98odena2016conditional}在GAN最重要的变体CGAN\cite{70mirza2014conditional}的基础上提出了多类别图像合成方法，为GAN的应用展现了一个更加广阔的前景。之后CycleGAN\cite{6zhu2017unpaired}的出现，	启发了后续许多基于GAN的多域图像转换研究和应用。在CycleGAN的基础上，IcGAN\cite{71perarnau2016invertible}、StarGAN\cite{13choi2018stargan:}、ContrastGAN\cite{5liang2018generative}等可实现图像到图像的多域转换方案或模型被陆续提出。最近的ModularGAN\cite{1zhao2018modular}、ComboGAN\cite{74anoosheh2018combogan:}和XGAN\cite{75royer2018xgan:}将网络模块化为多个部件又开启了另一种思路。
 
 总的来说，无论是采用CNN还是GAN的图像合成都得到了充分的发展，尤其是在语义分割、人像合成等领域，图像合成方法得到了广泛和深入的应用与发展，产生了大量的优秀研究成果。在这些研究的基础上实现高质量的医学影像的合成将具备充分的可行性，这一方面开拓了图像合成方法的应用领域，同时也能进一步的发展图像合成方法和技术。
 
@@ -320,7 +320,7 @@ CANet\cite{128zhang2019canet}
 
 一项对于视网膜合成的研究\cite{41costa2017towards}通过变分自编码器(VAE)\cite{87kingma2014auto-encoding,88rezende2014stochastic}实现了血管分割图的随机生成，进而以合成的血管分割图合成了彩色视网膜图像，从合成数量上没有限制，但该研究仍需训练一个血管分割网络从真实图像中提取血管分割图来训练血管分割图的VAE生成网络。
 
-而SkrGAN\cite{96zhang2019skrgan:}与本研究思路不谋而合，该研究在更广泛的数据集上采用Sobel算子实现对医学影像结构信息草图（Sketch）的提取，并通过GAN实现的草图的随机生成，再进一步实现了对医学影像的合成。SkrGAN在训练中，仅进行了单模态影像的合成尝试，并一方面由于始终采用从真实数据集中提取的草图进行训练，并以输入草图对应的真实影像为监督标签，使得其模型的训练极易过拟合且缺乏对合成草图的适应能力，最终导致模型合成的医学影像缺乏多样性，另一方面提取的草图对原图生理结构信息的勾勒效果较差，使得合成的影像在结构细节上存在残缺或模糊的情况。与前述绝大部分的研究相同的是，SkrGAN合成的医学影像没有考虑病灶信息的合成，也没有对应的病灶标签的产出，这使得绝大多数的合成数据没有可用性。
+而SkrGAN\cite{96zhang2019skrgan:}与本研究思路不谋而合，该研究在更广泛的数据集上采用Sobel算子实现对医学影像结构信息草图（Sketch）的提取，并通过GAN实现的草图的随机生成，再进一步实现了对医学影像的合成。SkrGAN在训练中，仅进行了单模态影像的合成尝试，并一方面由于始终采用从真实数据集中提取的草图进行训练，并以输入草图对应的真实影像为监督标签，使得其模型的训练极易过拟合且缺乏对合成草图的适应能力，最终导致模型合成的医学影像缺乏多样性，另一方面提取的草图对原图生理结构信息的勾勒效果较差，使得合成的影像在结构细节上存在残缺或模糊的情况。与前述绝大部分的研究相同的是，SkrGAN合成的医学影像没有考虑病灶信息的合成，也没有对应的病灶标签的产出，这使得绝大多数的合成数据没有适合的使用场景。
 
 \subsection{小结}
 在上述对相关研究进行的分析中不难发现，当前合成医学影像尽管取得了长足的进展，具备了很好的研究基础，但依然有许多问题亟待解决，依然有继续深入研究的巨大价值和空间。总的来说，在前述各项研究的基础之上，本研究需要对多模态医学影像的合成方案的各个环节进行更科学的规划和改进，实现多个数据集上更清晰简明的结构特征图的提取、更稳定且无限制的结构特征图的随机合成、更逼真的配准多模态医学影像的合成、可控可验证的病灶的合成、客观的合成数据的可用性评估。
@@ -730,12 +730,12 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 			Dataset &Metric &Ours &SkrGAN\cite{96zhang2019skrgan:} &DCGAN\cite{97radford2015unsupervised,96zhang2019skrgan:} &ACGAN\cite{98odena2016conditional,96zhang2019skrgan:} &WGAN\cite{99arjovsky2017wasserstein,96zhang2019skrgan:} &PGGAN\cite{100karras2017progressive,96zhang2019skrgan:}\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{Kaggle Chest}\\\textbf{X-ray}}}
-			&MS-SSIM ↑ &0.597 &0.506 &0.269 &0.301 &0.401 &0.493 \\
-			&FID ↓ &102.5 &114.6 &260.3 &235.2 &300.7 &124.2\\
+			&MS-SSIM ↑ &\textbf{0.597} &0.506 &0.269 &0.301 &0.401 &0.493 \\
+			&FID ↓ &\textbf{102.5} &114.6 &260.3 &235.2 &300.7 &124.2\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{Kaggle Lung}\\\textbf{CT}}}
-			&MS-SSIM ↑ &0.473 &0.359 &0.199 &0.235 &0.277 &0.328 \\
-			&FID ↓ &66.91 &79.97 &285.0 &222.5 &349.1 &91.89\\
+			&MS-SSIM ↑ &\textbf{0.473 }&0.359 &0.199 &0.235 &0.277 &0.328 \\
+			&FID ↓ &\textbf{66.91} &79.97 &285.0 &222.5 &349.1 &91.89\\
 			\hline
 			
 			\end{tabular}
@@ -755,16 +755,16 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 			Dataset &Metric &Ours$^+$ &Ours &SkrGAN$^*$ &GAN$^\#$\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{DRIVE+FIRE}\\\textbf{Color Fundus}}}
-			&MS-SSIM ↑  &-     &0.607 &0.584 &0.392\\
-			&FID ↓      &-     &30.13 &37.91 &227.41\\
+			&MS-SSIM ↑  &-     &\textbf{0.607} &0.584 &0.392\\
+			&FID ↓      &-     &\textbf{30.13} &37.91 &227.41\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{BRATS2015 }\textbf{MRI}}}
-			&MS-SSIM ↑  &0.692 &0.686 &0.653 &0.504\\
-			&FID ↓      &20.15 &21.87 &28.76 &124.53\\
+			&MS-SSIM ↑  &\textbf{0.692} &\textbf{0.686 }&0.653 &0.504\\
+			&FID ↓      &\textbf{20.15} &\textbf{21.87} &28.76 &124.53\\
 			\hline
 			\multirow{2}*{\tabincell{l}{\textbf{TC Lung }\textbf{CT}}}
-			&MS-SSIM ↑  &-     &0.676 &0.667 &0.543\\
-			&FID ↓      &-     &27.40 &29.81 &113.65\\
+			&MS-SSIM ↑  &-     &\textbf{0.676} &0.667 &0.543\\
+			&FID ↓      &-     &\textbf{27.40} &29.81 &113.65\\
 			\hline	
 		\end{tabular}
 		}
@@ -772,7 +772,7 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 	\item[+] 表示合成肿瘤的评估，即根据病灶标签对合成数据集影像和原数据集影像中切割出的肿瘤的评估。
 	\item[\#] 表示基础GAN的评估，即在DCGAN\cite{97radford2015unsupervised}的基础上将生成器加深为U-net，将鉴别器加深为VGG11。
 	\item[*] 表示复现的SkrGAN的评估结果。由于SkrGAN\cite{96zhang2019skrgan:}中未给出草图详细算法或开源代码和鉴别器网络结构，
-	合成多模态影像时，采用本文的算法提取的真实影像的结构特征图的二值反色图（0与1像素值调转）作为训练输入，以U-net为基础生成模型、以本文方法采用的VGG11鉴别器为鉴别器合成多模态影像、无病灶损失、无配准损失、无自监督预训练、采用自监督和对抗性混合损失。
+	合成多模态影像时，采用本文的算法提取的真实影像的结构特征图的二值反色图（0与1像素值调转）作为训练输入，以U-net为基础生成模型、以本文方法采用的VGG11鉴别器为鉴别器合成多模态影像、无病灶生成指导损失、无模态配准损失、无自监督预训练、采用自监督和对抗性混合损失。
 	\end{center}
 \end{table}
 
@@ -789,7 +789,7 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 			Training Dataset &Test Dataset &MSE   &Dice Score
 			\\
 			\hline
-			real &real 	 &0.027   &0.915 \\							
+			real &real 	 &\textbf{0.027}   &\textbf{0.915} \\							
 			real &synthetic	&0.098 &0.838 \\
 			\hline
 		\end{tabular}
@@ -869,14 +869,14 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 			\hline
 			\tabincell{c}{DRIVE训练集}  	 	&  DRIVE测试集 	&0.7781 &0.9477 &0.9705
 			  \\
-		   \tabincell{c}{DRIVE训练集+2000张\\SkrGAN合成图像}	 &  DRIVE测试集 	& 0.8464 &0.9513 &0.9762 \\
+		   \tabincell{c}{DRIVE训练集+2000张\\SkrGAN合成图像}	 &  DRIVE测试集 	& \textbf{0.8464} &0.9513 &\textbf{0.9762} \\
 		   \tabincell{c}{DRIVE训练集+2000张\\SkrGAN$^*$合成图像}	 &  DRIVE测试集 	& 0.8297 &0.9428 &0.9732 \\
-			\tabincell{c}{DRIVE训练集+2000张\\本文方法的合成图像}	&  DRIVE测试集  	& 0.8416 &0.9518 &0.9749 \\	
+			\tabincell{c}{DRIVE训练集+2000张\\本文方法的合成图像}	&  DRIVE测试集  	& 0.8416 &\textbf{0.9518} &0.9749 \\	
 			\hline
 		\end{tabular}
 	\footnotesize
 	\item[*] 表示复现的SkrGAN的评估结果。由于SkrGAN\cite{96zhang2019skrgan:}中未给出草图详细算法或开源代码和鉴别器网络结构，
-	合成多模态影像时，采用本文的算法提取的真实影像的结构特征图的反二值图（0与1像素值调转）作为训练输入，以U-net为基础生成模型、以本文方法采用的VGG11鉴别器为鉴别器合成多模态影像、无病灶损失、无配准损失、无自监督预训练、采用自监督和对抗性混合损失。
+	合成多模态影像时，采用本文的算法提取的真实影像的结构特征图的反二值图（0与1像素值调转）作为训练输入，以U-net为基础生成模型、以本文方法采用的VGG11鉴别器为鉴别器合成多模态影像、无病灶生成指导损失、无模态配准损失、无自监督预训练、采用自监督和对抗性混合损失。
 	\end{center}
 \end{table}
 \subsubsection{合成胸部X光线数据用于肺炎分类任务}
@@ -890,15 +890,15 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 			\hline
 			\tabincell{c}{Kaggle Chest X-Ray训练集}  	 	& Kaggle Chest X-Ray测试集 	&0.804 
 			\\
-			\tabincell{c}{Kaggle Chest X-Ray训练集+2000张\\合成图像}	& Kaggle Chest X-Ray测试集  	& 0.818 \\	
+			\tabincell{c}{Kaggle Chest X-Ray训练集+2000张\\合成图像}	& Kaggle Chest X-Ray测试集  	&\textbf{0.818} \\	
 			\hline
 		\end{tabular}
 	\end{center}
 \end{table}
-本研究采用Kaggle Chest X-Ray数据集合成了大量带有肺炎类别标签的胸部X-Ray数据。合成时，由于只有单模态数据，因此无模态配准损失，输入的病灶标签为扩展成的与结构特征图同尺寸独热矩阵的肺炎类别标签。然后本研究使用Kaggle Chest X-Ray数据集+合成X-Ray数据采用随机混合模式训练了一个胸部X-Ray肺炎分类模型，再将该模型和只采用Kaggle Chest X-Ray数据集训练的模型进行对比。结果如表~\ref{X-Ray_availability_test}所示，可见在该数据集上，本文方法的合成数据同样可以在分类任务中具有良好的可用性，但相对于分割任务，由于合成时输入的分类标签的指向性较弱，合成图像所具有的类别属性不如分割类任务合成病灶那样集中和突出，因此分类任务使用合成数据的提升效果相对不明显。
+本研究采用Kaggle Chest X-Ray数据集合成了大量带有肺炎类别标签的胸部X-Ray数据。合成时，由于只有单模态数据，因此无模态模态配准损失，输入的病灶标签为扩展成的与结构特征图同尺寸独热矩阵的肺炎类别标签。然后本研究使用Kaggle Chest X-Ray数据集+合成X-Ray数据采用随机混合模式训练了一个胸部X-Ray肺炎分类模型，再将该模型和只采用Kaggle Chest X-Ray数据集训练的模型进行对比。结果如表~\ref{X-Ray_availability_test}所示，可见在该数据集上，本文方法的合成数据同样可以在分类任务中具有良好的可用性，但相对于分割任务，由于合成时输入的分类标签的指向性较弱，合成图像所具有的类别属性不如分割类任务合成病灶那样集中和突出，因此分类任务使用合成数据的提升效果相对不明显。
 
 \subsubsection{合成肺部CT数据用于肺结节检测任务}
-本研究采用天池全球数据智能大赛(2019)数据集合成了大量带有病灶检测标签的肺部低剂量CT数据。合成时，由于只有单模态数据，因此无模态配准损失，输入的病灶标签为根据肺结节病灶检测框坐标信息生成的对应的检测标签图，其中填充检测框得到的色块可以粗粒度的指示病灶合成的位置。本研究使用天池全球数据智能大赛(2019)数据集+合成肺部低剂量CT数据采用随机混合模式训练了一个病灶检测模型，将该模型的测试结果与只采用天池全球数据智能大赛(2019)数据集训练的检测模型进行对比。结果如表~\ref{TC_availability_test}，这表明，在该数据集上，合成数据同样具有良好的可用性。在检测任务中，输入的检测标签较分割标签的指向性弱，但比分类标签集中，从在对应任务中的提升效果也可以看出，合成数据在检测任务中的提升效果介于分类任务和分割任务之间。
+本研究采用天池全球数据智能大赛(2019)数据集合成了大量带有病灶检测标签的肺部低剂量CT数据。合成时，由于只有单模态数据，因此无模态模态配准损失，输入的病灶标签为根据肺结节病灶检测框坐标信息生成的对应的检测标签图，其中填充检测框得到的色块可以粗粒度的指示病灶合成的位置。本研究使用天池全球数据智能大赛(2019)数据集+合成肺部低剂量CT数据采用随机混合模式训练了一个病灶检测模型，将该模型的测试结果与只采用天池全球数据智能大赛(2019)数据集训练的检测模型进行对比。结果如表~\ref{TC_availability_test}，这表明，在该数据集上，合成数据同样具有良好的可用性。在检测任务中，输入的检测标签较分割标签的指向性弱，但比分类标签集中，从在对应任务中的提升效果也可以看出，合成数据在检测任务中的提升效果介于分类任务和分割任务之间。
 \begin{table}[thbp!]
 	\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 	\begin{center}
@@ -909,7 +909,7 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 			\hline
 			\tabincell{c}{TC Lung CT训练集}  	 	&TC Lung CT测试集 	&0.574 
 			\\
-			\tabincell{c}{TC Lung CT训练集+20000张\\合成图像}	&TC Lung CT测试集  	& 0.592 \\	
+			\tabincell{c}{TC Lung CT训练集+20000张\\合成图像}	&TC Lung CT测试集  	&\textbf{0.592} \\	
 			\hline
 		\end{tabular}
 	\end{center}
