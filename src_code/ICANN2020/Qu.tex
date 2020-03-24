@@ -263,8 +263,9 @@
 		\end{center}
 	\end{table}
 	\subsection{Experiments Settings}
-	Each experiment is comprehensively trained with more than 100 epochs with the environment of Python3.6+TensorFlow1.13 on NVIDIA Tesla V100GPU cluster. The learning rate is 1e-5 with 4 batch size. We use the Adam optimizer with beta1 of 0.5.
-	The state-of-the-art synthesis method SkrGAN\cite{96zhang2019skrgan:} is our benchmark. We used multi-scale structural similarity (MS-SSIM) and FreshetInception distance (FID)\cite{100karras2017progressive} to assess the performance of synthetic medical images. Dice Score\cite {95dice1945measures} and mean square error (MSE) are used to evaluate the segmentation results. Sensitivity, Accuracy and area under the ROC curve (AUC) are used to assess vascular annotation results. The Average Precision (AP) is used to estimate the detection results. We evaluate on 2D and adpot the best results after at least four training sessions.	
+	Experiments were performed on a NVIDIA Tesla V100GPU cluster of Tianhe-2 with Python3.6+TensorFlow1.13. Each model was comprehensively trained more than 100 epochs until converged completely with a learning rate of 1e-5 and a batch size of 4. The loss was minimized using the Adam optimizer.
+%	Taking he state-of-the-art synthesis method SkrGAN\cite{96zhang2019skrgan:} as the benchmark,
+	We used multi-scale structural similarity (MS-SSIM) and FreshetInception distance (FID)\cite{100karras2017progressive} to assess the performance of synthetic medical images. Dice Score\cite{95dice1945measures} and mean square error (MSE) were used to evaluate the segmentation results. Sensitivity, Accuracy and area under the ROC curve (AUC) were used to assess vascular annotation results. The Average Precision (AP) was used to estimate the detection results. The performances were evaluated on 2D images. We adopted the best results after at least four effective training sessions.
 	\subsection{Ablation Experiments on BRATS2015}
 	Table~\ref{Ablation Experiment Setting on BRATS2015} shows the settings and results of the ablation experiments of our method.
 	Fig.~\ref{ablation_and_seg} (a) shows examples of synthetic images generated in ablation experiments. 

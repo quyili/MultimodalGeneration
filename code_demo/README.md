@@ -12,7 +12,7 @@ Kaggle Chest Xray(https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
 
 Kaggle Lung CT(https://www.kaggle.com/kmader/finding-lungs-in-ct-data/data/) includes 267 CT of transverse from lung, with a size of [512\*512].
 
-DRIVE(http://www.isi.uu.nl/Research/Databases/DRIVE/) includes 20 [565\*584] color fundus retinal photos in both training set and test set and 20 corresponding retinal vascular annotations for training.
+DRIVE(http://www.isi.uu.nl/Research/Databases/DRIVE/) includes 20 [565\*584] color fundus retinal photos and corresponding retinal vascular segmentation annotations in both training set and test set.
 
 FIRE(https://projects.ics.forth.gr/cvrl/fire/)includes 268 [2912\*2912] color fundus retinal photos.
 
