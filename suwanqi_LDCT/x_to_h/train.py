@@ -16,38 +16,38 @@ tf.flags.DEFINE_integer('log_level', 10, 'CRITICAL = 50,ERROR = 40,WARNING = 30,
 tf.flags.DEFINE_integer('batch_size', 4, 'batch size, default: 1')
 tf.flags.DEFINE_list('image_size', [512, 512, 1], 'image size, default: [155,240,240]')
 tf.flags.DEFINE_float('learning_rate', 1e-4, 'initial learning rate for Adam, default: 2e-4')
-tf.flags.DEFINE_integer('ngf', 1, 'number of gen filters in first conv layer, default: 64')
+tf.flags.DEFINE_integer('ngf', 32, 'number of gen filters in first conv layer, default: 64')
 tf.flags.DEFINE_string('load_model', None,
                        'folder of saved model that you wish to continue training (e.g. 20170602-1936), default: None')
 tf.flags.DEFINE_string('checkpoint', None, "default: None")
 tf.flags.DEFINE_bool('step_clear', False,
                      'if continue training, step clear, default: True')
-tf.flags.DEFINE_integer('epoch', 1, 'default: 100')
+tf.flags.DEFINE_integer('epoch', 50, 'default: 100')
 tf.flags.DEFINE_float('display_epoch', 1, 'default: 1')
-tf.flags.DEFINE_integer('epoch_steps', 8, '463 or 5480, default: 5480')
+tf.flags.DEFINE_integer('epoch_steps', 12141, '463 or 5480, default: 5480')
 tf.flags.DEFINE_string('stage', "train", 'default: train')
 tf.flags.DEFINE_integer('denoise_num', 1, 'default: 2')
 tf.flags.DEFINE_list('noise_dropout', [0.0, 0.3, 1.0], 'image size, default: [155,240,240]')
 
 ###########################################################################
-tf.flags.DEFINE_string('X', 'E:/project/MultimodalGeneration/data/TC19/test/X', 'X files for training')
-tf.flags.DEFINE_string('L', 'E:/project/MultimodalGeneration/data/TC19/test/L', 'Y files for training')
-tf.flags.DEFINE_string('X_test', 'E:/project/MultimodalGeneration/data/TC19/test/X', 'X files for training')
-tf.flags.DEFINE_string('L_test', 'E:/project/MultimodalGeneration/data/TC19/test/L', 'Y files for training')
-tf.flags.DEFINE_string('LD', 'E:/project/MultimodalGeneration/data/LDCT/test/low', 'X files for training')
-tf.flags.DEFINE_string('HD', 'E:/project/MultimodalGeneration/data/LDCT/test/high', 'Y files for training')
-tf.flags.DEFINE_string('LD_test', 'E:/project/MultimodalGeneration/data/LDCT/test/low', 'X files for training')
-tf.flags.DEFINE_string('HD_test', 'E:/project/MultimodalGeneration/data/LDCT/test/high', 'Y files for training')
+# tf.flags.DEFINE_string('X', 'E:/project/MultimodalGeneration/data/TC19/test/X', 'X files for training')
+# tf.flags.DEFINE_string('L', 'E:/project/MultimodalGeneration/data/TC19/test/L', 'Y files for training')
+# tf.flags.DEFINE_string('X_test', 'E:/project/MultimodalGeneration/data/TC19/test/X', 'X files for training')
+# tf.flags.DEFINE_string('L_test', 'E:/project/MultimodalGeneration/data/TC19/test/L', 'Y files for training')
+tf.flags.DEFINE_string('LD', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm3/trainLow', 'X files for training')
+tf.flags.DEFINE_string('HD', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm3/trainHigh', 'Y files for training')
+tf.flags.DEFINE_string('LD_test', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm3/testLow', 'X files for training')
+tf.flags.DEFINE_string('HD_test', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm3/testHigh', 'Y files for training')
 # tf.flags.DEFINE_string('LD', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm/trainLow', 'X files for training')
 # tf.flags.DEFINE_string('HD', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm/trainHigh', 'Y files for training')
 # tf.flags.DEFINE_string('LD_test', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm/testLow','X files for training')
 # tf.flags.DEFINE_string('HD_test', '/GPUFS/nsccgz_ywang_1/suwanqi/LDCT/data_3mm/new_norm/testHigh', 'Y files for training')
-# tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/train/X', 'X files for training')
-# tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/train/L', 'Y files for training')
-# tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/X', 'X files for training')
-# tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/L', 'Y files for training')
-tf.flags.DEFINE_string('load_T_model', "20200314-0102", 'e.g. 20170602-1936, default: None')
-tf.flags.DEFINE_string('load_LP_model', "20200314-0059", 'e.g. 20170602-1936, default: None')
+tf.flags.DEFINE_string('X', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/train/X', 'X files for training')
+tf.flags.DEFINE_string('L', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/train/L', 'Y files for training')
+tf.flags.DEFINE_string('X_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/X', 'X files for training')
+tf.flags.DEFINE_string('L_test', '/GPUFS/nsccgz_ywang_1/quyili/DATA/TC19/test/L', 'Y files for training')
+tf.flags.DEFINE_string('load_T_model', "20200323-0507", 'e.g. 20170602-1936, default: None')
+tf.flags.DEFINE_string('load_LP_model', "20200321-1425", 'e.g. 20170602-1936, default: None')
 
 # 每个特征图单元的default box数量
 default_box_size = [4, 6, 6, 6, 4, 4]
@@ -211,7 +211,6 @@ def read_txt_file(l_path, Label_train_files, index, inpu_form=".mha"):
 def mean(list):
     return sum(list) / float(len(list))
 
-
 def mean_list(lists):
     out = []
     lists = np.asarray(lists).transpose([1, 0])
@@ -219,23 +218,19 @@ def mean_list(lists):
         out.append(mean(list))
     return out
 
-
 def dropout(x, keep_prob=0.5):
     if keep_prob == 0.0:
         keep_prob = np.random.rand() * 0.7 + 0.3
     x *= np.random.binomial(1, keep_prob, size=x.shape) / keep_prob
     return x
 
-
 def random(n, h, w, c):
     return np.random.uniform(0., 1., size=[n, h, w, c])
-
 
 def mynorm(input):
     output = (input - np.min(input)
               ) / (np.max(input) - np.min(input))
     return output
-
 
 def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out_form="", norm=False):
     train_range = len(Label_train_files)
@@ -260,7 +255,6 @@ def read_file(l_path, Label_train_files, index, out_size=None, inpu_form="", out
         img = mynorm(img)
     return img
 
-
 def read_files(x_path, l_path, Label_train_files, index):
     train_range = len(Label_train_files)
     T1_img = SimpleITK.ReadImage(x_path + "/" + Label_train_files[index % train_range])
@@ -270,7 +264,6 @@ def read_files(x_path, l_path, Label_train_files, index):
     T1_arr_ = T1_arr_.astype('float32')
     L_arr_ = L_arr_.astype('float32')
     return T1_arr_, L_arr_
-
 
 def save_images(image_dirct, checkpoints_dir, file_index=""):
     for key in image_dirct:
@@ -359,21 +352,21 @@ def train():
                                                         dtype=tf.float32,
                                                         name='groundtruth_negatives')
                         loss_list_0, bec_0, \
-                        detect_loss_list_0, feature_class_0, feature_location_0 \
-                            = gan.model(X_0, LD_0, HD_0, GT_class_0, GT_location_0, GT_positives_0, GT_negatives_0)
+                        detect_loss_list_0, feature_class_0, feature_location_0 ,\
+                        trans_image_list_0,seg_image_list_0,\
+                        trans_judge_list_0,seg_judge_list_0  = gan.model(X_0,LD_0, HD_0, GT_class_0, GT_location_0, GT_positives_0, GT_negatives_0)
                         feature_class_softmax_0, box_top_index_0, box_top_value_0 = gan.pred(
                             classes_size, feature_class_0,
                             background_classes_val,
                             all_default_boxs_len)
-                        image_list_0, j_list_0 = gan.image_list, gan.judge_list
-                        ssim_list_0, psnr_list_0 = gan.evaluation(image_list_0)
+                        ssim_list_0, psnr_list_0 = gan.evaluation(trans_image_list_0)
                         variables_list_0 = gan.get_variables()
                         G_grad_0 = G_optimizer.compute_gradients(loss_list_0[0]
-                                                                 + detect_loss_list_0[0]
-                                                                 + detect_loss_list_0[1],
+                                                                 +detect_loss_list_0[0]
+                                                                 +detect_loss_list_0[1], 
                                                                  var_list=variables_list_0[0])
                         D_grad_0 = D_optimizer.compute_gradients(loss_list_0[1] +
-                                                                 detect_loss_list_0[2],
+                                                                 detect_loss_list_0[2], 
                                                                  var_list=variables_list_0[1])
                         G_grad_list.append(G_grad_0)
                         D_grad_list.append(D_grad_0)
@@ -395,10 +388,11 @@ def train():
                                                         dtype=tf.float32,
                                                         name='groundtruth_negatives')
                         loss_list_1, bec_1, \
-                        detect_loss_list_1, feature_class_1, feature_location_1 \
-                            = gan.model(X_1, LD_1, HD_1, GT_class_1, GT_location_1, GT_positives_1, GT_negatives_1)
-                        image_list_1, j_list_1 = gan.image_list, gan.judge_list
-                        ssim_list_1, psnr_list_1 = gan.evaluation(image_list_1)
+                        detect_loss_list_1, feature_class_1, feature_location_1, \
+                        trans_image_list_1, seg_image_list_1, \
+                        trans_judge_list_1, seg_judge_list_1 = gan.model(X_1, LD_1, HD_1, GT_class_1, GT_location_1,
+                                                                         GT_positives_1, GT_negatives_1)
+                        ssim_list_1, psnr_list_1 = gan.evaluation(trans_image_list_1)
                         variables_list_1 = gan.get_variables()
                         G_grad_1 = G_optimizer.compute_gradients(loss_list_1[0]
                                                                  + detect_loss_list_1[0]
@@ -427,10 +421,12 @@ def train():
                                                         dtype=tf.float32,
                                                         name='groundtruth_negatives')
                         loss_list_2, bec_2, \
-                        detect_loss_list_2, feature_class_2, feature_location_2 \
-                            = gan.model(X_2, LD_2, HD_2, GT_class_2, GT_location_2, GT_positives_2, GT_negatives_2)
-                        image_list_2, j_list_2 = gan.image_list, gan.judge_list
-                        ssim_list_2, psnr_list_2 = gan.evaluation(image_list_2)
+                        detect_loss_list_2, feature_class_2, feature_location_2, \
+                        trans_image_list_2, seg_image_list_2, \
+                        trans_judge_list_2, seg_judge_list_2 = gan.model(X_2, LD_2, HD_2, GT_class_2, GT_location_2,
+                                                                         GT_positives_2, GT_negatives_2)
+
+                        ssim_list_2, psnr_list_2 = gan.evaluation(trans_image_list_2)
                         variables_list_2 = gan.get_variables()
                         G_grad_2 = G_optimizer.compute_gradients(loss_list_2[0]
                                                                  + detect_loss_list_2[0]
@@ -459,10 +455,11 @@ def train():
                                                         dtype=tf.float32,
                                                         name='groundtruth_negatives')
                         loss_list_3, bec_3, \
-                        detect_loss_list_3, feature_class_3, feature_location_3 \
-                            = gan.model(X_3, LD_3, HD_3, GT_class_3, GT_location_3, GT_positives_3, GT_negatives_3)
-                        image_list_3, j_list_3 = gan.image_list, gan.judge_list
-                        ssim_list_3, psnr_list_3 = gan.evaluation(image_list_3)
+                        detect_loss_list_3, feature_class_3, feature_location_3, \
+                        trans_image_list_3, seg_image_list_3, \
+                        trans_judge_list_3, seg_judge_list_3 = gan.model(X_3, LD_3, HD_3, GT_class_3, GT_location_3,
+                                                                         GT_positives_3, GT_negatives_3)
+                        ssim_list_3, psnr_list_3 = gan.evaluation(trans_image_list_3)
                         variables_list_3 = gan.get_variables()
                         G_grad_3 = G_optimizer.compute_gradients(loss_list_3[0]
                                                                  + detect_loss_list_3[0]
@@ -480,18 +477,20 @@ def train():
             D_optimizer_op = D_optimizer.apply_gradients(D_ave_grad)
             optimizers = [G_optimizer_op, D_optimizer_op]
 
-            gan.image_summary(image_list_0)
-            gan.histogram_summary(j_list_0)
-            image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image'),
-                                                 tf.get_collection(tf.GraphKeys.SUMMARIES, 'discriminator')])
+            gan.image_summary(trans_image_list_0)
+            #gan.histogram_summary(trans_judge_list_0)
+            trans_image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image_trans')])
+            gan.image_summary(seg_image_list_0)
+            #gan.histogram_summary(seg_judge_list_0)
+            seg_image_summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'image_seg')])
 
             loss_list_summary = tf.placeholder(tf.float32)
             ssim_list_summary = tf.placeholder(tf.float32)
             psnr_list_summary = tf.placeholder(tf.float32)
             bec_list_summary = tf.placeholder(tf.float32)
-            detect_loss_list_summary = tf.placeholder(tf.float32)
+            detect_loss_list_summary=tf.placeholder(tf.float32)
 
-            gan.loss_summary(loss_list_summary, bec_list_summary, detect_loss_list_summary)
+            gan.loss_summary(loss_list_summary, bec_list_summary,detect_loss_list_summary)
             gan.evaluation_summary(ssim_list_summary, psnr_list_summary)
 
             summary_op = tf.summary.merge([tf.get_collection(tf.GraphKeys.SUMMARIES, 'evaluation'),
@@ -526,7 +525,7 @@ def train():
             # tf.reset_default_graph()
             if FLAGS.load_T_model is not None:
                 trans_latest_checkpoint = tf.train.latest_checkpoint("checkpoints/" + FLAGS.load_T_model)
-                trans_saver = tf.train.Saver(variables_list[1] + variables_list[0])
+                trans_saver = tf.train.Saver(variables_list[1]+variables_list[0])
                 trans_saver.restore(sess, trans_latest_checkpoint)
 
             if FLAGS.load_LP_model is not None:
@@ -550,7 +549,7 @@ def train():
                     train_ssim_list = []
                     train_psnr_list = []
                     train_bec_list = []
-                    train_detect_loss_list = []
+                    train_detect_loss_list=[]
                     while not coord.should_stop() and epoch <= FLAGS.epoch:
                         train_true_l = []
                         train_true_X = []
@@ -584,9 +583,8 @@ def train():
 
                         logging.info(
                             "-----------train epoch " + str(epoch) + ", step " + str(step) + ": start-------------")
-                        _, train_image_summary_op, train_losses, train_detect_losses, train_bec, train_ssim, train_psnr = sess.run(
-                            [optimizers, image_summary_op, loss_list_0, detect_loss_list_0, bec_0, ssim_list_0,
-                             psnr_list_0],
+                        _, train_image_summary_op, train_losses, train_detect_losses,train_bec, train_ssim, train_psnr = sess.run(
+                            [optimizers, trans_image_summary_op, loss_list_0,detect_loss_list_0,bec_0, ssim_list_0, psnr_list_0],
                             feed_dict={
                                 X_0: np.asarray(train_true_X)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
                                 LD_0: np.asarray(train_true_LD)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
@@ -595,7 +593,7 @@ def train():
                                 GT_location_0: gt_location_0,
                                 GT_positives_0: gt_positives_0,
                                 GT_negatives_0: gt_negatives_0,
-                                X_1: np.asarray(train_true_X)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                                X_1: np.asarray(train_true_X)[1* int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
                                 LD_1: np.asarray(train_true_LD)[
                                       1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
                                 HD_1: np.asarray(train_true_HD)[
@@ -604,7 +602,7 @@ def train():
                                 GT_location_1: gt_location_1,
                                 GT_positives_1: gt_positives_1,
                                 GT_negatives_1: gt_negatives_1,
-                                X_2: np.asarray(train_true_X)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                                X_2: np.asarray(train_true_X)[2* int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
                                 LD_2: np.asarray(train_true_LD)[
                                       2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
                                 HD_2: np.asarray(train_true_HD)[
@@ -613,7 +611,7 @@ def train():
                                 GT_location_2: gt_location_2,
                                 GT_positives_2: gt_positives_2,
                                 GT_negatives_2: gt_negatives_2,
-                                X_3: np.asarray(train_true_X)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
+                                X_3: np.asarray(train_true_X)[3* int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
                                 LD_3: np.asarray(train_true_LD)[
                                       3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
                                 HD_3: np.asarray(train_true_HD)[
@@ -679,7 +677,7 @@ def train():
                                      loss_list_1, bec_1, ssim_list_1, psnr_list_1,
                                      loss_list_2, bec_2, ssim_list_2, psnr_list_2,
                                      loss_list_3, bec_3, ssim_list_3, psnr_list_3,
-                                     image_summary_op, image_list_0, image_list_1, image_list_2, image_list_3],
+                                     trans_image_summary_op, trans_image_list_0, trans_image_list_1, trans_image_list_2, trans_image_list_3],
                                     feed_dict={
                                         LD_0: np.asarray(val_true_LD)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
                                         HD_0: np.asarray(val_true_HD)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
@@ -716,7 +714,7 @@ def train():
                                 if j == 0:
                                     save_images(val_image_list_0, checkpoints_dir, str(0))
 
-                            val_index = 0
+                            val_index=0
                             val_detect_loss_list = []
                             l_val_files = read_filename(FLAGS.L_test)  # 打乱文件名
                             for j in range(int(math.ceil(len(l_val_files) / FLAGS.batch_size))):
@@ -724,11 +722,11 @@ def train():
                                 val_true_X = []
                                 for b in range(FLAGS.batch_size):
                                     val_l_arr = read_txt_file(FLAGS.L_test, l_val_files, val_index)
-                                    val_X_arr = read_file(FLAGS.X_test, l_val_files, val_index, out_size=[512, 512, 3],
-                                                          inpu_form=".txt", out_form=".mha")
+                                    val_X_arr = read_file(FLAGS.X_test, l_val_files, val_index,out_size=[512, 512, 3],
+                                                    inpu_form=".txt", out_form=".mha")
                                     logging.info(l_val_files[val_index % len(l_val_files)])
                                     val_true_l.append(val_l_arr)
-                                    val_true_X.append(val_X_arr[:, :, 1:2])
+                                    val_true_X.append(val_X_arr[:,:,1:2])
                                     val_index += 1
 
                                 gt_class_0, gt_location_0, gt_positives_0, gt_negatives_0 = generate_groundtruth_data(
@@ -741,8 +739,7 @@ def train():
                                     val_true_l[3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4)])
 
                                 val_detect_losses_0, f_class, f_location, f_class_softmax, box_top_index, box_top_value = sess.run(
-                                    [detect_loss_list_0, feature_class_0, feature_location_0, feature_class_softmax_0,
-                                     box_top_index_0,
+                                    [detect_loss_list_0, feature_class_0, feature_location_0, feature_class_softmax_0, box_top_index_0,
                                      box_top_value_0],
                                     feed_dict={
                                         X_0: np.asarray(val_true_X)[0:1 * int(FLAGS.batch_size / 4), :, :, :],
@@ -751,19 +748,19 @@ def train():
                                         GT_positives_0: gt_positives_0,
                                         GT_negatives_0: gt_negatives_0,
                                         X_1: np.asarray(val_true_X)[
-                                             1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
+                                              1 * int(FLAGS.batch_size / 4):2 * int(FLAGS.batch_size / 4), :, :, :],
                                         GT_class_1: gt_class_1,
                                         GT_location_1: gt_location_1,
                                         GT_positives_1: gt_positives_1,
                                         GT_negatives_1: gt_negatives_1,
                                         X_2: np.asarray(val_true_X)[
-                                             2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
+                                              2 * int(FLAGS.batch_size / 4):3 * int(FLAGS.batch_size / 4), :, :, :],
                                         GT_class_2: gt_class_2,
                                         GT_location_2: gt_location_2,
                                         GT_positives_2: gt_positives_2,
                                         GT_negatives_2: gt_negatives_2,
                                         X_3: np.asarray(val_true_X)[
-                                             3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
+                                              3 * int(FLAGS.batch_size / 4):4 * int(FLAGS.batch_size / 4), :, :, :],
                                         GT_class_3: gt_class_3,
                                         GT_location_3: gt_location_3,
                                         GT_positives_3: gt_positives_3,

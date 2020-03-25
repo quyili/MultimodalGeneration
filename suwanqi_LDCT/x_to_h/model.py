@@ -6,7 +6,6 @@ import numpy as np
 import dwt
 from ssd import Detector
 
-
 class GAN:
     def __init__(self,
                  image_size,
@@ -25,12 +24,10 @@ class GAN:
         self.learning_rate = learning_rate
         self.input_shape = [int(batch_size / 4), image_size[0], image_size[1], image_size[2]]
         self.ones = tf.ones(self.input_shape, name="ones")
-        self.image_list = {}
-        self.judge_list = {}
         self.tenaor_name = {}
-        self.EC = Encoder('EC', ngf=ngf)
-        self.D = Discriminator('D', ngf=ngf)
-        self.LESP = Detector('LESP', ngf, classes_size=classes_size, keep_prob=0.99, input_channl=image_size[2])
+        self.EC = Encoder('EC', ngf=64)
+        self.D = Discriminator('D', ngf=64)
+        self.LESP = Detector('LESP', ngf=ngf,classes_size=classes_size,keep_prob=0.99,input_channl=image_size[2])
 
     def pred(self, classes_size, feature_class, background_classes_val, all_default_boxs_len):
         # softmax归一化预测结果
@@ -54,8 +51,7 @@ class GAN:
         mask = mask1 + mask2
         return mask
 
-    def model(self, X, low, high, groundtruth_class, groundtruth_location, groundtruth_positives,
-              groundtruth_negatives):
+    def model(self, X, low, high, groundtruth_class, groundtruth_location, groundtruth_positives, groundtruth_negatives):
         noise = low - high
         # LOW ->L1,L2,L3,L4
         wavelet_l1 = dwt.tf_dwt(low)
@@ -78,13 +74,13 @@ class GAN:
 
         ###################################################################
         wavelet_X = dwt.tf_dwt(X)
-        Y = X + self.EC(X, wavelet_X)
+        Y = X-self.EC(X, wavelet_X)
+        j_X = self.D(X)
         j_Y = self.D(Y)
 
         feature_class, feature_location = self.LESP(Y)
         groundtruth_count = tf.add(groundtruth_positives, groundtruth_negatives)
-        softmax_cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=feature_class,
-                                                                               labels=groundtruth_class)
+        softmax_cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=feature_class, labels=groundtruth_class)
         # 回归损失
         loss_location = tf.div(tf.reduce_sum(tf.multiply(
             tf.reduce_sum(self.smooth_L1(tf.subtract(groundtruth_location, feature_location)),
@@ -94,15 +90,14 @@ class GAN:
         loss_class = tf.div(
             tf.reduce_sum(tf.multiply(softmax_cross_entropy, groundtruth_count), reduction_indices=1),
             tf.reduce_sum(groundtruth_count, reduction_indices=1))
-        loss_all = tf.reduce_sum(tf.add(loss_class, loss_location)) * 0.5
+        loss_all = tf.reduce_sum(tf.add(loss_class, loss_location))#*0.5
         ######################################################################
 
         D_loss = 0.0
         G_loss = 0.0
 
         # 使得通过编码结果转换的图更逼真的对抗性损失
-        D_loss += self.mse_loss(j_high, 1.0) * 5
-        D_loss += self.mse_loss(j_high_t, 0.0) * 5
+        D_loss += self.mse_loss(j_high, 1.0) * 5*2
         D_loss += self.mse_loss(j_high_t, 0.0) * 5
         G_loss += self.mse_loss(j_high_t, 1.0) * 5
 
@@ -117,29 +112,41 @@ class GAN:
         G_loss += self.mse_loss(wavelet_h1[:, :, :, 2:3], wavelet_ht1[:, :, :, 2:3]) * 10
         G_loss += self.mse_loss(wavelet_h1[:, :, :, 3:4], wavelet_ht1[:, :, :, 3:4]) * 10
 
+        n_high=self.norm(high)
+        n_high_t=self.norm(high_t)
+        n_low=self.norm(low)
+
         # 低剂量图与去噪图的自监督小波损失
         G_loss += self.mse_loss(wavelet_l2[:, :, :, 0:1], wavelet_ht2[:, :, :, 0:1]) * 0.5
-        G_loss += self.mse_loss(high_t, high) * 55
+        G_loss += self.mse_loss(n_high_t, n_high) * 20
         G_loss += self.mse_loss(noise_t, mask * noise_t) * 5
-        G_loss += self.ssim_loss((noise / 2.0) + 1.0, (noise_t / 2.0) + 1.0)
+        G_loss += self.ssim_loss((noise/2.0)+1.0,(noise_t/2.0)+1.0)
 
         rmse2 = self.RMSE(high, high_t)
-        rmse2_n = self.RMSE(high, self.norm(high_t))
-        rmse2_n2 = self.RMSE(high, self.normalize(high_t))
-        bec_list = [rmse2, rmse2_n, rmse2_n2]
-        self.image_list["low"] = low
-        self.image_list["high"] = high
-        self.image_list["noise"] = noise
-        self.image_list["noise_t"] = noise_t
-        self.image_list["high_t"] = self.normalize(high_t)
+        rmse2_n = self.RMSE(n_high, n_high_t)
 
-        self.judge_list["j_high_t"] = j_high_t
-        self.judge_list["j_high"] = j_high
+        bec_list = [rmse2, rmse2_n]
+        trans_image_list={}
+        seg_image_list={}
+        trans_image_list["low"] = n_low
+        trans_image_list["high"] = n_high
+        trans_image_list["noise"] = noise
+        trans_image_list["noise_t"] = noise_t
+        trans_image_list["high_t"] = n_high_t
+        seg_image_list["tc_low"] = X
+        seg_image_list["tc_high_t"] = Y
 
-        loss_list = [G_loss, D_loss]
-        detect_loss_list = [loss_all, Y_G_loss, Y_D_loss, loss_class, loss_location]
+        trans_judge_list={}
+        seg_judge_list={}
+        trans_judge_list["j_high_t"] = j_high_t
+        trans_judge_list["j_high"] = j_high
+        seg_judge_list["j_Y"] = j_high
 
-        return loss_list, bec_list, detect_loss_list, feature_class, feature_location
+        loss_list = [G_loss,D_loss]
+        detect_loss_list=[loss_all,Y_G_loss,Y_D_loss, loss_class, loss_location]
+
+        return loss_list,bec_list,detect_loss_list,feature_class, feature_location,\
+               trans_image_list,seg_image_list,trans_judge_list,seg_judge_list
 
     def get_variables(self):
         return [self.EC.variables,
@@ -157,21 +164,22 @@ class GAN:
         G_optimizer = make_optimizer(name='Adam_G')
         D_optimizer = make_optimizer(name='Adam_D')
 
-        return G_optimizer, D_optimizer
+        return G_optimizer,D_optimizer
 
-    def histogram_summary(self, judge_dirct):
+    def histogram_summary(self,judge_dirct, stage="trans"):
         for key in judge_dirct:
-            tf.summary.image('judge/' + key, judge_dirct[key])
+            tf.summary.image("judge_"+stage+"/" + key, judge_dirct[key])
 
-    def loss_summary(self, loss_list, bec_list, detect_loss_list):
+    def loss_summary(self, loss_list, bec_list,detect_loss_list):
         G_loss, D_loss = loss_list[0], loss_list[1]
-        rmse2, rmse2_n, rmse2_n2 = bec_list[0], bec_list[1], bec_list[2]
+        rmse2, rmse2_n= bec_list[0],bec_list[1]
         tf.summary.scalar('loss/G_loss', G_loss)
         tf.summary.scalar('loss/D_loss', D_loss)
         tf.summary.scalar('loss/rmse', rmse2)
         tf.summary.scalar('loss/rmse_n', rmse2_n)
-        tf.summary.scalar('loss/rmse2_n2', rmse2_n2)
         tf.summary.scalar('loss/detect_loss', detect_loss_list[0])
+        tf.summary.scalar('loss/class_loss', detect_loss_list[3])
+        tf.summary.scalar('loss/location_loss', detect_loss_list[4])
 
     def evaluation(self, image_dirct):
         self.name_list_true = ["high", "high"]
@@ -191,9 +199,9 @@ class GAN:
             tf.summary.scalar("evaluation_psnr/" + self.name_list_true[i] + "__VS__" + self.name_list_false[i],
                               psnr_list[i])
 
-    def image_summary(self, image_dirct):
+    def image_summary(self, image_dirct, stage="trans"):
         for key in image_dirct:
-            tf.summary.image('image/' + key, image_dirct[key])
+            tf.summary.image("image_"+stage+"/" + key, image_dirct[key])
 
     def mse_loss(self, x, y):
         """ supervised loss (L2 norm)
@@ -244,7 +252,7 @@ class GAN:
                   ) / (tf.reduce_max(input, axis=[1, 2, 3]) - tf.reduce_min(input, axis=[1, 2, 3]))
         return output
 
-    def normalize(self, input, max_=3072, min_=-1024):
+    def normalize(self, input,max_ = 3072, min_=-1024):
         output = (input - tf.reduce_min(input, axis=[1, 2, 3])
                   ) / (max_ - min_)
         return output
@@ -256,6 +264,7 @@ class GAN:
                                        self.norm(input[:, :, :, 3:4])], axis=-1),
                             shape=input_shape)
         return output
+
 
     # smooth_L1 算法
     def smooth_L1(self, x):
