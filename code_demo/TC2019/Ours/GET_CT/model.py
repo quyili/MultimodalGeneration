@@ -109,6 +109,9 @@ class GAN:
 
         return G_optimizer, D_optimizer
 
+    def average_precision_at_k(self, labels, predictions, k):
+        return tf.metrics.average_precision_at_k( labels, predictions, k)
+
     def acc(self, x, y):
         correct_prediction = tf.equal(x, y)
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))

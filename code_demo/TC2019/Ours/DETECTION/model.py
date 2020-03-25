@@ -70,6 +70,8 @@ class GAN:
         G_optimizer = make_optimizer(name='Adam_G')
         return G_optimizer
 
+    def average_precision_at_k(self, labels, predictions, k):
+        return tf.metrics.average_precision_at_k(labels, predictions, k)
 
     def acc(self, x, y):
         correct_prediction = tf.equal(x, y)
