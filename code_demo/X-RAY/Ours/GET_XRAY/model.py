@@ -154,6 +154,9 @@ class GAN:
         loss = tf.reduce_mean(tf.square(x - y))
         return loss
 
+    def cross_entropy(self, onehot_labels, logits):
+        return tf.losses.softmax_cross_entropy(onehot_labels, logits)
+
     def ssim_loss(self, x, y):
         loss = (1.0 - self.SSIM(x, y)) * 20
         return loss
