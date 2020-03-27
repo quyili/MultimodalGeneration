@@ -80,26 +80,26 @@
 	
 	\subsection{Structural Map Extraction and Gereration}
 	We designate the image that provides basic contour and structure information as a structural map. Medical images generated directly from random noise by GAN are usually in short of realistic structural information while structural maps can provide basic guidance for the synthesis of medical images. Therefore we extracted structural maps directly from images and fed them to a generator to training for synthesis structural maps.
-	\vspace{-0.2cm}\begin{algorithm}[th]
+	\vspace{-0.35cm}\begin{algorithm}[th]
 		\caption{Structural map extraction}
-		\setstretch{0.8}
+%		\setstretch{0.8}
 		\label{alg:1}
-		\begin{multicols}{2}
+	   \begin{multicols}{2}
+			\hspace*{0.02in} {\bf Input: }grayscale image $x$; pixel threshold \\\hspace*{0.02in} $\alpha$, $\beta$, $\gamma$;
+			gaussian kernel variance $\sigma_1$, $\sigma_2$.\\
+			\hspace*{0.02in} {\bf Output: }structural map $s$.
 			\begin{algorithmic}[1]
-				\State Input grayscale image $x$,
-				pixel threshold $\alpha$ , $\beta$ and $\gamma$,
-				gaussian kernel variance $\sigma 1$ and $\sigma 2$
-				\State $s1 = reduce\_min(sobel(x))$
-				\State $s2 = reduce\_max(sobel(x))$
-				\State $s1 = gaussian\_blur(s1,\sigma 1)$
-				\State $s2 = gaussian\_blur(s2,\sigma 1)$
-				\State $s1 = mean(s1) - s1$
-				\State $s2 = s2 - mean(s2)$
-				\State $s1 = ones \times (s1 > \alpha)$
-				\State $s2 = ones \times (s2 > \alpha)$
-				\State $s = ones \times ((s1 + s2)> 0)$
-				\State $s = gaussian\_blur(s,\sigma 2)$
-				\State $s = ones \times ((s1 + s2)> \beta)$
+				\State $s_1 = reduce\_min(sobel(x))$
+				\State $s_2 = reduce\_max(sobel(x))$
+				\State $s_1 = gaussian\_blur(s_1,\sigma_1)$
+				\State $s_2 = gaussian\_blur(s_2,\sigma_1)$
+				\State $s_1 = mean(s_1) - s_1$
+				\State $s_2 = s_2 - mean(s_2)$
+				\State $s_1 = ones \times (s_1 > \alpha)$
+				\State $s_2 = ones \times (s_2 > \alpha)$
+				\State $s = ones \times ((s_1 + s_2)> 0)$
+				\State $s = gaussian\_blur(s,\sigma_2)$
+				\State $s = ones \times ((s_1 + s_2)> \beta)$
 				\State $s = medfilt(s)\times (x > \gamma)$
 			\end{algorithmic} 
 		\end{multicols}
@@ -108,10 +108,11 @@
 	\vspace{-0.5cm}\begin{algorithm}[th]
 		\caption{Mask extraction}
 		\label{alg:2}
-		\setstretch{0.8}
+%		\setstretch{0.8}
 		\begin{multicols}{2}
+			\hspace*{0.02in} {\bf Input: }grayscale image $x$; pixel threshold \\\hspace*{0.05in}$\alpha$; expanded pixel width $p$.\\
+			\hspace*{0.02in} {\bf Output: }mask $m$.
 			\begin{algorithmic}[1]
-				\State Input grayscale image $x$, pixel threshold $\alpha$, expanded pixel width $p$
 				\State $m = 1.0 - ones \times (x > \alpha)$
 				\State $size=[x.width+p, x.length+p]$
 				\State $m = resize(m, size)$
@@ -120,7 +121,7 @@
 			\end{algorithmic} 
 		\end{multicols}
 		\vspace{-0.3cm}
-	\end{algorithm}\vspace{-0.9cm}
+	\end{algorithm}\vspace{-0.75cm}
 	\subsubsection{Structural Map Extraction Method}
 	The general structural maps such as retinal vascular maps\cite{41costa2017towards} and brain segmentation labels \cite{4shin2018medical} require additional data and training before extraction. Considering that the Sobel operator\cite{147Sobel} in digital image processing field are widely used for edge extaction, we designed a structural map extraction method based on Sobel operator. As shown in Algorithm~\ref{alg:1}, $gaussian\_blur(\cdot)$ is 3$\times$3 gaussian blur and $medfilt(\cdot)$ is 3$\times$3 median filter function. The method is advanced for fast operation, no training, and no additional required data. 
 	\subsubsection{Structural Map Generation Training}
