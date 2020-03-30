@@ -271,7 +271,7 @@
 	Table~\ref{Ablation Experiment Setting on BRATS2015} shows the settings and results of the ablation experiments of our method.
 	Fig.~\ref{ablation_and_seg} (a) shows examples of synthetic images generated in ablation experiments. 
 	\textbf{A} no contour from structural map, the synthetic image conforms to the features of MRI, but not to the structural features of the brain. 
-	\textbf{B} was poorly trained due to lack of a random sample.
+	\textbf{B} was poorly trained due to the lack of a random sample.
 	\textbf{C} registration effect seems unsatisfactory, especially the edge details.
 	Lesions in \textbf{D} are random and exaggerated, which hardly match the input label. 
 	Obviously, tumor in \textbf{E} is beyond the contours of the brain. 
@@ -302,8 +302,8 @@
 		\end{center}
 	\end{table}
 	\subsection{Evaluation of Synthetic Images Quality }
-	As shown in Table~\ref{evalu_on_all_dataset1}-~\ref{evalu_on_all_dataset2}, our method is quantitatively evaluated on various datasets and compared with the state-of-the-art methods. Combined the results in tables with the visual comparison in Fig.~\ref{evalu_compare}, the quality of the synthetic image input with structural map is much better than that of the synthetic image input with random noise. The model generalizes better when the structural map is processed by fusion noise versus those processe without fusion noise or treated by binary inversion. Self-supervised pre-training can improve the quality of synthetic image obviously. Compared with the sketch of SkrGAN and other random noise input, the structural map, self-supervised pre-training, lesion loss and other measures that we adopted make the synthetic medical image in this study achieve higher quality and closer to the real image.
-	\begin{table}[th]
+	Our method was quantitatively evaluated on various datasets and compared with the state-of-the-art methods. As shown in Table~\ref{evalu_on_all_dataset1}-\ref{evalu_on_all_dataset2} and Fig.~\ref{evalu_compare}, the quality of the synthetic image input with structural map is much better than that of the synthetic image input with random noise. The model generalizes better when the structural map is processed by fusion noise versus those processed without fusion noise or treated by binary inversion. Compared with the sketch of SkrGAN and other random noise input, our synthetic medical image achieves higher quality and seems more closer to the real image, which can be largely attributed to the structural map, self-supervised pre-training and lesion loss that we adopted.
+	\begin{table}[th]z
 		\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
 		\begin{center}
 			\caption{Evaluation of synthetic images quality (B)}
@@ -412,7 +412,7 @@
 	\subsection{Evaluation of Synthetic Data Availability}
 	As shown in Table~\ref{availability_test}, we mixed real BRATS2015 training data with synthetic data in different amounts, then we used the mixed data for segmentation training, and finally evaluated the segmentation ability of the model on the real BRATS2015 test set. We set up three data mixing modes: random mixing, real data training first, and synthetic data training first. As reported in Table~\ref{availability_test}, our synthetic images can be used as pre-trained data or enhanced data to greatly improve the generalization ability of the model, and the performance of our synthetic data augmentation is much better than the usual data augmentation. We do not recommend using synthetic data completely for training or using synthetic data for supplementary training.
 	
-	Similarly in Table~\ref{DRIVE_availability_test}-\ref{TC_availability_test}, we performed other medical image processing tasks with the medical images synthesized on other datasets. The results show that our synthetic data can also improve the generalization ability of the model in these tasks, which indicates that our synthetic data are available and the synthetic lesions are effective.
+	As shown in Table~\ref{DRIVE_availability_test}-\ref{TC_availability_test}, We further tested the medical images in other medical image processing tasks with corresponding datasets. The results show that our synthetic data can also improve the generalization ability of the model in these tasks, which indicates that our synthetic data are available and the synthetic lesions are effective.
 	\begin{figure}[th]
 		\centering
 		\includegraphics[width=0.78\linewidth]{figures/evalu_compare}
@@ -420,7 +420,7 @@
 		\label{evalu_compare}
 	\end{figure}
 	\section{Conclusion}
-	In this paper, a clearer extraction method of medical image structural map based Sobel operator is proposed, which requires no training or additional labels, and takes advantage of VAE to learn the mapping between normal distribution and structure map distribution. The multimodal synthesis based on structural maps can synthesize the medical image that conforms to physiological structure. The well designed lesion generation guidance loss and registration supervision loss ensure the synthesis of the specified lesion and multimodal registration. Experimental results on multiple datasets show that the synthetic lesions are effective, and the synthetic medical images can be used as pre-trained data or enhanced data to improve the performance of the model.
+	In this paper, we proposed a clearer extraction method of medical image structural map based Sobel operator, which requires no training or additional labels, and takes advantage of VAE to learn the mapping between normal distribution and structure map distribution. The multimodal synthesis based on structural maps can synthesize the medical image that conforms to physiological structure. The well-designed lesion generation guidance loss and registration supervision loss ensure the synthesis of the specified lesion and multimodal registration. Experimental results on multiple datasets show that the synthetic lesions are effective, and the synthetic medical images can be used as pre-trained data or enhanced data to improve the performance of the model.
 	%
 	% ---- Bibliography ----
 	%
