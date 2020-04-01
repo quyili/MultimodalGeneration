@@ -279,18 +279,18 @@ To solve these problems, this study proposed a multimodal medical image synthesi
 前述章节对图像合成的概念进行了介绍和解释，本节对其研究现状进行更详细的介绍。
 在最近的图像合成研究中，CNN和GAN成为了应用最广泛的技术。
 语义分割模型全卷积神经网络（FCN）\cite{68long2015fully}是采用CNN输出整张图像的最早的研究之一，
-之后在语义分割领域，优秀的CNN模型不断涌现，例如
+之后在语义分割领域，优秀的CNN模型不断涌现，从最初经典的
 SegNet\cite{117badrinarayanan2017segnet:}、
 U-Net\cite{51ronneberger2015u-net:}、
 DeepLab系列\cite{118chen2015semantic,104chen2018deeplab:,119chen2017rethinking,120chen2018encoder-decoder}、
-Fully Convolutional DenseNet\cite{121jegou2017the}、
-E-Net\cite{122paszke2017enet:}、
-EncNet\cite{135zhang2018context}、
+FCDenseNet\cite{121jegou2017the}、
+%E-Net\cite{122paszke2017enet:}、
+%EncNet\cite{135zhang2018context}、
 Mask R-CNN\cite{123he2017mask}、
 PSPNet\cite{124zhao2017pyramid}、
-RefineNet\cite{125lin2017refinenet}、
-G-FRNet\cite{126amirul2017gated}、
-DecoupledNet\cite{127hong2015decoupled}、
+RefineNet\cite{125lin2017refinenet}等模型再到最近性能卓越的
+%G-FRNet\cite{126amirul2017gated}、
+%DecoupledNet\cite{127hong2015decoupled}、
 DenseASPP\cite{134yang2018denseaspp}、
 ResNet DUC\cite{133wang2018understanding}、
 DFANet\cite{132li2019dfanet}、
@@ -298,7 +298,7 @@ DANet\cite{131fu2019dual}、
 Auto Deeplab\cite{130liu2019auto}、
 APCNet\cite{129he2019adaptive}、
 CANet\cite{128zhang2019canet}
-等，这些模型在CNN模型结构上一步步发展，许多通用的模型结构设计方法和训练方法被提出和不断成熟。
+等模型，这些模型在CNN模型结构上一步步发展，许多通用的模型结构设计方法和训练方法被提出和不断成熟。
 在以语义分割为主的图像合成任务中，CNN图像生成模型也在发展过程中从结构上被模式化成一个编码器和一个解码器连接起来的生成器结构。采用CNN合成图像的大多数研究是有监督训练，且与其他多数CNN任务一样，任务中CNN起到的作用是提取输入的某种特征或对输入的特征进行转换而不是对输入添加更加丰富的细节，例如图像转换任务\cite{139gatys2016image,140johnson2016perceptual,66miao2018dilated,36vannguyen2015crossdomain}或前述的一系列语义分割任务。CNN对训练标签的要求限制了CNN在图像合成领域的应用场景。
 
 相反，GAN天然是采用无监督训练的方法，同时也可添加有监督损失进行有监督训练\cite{4shin2018medical,42huo2018adversarial,44shrivastava2017learning}。因此，最近越来越多的研究采用GAN来进行图像合成任务。由于编解码结构在CNN上的有效性，在采用GAN的图像合成的发展中，图像合成任务也被模式化为使用编码器和解码器组成的生成器进行像素到像素的映射\cite{27isola2017image-to-image,28liu2017unsupervised,29kim2017learning,30zhu2017imagine,31zhang2018densely,32gong2018learning}，其中编码器实现对输入进行特征提取和融合，解码器实现对特征进行填充还原和添加细节。GAN在图像生成任务中的惊人表现和相关数据集的发展逐步催生了图像合成领域中一些研究方向的火热，例如人像合成\cite{1zhao2018modular,5liang2018generative,13choi2018stargan:,27isola2017image-to-image}、风格迁移\cite{6zhu2017unpaired,141azadi2018multi}和草图补全\cite{27isola2017image-to-image,81xian2018texturegan:}等。在结构设计和训练方法上，DCGAN\cite{97radford2015unsupervised}通过采用更深层和复杂的CNN作为生成器和鉴别器使得合成质量在原始GAN的基础上有了很大的提升，展现了GAN的巨大潜力。随后ACGAN\cite{98odena2016conditional}在GAN最重要的变体CGAN\cite{70mirza2014conditional}的基础上提出了多类别图像合成方法，为GAN的应用展现了一个更加广阔的前景。之后CycleGAN\cite{6zhu2017unpaired}的出现，	启发了后续许多基于GAN的多域图像转换的研究和应用。在CycleGAN的基础上，IcGAN\cite{71perarnau2016invertible}、StarGAN\cite{13choi2018stargan:}、ContrastGAN\cite{5liang2018generative}等可实现图像到图像的多域转换方案或模型被陆续提出。最近的ModularGAN\cite{1zhao2018modular}、ComboGAN\cite{74anoosheh2018combogan:}和XGAN\cite{75royer2018xgan:}将网络模块化为多个部件又开启了另一种思路。
@@ -1040,7 +1040,7 @@ NO.24-NO.25与NO.15比较发现，合成数据用作预训练数据时性能最佳，而用作补充训练数据
 [4]. 卢宇彤, 瞿毅力, 郑馥丹, 陈志广. 一种基于进化算法的卷积神经网络结构搜索方法及系统, 已公开发明专利, 专利公开号CN109299142A, 2019-02-01. (除导师外第一作者)
 
 \noindent
-[5]. 可使具有全连接层的CNN接受不定形状输入的方法及系统, 已公开发明专利, 专利公开号CN109583584A, 2019-04-05. 卢宇彤, 瞿毅力, 陈志广. (除导师外第一作者)
+[5]. 卢宇彤, 瞿毅力, 陈志广. 可使具有全连接层的CNN接受不定形状输入的方法及系统, 已公开发明专利, 专利公开号CN109583584A, 2019-04-05. (除导师外第一作者)
 
 \noindent
 [6]. 苏琬棋, 瞿毅力, 邓楚富, 王莹, 陈志广, 卢宇彤. 基于GAN的多模态低剂量CT转换高剂量CT的方法、系统及介质, 已公开发明专利, 专利公开号CN110559009A, 2019-12-13. (第二作者)
