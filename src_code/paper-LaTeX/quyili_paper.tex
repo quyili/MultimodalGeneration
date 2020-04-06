@@ -489,7 +489,14 @@ s'=s\times m_l.
 \item 以VAE编码器$E_s$对$s$编码生成的近似正态分布矩阵$f$为负样本，以随机生成的噪声$z$为正样本，对特征图分布鉴别器$D_{z}$和$E_s$进行对抗训练；
 \item 以VAE解码器$G_s$对随机生成的噪声$z$解码生成的随机结构特征图$s_g$为负样本，以$s$为正样本，对结构特征图鉴别器$D_{s}$和$G_s$进行对抗训练；
 \end{itemize}
-$E_s$、$G_s$、$D_{z}$和$D_{s}$均在VGG11模型结构的基础上进行了调整适配，$G_m$在U-net的模型结构的基础上进行了调整适配。$E_s$为一个最后两层双线输出两个结果的正向VGG11（编码器）而$G_s$为一个反向VGG11（解码器），两者对接形成一个编解码结构的网络。其中，对所有模型的改进都包括将所有步长为2的池化操作改为步长为2的卷积操作，将所有步长为2的反卷积（Deconvolution）上采样改为步长为2的最近邻插值上采样后接一个卷积层，在所有除输出层外的卷积层之后执行实例归一化（Instance normalization）和Leaky ReLU非线性激活。各个网络的损失函数如下，其中$\mathbb{E}$为在指定数据分布上的期望（Expectation）函数：
+
+\begin{figure}[thbp!]
+	\centering
+	\includegraphics[width=0.95\columnwidth]{figures/GS_DS}
+	\caption{结构特征图生成训练阶段各组件的网络结构。A-D依次为特征图分布鉴别器$D_{z}$、结构特征图鉴别器$D_{s}$、结构特征图编码器$E_s$、结构特征图生成器$G_s$}
+	\label{GS_DS}
+\end{figure}
+如图~\ref{GS_DS}所示，$E_s$、$G_s$、$D_{z}$和$D_{s}$均在VGG11模型结构的基础上进行了调整适配，$G_m$在U-net的模型结构的基础上进行了调整适配。$E_s$为一个最后两层双线输出两个结果的正向VGG11（编码器）而$G_s$为一个反向VGG11（解码器），两者对接形成一个编解码结构的网络。掩膜生成器$G_m$的结构与下一章中模态生成器一致，但无需输入独热条件矩阵，详细结构如图~\ref{G}所示。其中，对所有模型的改进都包括将所有步长为2的池化操作改为步长为2的卷积操作，将所有步长为2的反卷积（Deconvolution）上采样改为在反卷积基础上与步长为2的最近邻插值上采样及后接的单层卷积堆叠，在所有除输出层外的卷积层之后执行实例归一化（Instance normalization）和Leaky ReLU非线性激活。各个网络的损失函数如下，其中$\mathbb{E}$为在指定数据分布上的期望（Expectation）函数：
 \begin{itemize}
 	\item{阶段B: 掩膜生成损失}
 	\begin{equation}
@@ -577,7 +584,19 @@ s'=s+z'\times(1-m)\times(1-s),
 \end{figure*}
 如图~\ref {mm_mri_generate}所示，首先，本节通过训练好的$G_s$生成结构特征图$ s_g $，融合随机噪声后得到$s'$，再根据需要可添加指定的病灶标签$ l $，与$s'$在通道向堆叠融合得到最后的融合图。然后，本节使用一个接受独热（One-Hot）条件矩阵的条件生成器$ G $，对融合图编码后添加不同的条件矩阵${\rm one\_hot}(i)$，然后再解码生成不同模态的合成图像$ x_{g,i} $。本节使用鉴别器$ D $提供的对抗性损失和类别指导损失来指导合成图像逼近真实影像的分布。合成的多模态影像过程可以根据需要通过病灶处理器$G_{l,i}$添加病灶生成指导损失、通过模态转换器$G_{t}$添加模态配准损失。
 
-$D$在VGG11模型结构的基础上进行了调整适配，$G$在U-net的模型结构的基础上进行了调整适配。在单模态时，$D$为单线结构，$G$仅在网络第一层接收输入，$G$与$D$组成一组基本GAN结构。在多模态时，$D$为在最后两层输出两个结果的双线结构，即输出包括真假鉴别结果矩阵和类别鉴别结果矩阵，$G$则以U-net生成器为基本结构，在编码（缩小尺寸）阶段的最后层输出后叠加输入的条件矩阵，再进行后续的解码（还原尺寸）过程，$G$与$D$组成一组ACGAN\cite{98odena2016conditional}结构。其中，对所有模型的改进都包括将所有步长为2的池化操作改为步长为2的卷积操作，将所有步长为2的反卷积上采样改为步长为2的最近邻插值上采样再接一个卷积层，在所有除输出层外的卷积层之后执行实例归一化和Leaky ReLu非线性激活。
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\columnwidth]{figures/D}
+	\caption{鉴别器$D$的网络结构。A为合成单模态影像时采用的单线结构，B为合成多模态时采用的双线结构。}
+	\label{D}
+\end{figure*}
+\begin{figure*}[thbp!]
+	\centering
+	\includegraphics[width=1\columnwidth]{figures/G}
+	\caption{生成器$G$的网络结构。}
+	\label{G}
+\end{figure*}
+$D$在VGG11模型结构的基础上进行了调整适配，详细结构如图~\ref{D}所示。$G$在U-net的模型结构的基础上进行了调整适配，详细结构如图~\ref{G}所示。在单模态时，$D$为单线结构，$G$仅在网络第一层接收输入，$G$与$D$组成一组基本GAN结构。在多模态时，$D$为在最后三层输出两个结果的双线结构，即输出包括真假鉴别结果矩阵和类别鉴别结果矩阵，$G$则以U-net生成器为基本结构，在编码（缩小尺寸）阶段的最后层输出后叠加输入的条件矩阵，再进行后续的解码（还原尺寸）过程，$G$与$D$组成一组ACGAN\cite{98odena2016conditional}结构。其中，对所有模型的改进都包括将所有步长为2的池化操作改为步长为2的卷积操作，将所有步长为2的反卷积上采样改为在反卷积基础上与步长为2的最近邻插值上采样及后接的单层卷积堆叠堆叠以平滑棋盘格效应，在所有除输出层外的卷积层之后执行实例归一化和Leaky ReLu非线性激活。
 
 多模态影像合成过程的损失项如下，其中$ x_{g,i} $是模态$ i $的合成图像， $d(x_{i})$和$c(x_{i})$是鉴别器输出$D(x_i)$中的真假鉴别结果和模态类别鉴别结果，同样地，$d(x_{g,i})$、$c(x_{g,i})$
 为$D(x_{g,i})$中的真假鉴别结果和模态类别鉴别结果：
@@ -632,7 +651,7 @@ $z'$是从均匀分布$\mathcal{U}(\alpha_1,\alpha_2)$采样的随机噪声且$\alpha_1=0.5$、
 \end{figure*}
 当需要确保合成的不同模态的影像精确配准时，可以通过模态转换器对合成图像再进行模态转换一致性约束。模态转换器通过真实的多模态数据预先训练完成，如图~\ref{trans_train}所示。模态转换器$G_t$同样为一个接受独热条件矩阵的条件生成器，不同条件矩阵指示转换生成不同模态的影像。
 
-模态转换器$G_t$与鉴别器$ D_t $组成一组循环生成对抗网络（CycleGAN）\cite{6zhu2017unpaired}，$D_t$与在VGG11模型结构的基础上进行了调整适配的$D$结构相同，$G_t$与在U-net的模型结构的基础上进行了调整适配的$G$结构相同，各自的损失函数如下：
+模态转换器$G_t$与鉴别器$ D_t $组成一组循环生成对抗网络（CycleGAN）\cite{6zhu2017unpaired}。$D_t$与在VGG11模型结构的基础上进行了调整适配的$D$结构相同，详细结构如图~\ref{D}。$G_t$与在U-net的模型结构的基础上进行了调整适配的$G$结构相同，详细结构如图~\ref{G}。各自的损失函数如下：
 \begin{itemize}
 	\item{模态循环一致性损失}
 	\begin{equation}
@@ -709,12 +728,12 @@ s''={\rm concat}([s',l]),
 在检测类病灶处理任务训练过程中，一个SSD检测模型\cite{101liu2016ssd:}的典型检测损失为：
 \begin{equation}
 \begin{split}
-\mathcal{L}_{detec}(G_{l})=&\mathbb{E}_{\boldsymbol{x},l,g}[\sum^{n}\limits_{i \in \boldsymbol{P}}\sum\limits_{m \in \{ x_c,y_c,w,h\}}\boldsymbol{x}^{k}_{ij}\times{{\rm smooth\_{l1}}}(l^{m}_{i}-\hat{g}^{m}_{j})]-\\
-&\alpha \mathbb{E}_{\boldsymbol{x},c}[\sum^{n}\limits_{i \in \boldsymbol{P}}\boldsymbol{x}^{k}_{ij}\times\log(\hat{c}^{k}_{i})+\sum\limits_{i \in \boldsymbol{N}}\log(\hat{c}^{0}_{i})],
+\mathcal{L}_{detec}(G_{l})=&\mathbb{E}_{r,l,g}[\sum^{n}\limits_{i \in \boldsymbol{P}}\sum\limits_{m \in \{ x_c,y_c,w,h\}}r^{k}_{ij}\times{{\rm smooth\_{l1}}}(l^{m}_{i}-\hat{g}^{m}_{j})]-\\
+&\alpha \mathbb{E}_{r,c}[\sum^{n}\limits_{i \in \boldsymbol{P}}r^{k}_{ij}\times\log(\hat{c}^{k}_{i})+\sum\limits_{i \in \boldsymbol{N}}\log(\hat{c}^{0}_{i})],
 \end{split}
 \end{equation}
 其中，
-$\boldsymbol{x}^{k}_{ij}\in\{0,1\}$表示第$i$个默认框与类别$k$的第$j$个真实框的匹配结果，
+$r^{k}_{ij}\in\{0,1\}$表示第$i$个默认框与类别$k$的第$j$个真实框的匹配结果，
 $l$是预测出的检测框相对于默认框$d$的偏移量，
 $\hat{g}$是真实框$g$相对于默认框$d$的偏移量，
 $\boldsymbol{P}$表示预测出的与真实框交并比（IoU，Intersection-over-Union）大等于设定阈值的预测框正样本集合，
