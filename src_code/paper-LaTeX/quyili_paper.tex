@@ -12,9 +12,6 @@
 \usepackage{subfigure}%使用子图形，两图并排，需要的宏包
 
 \usepackage{chngcntr}%图像按章节标号
-\counterwithin{figure}{section}
-\counterwithin{table}{section}
-\counterwithin{equation}{section}
 
 \usepackage{geometry}%页面设置
 \usepackage{titlesec}%修改章节格式
@@ -32,6 +29,10 @@
 \usepackage{multirow}
 \usepackage{threeparttable}
 \usepackage[hidelinks]{hyperref}%目录超链接
+
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\counterwithin{equation}{section}
 \geometry{left=3cm,right=3cm,top=3cm,bottom=3cm}% 页边距
 \setlength{\headheight}{15pt}
 \pagestyle{fancy}
