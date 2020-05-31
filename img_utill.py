@@ -6,6 +6,7 @@ import cv2
 import scipy.signal as signal
 import os
 from skimage import transform
+import matplotlib.pyplot as plt
 
 def mynorm(input):
     output = (input - np.min(input)
@@ -13,7 +14,7 @@ def mynorm(input):
     return output.astype("float32")
 
 
-def binary(x, beta=0.5):
+def binary(x, beta=0.1):
     return np.asarray(x > beta).astype("float32")
 
 
@@ -27,6 +28,39 @@ def binary_run(
     input_x = mynorm(input_x)
     input_x = binary(input_x)
     SimpleITK.WriteImage(SimpleITK.GetImageFromArray(1.0 - input_x), SAVE_PATH)
+
+def get_mask_from_s(imgfile):
+    img = cv2.imread(imgfile, cv2.IMREAD_GRAYSCALE)
+    gray = cv2.GaussianBlur(img, (3, 3), 0)
+    ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
+    c_list = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = c_list[-2], c_list[-1]
+    cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
+    return np.asarray(img, dtype="float32")
+
+def binary_png_run(
+        SRC_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/figures/SWM_SkrGAN_F.png",
+        SAVE_PATH="E:/project/MultimodalGeneration/src_code/paper-LaTeX/figures/new_SWM_SkrGAN_F.tiff",
+):
+    input_x = SimpleITK.GetArrayFromImage(SimpleITK.ReadImage(SRC_PATH))
+    input_x = (input_x[:, :, 0] + input_x[:, :, 1] + input_x[:, :, 2]) / 3.0
+    print(input_x.shape)
+    input_x = mynorm(input_x)
+    input_x = binary(input_x,beta=0.4)
+    SimpleITK.WriteImage(SimpleITK.GetImageFromArray(input_x), "quyili.tiff")
+    output=np.zeros([input_x.shape[0],input_x.shape[1],4])
+    output[:, :, 0] = 1.0 -input_x
+    output[:, :, 1] = 1.0 -input_x
+    output[:, :, 2] = 1.0 -input_x
+    output[:, :, 3] = 1.0 -input_x
+    cv2.imwrite("quyili1.jpg", output[:,:,0:3] * 255)
+    img = cv2.imread("quyili1.jpg", cv2.IMREAD_GRAYSCALE)
+    gray = cv2.GaussianBlur(img, (3, 3), 0)
+    ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
+    c_list = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = c_list[-2], c_list[-1]
+    cv2.drawContours(img, contours, -1, (255, 255, 255), thickness=-1)
+    cv2.imwrite(SAVE_PATH,output*255)
 
 
 def run(
@@ -138,4 +172,7 @@ def mask_fesion(
 
 
 if __name__ == '__main__':
-    m_noise_fesion()
+    binary_png_run(
+        SRC_PATH="quyili.jpg",
+        SAVE_PATH="quyili.png",
+    )
